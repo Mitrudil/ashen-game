@@ -1,3 +1,9 @@
+# ASHEN v0.1.28 – surowce i przyciski z przetartej blachy
+
+Odświeżona oprawa ekranu Wypraw: osobne grafiki sześciu zasobów w `assets/ui/resources/`, tekstura metalu `assets/ui/rusted-orange.webp`, spójne przyciski w panelach i poprawiona typografia. Usunięto górny komunikat „Wyprawa rozpoczęta…”, zachowując licznik trwającej wyprawy. Logika, raporty i zapis gry pozostają zgodne z wersją 0.1.27.
+
+Wgraj całą zawartość paczki do głównego katalogu repozytorium i zachowaj strukturę folderów. Przed aktualizacją wyeksportuj plik JSON zapisu postaci.
+
 # ASHEN v0.1.27 — Wyprawy (redesign i narracja)
 
 - 15 autorskich opisów fabularnych dla każdej z trzech lokacji (45 łącznie); ostatni wariant danej lokacji nie powtarza się bezpośrednio.
