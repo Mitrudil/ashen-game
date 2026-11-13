@@ -58,3 +58,13 @@ Po potwierdzeniu importu postać jest aktywowana od razu bez przeładowywania st
 ## v0.1.19 — pierwsze tło graficzne Schronu 17
 
 W sypialni zastosowano realistyczne tło `assets/bunker/rooms/bedroom-base.webp`. Meble i dekoracje nadal są niezależnymi elementami SVG, a ich wybór jest wyłącznie kosmetyczny. Na GitHub należy przesłać także nowy plik WebP, zachowując strukturę folderów.
+
+
+### v0.1.21 — umeblowanie
+- Poprawione proporcje i pozycje: większe łóżko na podłodze, szafka bliżej ściany, stół na środku.
+- Trzy warianty łóżka, stołu i szafki: od 1. poziomu, następne od poziomów 20 i 30.
+- Tworzenie i ulepszanie mebli kosztuje złom, inne surowce i (wyższe warianty) kredyty.
+- Łóżko jest obowiązkowym miejscem do spania; przed wykonaniem łóżka polowego bohater ma prowizoryczne posłanie.
+- Wszystkie meble są wyłącznie wizualne. Bonusy będą związane z przyszłą rozbudową pomieszczeń.
+- Starsze zapisane meble zostają uznane za posiadane na poziomie 1 bez ponownego kosztu.
+- Wyższe warianty mają tymczasowe zmiany wizualne; pełne grafiki powstaną później.
