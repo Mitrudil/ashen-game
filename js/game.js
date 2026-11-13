@@ -258,7 +258,7 @@ function slotChip(slot,uid){const inst=instance(uid),o=statsOf(inst),empty=!o;co
 function equippedDetail(slot){const uid=state.equip[slot],inst=instance(uid),o=statsOf(inst); return `<div class="eq-detail"><div>${o?itemIcon(inst):`<div class="iconbox">${svgIcon(slotPlaceholder(slot),'#64717a')}</div>`}</div><div class="grow"><div class="slotname">${slotLabels[slot]}</div>${o?`<strong style="color:${rarities.find(r=>r.name===o.rarity)?.color}">${escape(o.name)}</strong><div class="small muted">${statDetails(o)}</div>${affixDetails(o)}<div class="actions"><button data-unequip="${slot}">Zdejmij</button></div>`:`<div class="muted">Brak przedmiotu.</div>`}</div></div>`}
 function itemSummary(inst,o,showSlot=true){return `<div class="itemline"><div>${itemIcon(inst)}</div><div class="grow"><strong style="color:${rarity(inst).color}">${escape(o.name)}</strong> <span class="small muted">${showSlot?slotName(o.slot)+' · ':''}${o.rarity}</span><div class="small muted">${statDetails(o)}</div>${affixDetails(o)}</div></div>`}
 
-// Ekonomia v0.1.17: wartości testowe, łatwo zmienialne w jednym miejscu.
+// Ekonomia v0.1.18: wartości testowe, łatwo zmienialne w jednym miejscu.
 const ECONOMY={saleBase:8,saleRarity:[1,1.5,2.4,4.5,8],yieldRarity:[1,1.2,1.5,2,2.7],prefixValue:1.18,suffixValue:1.18};
 function getStock(key){return key==='scrap'?state.scrap:(state.materials[key]||0)}
 function materialFamily(d){
@@ -496,19 +496,59 @@ function validImport(raw){
  return raw;
 }
 function backupCurrentAndReplace(next){
+ // Najpierw zapis do localStorage, potem weryfikacja. Nie zmieniamy aktywnej postaci,
+ // dopóki nie mamy pewności, że nowy zapis faktycznie przetrwa odświeżenie.
  const current=localStorage.getItem(KEY);
+ const serialized=JSON.stringify(next);
  try{
   if(current!==null)localStorage.setItem(BACKUP_KEY,current);
-  localStorage.setItem(KEY,JSON.stringify(next));
- }catch(err){throw Error('Nie można bezpiecznie zapisać danych w przeglądarce. Import przerwany.');}
+  localStorage.setItem(KEY,serialized);
+  const stored=localStorage.getItem(KEY);
+  if(stored!==serialized)throw Error('Zapis nie został utrwalony.');
+ }catch(err){
+  try{if(current!==null)localStorage.setItem(KEY,current)}catch{}
+  throw Error('Przeglądarka nie zapisała nowej postaci. Sprawdź, czy zapis danych strony jest dozwolony.');
+ }
+}
+function activateImportedSave(data,source){
+ // Nie polegamy na location.reload(): od razu zastępujemy aktywny stan gry.
+ state=data;
+ if(!['left','right'].includes(state.dominantHand))state.dominantHand='right';
+ if(!Number.isFinite(state.credits)||state.credits<0)state.credits=0;
+ if(!Number.isFinite(state.cores)||state.cores<0)state.cores=0;
+ if(!Number.isFinite(state.schematics)||state.schematics<0)state.schematics=0;
+ if(typeof state.workshopTestGranted!=='boolean')state.workshopTestGranted=false;
+ if(!state.materials||typeof state.materials!=='object')state.materials={};
+ for(const k of materialKeys.slice(1))if(!Number.isFinite(state.materials[k])||state.materials[k]<0)state.materials[k]=0;
+ if(state.inventory.some(x=>typeof x==='string')){
+  const legacy=state.inventory;
+  const previous=state.equip||{};
+  state.inventory=legacy.map((id,i)=>({uid:'legacy-'+i,id,rarity:0,affix:null}));
+  const used=new Set(),eq={};
+  for(const [slot,id] of Object.entries(previous)){
+   const found=state.inventory.find(x=>x.id===id&&!used.has(x.uid));
+   if(found){eq[slot]=found.uid;used.add(found.uid)}
+  }
+  state.equip=eq;
+ }
+ for(const inst of state.inventory){
+  if(!Number.isInteger(inst.upgrade)||inst.upgrade<0||inst.upgrade>5)inst.upgrade=0;
+  if(typeof inst.locked!=='boolean')inst.locked=Number(inst.rarity)>=3;
+ }
+ normalizeEquip();
+ bulkSelected.clear();selectedUid=null;workshopUid=null;
+ page=state.created?'home':'bunker';
+ message=`${source}: „${state.name}”, poziom ${state.level}. Postać jest już aktywna.`;
+ render();
 }
 async function importSaveFile(file){
  try{
   if(!file)return;
   if(file.size>5*1024*1024)throw Error('Plik przekracza limit 5 MB.');
   const data=validImport(JSON.parse(await file.text()));
-  if(!confirm(`Importować zapis postaci „${data.name}” (poziom ${data.level})?\n\nZastąpi to aktualny zapis „${state.name}” (poziom ${state.level}). Zapis obecny zostanie zabezpieczony jako lokalna kopia, ale zalecamy również eksport do pliku.`))return;
-  backupCurrentAndReplace(data);location.reload();
+  if(!confirm(`Importować zapis postaci „${data.name}” (poziom ${data.level})?\n\nZastąpi to aktualny zapis „${state.name}” (poziom ${state.level}). Obecny zapis zostanie zabezpieczony jako lokalna kopia.`))return;
+  backupCurrentAndReplace(data);
+  activateImportedSave(data,'Zaimportowano zapis');
  }catch(err){message='Nie udało się zaimportować: '+(err instanceof SyntaxError?'plik nie jest prawidłowym JSON.':err.message);render();}
 }
 function restoreSaveBackup(){
@@ -516,18 +556,17 @@ function restoreSaveBackup(){
  if(!b){message='Brak poprzedniego zapisu do przywrócenia.';render();return}
  try{
   const restored=validImport(JSON.parse(b));
-  if(!confirm(`Przywrócić kopię postaci „${restored.name}” (poziom ${restored.level})?\nBieżący zapis zostanie nadpisany. Przedtem możesz pobrać eksport JSON.`))return;
-  const current=localStorage.getItem(KEY);
-  localStorage.setItem(KEY,b);
-  if(current!==null)localStorage.setItem(BACKUP_KEY,current); // możliwość cofnięcia przywrócenia
-  location.reload();
+  if(!confirm(`Przywrócić kopię postaci „${restored.name}” (poziom ${restored.level})?\nBieżący zapis zostanie nadpisany.`))return;
+  backupCurrentAndReplace(restored);
+  // Zachowaj dotychczasowy zapis jako nową kopię, co umożliwia cofnięcie tej operacji.
+  activateImportedSave(restored,'Przywrócono kopię zapisu');
  }catch(err){message='Nie udało się przywrócić kopii: '+err.message;render();}
 }
 function bunker(){const h=hideoutState(),r=BUNKER_ROOMS[activeBunkerRoom]||BUNKER_ROOMS.bedroom;return section('Kryjówka',`<div class="hideout-screen"><div class="hideout-title"><div><div class="tag">SEKTOR 17 · SCHRON MODUŁOWY</div><h3>Twoja baza</h3></div><div class="hideout-legend"><span class="hideout-pill">Pomieszczenia mają własne funkcje</span><span class="hideout-pill">Dekoracje są tylko wizualne</span></div></div>${bunkerRoomsOverview(h)}<div class="bunker-focused"><div class="bunker-focused-head"><div><span class="tag">WYBRANE POMIESZCZENIE</span><h3>${r.name}</h3></div><span class="hideout-pill">Poziom pomieszczenia: 1</span></div>${bunkerRoomSvg(activeBunkerRoom,h)}<p class="bunker-room-description">${r.desc}</p><div class="bunker-meta"><span>Obecnie: ${r.unlock}</span><span>${r.future}</span></div>${activeBunkerRoom==='bedroom'?`<div class="hideout-controls">${Object.keys(HIDEOUT_OPTIONS).map(key=>hideoutChoice(key,h[key])).join('')}</div><div class="hideout-hint">Zmiana mebli, plakatu i oświetlenia wpływa jedynie na wygląd sypialni — nie daje bonusów do walki ani statystyk.</div>`:activeBunkerRoom==='storage'?`<div class="bunker-links"><button class="primary" data-page="storage">Otwórz magazyn surowców</button></div>`:`<div class="bunker-links"><button class="primary" data-page="workshop">Przejdź do ulepszania ekwipunku</button></div>`}</div><div class="hideout-hint">Plan rozwoju: poziomy pomieszczeń będą odblokowywać bonusy, zadania lub funkcje. Samo ustawianie dekoracji pozostanie wyłącznie wizualne. Rozbudowa, kupowanie mebli i nowe pokoje pojawią się w kolejnych wersjach.</div><div class="actions" style="margin-top:14px">${activeBunkerRoom==='bedroom'?'<button data-action="hideout-reset">Przywróć wystrój sypialni</button>':''}<button data-page="workshop">Warsztat</button><button data-page="storage">Magazyn</button></div></div><div class="panel section" style="margin-top:14px"><h3 style="color:var(--gold)">Zapis i bezpieczeństwo</h3><p class="small muted">Eksport zapisuje postać i ekwipunek do pliku JSON. Import zastępuje obecny stan gry. Przed importem automatycznie zachowamy poprzedni zapis w pamięci tej przeglądarki.</p><div class="actions"><button data-action="export">Pobierz kopię zapisu JSON</button><button class="primary" data-action="import">Importuj zapis JSON</button><button data-action="restore-backup">Przywróć poprzedni zapis</button><button data-action="reset">Nowa gra / reset</button></div><p class="small muted">Po imporcie gra odświeży stronę. Pliki z zapisami przechowuj u siebie, nie w publicznym repozytorium GitHub.</p></div>`) }
 
 const origins={scout:{title:'Zwiadowca',desc:'Szybki i spostrzegawczy. +2 Zręczności, +1 Percepcji.',bonus:{dex:2,per:1}},fighter:{title:'Najemnik',desc:'Wytrzymały wojownik. +2 Siły, +1 Wytrzymałości.',bonus:{str:2,end:1}},tech:{title:'Mechanik',desc:'Specjalista od technologii. +2 Inteligencji, +1 Percepcji.',bonus:{int:2,per:1}}};
 function creation(){return `<div class="hero"><div class="sub">SCHRON 17 · POCZĄTEK HISTORII</div><h1>Stwórz Wędrowca</h1><p class="muted">Wybierz pochodzenie postaci. To bonus początkowy, a nie zamknięta klasa — później rozwijasz dowolne atrybuty.</p></div><div class="panel"><label for="hero-name">Imię Wędrowca</label><input class="input" id="hero-name" maxlength="24" value="${escape(state.name)}" placeholder="Wpisz imię" style="margin:9px 0 18px"><h3 style="color:var(--gold)">Pochodzenie</h3><div class="grid">${Object.entries(origins).map(([id,o])=>`<label class="tile" style="cursor:pointer;border-color:${state.origin===id?'var(--gold)':'var(--line)'}"><input type="radio" name="origin" value="${id}" ${state.origin===id?'checked':''}><h3>${o.title}</h3><p class="small muted">${o.desc}</p></label>`).join('')}</div><h3 style="color:var(--gold)">Ręka dominująca</h3><p class="small muted">Wybór nie zmienia siły postaci. Dominująca ręka atakuje z mocą 100%, druga z mocą 80%. Możesz wybrać swoją naturalną stronę.</p><div class="actions"><label class="tile"><input type="radio" name="dominantHand" value="right" ${state.dominantHand==='right'?'checked':''}> Prawa</label><label class="tile"><input type="radio" name="dominantHand" value="left" ${state.dominantHand==='left'?'checked':''}> Lewa</label></div><p class="small muted">Po rozpoczęciu otrzymasz 5 dodatkowych punktów do rozdania i podstawowy ekwipunek.</p><div class="actions" style="margin-top:10px"><button class="primary" data-action="create">Rozpocznij przygodę →</button><button data-action="import">Wczytaj istniejącą postać (JSON)</button><button data-action="restore-backup">Przywróć kopię zapasową</button></div></div>`}
-function render(){sync();let views={home,character,missions,inventory,workshop,storage,reports,bunker};$('app').innerHTML=`<div class="shell"><header class="header"><div><div class="brand">ASHEN</div><div class="sub">KRONIKI UPADKU · v0.1.17</div></div><div class="small muted">PROTOTYP OFFLINE<br>Postęp zapisuje się w przeglądarce</div></header><div class="layout"><aside class="sidebar"><strong>${escape(state.name)}</strong><p class="muted">Poziom ${state.level} · Ocalały</p><p class="small good">Energia: ∞ (testy)</p><p class="small muted">🪙 ${state.credits.toLocaleString('pl-PL')} kredytów · ⚙ ${state.scrap} złomu</p><nav class="nav">${state.created?nav():''}</nav></aside><main class="main">${message?`<div class="notice" style="margin-bottom:12px">${escape(message)}</div>`:''}${state.created?views[page]():creation()}<div class="footer">ASHEN v0.1.17 · Wersja testowa · Brak połączenia z serwerem · Zapis lokalny</div><input id="ashen-import-file" type="file" accept=".json,application/json" hidden aria-label="Plik zapisu gry JSON"></main></div></div>`;let c=$('countdown');if(c)c.textContent=Math.max(0,Math.ceil((state.mission?.ends-Date.now())/1000))+' s'}
+function render(){sync();let views={home,character,missions,inventory,workshop,storage,reports,bunker};$('app').innerHTML=`<div class="shell"><header class="header"><div><div class="brand">ASHEN</div><div class="sub">KRONIKI UPADKU · v0.1.18</div></div><div class="small muted">PROTOTYP OFFLINE<br>Postęp zapisuje się w przeglądarce</div></header><div class="layout"><aside class="sidebar"><strong>${escape(state.name)}</strong><p class="muted">Poziom ${state.level} · Ocalały</p><p class="small good">Energia: ∞ (testy)</p><p class="small muted">🪙 ${state.credits.toLocaleString('pl-PL')} kredytów · ⚙ ${state.scrap} złomu</p><nav class="nav">${state.created?nav():''}</nav></aside><main class="main">${message?`<div class="notice" style="margin-bottom:12px">${escape(message)}</div>`:''}${state.created?views[page]():creation()}<div class="footer">ASHEN v0.1.18 · Wersja testowa · Brak połączenia z serwerem · Zapis lokalny</div><input id="ashen-import-file" type="file" accept=".json,application/json" hidden aria-label="Plik zapisu gry JSON"></main></div></div>`;let c=$('countdown');if(c)c.textContent=Math.max(0,Math.ceil((state.mission?.ends-Date.now())/1000))+' s'}
 function act(e){let b=e.target.closest('button');if(!b)return;if(b.dataset.bunkerRoom&&BUNKER_ROOMS[b.dataset.bunkerRoom]){activeBunkerRoom=b.dataset.bunkerRoom;message='';render();return;}if(b.dataset.hideoutSlot){setHideoutItem(b.dataset.hideoutSlot,b.dataset.hideoutItem);return}if(b.dataset.action==='hideout-reset'){if(confirm('Przywrócić początkowe wyposażenie i oświetlenie kryjówki?')){state.hideout=hideoutDefault();message='Przywrócono podstawowy wygląd schronu.';save();render()}return}if(b.dataset.page){if(!state.created)return;page=b.dataset.page;if(b.dataset.workshopSelect)workshopUid=b.dataset.workshopSelect;message='';render();return}if(b.dataset.action==='create'){let n=$('hero-name')?.value.trim();if(!n||n.length<2||n.length>24){message='Podaj imię od 2 do 24 znaków.';render();return}state.name=n;state.created=true;let bonus=origins[state.origin]?.bonus||{};for(const [k,v] of Object.entries(bonus))state.attrs[k]+=v;message='Witaj na Pustkowiach, '+n+'!';page='home';save();render();return}if(b.dataset.workshopSelect){workshopUid=b.dataset.workshopSelect;render();return}if(b.dataset.workshopUpgrade){applyUpgrade(b.dataset.workshopUpgrade);return}if(b.dataset.action==='workshop-test'){grantWorkshopTest();return}if(b.dataset.dominant){if(['left','right'].includes(b.dataset.dominant)){state.dominantHand=b.dataset.dominant;message='Zmieniono rękę dominującą.';save();render()}return}if(b.dataset.attr){if(state.points>0){state.attrs[b.dataset.attr]++;state.points--;save();render()}return}if(b.dataset.mission){let l=locations.find(x=>x.id===b.dataset.mission);if(!l||state.mission)return;/* Testy: energia nie jest zużywana */state.mission={id:l.id,ends:Date.now()};finish();render();return}if(b.dataset.lock){const inst=instance(b.dataset.lock);if(inst){inst.locked=!inst.locked;message=inst.locked?'Przedmiot zabezpieczony.':'Zdjęto zabezpieczenie.';save();render()}return}
 if(b.dataset.action==='bulk-visible'){const arr=bulkEligibleVisible(invFilter);if(arr.length&&arr.every(x=>bulkSelected.has(x.uid)))arr.forEach(x=>bulkSelected.delete(x.uid));else arr.forEach(x=>bulkSelected.add(x.uid));render();return}
 if(b.dataset.action==='bulk-all'){state.inventory.filter(eligibleForBulk).forEach(x=>bulkSelected.add(x.uid));render();return}
