@@ -68,3 +68,10 @@ W sypialni zastosowano realistyczne tło `assets/bunker/rooms/bedroom-base.webp`
 - Wszystkie meble są wyłącznie wizualne. Bonusy będą związane z przyszłą rozbudową pomieszczeń.
 - Starsze zapisane meble zostają uznane za posiadane na poziomie 1 bez ponownego kosztu.
 - Wyższe warianty mają tymczasowe zmiany wizualne; pełne grafiki powstaną później.
+
+
+### v0.1.22 — poprawione osadzenie mebli
+- Grafiki mebli zostały przycięte do rzeczywistych konturów, bez dużych przezroczystych marginesów. Dzięki temu rozmiary w silniku odpowiadają widocznym meblom.
+- Łóżko i szafka stoją teraz niżej, z nogami na poziomie podłogi; stół jest bliżej środka.
+- Aktualizacja obejmuje pliki WebP (koniecznie wgraj je ponownie do repozytorium), `js/game.js` i `index.html`.
+- Bez zmian w zapisie gry, cenach mebli i mechanice.
