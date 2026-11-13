@@ -1,6 +1,6 @@
 # ASHEN – Kroniki Upadku
 
-Przeglądarkowe RPG postapokaliptyczne. Aktualna wersja: **0.1.16**.
+Przeglądarkowe RPG postapokaliptyczne. Aktualna wersja: **0.1.17**.
 
 ## Co jest w repozytorium?
 
@@ -22,7 +22,7 @@ Przeglądarkowe RPG postapokaliptyczne. Aktualna wersja: **0.1.16**.
 
 ## Zapisy gry – bardzo ważne
 
-Gra używa obecnie `localStorage` w przeglądarce. **Postęp z lokalnych plików HTML nie przeniesie się automatycznie na adres GitHub Pages.** Plik projektu nie zawiera Twojego zapisu postaci. Zrób kopię zapisu przed przejściem na Pages. Obecna wersja umożliwia eksport JSON, ale nie ma jeszcze wygodnego importu JSON – to warto dodać w następnej wersji.
+Gra używa obecnie `localStorage` w przeglądarce. **Postęp z lokalnych plików HTML nie przeniesie się automatycznie na adres GitHub Pages.** Plik projektu nie zawiera Twojego zapisu postaci. Zrób kopię zapisu przed przejściem na Pages. Obecna wersja umożliwia eksport i import JSON oraz przywrócenie poprzedniego zapisu z kopii przechowywanej lokalnie. Przed importem lub resetem gra automatycznie zachowuje poprzedni zapis w przeglądarce. Zalecamy również pobranie pliku JSON jako niezależnej kopii.
 
 Dane gry są zapisywane osobno w każdej przeglądarce i na każdym urządzeniu. GitHub Pages nie zapewnia kont użytkowników, wspólnych zapisów ani bezpiecznego serwera gry.
 
@@ -33,3 +33,12 @@ Podmieniaj `index.html`, `css/style.css` i `js/game.js`, gdy zmieniamy kod gry. 
 ## Uwaga
 
 To prototyp offline przeznaczony do testów, nie gotowa gra wieloosobowa.
+
+## Jak przenieść wcześniejszą postać?
+
+1. Otwórz poprzedni plik HTML z grą, a następnie w Kryjówce kliknij **Eksportuj zapis JSON**.
+2. Na opublikowanej stronie GitHub Pages otwórz **Kryjówka → Importuj zapis JSON** (lub **Wczytaj istniejącą postać** na ekranie tworzenia postaci).
+3. Wybierz plik JSON i potwierdź import. Strona odświeży się z przywróconą postacią.
+4. W razie pomyłki użyj **Przywróć poprzedni zapis**. Kopia w przeglądarce jest pojedyncza i może zostać zastąpiona kolejnym importem/resetem; warto zachować eksport na dysku.
+
+**Nie publikuj plików zapisu postaci na publicznym GitHubie.**
