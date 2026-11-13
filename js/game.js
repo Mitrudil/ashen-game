@@ -70,7 +70,7 @@ if(!Number.isFinite(state.cores)||state.cores<0)state.cores=0;
 if(!Number.isFinite(state.schematics)||state.schematics<0)state.schematics=0;
 if(typeof state.workshopTestGranted!=='boolean')state.workshopTestGranted=false;
 for(const inst of state.inventory){if(!Number.isInteger(inst.upgrade)||inst.upgrade<0||inst.upgrade>5)inst.upgrade=0;}
-// ASHEN 0.1.23: trwały rozwój modułów schronu, niezależny od dekoracji.
+// ASHEN 0.1.24: trwały rozwój modułów schronu, niezależny od dekoracji.
 function roomLevel(id){const n=state.rooms?.[id];return Number.isInteger(n)&&n>=1&&n<=3?n:1}
 if(!state.rooms||typeof state.rooms!=='object'||Array.isArray(state.rooms))state.rooms={};
 for(const id of ['bedroom','storage','workshop'])state.rooms[id]=roomLevel(id);
@@ -288,7 +288,7 @@ function slotChip(slot,uid){const inst=instance(uid),o=statsOf(inst),empty=!o;co
 function equippedDetail(slot){const uid=state.equip[slot],inst=instance(uid),o=statsOf(inst); return `<div class="eq-detail"><div>${o?itemIcon(inst):`<div class="iconbox">${svgIcon(slotPlaceholder(slot),'#64717a')}</div>`}</div><div class="grow"><div class="slotname">${slotLabels[slot]}</div>${o?`<strong style="color:${rarities.find(r=>r.name===o.rarity)?.color}">${escape(o.name)}</strong><div class="small muted">${statDetails(o)}</div>${affixDetails(o)}<div class="actions"><button data-unequip="${slot}">Zdejmij</button></div>`:`<div class="muted">Brak przedmiotu.</div>`}</div></div>`}
 function itemSummary(inst,o,showSlot=true){return `<div class="itemline"><div>${itemIcon(inst)}</div><div class="grow"><strong style="color:${rarity(inst).color}">${escape(o.name)}</strong> <span class="small muted">${showSlot?slotName(o.slot)+' · ':''}${o.rarity}</span><div class="small muted">${statDetails(o)}</div>${affixDetails(o)}</div></div>`}
 
-// Ekonomia v0.1.23: wartości testowe, łatwo zmienialne w jednym miejscu.
+// Ekonomia v0.1.24: wartości testowe, łatwo zmienialne w jednym miejscu.
 const ECONOMY={saleBase:8,saleRarity:[1,1.5,2.4,4.5,8],yieldRarity:[1,1.2,1.5,2,2.7],prefixValue:1.18,suffixValue:1.18};
 function getStock(key){return key==='scrap'?state.scrap:(state.materials[key]||0)}
 function materialFamily(d){
@@ -503,9 +503,9 @@ function hideoutSvgThing(slot,id){if(id==='none')return '';
  // Grafiki umeblowania sa oddzielnymi assetami w folderze furniture.
  // Pozostale wybory zachowuja dotychczasowe rysunki SVG.
  const furniture={
-   'left:bed':{path:'bed-rusty.webp',x:42,y:292,w:460,h:255},
-   'center:table':{path:'table-rusty.webp',x:460,y:335,w:251,h:186},
-   'right:nightstand':{path:'nightstand-metal.webp',x:735,y:357,w:139,h:169}
+   'left:bed':{path:'bed-rusty.webp',x:-40,y:302,w:500,h:272},
+   'center:table':{path:'table-rusty.webp',x:500,y:334,w:246,h:182},
+   'right:nightstand':{path:'nightstand-metal.webp',x:780,y:360,w:122,h:150}
  };
  const art=furniture[slot+':'+id];
  if(art){
@@ -532,20 +532,24 @@ function hideoutSvgThing(slot,id){if(id==='none')return '';
  if(id==='trophy')content=`<path d="M-8 -82 h16 v50 h-16z" fill="#7c8b83"/><path d="M-43 -59 Q-23 -80 0 -62 Q23 -80 43 -59 Q51 -28 23 -17 L12 5 H-12 L-23 -17 Q-51 -28 -43 -59Z" fill="#695d4d" stroke="#b8a17d" stroke-width="5"/><path d="M-13 14 H13 L20 57 H-20 Z" fill="#726452"/><path d="M-33 65 H33" stroke="#b8a17d" stroke-width="9"/>`;
  return content?`<g transform="translate(${slot==='left'?218:slot==='center'?488:slot==='right'?759:480} ${slot==='wall'?174:405})">${content}</g>`:'';
 }
+const bedroomBackgroundByLevel=lvl=>`./assets/bunker/rooms/${lvl>=3?'bedroom-level3.webp':lvl===2?'bedroom-level2.webp':'bedroom-level1.webp'}`;
 function hideoutScene(h){
  const lightColors={candle:'#f1a557',bulb:'#f5d49c',neon:'#81d4d6'};
  const illum=lightColors[h.light]||lightColors.candle;
- return `<svg viewBox="0 0 960 540" role="img" aria-label="Sypialnia Schronu 17 z realistycznym tłem i wybranymi meblami" xmlns="http://www.w3.org/2000/svg"><defs>
+ const lvl=roomLevel('bedroom');
+ const roomLabel=lvl===1?'Poziom 1 — surowa, zaniedbana sypialnia':lvl===2?'Poziom 2 — odnowiona i uporządkowana sypialnia':'Poziom 3 — nowoczesna, surowa sypialnia';
+ return `<svg viewBox="0 0 960 540" role="img" aria-label="Sypialnia Schronu 17: ${roomLabel}" xmlns="http://www.w3.org/2000/svg"><defs>
   <radialGradient id="ashenlight"><stop stop-color="${illum}" stop-opacity="${h.light==='candle'?.24:.33}"/><stop offset="1" stop-color="${illum}" stop-opacity="0"/></radialGradient>
   <linearGradient id="ashenfallback" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#272e2e"/><stop offset="1" stop-color="#151b20"/></linearGradient>
  </defs>
  <rect width="960" height="540" fill="url(#ashenfallback)"/>
- <image href="./assets/bunker/rooms/bedroom-base.webp" x="0" y="0" width="960" height="540" preserveAspectRatio="xMidYMid slice"/>
+ <image href="${bedroomBackgroundByLevel(lvl)}" x="0" y="0" width="960" height="540" preserveAspectRatio="xMidYMid slice"/>
  <ellipse cx="480" cy="210" rx="435" ry="310" fill="url(#ashenlight)"/>
  ${hideoutSvgThing('wall',h.wall)}${hideoutSvgThing('left',h.left)}${hideoutSvgThing('center',h.center)}${hideoutSvgThing('right',h.right)}
  ${h.light==='candle'?`<g transform="translate(572 331)"><path d="M-14 0H14V46H-14Z" fill="#b9a681"/><path d="M0 -20 Q20 -3 0 4 Q-17 -4 0 -20" fill="#ffd387"/></g>`:''}
  ${h.light==='neon'?`<path d="M306 64H651" stroke="#91e3dc" stroke-width="12" opacity=".65"/><path d="M306 64H651" stroke="#e4fffd" stroke-width="4"/>`:''}
  <rect x="13" y="13" width="173" height="29" rx="6" fill="#0c1519" opacity=".84"/><text x="26" y="32" fill="#d5bc8a" font-size="14" letter-spacing="2">SCHRON 17</text>
+ <rect x="745" y="13" width="203" height="29" rx="6" fill="#0c1519" opacity=".84"/><text x="760" y="32" fill="#d5bc8a" font-size="14" letter-spacing="1.2">SYPIALNIA · POZIOM ${lvl}</text>
  </svg>`;
 }
 function hideoutChoice(key,current){return `<div class="hideout-group"><h3>${({left:'Lewa strona pomieszczenia',center:'Środek pomieszczenia',right:'Prawa strona pomieszczenia',wall:'Dekoracja ścienna',light:'Oświetlenie'})[key]}</h3><div class="hideout-choice">${HIDEOUT_OPTIONS[key].map(([id,title])=>`<button type="button" data-hideout-slot="${key}" data-hideout-item="${id}" class="${id===current?'selected':''}" aria-pressed="${id===current}">${escape(title)}</button>`).join('')}</div></div>`}
@@ -669,7 +673,7 @@ function bunker(){const h=hideoutState(),r=BUNKER_ROOMS[activeBunkerRoom]||BUNKE
 
 const origins={scout:{title:'Zwiadowca',desc:'Szybki i spostrzegawczy. +2 Zręczności, +1 Percepcji.',bonus:{dex:2,per:1}},fighter:{title:'Najemnik',desc:'Wytrzymały wojownik. +2 Siły, +1 Wytrzymałości.',bonus:{str:2,end:1}},tech:{title:'Mechanik',desc:'Specjalista od technologii. +2 Inteligencji, +1 Percepcji.',bonus:{int:2,per:1}}};
 function creation(){return `<div class="hero"><div class="sub">SCHRON 17 · POCZĄTEK HISTORII</div><h1>Stwórz Wędrowca</h1><p class="muted">Wybierz pochodzenie postaci. To bonus początkowy, a nie zamknięta klasa — później rozwijasz dowolne atrybuty.</p></div><div class="panel"><label for="hero-name">Imię Wędrowca</label><input class="input" id="hero-name" maxlength="24" value="${escape(state.name)}" placeholder="Wpisz imię" style="margin:9px 0 18px"><h3 style="color:var(--gold)">Pochodzenie</h3><div class="grid">${Object.entries(origins).map(([id,o])=>`<label class="tile" style="cursor:pointer;border-color:${state.origin===id?'var(--gold)':'var(--line)'}"><input type="radio" name="origin" value="${id}" ${state.origin===id?'checked':''}><h3>${o.title}</h3><p class="small muted">${o.desc}</p></label>`).join('')}</div><h3 style="color:var(--gold)">Ręka dominująca</h3><p class="small muted">Wybór nie zmienia siły postaci. Dominująca ręka atakuje z mocą 100%, druga z mocą 80%. Możesz wybrać swoją naturalną stronę.</p><div class="actions"><label class="tile"><input type="radio" name="dominantHand" value="right" ${state.dominantHand==='right'?'checked':''}> Prawa</label><label class="tile"><input type="radio" name="dominantHand" value="left" ${state.dominantHand==='left'?'checked':''}> Lewa</label></div><p class="small muted">Po rozpoczęciu otrzymasz 5 dodatkowych punktów do rozdania i podstawowy ekwipunek.</p><div class="actions" style="margin-top:10px"><button class="primary" data-action="create">Rozpocznij przygodę →</button><button data-action="import">Wczytaj istniejącą postać (JSON)</button><button data-action="restore-backup">Przywróć kopię zapasową</button></div></div>`}
-function render(){sync();let views={home,character,missions,inventory,workshop,storage,reports,bunker};$('app').innerHTML=`<div class="shell"><header class="header"><div><div class="brand">ASHEN</div><div class="sub">KRONIKI UPADKU · v0.1.23</div></div><div class="small muted">PROTOTYP OFFLINE<br>Postęp zapisuje się w przeglądarce</div></header><div class="layout"><aside class="sidebar"><strong>${escape(state.name)}</strong><p class="muted">Poziom ${state.level} · Ocalały</p><p class="small good">Energia: ∞ (testy)</p><p class="small muted">🪙 ${state.credits.toLocaleString('pl-PL')} kredytów · ⚙ ${state.scrap} złomu</p><nav class="nav">${state.created?nav():''}</nav></aside><main class="main">${message?`<div class="notice" style="margin-bottom:12px">${escape(message)}</div>`:''}${state.created?views[page]():creation()}<div class="footer">ASHEN v0.1.23 · Wersja testowa · Brak połączenia z serwerem · Zapis lokalny</div><input id="ashen-import-file" type="file" accept=".json,application/json" hidden aria-label="Plik zapisu gry JSON"></main></div></div>`;let c=$('countdown');if(c)c.textContent=Math.max(0,Math.ceil((state.mission?.ends-Date.now())/1000))+' s'}
+function render(){sync();let views={home,character,missions,inventory,workshop,storage,reports,bunker};$('app').innerHTML=`<div class="shell"><header class="header"><div><div class="brand">ASHEN</div><div class="sub">KRONIKI UPADKU · v0.1.24</div></div><div class="small muted">PROTOTYP OFFLINE<br>Postęp zapisuje się w przeglądarce</div></header><div class="layout"><aside class="sidebar"><strong>${escape(state.name)}</strong><p class="muted">Poziom ${state.level} · Ocalały</p><p class="small good">Energia: ∞ (testy)</p><p class="small muted">🪙 ${state.credits.toLocaleString('pl-PL')} kredytów · ⚙ ${state.scrap} złomu</p><nav class="nav">${state.created?nav():''}</nav></aside><main class="main">${message?`<div class="notice" style="margin-bottom:12px">${escape(message)}</div>`:''}${state.created?views[page]():creation()}<div class="footer">ASHEN v0.1.24 · Wersja testowa · Brak połączenia z serwerem · Zapis lokalny</div><input id="ashen-import-file" type="file" accept=".json,application/json" hidden aria-label="Plik zapisu gry JSON"></main></div></div>`;let c=$('countdown');if(c)c.textContent=Math.max(0,Math.ceil((state.mission?.ends-Date.now())/1000))+' s'}
 function act(e){let b=e.target.closest('button');if(!b)return;if(b.dataset.bunkerRoom&&BUNKER_ROOMS[b.dataset.bunkerRoom]){activeBunkerRoom=b.dataset.bunkerRoom;message='';render();return;}if(b.dataset.roomUpgrade){roomUpgrade(b.dataset.roomUpgrade);return}if(b.dataset.furnitureUpgrade){furnitureUpgrade(b.dataset.furnitureUpgrade);return}if(b.dataset.hideoutSlot){setHideoutItem(b.dataset.hideoutSlot,b.dataset.hideoutItem);return}if(b.dataset.action==='hideout-reset'){if(confirm('Przywrócić początkowe wyposażenie i oświetlenie kryjówki?')){state.hideout=hideoutDefault();message='Przywrócono podstawowy wygląd schronu.';save();render()}return}if(b.dataset.page){if(!state.created)return;page=b.dataset.page;if(b.dataset.workshopSelect)workshopUid=b.dataset.workshopSelect;message='';render();return}if(b.dataset.action==='create'){let n=$('hero-name')?.value.trim();if(!n||n.length<2||n.length>24){message='Podaj imię od 2 do 24 znaków.';render();return}state.name=n;state.created=true;let bonus=origins[state.origin]?.bonus||{};for(const [k,v] of Object.entries(bonus))state.attrs[k]+=v;message='Witaj na Pustkowiach, '+n+'!';page='home';save();render();return}if(b.dataset.workshopSelect){workshopUid=b.dataset.workshopSelect;render();return}if(b.dataset.workshopUpgrade){applyUpgrade(b.dataset.workshopUpgrade);return}if(b.dataset.action==='workshop-test'){grantWorkshopTest();return}if(b.dataset.dominant){if(['left','right'].includes(b.dataset.dominant)){state.dominantHand=b.dataset.dominant;message='Zmieniono rękę dominującą.';save();render()}return}if(b.dataset.attr){if(state.points>0){state.attrs[b.dataset.attr]++;state.points--;save();render()}return}if(b.dataset.mission){let l=locations.find(x=>x.id===b.dataset.mission);if(!l||state.mission)return;/* Testy: energia nie jest zużywana */state.mission={id:l.id,ends:Date.now()};finish();render();return}if(b.dataset.lock){const inst=instance(b.dataset.lock);if(inst){inst.locked=!inst.locked;message=inst.locked?'Przedmiot zabezpieczony.':'Zdjęto zabezpieczenie.';save();render()}return}
 if(b.dataset.action==='bulk-visible'){const arr=bulkEligibleVisible(invFilter);if(arr.length&&arr.every(x=>bulkSelected.has(x.uid)))arr.forEach(x=>bulkSelected.delete(x.uid));else arr.forEach(x=>bulkSelected.add(x.uid));render();return}
 if(b.dataset.action==='bulk-all'){state.inventory.filter(eligibleForBulk).forEach(x=>bulkSelected.add(x.uid));render();return}

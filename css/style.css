@@ -67,7 +67,7 @@
 .furniture-card p{min-height:28px;margin:7px 0}.furniture-card button{width:100%;white-space:normal}
 @media(max-width:780px){.furniture-catalog{grid-template-columns:1fr}}
 
-/* ASHEN 0.1.23: rozbudowa modułów */
+/* ASHEN 0.1.24: rozbudowa modułów */
 .room-upgrade-panel{display:flex;gap:15px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:14px;margin:14px 0;border:1px solid #786b4b;background:linear-gradient(120deg,#292a24,#182329);border-radius:10px}
 .room-upgrade-panel h3{font-size:18px;margin:7px 0;color:#e1bd85}.room-upgrade-panel p{margin:5px 0}.room-upgrade-panel button{min-width:190px}
 @media(max-width:650px){.room-upgrade-panel button{width:100%}}

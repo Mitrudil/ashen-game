@@ -1,3 +1,15 @@
+# ASHEN – Kroniki Upadku v0.1.24
+
+Nowość: trzy poziomy tła sypialni Schronu 17 oraz poprawione ustawienie mebli. Rozbudowa sypialni od razu zmienia wygląd pomieszczenia: poziom 1 jest zaniedbany, poziom 2 uporządkowany i odnowiony, a poziom 3 surowy, nowoczesny i niemal idealny. Skorygowano też położenie łóżka, stołu i szafki, aby nie nachodziły na siebie.
+
+Przy aktualizacji wgraj `index.html`, `js/game.js` oraz nowe pliki tła do `assets/bunker/rooms/`. Nie usuwaj `assets/` ani danych przeglądarki. Starsze zapisy są zachowane.
+
+# ASHEN – Kroniki Upadku v0.1.24
+
+Nowość: rozbudowa sypialni, magazynu i warsztatu do poziomu 3. Sypialnia daje +3/+6% PD, magazyn +10/+20% odzysku, warsztat −5/−10% kosztów materiałów i kredytów. Koszty i wymagane poziomy postaci są widoczne w Kryjówce. Meble pozostają dekoracyjne.
+
+Przy aktualizacji wgraj `index.html`, `css/style.css`, `js/game.js`. Nie usuwaj `assets/` ani danych przeglądarki. Starsze zapisy są zachowane.
+
 # ASHEN v0.1.20 – Meble sypialni
 
 Pierwsze realistyczne wyposażenie pomieszczenia: łóżko, stolik i metalowa szafka. Grafiki przechowywane oddzielnie w `assets/bunker/furniture/`. Zachowano lokalny zapis i dotychczasowe funkcje gry. Przed wymianą plików warto wyeksportować zapis JSON.
