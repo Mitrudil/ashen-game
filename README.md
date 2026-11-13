@@ -1,3 +1,17 @@
+# ASHEN – Kroniki Upadku v0.1.25
+
+- Wyprawy: wybór lokacji jest pierwszy; trzy nowe grafiki WebP; ostatni raport na dole; nie pokazujemy przykładowych łupów.
+- Wyprawy trwają 5/10/15 sekund w wersji testowej. Pojazdy realnie skracają czas. Po powrocie walka rozstrzyga się automatycznie.
+- Postać: stały wizerunek powiązany z pochodzeniem (zwiadowca/najemnik/mechanik), wybieranym na początku gry.
+- Towarzysz: pies, kot lub sokół, wybór od poziomu 20. Każde zwierzę ma inny bonus.
+- Transport: rower, motocykl, stary samochód, terenówka, van, kamper, ciężarówka; koszty i poziomy odblokowania; dwa usprawnienia.
+- Zapis: lokalStorage `ashen-save-v010` i import/eksport JSON zgodne z poprzednimi wersjami.
+
+Wgraj zawartość ZIP do głównego katalogu repozytorium, podmieniając `index.html`, `css/style.css`, `js/game.js`, i dodaj foldery `assets/missions`, `assets/characters`, `assets/companions`. Zachowaj istniejące `assets/bunker`.
+
+## Uwagi
+Grafiki postaci są pierwszymi statycznymi wariantami portretów. Nie odzwierciedlają zakładanego ekwipunku postaci. Bonusy i koszty są testowe i będą balansowane w przyszłości.
+
 # ASHEN – Kroniki Upadku v0.1.24
 
 Nowość: trzy poziomy tła sypialni Schronu 17 oraz poprawione ustawienie mebli. Rozbudowa sypialni od razu zmienia wygląd pomieszczenia: poziom 1 jest zaniedbany, poziom 2 uporządkowany i odnowiony, a poziom 3 surowy, nowoczesny i niemal idealny. Skorygowano też położenie łóżka, stołu i szafki, aby nie nachodziły na siebie.
