@@ -1,6 +1,6 @@
 # ASHEN – Kroniki Upadku
 
-Przeglądarkowe RPG postapokaliptyczne. Aktualna wersja: **0.1.17**.
+Przeglądarkowe RPG postapokaliptyczne. Aktualna wersja: **0.1.18**.
 
 ## Co jest w repozytorium?
 
@@ -42,3 +42,11 @@ To prototyp offline przeznaczony do testów, nie gotowa gra wieloosobowa.
 4. W razie pomyłki użyj **Przywróć poprzedni zapis**. Kopia w przeglądarce jest pojedyncza i może zostać zastąpiona kolejnym importem/resetem; warto zachować eksport na dysku.
 
 **Nie publikuj plików zapisu postaci na publicznym GitHubie.**
+
+## Poprawka v0.1.19
+Po potwierdzeniu importu postać jest aktywowana od razu bez przeładowywania strony; zapis jest weryfikowany w localStorage. Zaktualizowano odwołanie do JS w index.html, aby ograniczyć problem starego pliku w pamięci podręcznej.
+
+
+## v0.1.19 — pierwsze tło graficzne Schronu 17
+
+W sypialni zastosowano realistyczne tło `assets/bunker/rooms/bedroom-base.webp`. Meble i dekoracje nadal są niezależnymi elementami SVG, a ich wybór jest wyłącznie kosmetyczny. Na GitHub należy przesłać także nowy plik WebP, zachowując strukturę folderów.
