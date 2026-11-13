@@ -1,3 +1,13 @@
+# ASHEN v0.1.27 — Wyprawy (redesign i narracja)
+
+- 15 autorskich opisów fabularnych dla każdej z trzech lokacji (45 łącznie); ostatni wariant danej lokacji nie powtarza się bezpośrednio.
+- Po powrocie z wyprawy u góry ekranu Wyprawy automatycznie pojawia się opowieść, łupy i nagrody.
+- W dolnym panelu przyciski Raport i Łupy rozwijają zawartość na miejscu, bez opuszczania Wypraw.
+- Poprawiona siatka kart i wyśrodkowanie treści, nowe przyciski z cieniami, czytelna typografia.
+- Zachowano dotychczasowy zapis (`ashen-save-v010`) i całą mechanikę rozgrywki.
+
+Wgraj zawartość ZIP do katalogu głównego GitHub, zachowując ścieżki. Zaktualizuj szczególnie `index.html`, `css/style.css`, `js/game.js`.
+
 # ASHEN – Kroniki Upadku v0.1.26
 
 - Wyprawy: wybór lokacji jest pierwszy; trzy nowe grafiki WebP; ostatni raport na dole; nie pokazujemy przykładowych łupów.
