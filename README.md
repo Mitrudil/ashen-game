@@ -1,3 +1,11 @@
+# ASHEN v0.1.20 – Meble sypialni
+
+Pierwsze realistyczne wyposażenie pomieszczenia: łóżko, stolik i metalowa szafka. Grafiki przechowywane oddzielnie w `assets/bunker/furniture/`. Zachowano lokalny zapis i dotychczasowe funkcje gry. Przed wymianą plików warto wyeksportować zapis JSON.
+
+## Wgrywanie na GitHub
+
+Wgraj całą zawartość tej paczki do katalogu głównego repozytorium (nie folder nadrzędny). W szczególności podmień `index.html`, `js/game.js` i dodaj trzy pliki `.webp` do `assets/bunker/furniture/`. Nie publikuj plików zapisu JSON – zawierają dane postaci.
+
 # ASHEN – Kroniki Upadku
 
 Przeglądarkowe RPG postapokaliptyczne. Aktualna wersja: **0.1.18**.
