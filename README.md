@@ -1,3 +1,9 @@
+# ASHEN v0.1.28.1 — poprawa czytelności
+
+Globalnie zastąpiono ciasną czcionkę nagłówków i przycisków czytelnym krojem interfejsowym. Zachowano metaliczne faktury, ale ograniczono cienie napisów, poprawiono odstępy i wysokości linii. Butelka z płynem jest podpisana **Chemikalia**. Wewnątrz zapisu gry klucz `tworzywo` pozostaje niezmieniony, aby starsze zapisy nadal działały. Usunięto zdublowany górny komunikat o zwycięstwie; wynik pozostaje w głównym raporcie wyprawy.
+
+Wgraj `index.html`, `css/style.css`, `js/game.js`. Grafiki nie uległy zmianie.
+
 # ASHEN v0.1.28 – surowce i przyciski z przetartej blachy
 
 Odświeżona oprawa ekranu Wypraw: osobne grafiki sześciu zasobów w `assets/ui/resources/`, tekstura metalu `assets/ui/rusted-orange.webp`, spójne przyciski w panelach i poprawiona typografia. Usunięto górny komunikat „Wyprawa rozpoczęta…”, zachowując licznik trwającej wyprawy. Logika, raporty i zapis gry pozostają zgodne z wersją 0.1.27.

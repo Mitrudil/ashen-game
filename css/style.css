@@ -227,3 +227,81 @@
 .ashen-missions-shell .mission-card{border-radius:7px;box-shadow:0 12px 28px #0009,inset 0 1px 0 #fff1}
 .ashen-missions-shell .mission-stage,.ashen-missions-shell .mission-latest,.ashen-missions-shell .mission-result-now{border-radius:7px;background-image:linear-gradient(180deg,#212121 0%,#121514 50%,#0b0f11 100%);box-shadow:inset 0 1px 1px #e9bc7940,inset 0 0 0 2px #000b,0 9px 22px #0008}
 @media(max-width:750px){.ashen-missions-shell .mission-resource .ico{height:43px;width:42px;flex-basis:42px}.ashen-missions-shell .mission-resource{padding:8px;gap:8px}.ashen-missions-shell .mission-resource .num{font-size:21px}}
+
+/* ASHEN 0.1.28.1 — readability pass for ALL screens */
+:root { --ashen-ui-font: "Segoe UI", "DejaVu Sans", Arial, sans-serif; }
+html { font-synthesis: none; }
+body, button, input, select, textarea, summary, .brand,
+h1, h2, h3, h4, h5, h6, .section h2, .hero h1,
+.mission-title h2, .mission-latest h3, .mission-result-head h2,
+.mission-card-body h3, .mission-latest-copy h4,
+.mission-result-columns h3, .mission-inline-section h4,
+.ashen-missions-shell .mission-resource .lab,
+.ashen-missions-shell .mission-resource .num,
+.ashen-missions-shell .mission-title h2,
+.ashen-missions-shell .mission-latest h3,
+.ashen-missions-shell .mission-result-head h2,
+.ashen-missions-shell .mission-card-body h3,
+.ashen-missions-shell .mission-card .primary,
+.ashen-missions-shell .mission-latest-actions button,
+.ashen-missions-shell .mission-result-head button {
+    font-family: var(--ashen-ui-font) !important;
+    font-stretch: normal !important;
+    font-kerning: normal;
+    text-rendering: optimizeLegibility;
+    font-variant-ligatures: none;
+}
+h1, h2, h3, h4, h5, h6, button,
+.mission-card-body h3, .mission-title h2,
+.ashen-missions-shell .mission-card-body h3,
+.ashen-missions-shell .mission-title h2,
+.ashen-missions-shell .mission-result-head h2 {
+    letter-spacing: 0.015em !important;
+    word-spacing: normal;
+    line-height: 1.35 !important;
+    text-shadow: none !important;
+}
+.ashen-missions-shell .mission-title h2,
+.ashen-missions-shell .mission-latest h3,
+.ashen-missions-shell .mission-result-head h2 {
+    font-size: clamp(24px, 2.4vw, 34px) !important;
+    font-weight: 750 !important;
+}
+.ashen-missions-shell .mission-card-body h3 {
+    font-size: clamp(19px, 1.6vw, 24px) !important;
+    font-weight: 750 !important;
+    line-height: 1.34 !important;
+    overflow-wrap: break-word;
+}
+.ashen-missions-shell .mission-card .primary,
+.ashen-missions-shell .mission-latest-actions button,
+.ashen-missions-shell .mission-result-head button {
+    font-size: 16px !important;
+    font-weight: 750 !important;
+    letter-spacing: 0.025em !important;
+    text-shadow: 0 1px 1px #211108 !important;
+    line-height: 1.42 !important;
+}
+.ashen-missions-shell .mission-card .primary {
+    padding-top: 13px; padding-bottom: 13px;
+}
+.ashen-missions-shell .mission-resource .lab { 
+    letter-spacing: .045em !important;
+    font-weight: 650 !important;
+}
+.ashen-missions-shell .mission-resource .num { 
+    font-weight: 750 !important;
+    letter-spacing: 0 !important;
+    text-shadow: none !important;
+}
+.ashen-missions-shell .mission-result-eyebrow {
+    letter-spacing: .065em !important;
+    font-weight: 700;
+}
+.ashen-missions-shell .mission-latest-copy h4 {
+    font-weight: 750;
+}
+@media (max-width: 560px) {
+    .ashen-missions-shell .mission-card-body h3 { font-size: 22px !important; }
+    .ashen-missions-shell .mission-title h2 { font-size: 24px !important; }
+}
