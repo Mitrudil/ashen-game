@@ -1,4 +1,4 @@
-# ASHEN – Kroniki Upadku v0.1.25
+# ASHEN – Kroniki Upadku v0.1.26
 
 - Wyprawy: wybór lokacji jest pierwszy; trzy nowe grafiki WebP; ostatni raport na dole; nie pokazujemy przykładowych łupów.
 - Wyprawy trwają 5/10/15 sekund w wersji testowej. Pojazdy realnie skracają czas. Po powrocie walka rozstrzyga się automatycznie.

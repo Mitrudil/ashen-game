@@ -74,3 +74,60 @@
 
 /* ASHEN v0.1.25 – wyprawy, postać, towarzysz i transport */
 .mission-intro{text-align:center;padding:12px 16px 8px}.mission-intro h3{font:23px Georgia,serif;color:var(--gold);margin:4px 0 10px}.mission-intro p{line-height:1.55}.mission-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}.mission-card{overflow:hidden;border:1px solid #465255;border-radius:10px;background:#202930;display:flex;flex-direction:column}.mission-card>img{width:100%;aspect-ratio:1.5;object-fit:cover;display:block}.mission-card-body{padding:14px;flex:1;display:flex;flex-direction:column;text-align:center}.mission-card-body h3{font:20px Georgia,serif;color:#dfbd89;margin:0 0 8px;min-height:44px}.mission-card-body p{margin:5px 0}.mission-card-body button{margin-top:auto;width:100%}.mission-card-body .small{margin-top:8px}.mission-progress{text-align:center;margin:12px 0}.mission-note{text-align:center;line-height:1.5;margin:14px 0}.mission-history-heading{margin:24px 0 12px;color:var(--gold);font:21px Georgia,serif;text-align:center}.character-layout{display:grid;grid-template-columns:minmax(175px,250px) minmax(0,1fr);gap:20px}.character-portrait{position:relative;border-radius:8px;overflow:hidden;background:#10191d;min-height:290px}.character-portrait img{width:100%;height:100%;min-height:290px;object-fit:cover;display:block}.character-portrait span{position:absolute;bottom:0;left:0;right:0;padding:12px;color:#f3ddaf;background:linear-gradient(transparent,#111b1f);font-weight:700;text-align:center}.character-companion{margin-top:16px;border-top:1px solid var(--line);padding-top:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}.character-companion button{margin-left:auto}.origin-thumb{width:100%;height:125px;object-fit:cover;border-radius:5px;margin:8px 0}.companion-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.companion-card,.vehicle-card{border:1px solid var(--line);background:#202930;border-radius:8px;padding:14px;text-align:center;display:flex;flex-direction:column;gap:8px}.companion-card h3,.vehicle-card h3{margin:0;color:#e4c18c}.companion-picture{height:150px;display:grid;place-items:center;background:#121b1f;border-radius:7px;overflow:hidden}.companion-picture img{width:100%;height:100%;object-fit:cover}.companion-picture span{font-size:76px}.companion-card p,.vehicle-card p{margin:3px 0;line-height:1.5}.companion-card button,.vehicle-card button{margin-top:auto}.vehicle-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}.vehicle-icon{font-size:55px;min-height:75px}.vehicle-card{min-height:220px}@media(max-width:830px){.mission-grid,.companion-grid,.vehicle-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:540px){.mission-grid,.companion-grid,.vehicle-grid,.character-layout{grid-template-columns:1fr}.character-portrait{max-height:300px}.character-portrait img{height:300px}.mission-card>img{aspect-ratio:16/9}}
+
+
+/* ASHEN v0.1.26 — redesign zakładki Wypraw */
+.mission-screen{display:grid;gap:18px}
+.mission-topbar{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.mission-resource{background:linear-gradient(180deg,#1d2228,#11161a);border:1px solid #4e4230;border-radius:14px;padding:12px 14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 10px 28px rgba(0,0,0,.24);min-height:76px;display:flex;align-items:center;gap:12px}
+.mission-resource .ico{font-size:28px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+.mission-resource .lab{font-size:12px;color:#b7a58b;text-transform:uppercase;letter-spacing:.08em}
+.mission-resource .num{font-size:30px;font-weight:800;line-height:1.02;color:#f2ece1}
+.mission-board{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:16px;align-items:stretch}
+.mission-stage,.mission-sideart,.mission-latest{background:linear-gradient(180deg,rgba(21,26,31,.98),rgba(14,18,22,.98));border:1px solid #4d3a28;border-radius:18px;box-shadow:inset 0 0 0 1px rgba(214,173,112,.08),0 18px 36px rgba(0,0,0,.35)}
+.mission-stage{padding:18px}
+.mission-sideart{position:relative;overflow:hidden;min-height:320px}
+.mission-sideart img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.92) contrast(1.04) brightness(.8)}
+.mission-sideart:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,11,14,.05),rgba(8,11,14,.25) 30%,rgba(8,11,14,.72));}
+.mission-sideart .caption{position:absolute;left:14px;right:14px;bottom:14px;z-index:1;padding:12px;border-radius:12px;background:rgba(8,11,14,.42);border:1px solid rgba(225,184,122,.24);backdrop-filter:blur(2px)}
+.mission-sideart .caption strong{display:block;color:#f0dfc0;margin-bottom:4px}
+.mission-progress.notice{background:linear-gradient(180deg,#2d2f23,#1a1f19);border-color:#6f6d44;color:#f1e1b8}
+.mission-title{display:flex;align-items:center;justify-content:center;gap:18px;margin:6px 0 18px;text-align:center}
+.mission-title h2{margin:0;font:700 28px/1.1 Georgia,serif;color:#f0e2c2;letter-spacing:.02em}
+.mission-title:before,.mission-title:after{content:'';height:2px;flex:1;max-width:120px;background:linear-gradient(90deg,transparent,#c67f2a,transparent);opacity:.9}
+.mission-meta-row{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:-8px;margin-bottom:14px;color:#b9a78f;font-size:13px;text-align:center}
+.mission-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.mission-card{overflow:hidden;display:flex;flex-direction:column;background:linear-gradient(180deg,#151a1e,#0f1418);border:1px solid #5a4430;border-radius:18px;box-shadow:0 14px 28px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.03)}
+.mission-card img{width:100%;height:210px;object-fit:cover;display:block;border-bottom:1px solid rgba(214,173,112,.16)}
+.mission-card-body{padding:16px 18px 18px;text-align:center;display:grid;gap:11px}
+.mission-card-body h3{margin:0;font-size:23px;color:#f3ece2;font-family:Georgia,serif}
+.mission-card-body .flavor{margin:0;color:#b7bcc2;line-height:1.45;min-height:42px}
+.mission-difficulty{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:700;font-size:14px;color:#ddd7cf}
+.mission-bars{display:inline-flex;gap:4px;align-items:flex-end}
+.mission-bars span{display:block;width:7px;background:#7b6b58;border-radius:2px}
+.mission-bars span:nth-child(1){height:12px}.mission-bars span:nth-child(2){height:17px}.mission-bars span:nth-child(3){height:22px}
+.mission-bars.low span:nth-child(1){background:#8acb57}.mission-bars.low span:nth-child(2){background:#648944}.mission-bars.low span:nth-child(3){background:#435535}
+.mission-bars.mid span:nth-child(1){background:#f0c14b}.mission-bars.mid span:nth-child(2){background:#d39526}.mission-bars.mid span:nth-child(3){background:#6a5631}
+.mission-bars.high span:nth-child(1){background:#dc5b45}.mission-bars.high span:nth-child(2){background:#b33d2b}.mission-bars.high span:nth-child(3){background:#792318}
+.mission-facts{display:grid;gap:7px;text-align:left;max-width:235px;margin:0 auto;color:#e0d5c8}
+.mission-facts .line{display:flex;justify-content:space-between;gap:12px;color:#dcd4c7}
+.mission-facts .line span{color:#b2a79a}
+.mission-card .primary{justify-self:center;min-width:180px;padding:12px 20px;border-radius:12px;background:linear-gradient(180deg,#d2832f,#8d4911);border:1px solid #d59a57;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 8px 18px rgba(0,0,0,.24);font-size:17px;font-weight:800}
+.mission-card .primary:hover{background:linear-gradient(180deg,#e09341,#9f5417)}
+.mission-card .primary:disabled{background:linear-gradient(180deg,#655746,#3a3026);border-color:#6f6251;color:#c6bba9;opacity:.78}
+.mission-warning,.mission-locked{font-size:12px;color:#d6b586}
+.mission-note{margin:0;color:#918679;text-align:center}
+.mission-latest{padding:18px}
+.mission-latest h3{margin:0 0 14px;font:700 26px/1.1 Georgia,serif;color:#f0e2c2}
+.mission-latest-card{display:grid;grid-template-columns:280px minmax(0,1fr) auto;gap:18px;align-items:center}
+.mission-latest-card img{width:100%;height:150px;border-radius:14px;object-fit:cover;border:1px solid rgba(214,173,112,.18)}
+.mission-latest-copy h4{margin:0 0 8px;font-size:20px;color:#f3ece2}
+.mission-latest-copy .state{font-size:17px;color:#91d565;font-weight:700;margin-bottom:8px}
+.mission-latest-copy .minirow{display:flex;gap:14px;flex-wrap:wrap;color:#d5c7b5}
+.mission-latest-copy .minirow span{display:inline-flex;align-items:center;gap:6px}
+.mission-latest-actions{display:grid;gap:10px;justify-items:end}
+.mission-latest-actions button{border-radius:12px;padding:13px 18px;min-width:170px;background:transparent;border:1px solid #b99566;color:#f0dfc0}
+.mission-latest-actions button:hover{background:rgba(255,255,255,.04)}
+.mission-empty{padding:18px;border:1px dashed rgba(214,173,112,.22);border-radius:14px;color:#baa995;text-align:center;background:rgba(255,255,255,.02)}
+@media(max-width:1080px){.mission-topbar{grid-template-columns:repeat(3,minmax(0,1fr))}.mission-board{grid-template-columns:1fr}.mission-sideart{min-height:210px}.mission-grid{grid-template-columns:1fr}.mission-latest-card{grid-template-columns:1fr}.mission-latest-actions{justify-items:start}}
+@media(max-width:760px){.mission-topbar{grid-template-columns:repeat(2,minmax(0,1fr))}.mission-title h2{font-size:24px}.mission-resource{min-height:70px;padding:10px 12px}.mission-resource .num{font-size:24px}.mission-card img{height:180px}.mission-stage,.mission-latest{padding:14px}.mission-facts{max-width:none}}
