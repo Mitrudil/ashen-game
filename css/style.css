@@ -661,3 +661,27 @@ h1, h2, h3, h4, h5, h6, button,
 .ashen-combat-specialization{display:flex;flex-direction:column;gap:4px;margin-top:12px;padding:10px 12px;border:1px solid rgba(170,122,69,.36);border-radius:7px;background:rgba(123,79,30,.13)}
 .ashen-combat-specialization strong{color:#f3cf97;font-size:.83rem}
 .ashen-combat-specialization span{color:#bbc4c6;font-size:.78rem;line-height:1.55}
+
+/* ASHEN v0.1.42 — wizualne znaki prefiksu / sufiksu i raport obrażeń */
+.ashen-mod-badges{display:inline-flex;gap:5px;align-items:center;vertical-align:middle;margin-left:8px;white-space:nowrap}
+.ashen-mod-icon{display:inline-flex;align-items:center;justify-content:center;line-height:1;width:22px;height:22px;border-radius:6px;font-size:13px;font-weight:800;background:#273c42;border:1px solid #58919a;color:#a7e2df;box-shadow:inset 0 1px 3px #0005}
+.ashen-mod-icon.prefix.weapon{background:#39251f;border-color:#b66d44;color:#f6c391}
+.ashen-mod-icon.prefix.clothing{background:#243b36;border-color:#6d9e7e;color:#b0edbd}
+.ashen-mod-icon.prefix.accessory{background:#273246;border-color:#697fb3;color:#becfff}
+.ashen-mod-icon.suffix{background:#392e46;border-color:#9e7bb9;color:#ddc5fa}
+.detail-affix strong{display:inline-flex;align-items:center;gap:7px}
+.ashen-damage-summary{margin:12px 0 15px;border:1px solid #5f6258;border-radius:8px;background:linear-gradient(145deg,#1c2528,#192125);overflow:hidden}
+.ashen-damage-header{padding:10px 13px;display:flex;justify-content:space-between;gap:12px;align-items:center;background:linear-gradient(90deg,#3d4648,#2c363a);color:#e3c28b;font-size:13px;letter-spacing:.03em}
+.ashen-damage-header span{color:#d1d5d1;font-weight:400;font-size:12px}
+.ashen-damage-table-wrap{overflow-x:auto}
+.ashen-damage-table{width:100%;border-collapse:collapse;font-size:12px;text-align:center}
+.ashen-damage-table th,.ashen-damage-table td{padding:8px 10px;border-bottom:1px solid #ffffff14}
+.ashen-damage-table thead{background:#344951;color:#dfebee}
+.ashen-damage-table th:first-child{text-align:left;white-space:nowrap}
+.ashen-damage-table tbody th{font-weight:400;color:#c3cbc8}
+.ashen-damage-table tbody td:nth-child(2){font-weight:700;color:#9ed6b7}
+.ashen-damage-table tbody td:nth-child(3){color:#dfb6a2}
+.ashen-damage-table tbody tr:nth-child(even){background:#ffffff07}
+.ashen-damage-total{display:flex;justify-content:space-between;padding:10px 13px;align-items:center;font-size:13px}
+.ashen-damage-summary>.small{padding:0 12px 11px;margin:0;line-height:1.4}
+@media(max-width:540px){.ashen-damage-table th,.ashen-damage-table td{padding:7px 6px;font-size:11px}.ashen-damage-header{padding:9px 10px}.ashen-mod-badges{margin-left:5px}}

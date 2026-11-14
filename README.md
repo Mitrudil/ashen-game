@@ -1,3 +1,11 @@
+# ASHEN v0.1.42 — ikony modyfikatorów i podsumowanie obrażeń
+
+- Prefiksy i sufiksy mają własne oznaczenia w Ekwipunku i oknie przedmiotu. Nie dodajemy osobnych plików graficznych.
+- Każda nowa walka zapisuje: obrażenia zadane/otrzymane, najlepsze trafienie, próby, trafienia, chybienia, krytyki i rundy.
+- Podsumowania pojawiają się bezpośrednio po powrocie z wyprawy, w ostatniej wyprawie i Raportach.
+- Dla starszych raportów statystyki są rekonstruowane z linii walki i oznaczone jako przybliżony zapis.
+- Mechanika losowania łupów, atrybuty postaci, losowość walki, ekwipunek i zapis pozostają bez zmian.
+
 # ASHEN v0.1.41 — Specjalizacje broni i atrybutów
 
 - Cztery grupy: broń biała jednoręczna (ZRĘ/SIŁ), biała dwuręczna (SIŁ/ZRĘ), palna/technologiczna (PER/ZRĘ) oraz dystansowa niepalna (PER/ZRĘ).

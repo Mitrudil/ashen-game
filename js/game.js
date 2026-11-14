@@ -1,4 +1,4 @@
-const APP_VERSION='0.1.41';
+const APP_VERSION='0.1.42';
 
 (()=>{'use strict';const KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 const rarities=[{name:'Zwykły',color:'#b8bfc3',weight:58,mult:1},{name:'Ulepszony',color:'#8ac78b',weight:25,mult:1.14},{name:'Rzadki',color:'#77afe5',weight:12,mult:1.32},{name:'Epicki',color:'#c391e4',weight:4,mult:1.58},{name:'Legendarny',color:'#f2bb65',weight:1,mult:1.95}];
@@ -440,21 +440,26 @@ function fight(enemy){
  const setArmor=activeSetBonuses().armorPct;
  const hero={hp:maxHp(),acc:6+a.per*1.3,dodge:3+a.dex*1.1,armor:armor+Math.round(armor*setArmor/100)+Math.floor(a.end/4)};
  const foe={...enemy},lines=[];
+ const damageSummary={hero:{attempts:0,hits:0,misses:0,crits:0,damage:0,best:0},foe:{attempts:0,hits:0,misses:0,crits:0,damage:0,best:0},rounds:0};
  const hitAttack=(attacker,defender,who,r,weapon=null)=>{
+   const performance=damageSummary[who==='hero'?'hero':'foe'];performance.attempts++;
    const accuracy=who==='hero'&&weapon?weaponAccuracy(a,weapon.weapon):attacker.acc;
    const chance=clamp(70+2*(accuracy-defender.dodge)+(who==='hero'?(weapon?.weapon.accuracy||0):0),15,95);
    const handName=weapon?' ('+(weapon.hand==='right'?'prawa':'lewa')+' ręka, '+Math.round(weapon.power*100)+'%)':'';
-   if(Math.random()*100>=chance){lines.push(`Runda ${r}: ${who==='hero'?'Chybiasz':'Przeciwnik chybia'}${handName}.`);return}
+   if(Math.random()*100>=chance){performance.misses++;lines.push(`Runda ${r}: ${who==='hero'?'Chybiasz':'Przeciwnik chybia'}${handName}.`);return}
    const critical=who==='hero'&&Math.random()<clamp(.05+a.per*.005+(weapon?.weapon.critPp||0)/100,0,.35);
    let raw;
    if(weapon){raw=Math.max(1,Math.floor((rand(weapon.weapon.min,weapon.weapon.max)+weaponAttributeDamage(a,weapon.weapon))*weapon.power));}
    else raw=rand(attacker.atk[0],attacker.atk[1]);
    if(critical)raw=Math.floor(raw*1.6);
    const dmg=Math.max(1,Math.floor(raw*(1-clamp(defender.armor/100,0,.6))));
+   const actualDamage=Math.min(defender.hp,dmg);
    defender.hp=Math.max(0,defender.hp-dmg);
-   lines.push(`Runda ${r}: ${who==='hero'?'Zadajesz':'Otrzymujesz'} ${dmg} obrażeń${handName}${critical?' (KRYTYCZNE)':''}.`);
+   performance.hits++;performance.damage+=actualDamage;performance.best=Math.max(performance.best,actualDamage);if(critical)performance.crits++;
+   lines.push(`Runda ${r}: ${who==='hero'?'Zadajesz':'Otrzymujesz'} ${actualDamage} obrażeń${handName}${critical?' (KRYTYCZNE)':''}.`);
  };
  for(let r=1;r<=10&&hero.hp>0&&foe.hp>0;r++){
+   damageSummary.rounds=r;
    const order=rand(1,20)+a.dex>=rand(1,20)+foe.dodge?['hero','foe']:['foe','hero'];
    for(const who of order){
      if(hero.hp<=0||foe.hp<=0)break;
@@ -463,7 +468,7 @@ function fight(enemy){
      } else hitAttack(foe,hero,'foe',r);
    }
  }
- return {won:foe.hp<=0,lines,heroHp:hero.hp,enemyHp:foe.hp};
+ return {won:foe.hp<=0,lines,heroHp:hero.hp,enemyHp:foe.hp,damageSummary};
 }
 const COMPANIONS={
  dog:{name:'Pies',desc:'Wierny tropiciel. +10% złomu z wypraw.',icon:'🐕',bonus:'Złom +10%'},
@@ -662,10 +667,10 @@ function missionLootDetails(r){
 function missionStoryBody(r){
  return `<p class="mission-story-copy">${escape(reportStory(r))}</p><p class="mission-story-result">${r.won?'Po niebezpiecznym starciu z przeciwnikiem udaje ci się oczyścić drogę i bezpiecznie wrócić do schronu.':'Starcie kończy się odwrotem, ale nie opuszczasz lokacji z pustymi rękami.'}</p>`;
 }
-function missionReportDetail(r){return `<div class="mission-inline-report">${missionStoryBody(r)}<div class="mission-report-meta"><span>⚔ ${escape(r.enemy||'Nieznany przeciwnik')}</span><span>⭐ ${r.xp||0} PD</span><span>⚙ ${r.scrap||0} złomu</span></div><h4>Przebieg walki</h4><div class="mission-battle-lines">${(r.lines||[]).map(line=>`<p>${escape(line)}</p>`).join('')||'<p>Brak szczegółowego raportu z wcześniejszej wersji.</p>'}</div></div>`}
+function missionReportDetail(r){return `<div class="mission-inline-report">${missionStoryBody(r)}<div class="mission-report-meta"><span>⚔ ${escape(r.enemy||'Nieznany przeciwnik')}</span><span>⭐ ${r.xp||0} PD</span><span>⚙ ${r.scrap||0} złomu</span></div>${damageReportPanel(r)}<h4>Przebieg walki</h4><div class="mission-battle-lines">${(r.lines||[]).map(line=>`<p>${escape(line)}</p>`).join('')||'<p>Brak szczegółowego raportu z wcześniejszej wersji.</p>'}</div></div>`}
 function missionInstantResult(){
  const r=state.reports[0];if(!r||!state.missionOutcomePending)return '';
- return `<div class="mission-result-now" id="mission-result-now"><div class="mission-result-head"><div><span class="mission-result-eyebrow">RAPORT Z PUSTKOWI · ŚWIEŻY POWRÓT</span><h2>${r.won?'Powrót ze zwycięstwem':'Powrót po ciężkiej walce'}</h2><p>${escape(r.location.replace(/^.*—\s*/,''))} · ${escape(r.at)}</p></div><button data-action="mission-dismiss-result" aria-label="Zamknij raport z wyprawy">✕ Zamknij</button></div><div class="mission-result-columns"><div><h3>Historia wyprawy</h3>${missionStoryBody(r)}<div class="mission-report-meta"><span>⚔ ${escape(r.enemy||'Nieznany wróg')}</span><span>⭐ +${r.xp||0} PD</span><span>⚙ +${r.scrap||0} złomu</span></div></div><div><h3>Zdobyte łupy</h3>${missionLootDetails(r)}</div></div></div>`;
+ return `<div class="mission-result-now" id="mission-result-now"><div class="mission-result-head"><div><span class="mission-result-eyebrow">RAPORT Z PUSTKOWI · ŚWIEŻY POWRÓT</span><h2>${r.won?'Powrót ze zwycięstwem':'Powrót po ciężkiej walce'}</h2><p>${escape(r.location.replace(/^.*—\s*/,''))} · ${escape(r.at)}</p></div><button data-action="mission-dismiss-result" aria-label="Zamknij raport z wyprawy">✕ Zamknij</button></div><div class="mission-result-columns"><div><h3>Historia wyprawy</h3>${missionStoryBody(r)}<div class="mission-report-meta"><span>⚔ ${escape(r.enemy||'Nieznany wróg')}</span><span>⭐ +${r.xp||0} PD</span><span>⚙ +${r.scrap||0} złomu</span></div>${damageReportPanel(r)}</div><div><h3>Zdobyte łupy</h3>${missionLootDetails(r)}</div></div></div>`;
 }
 function lastMissionCard(){
  const r=state.reports[0];if(!r)return `<div class="mission-empty">Nie masz jeszcze ukończonej wyprawy. Wyrusz po pierwszy raport z Pustkowi.</div>`;
@@ -709,12 +714,45 @@ function inventoryMatchesFilter(inst,filter){const d=def(inst);if(!d)return fals
 let openItemDetail=null;
 function weaponFamilyLabel(d){const c=weaponCategoryFor(d);return c?WEAPON_CATEGORIES[c].name:slotName(d?.slot||'')}
 function itemDetailImage(d){if(itemArtUrl(d))return `<img class="ashen-detail-artwork" src="${itemArtUrl(d)}" alt="${escape(d.name)}">`;return d?.id&&!!weaponCategoryFor(d)?`<div class="detail-placeholder" aria-label="Grafika przedmiotu będzie dodana później">${itemIcon(d,'')}<span>Grafika w przygotowaniu</span></div>`:itemIcon(d,'')}
+// Symboliczne znaki przedrostków i przyrostków: nie wymagają osobnych plików graficznych.
+function modifierGlyph(kind,d){
+ const category=categoryOf(d||{});
+ const glyph=kind==='prefix'?(category==='weapon'?'⚔':category==='clothing'?'⛨':'◈'):'✦';
+ const title=kind==='prefix'?'Prefiks':'Sufiks';
+ return `<span class="ashen-mod-icon ${kind} ${category}" aria-hidden="true" title="${title}">${glyph}</span>`;
+}
+function itemAffixBadges(o,d){
+ if(!o?.prefixName&&!o?.suffixName)return '';
+ return `<span class="ashen-mod-badges" aria-label="Modyfikatory przedmiotu">${o.prefixName?`<span title="Prefiks: ${escape(o.prefixName)}">${modifierGlyph('prefix',d)}</span>`:''}${o.suffixName?`<span title="Sufiks: ${escape(o.suffixName)}">${modifierGlyph('suffix',d)}</span>`:''}</span>`;
+}
+// Sumaryczne parametry walki zapisywane przy ukończeniu wyprawy. Historyczne
+// raporty pozbawione statystyk odczytujemy z ich tekstu, bez zgadywania krytyków wroga.
+function damageReportStats(r){
+ if(r?.damageSummary?.hero&&r?.damageSummary?.foe)return {...r.damageSummary,legacy:false};
+ const summary={hero:{attempts:0,hits:0,misses:0,crits:0,damage:0,best:0},foe:{attempts:0,hits:0,misses:0,crits:0,damage:0,best:0},rounds:0,legacy:true};
+ for(const line of r?.lines||[]){
+  const round=String(line).match(/^Runda (\d+):/);if(round)summary.rounds=Math.max(summary.rounds,Number(round[1]));
+  const outgoing=String(line).match(/Zadajesz (\d+) obrażeń/);
+  const incoming=String(line).match(/Otrzymujesz (\d+) obrażeń/);
+  const who=outgoing?'hero':incoming?'foe':null;
+  if(who){const entry=summary[who],value=Number((outgoing||incoming)[1]);entry.attempts++;entry.hits++;entry.damage+=value;entry.best=Math.max(entry.best,value);if(who==='hero'&&line.includes('(KRYTYCZNE)'))entry.crits++;}
+  else if(String(line).includes('Chybiasz')){summary.hero.attempts++;summary.hero.misses++;}
+  else if(String(line).includes('Przeciwnik chybia')){summary.foe.attempts++;summary.foe.misses++;}
+ }
+ return summary;
+}
+function damageReportPanel(r){
+ const x=damageReportStats(r),h=x.hero,f=x.foe;
+ const percentage=entry=>entry.attempts?`${Math.round(entry.hits/entry.attempts*100)}%`:'—';
+ const row=(title,hero,foe)=>`<tr><th scope="row">${title}</th><td>${hero}</td><td>${foe}</td></tr>`;
+ return `<div class="ashen-damage-summary" aria-label="Podsumowanie obrażeń w walce"><div class="ashen-damage-header"><strong>⚔ PODSUMOWANIE WALKI</strong><span>${x.rounds} ${x.rounds===1?'runda':'rund'}</span></div><div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Parametr</th><th>Postać</th><th>Przeciwnik</th></tr></thead><tbody>${row('Zadane obrażenia',h.damage,f.damage)}${row('Najmocniejsze trafienie',h.best,f.best)}${row('Trafienia / próby',`${h.hits} / ${h.attempts}`,`${f.hits} / ${f.attempts}`)}${row('Skuteczność',percentage(h),percentage(f))}${row('Trafienia krytyczne',h.crits,x.legacy?'—':f.crits)}</tbody></table></div><div class="ashen-damage-total"><span>Bilans obrażeń</span><strong class="${h.damage>=f.damage?'good':'bad'}">${h.damage-f.damage>=0?'+':''}${h.damage-f.damage}</strong></div>${x.legacy?'<p class="small muted">Raport ze starszej wersji: wartości odtworzone z przebiegu walki. Niektóre dane mogły nie być zapisywane.</p>':''}</div>`;
+}
 function itemDetailContent(){if(!openItemDetail)return '';
  const owned=openItemDetail.kind==='owned'?instance(openItemDetail.id):null;
  const defn=owned?def(owned):item(openItemDetail.id);
  if(!defn)return '';
  const o=owned?statsOf(owned):{...defn,rarity:'Zwykły',name:defn.name,bonus:defn.bonus||{}};
- return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${1+(Number(o.extraAttacks)||0)}</strong></div>`:''}<div class="detail-affix"><strong>Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span><small>Ikona prefiksu – w przyszłości</small></div><div class="detail-affix"><strong>Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span><small>Ikona sufiksu – w przyszłości</small></div>${owned?`<div class="small muted">${statDetails(o)}</div>${itemSetPanel(owned)}`:''}</div></div><div class="actions"><button class="primary" data-item-close>Zamknij</button></div></div></div>`
+ return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${1+(Number(o.extraAttacks)||0)}</strong></div>`:''}<div class="detail-affix"><strong>${modifierGlyph('prefix',defn)} Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span></div><div class="detail-affix"><strong>${modifierGlyph('suffix',defn)} Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span></div>${owned?`<div class="small muted">${statDetails(o)}</div>${itemSetPanel(owned)}`:''}</div></div><div class="actions"><button class="primary" data-item-close>Zamknij</button></div></div></div>`
 }
 function slotChip(slot,uid){
  const inst=instance(uid),o=statsOf(inst),empty=!o,label=slotLabels[slot];
@@ -723,7 +761,7 @@ function slotChip(slot,uid){
  return `<div class="slot-anchor ${empty?'empty':''}" data-slot="${slot}"><div class="label">${label}</div>${icon}${name}</div>`
 }
 function equippedDetail(slot){const uid=state.equip[slot],inst=instance(uid),o=statsOf(inst); return `<div class="eq-detail"><div>${o?itemIcon(inst):`<div class="iconbox">${svgIcon(slotPlaceholder(slot),'#64717a')}</div>`}</div><div class="grow"><div class="slotname">${slotLabels[slot]}</div>${o?`<button class="item-view-name" style="color:${rarities.find(r=>r.name===o.rarity)?.color}" data-item-open="${inst.uid}">${escape(o.name)}</button><div class="small muted">${statDetails(o)}</div>${affixDetails(o)}<div class="actions"><button data-unequip="${slot}">Zdejmij</button></div>`:`<div class="muted">Brak przedmiotu.</div>`}</div></div>`}
-function itemSummary(inst,o,showSlot=true){return `<div class="itemline"><button class="item-view-icon" data-item-open="${escape(inst.uid)}" aria-label="Otwórz opis: ${escape(o.name)}">${itemIcon(inst)}</button><div class="grow"><button class="item-view-name" data-item-open="${escape(inst.uid)}" style="color:${rarity(inst).color}">${escape(o.name)}</button></div></div>`}
+function itemSummary(inst,o,showSlot=true){return `<div class="itemline"><button class="item-view-icon" data-item-open="${escape(inst.uid)}" aria-label="Otwórz opis: ${escape(o.name)}">${itemIcon(inst)}</button><div class="grow"><button class="item-view-name" data-item-open="${escape(inst.uid)}" style="color:${rarity(inst).color}">${escape(o.name)}</button>${itemAffixBadges(o,def(inst))}</div></div>`}
 
 // Ekonomia v0.1.24: wartości testowe, łatwo zmienialne w jednym miejscu.
 const ECONOMY={saleBase:8,saleRarity:[1,1.5,2.4,4.5,8],yieldRarity:[1,1.2,1.5,2,2.7],prefixValue:1.18,suffixValue:1.18};
@@ -896,7 +934,7 @@ function inventory(){
 
 function specialLoot(r){const p=r?.special||{};return (p.cores||p.schematics)?`<div class="notice" style="margin-top:10px"><strong>Rzadkie znaleziska:</strong> ${[p.cores?`⚙ Rdzeń technologiczny × ${p.cores}`:'',p.schematics?`📜 Schemat przedwojenny × ${p.schematics}`:''].filter(Boolean).join(' · ')}</div>`:''}
 function foundLootPreview(r){return `<div class="panel section"><h3 style="color:var(--gold)">Ostatnia ukończona wyprawa: ${escape(r.location)}</h3><p class="small muted">${escape(r.at)}</p><p>Znalazłeś:</p>${(r.drops||[]).map(x=>`<details class="loot-detail"><summary><div class="loot-row">${lootDetailButton(x)}<div>${lootDetailName(x)}<div class="small muted">Kliknij, aby rozwinąć opis</div></div></div></summary><div class="small muted">${escape(x.details||'Brak zapisanych parametrów')} · ${escape(x.slot?slotName(x.slot):'')}${(x.effects||[]).map(e=>`<div>↳ ${escape(e.name)}: ${escape(e.description)}</div>`).join('')}</div></details>`).join('')||'<p class="muted">Sprawdź starszy raport w zakładce Raporty.</p>'}${specialLoot(r)}<button data-page="inventory">Przejdź do ekwipunku</button></div>`}
-function reports(){return section('Raporty walk',state.reports.length?`<div class="stack">${state.reports.map((r,i)=>`<div class="panel"><div class="row wrap"><strong class="${r.won?'good':'bad'}">${r.won?'ZWYCIĘSTWO':'PORAŻKA'} · ${escape(r.location)}</strong><span class="small muted">${escape(r.at)}</span></div><p>Przeciwnik: ${escape(r.enemy)}</p><p class="tag">+${r.xp} XP · +${r.scrap} złomu ${r.levels?'· Awans: +'+r.levels+' poziom':''}</p>${specialLoot(r)}<div class="small"><strong>Znalazłeś (${r.drops?.length||Number(!!r.drop)}):</strong><div class="loot-list">${(r.drops|| (r.drop?[{name:r.drop,rarity:r.dropRarity}]:[])).map(x=>`<details class="loot-detail"><summary><div class="loot-row">${lootDetailButton(x)}<div>${lootDetailName(x)}<div class="small muted">Kliknij, aby rozwinąć opis</div></div></div></summary><div class="small muted">${escape(x.details||((x.uid&&instance(x.uid))?statDetails(statsOf(instance(x.uid))):'Szczegóły nie były zapisywane w tej wersji raportu.'))}<br>Rzadkość: ${escape(x.rarity||'Nieznana')} · ${escape(x.slot?slotName(x.slot):'Przedmiot ze starszego raportu')}${(x.effects||[]).map(e=>`<div>↳ ${escape(e.name)}: ${escape(e.description)}</div>`).join('')}</div></details>`).join('')||'Brak'}</div></div><details ${i===0?'open':''}><summary>Przebieg walki</summary>${r.lines.map(line=>`<div class="report small">${escape(line)}</div>`).join('')}</details></div>`).join('')}</div>`:'<div class="panel muted">Brak raportów. Wykonaj pierwszą wyprawę.</div>')}
+function reports(){return section('Raporty walk',state.reports.length?`<div class="stack">${state.reports.map((r,i)=>`<div class="panel"><div class="row wrap"><strong class="${r.won?'good':'bad'}">${r.won?'ZWYCIĘSTWO':'PORAŻKA'} · ${escape(r.location)}</strong><span class="small muted">${escape(r.at)}</span></div><p>Przeciwnik: ${escape(r.enemy)}</p>${damageReportPanel(r)}<p class="tag">+${r.xp} XP · +${r.scrap} złomu ${r.levels?'· Awans: +'+r.levels+' poziom':''}</p>${specialLoot(r)}<div class="small"><strong>Znalazłeś (${r.drops?.length||Number(!!r.drop)}):</strong><div class="loot-list">${(r.drops|| (r.drop?[{name:r.drop,rarity:r.dropRarity}]:[])).map(x=>`<details class="loot-detail"><summary><div class="loot-row">${lootDetailButton(x)}<div>${lootDetailName(x)}<div class="small muted">Kliknij, aby rozwinąć opis</div></div></div></summary><div class="small muted">${escape(x.details||((x.uid&&instance(x.uid))?statDetails(statsOf(instance(x.uid))):'Szczegóły nie były zapisywane w tej wersji raportu.'))}<br>Rzadkość: ${escape(x.rarity||'Nieznana')} · ${escape(x.slot?slotName(x.slot):'Przedmiot ze starszego raportu')}${(x.effects||[]).map(e=>`<div>↳ ${escape(e.name)}: ${escape(e.description)}</div>`).join('')}</div></details>`).join('')||'Brak'}</div></div><details ${i===0?'open':''}><summary>Przebieg walki</summary>${r.lines.map(line=>`<div class="report small">${escape(line)}</div>`).join('')}</details></div>`).join('')}</div>`:'<div class="panel muted">Brak raportów. Wykonaj pierwszą wyprawę.</div>')}
 
 const HIDEOUT_OPTIONS={
  left:[['none','Puste'],['bed','Łóżko polowe'],['chair','Fotel'],['crate','Skrzynie']],
