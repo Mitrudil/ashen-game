@@ -1,3 +1,14 @@
+# ASHEN v0.1.43 — jakość łupów zależna od wyprawy
+
+- Bliska wyprawa: zwykły 78%, ulepszony 22%; rzadkie, epickie i legendarne **niedostępne**.
+- Średnia wyprawa: zwykły 55%, ulepszony 30%, rzadki 13%, epicki 2%; legendarny **niedostępny**.
+- Daleka wyprawa: zwykły 37%, ulepszony 29%, rzadki 23%, epicki 9%, legendarny 2%.
+- Losowanie jakości każdego zdobywanego przedmiotu odbywa się w obrębie puli danej wyprawy (także łupy dodatkowe od kota).
+- W kartach wypraw widoczne są szanse na jakość łupu. Pula *typów przedmiotów*, dotychczasowa liczba łupów, walka i pozostałe nagrody nie zostały zmienione.
+- Nie dodano jeszcze Szczęścia ani testu eksploracji — te mechaniki w kolejnych wersjach; ograniczenia maksymalnych rzadkości pozostaną twarde.
+- Zapis postaci pozostaje zgodny (`ashen-save-v010`); starsze znalezione przedmioty pozostają bez zmian.
+- Następny plan: v0.1.44 trzy sloty na akcesoria; v0.1.45 Szczęście i eksploracja; v0.1.46 artefakty i zestawy rezonansowe; v0.1.47 anomalie i wyjątkowe wydarzenia. Zmiana zestawów wyposażenia pod różne aktywności dopiero, gdy pojawi się walka poza wyprawami.
+
 # ASHEN v0.1.42 — ikony modyfikatorów i podsumowanie obrażeń
 
 - Prefiksy i sufiksy mają własne oznaczenia w Ekwipunku i oknie przedmiotu. Nie dodajemy osobnych plików graficznych.

@@ -685,3 +685,8 @@ h1, h2, h3, h4, h5, h6, button,
 .ashen-damage-total{display:flex;justify-content:space-between;padding:10px 13px;align-items:center;font-size:13px}
 .ashen-damage-summary>.small{padding:0 12px 11px;margin:0;line-height:1.4}
 @media(max-width:540px){.ashen-damage-table th,.ashen-damage-table td{padding:7px 6px;font-size:11px}.ashen-damage-header{padding:9px 10px}.ashen-mod-badges{margin-left:5px}}
+
+/* ASHEN v0.1.43 — czytelne szanse na jakość łupów */
+.mission-rarity-info{margin:10px 0 13px;padding:10px 12px;border:1px solid rgba(177,137,75,.25);border-radius:8px;background:rgba(0,0,0,.16);font-size:12px;line-height:1.5;color:#c0bcb4}
+.mission-rarity-info span{display:block;margin-bottom:3px;color:#e6bd7e;font-weight:700;letter-spacing:.025em}
+.mission-rarity-info div{overflow-wrap:anywhere}

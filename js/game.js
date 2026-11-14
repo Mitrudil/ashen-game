@@ -1,4 +1,4 @@
-const APP_VERSION='0.1.42';
+const APP_VERSION='0.1.43';
 
 (()=>{'use strict';const KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 const rarities=[{name:'Zwykły',color:'#b8bfc3',weight:58,mult:1},{name:'Ulepszony',color:'#8ac78b',weight:25,mult:1.14},{name:'Rzadki',color:'#77afe5',weight:12,mult:1.32},{name:'Epicki',color:'#c391e4',weight:4,mult:1.58},{name:'Legendarny',color:'#f2bb65',weight:1,mult:1.95}];
@@ -253,9 +253,33 @@ function statsOf(inst){
   prefixName:prefixLabel(pref,d)||null,suffixName:suf?.name||null,
   effects:mods.map(x=>({name:x===pref?prefixLabel(x,d):x.name,description:modifierText(x)}))};
 }
-function rollItem(id){
- const r=Math.random()*100;let t=0,rar=0;
- for(let i=0;i<rarities.length;i++){t+=rarities[i].weight;if(r<t){rar=i;break}}
+// ASHEN v0.1.43 — bazowe pule jakości łupów z wypraw; brak wpływu szczęścia (kolejny etap).
+// Łączna suma wag w każdej lokalizacji wynosi dokładnie 100.
+const EXPEDITION_RARITY_WEIGHTS=Object.freeze({
+ ruins:Object.freeze([78,22,0,0,0]),
+ hospital:Object.freeze([55,30,13,2,0]),
+ outpost:Object.freeze([37,29,23,9,2])
+});
+function rarityWeightsForExpedition(loc){
+ const id=typeof loc==='string'?loc:loc?.id;
+ return EXPEDITION_RARITY_WEIGHTS[id]||null;
+}
+function rollRarity(weights){
+ const pool=weights||rarities.map(q=>q.weight);
+ const total=pool.reduce((sum,w)=>sum+w,0);
+ if(total<=0)return 0;
+ let value=Math.random()*total;
+ for(let i=0;i<pool.length;i++){
+  value-=pool[i];if(value<0)return i;
+ }
+ return pool.length-1;
+}
+function expeditionRarityLabel(loc){
+ const weights=rarityWeightsForExpedition(loc);
+ return weights?weights.map((w,i)=>w?`${rarities[i].name} ${w}%`:null).filter(Boolean).join(' · '):'';
+}
+function rollItem(id,expedition=null){
+ const rar=rollRarity(rarityWeightsForExpedition(expedition));
  const d=item(id);
  const prefix=d?.slot!=='material'&&Math.random()<prefixChance[rar]?pickModifier(prefixDefs,d,rar):null;
  const suffix=d?.slot!=='material'&&Math.random()<suffixChance[rar]?pickModifier(suffixDefs,d,rar):null;
@@ -279,7 +303,7 @@ function pickLoot(loc){
  for(let i=0;i<count;i++){
   const total=pool.reduce((v,x)=>v+x.w,0);let r=Math.random()*total,chosen=pool[pool.length-1];
   for(const p of pool){r-=p.w;if(r<=0){chosen=p;break}}
-  const rolled=rollItem(chosen.id);picks.push(rolled);state.inventory.push(rolled);
+  const rolled=rollItem(chosen.id,loc);picks.push(rolled);state.inventory.push(rolled);
  }
  return picks;
 }
@@ -685,7 +709,7 @@ function missions(){return `<section class="section mission-screen"><div class="
  {icon:'polymer',label:'Chemikalia',value:getStock('tworzywo').toLocaleString('pl-PL')},
  {icon:'electronics',label:'Elektronika',value:getStock('elektronika').toLocaleString('pl-PL')},
  {icon:'parts',label:'Części',value:getStock('czesci').toLocaleString('pl-PL')}
-].map(r=>`<div class="mission-resource"><div class="ico"><img src="./assets/ui/resources/${r.icon}.webp" alt="" loading="eager"></div><div><div class="lab">${r.label}</div><div class="num">${r.value}</div></div></div>`).join('')}</div>${missionInstantResult()}<div class="mission-board"><div class="mission-stage"><div class="mission-title"><h2>Wybierz wyprawę</h2></div><div class="mission-meta-row"><span>Transport: <strong>${vehicleDef().icon} ${vehicleDef().name}</strong></span><span>Towarzysz: <strong>${companionId()?COMPANIONS[companionId()].name:'brak'}</strong></span></div>${state.mission?`<div class="mission-active-strip" role="status"><div class="mission-active-main"><div><span class="mission-active-label">⌛ TRWA WYPRAWA</span><strong>${escape(locations.find(l=>l.id===state.mission.id)?.name||'Nieznana lokacja')}</strong></div><div class="mission-active-time">Pozostało <strong id="countdown">${Math.max(0,Math.ceil((state.mission.ends-Date.now())/1000))} s</strong></div></div><div class="mission-active-track"><div id="mission-progress-fill" style="width:${Math.max(0,Math.min(100,100*(1-(state.mission.ends-Date.now())/(state.mission.durationMs||travelSeconds(locations.find(l=>l.id===state.mission.id)||locations[0])*1000))))}%"></div></div></div>`:''}<div class="mission-grid">${locations.map(l=>{const diff=missionDifficultyMeta(l);return `<article class="mission-card"><img src="${missionImage(l.id)}" alt="${escape(l.name)}"><div class="mission-card-body"><h3>${escape(l.name.replace(/^.*—\s*/,''))}</h3><p class="flavor">${missionFlavor(l.id)}</p><div class="mission-difficulty"><div class="mission-bars ${diff.cls}"><span></span><span></span><span></span></div><span>Trudność: <strong>${diff.label}</strong></span></div><div class="mission-facts"><div class="line"><span>Poziom zalecany</span><strong>${l.level}+</strong></div><div class="line"><span>Powrót za</span><strong>${travelSeconds(l)} s</strong></div></div><button class="primary" data-mission="${l.id}" ${state.mission?'disabled':''}>Wyrusz</button>${state.level<l.level?'<div class="mission-locked">Ryzykowna wyprawa dla twojej postaci.</div>':''}</div></article>`}).join('')}</div><p class="mission-note small">Wersja testowa: starcie rozstrzyga się automatycznie po powrocie. Łupy pozostają niespodzianką.</p></div><aside class="mission-sideart"><img src="${missionSidebarImage()}" alt="Pustkowia ASHEN"><div class="caption"><strong>Pustkowia czekają</strong><div class="small">Każda wyprawa to nowa opowieść. Przetrwają tylko przygotowani.</div></div></aside></div><div class="mission-latest"><h3>Ostatnia wyprawa</h3>${lastMissionCard()}</div></section>`}
+].map(r=>`<div class="mission-resource"><div class="ico"><img src="./assets/ui/resources/${r.icon}.webp" alt="" loading="eager"></div><div><div class="lab">${r.label}</div><div class="num">${r.value}</div></div></div>`).join('')}</div>${missionInstantResult()}<div class="mission-board"><div class="mission-stage"><div class="mission-title"><h2>Wybierz wyprawę</h2></div><div class="mission-meta-row"><span>Transport: <strong>${vehicleDef().icon} ${vehicleDef().name}</strong></span><span>Towarzysz: <strong>${companionId()?COMPANIONS[companionId()].name:'brak'}</strong></span></div>${state.mission?`<div class="mission-active-strip" role="status"><div class="mission-active-main"><div><span class="mission-active-label">⌛ TRWA WYPRAWA</span><strong>${escape(locations.find(l=>l.id===state.mission.id)?.name||'Nieznana lokacja')}</strong></div><div class="mission-active-time">Pozostało <strong id="countdown">${Math.max(0,Math.ceil((state.mission.ends-Date.now())/1000))} s</strong></div></div><div class="mission-active-track"><div id="mission-progress-fill" style="width:${Math.max(0,Math.min(100,100*(1-(state.mission.ends-Date.now())/(state.mission.durationMs||travelSeconds(locations.find(l=>l.id===state.mission.id)||locations[0])*1000))))}%"></div></div></div>`:''}<div class="mission-grid">${locations.map(l=>{const diff=missionDifficultyMeta(l);return `<article class="mission-card"><img src="${missionImage(l.id)}" alt="${escape(l.name)}"><div class="mission-card-body"><h3>${escape(l.name.replace(/^.*—\s*/,''))}</h3><p class="flavor">${missionFlavor(l.id)}</p><div class="mission-difficulty"><div class="mission-bars ${diff.cls}"><span></span><span></span><span></span></div><span>Trudność: <strong>${diff.label}</strong></span></div><div class="mission-facts"><div class="line"><span>Poziom zalecany</span><strong>${l.level}+</strong></div><div class="line"><span>Powrót za</span><strong>${travelSeconds(l)} s</strong></div></div><div class="mission-rarity-info"><span>Jakość znalezisk</span><div>${expeditionRarityLabel(l)}</div></div><button class="primary" data-mission="${l.id}" ${state.mission?'disabled':''}>Wyrusz</button>${state.level<l.level?'<div class="mission-locked">Ryzykowna wyprawa dla twojej postaci.</div>':''}</div></article>`}).join('')}</div><p class="mission-note small">Jakość łupów zależy od wyprawy. Szczęście i specjalny sprzęt eksploracyjny dodamy w kolejnych etapach.</p></div><aside class="mission-sideart"><img src="${missionSidebarImage()}" alt="Pustkowia ASHEN"><div class="caption"><strong>Pustkowia czekają</strong><div class="small">Każda wyprawa to nowa opowieść. Przetrwają tylko przygotowani.</div></div></aside></div><div class="mission-latest"><h3>Ostatnia wyprawa</h3>${lastMissionCard()}</div></section>`}
 function itemFamily(d){if(!d)return 'empty';const id=d.id||'';if(d.slot==='material')return 'material';if(d.slot==='shirt')return 'shirt';if(d.slot==='outer')return id==='coat'?'coat':'outer';if(d.slot==='pants')return 'pants';if(d.slot==='boots')return 'boots';if(d.slot==='head'){if(id==='hood')return 'hood';if(id.includes('helm')||id==='helmet'||id==='cap')return 'head';return 'head';}if(d.slot==='hands'){if(id.includes('bracer'))return 'bracer';return 'gloves';}if(d.slot==='extra'){if(id.includes('goggle')||id.includes('glasses'))return 'goggles';if(id==='scarf'||id==='neckwarmer'||id==='bandana')return 'neck';if(id==='radio')return 'radio';if(id==='scope')return 'scope';if(id==='injector')return 'injector';if(id==='badge')return 'badge';if(id==='module')return 'module';if(id==='compass')return 'compass';if(id==='bracelet')return 'bracelet';return 'extra';}if(d.slot==='hand1'){if(['knife','machete','saber','cleaver'].includes(id))return 'blade';if(['hatchet'].includes(id))return 'axe';if(['pistol','revolver','deserteagle','smg'].includes(id))return 'pistol';if(['pipe','wrench','baton'].includes(id))return 'club';return 'hand1';}if(d.slot==='hand2'){if(['shotgun','rifle','carbine','sniper','lmg','harpoon'].includes(id))return 'rifle';if(['crossbow'].includes(id))return 'crossbow';if(['flame'].includes(id))return 'flame';if(['rail'].includes(id))return 'rail';if(['crowbar','sledge','hammer'].includes(id))return 'heavy';return 'hand2';}return d.slot||'generic'}
 function slotPlaceholder(slot){return ({head:'head',extra:'extra',right:'hand1',left:'hand1',hands:'gloves',shirt:'shirt',outer:'outer',pants:'pants',boots:'boots'})[slot]||'empty'}
 function svgIcon(kind,color){const bg='#11171b',accent=color||'#9ba7ad';const start=`<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="62" height="62" rx="12" fill="${bg}" stroke="${accent}" stroke-width="1.6"/>`;const end='</svg>';const c=accent;
