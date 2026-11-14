@@ -161,3 +161,9 @@ W sypialni zastosowano realistyczne tło `assets/bunker/rooms/bedroom-base.webp`
 - Łóżko i szafka stoją teraz niżej, z nogami na poziomie podłogi; stół jest bliżej środka.
 - Aktualizacja obejmuje pliki WebP (koniecznie wgraj je ponownie do repozytorium), `js/game.js` i `index.html`.
 - Bez zmian w zapisie gry, cenach mebli i mechanice.
+
+
+## v0.1.34
+- dodano grafiki dla 5 par spodni i 5 par butów,
+- podpięto grafiki w ekwipunku i w oknie szczegółów przedmiotu,
+- poprawiono nazwy: `Zniesione trampki` → `Zniszczone trampki`, `Buty uszczelnione` → `Buty trapera`.
