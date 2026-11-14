@@ -1,3 +1,18 @@
+# ASHEN v0.1.37 — Akcesoria i poprawka wersji
+
+- numer wersji został ujednolicony — nagłówek i stopka pobierają teraz tę samą wartość
+- usunięto górny komunikat o czasie wyprawy, bo te informacje są już widoczne na panelu wypraw
+- dodano komplet akcesoriów z różnymi bonusami i własnymi grafikami:
+  - Szal Wędrowca
+  - Bandana Zbieracza
+  - Gogle Zwiadowcy
+  - Okulary Technika
+  - Naszyjnik Ocalonego
+  - Bransoleta Strażnika
+  - Kompas Tropiciela
+  - Moduł Łączności
+- akcesoria zostały podpięte do ekwipunku jako osobna część wyposażenia
+
 # ASHEN v0.1.36 — Rękawice i karwasze
 
 Osiem indywidualnych grafik WebP podpiętych do wyposażenia, listy ekwipunku oraz szczegółów przedmiotu. Zachowano nazwy, statystyki i identyfikatory z v0.1.35, a także zgodność zapisu. Nowe pliki: `assets/items/hands/*.webp`.
