@@ -1,3 +1,10 @@
+# ASHEN v0.1.37.1 – uzupełnienie grafik i licznik wyprawy
+
+- Uzupełniono brakujące grafiki: Gogle noktowizyjne, Celownik optyczny, Moduł neurotechniczny, Wzmacniacz odruchów, Komin filtrujący, Rękawice technika, a także grafiki surowców-przedmiotów.
+- Bransoleta Strażnika jest teraz akcesorium (`extra`), nie rękawicą (`hands`). Przestarzały zapis jest migrowany bez usuwania przedmiotu.
+- Przywrócono licznik i pasek upływu czasu w panelu Wypraw.
+- Zachowano klucz zapisu `ashen-save-v010`, numer wersji danych `1`, dotychczasowe ID itemów.
+
 # ASHEN v0.1.37 — Akcesoria i poprawka wersji
 
 - numer wersji został ujednolicony — nagłówek i stopka pobierają teraz tę samą wartość

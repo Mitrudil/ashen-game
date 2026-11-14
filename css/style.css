@@ -534,3 +534,15 @@ h1, h2, h3, h4, h5, h6, button,
 .iconbox.has-item-art img.inventory-item-art{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit;}
 .ashen-item-art .ashen-detail-artwork{width:100%;height:100%;max-height:390px;min-height:200px;object-fit:contain;border:1px solid #4e4132;border-radius:10px;background:#1c1d1f;display:block;}
 @media(max-width:600px){.ashen-inventory-sortbar{display:grid;gap:8px}.ashen-inventory-sortbar select{min-width:0;width:100%;flex:none}.ashen-inventory-sortbar .small{margin:0;}}
+
+/* 0.1.37.1 - aktywna wyprawa: licznik w obrębie panelu Wypraw */
+.mission-active-strip{margin:4px 0 22px;padding:14px 16px;background:linear-gradient(180deg,#30251b,#1a1918);border:1px solid #a77539;border-radius:13px;box-shadow:inset 0 1px 0 #d9a46136,0 6px 15px #0006;color:#f4dfc2}
+.mission-active-main{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.mission-active-main>div:first-child{display:grid;gap:5px;min-width:0}
+.mission-active-label{font-size:12px;letter-spacing:.11em;color:#e2ae64;font-weight:750}
+.mission-active-main strong{font-family:"Segoe UI",Arial,sans-serif;letter-spacing:.01em;overflow-wrap:anywhere}
+.mission-active-time{white-space:nowrap;font-size:15px;color:#e6d5bd}
+.mission-active-time strong{color:#ffd18e;font-size:21px}
+.mission-active-track{height:9px;margin-top:13px;background:#0d1214;border-radius:20px;overflow:hidden;border:1px solid #574129}
+.mission-active-track>div{height:100%;background:linear-gradient(90deg,#a65017,#e39330,#f2bd66);border-radius:20px;transition:width .8s linear;box-shadow:0 0 9px #e29b3980}
+@media(max-width:520px){.mission-active-main{align-items:flex-start}.mission-active-time{white-space:normal}}
