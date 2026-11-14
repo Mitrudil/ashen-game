@@ -1,3 +1,14 @@
+# ASHEN v0.1.45 — Szczęście i eksploracja
+
+- Test eksploracji zależny od Percepcji, Inteligencji i Zręczności; szansa ograniczona do 15–80%.
+- Udany test daje 1 dodatkowy przedmiot obok dotychczasowych 1–3 znalezisk.
+- Szczęście pochodzi obecnie z wybranych akcesoriów (kompas, gogle, gogle noktowizyjne, naszyjnik, moduł łączności) założonych w trzech slotach.
+- Każdy punkt szczęścia przesuwa 1 punkt procentowy szansy ze zwykłych łupów w kierunku dostępnych wyższych rzadkości (maksymalnie 12 punktów procentowych).
+- Żadna wyprawa nie daje jakości spoza swojej puli (bliska maks. ulepszone, średnia maks. epickie, daleka do legendarnych).
+- Szanse i źródła Szczęścia w Wyprawach, szczegóły eksploracji w raportach i Postaci.
+- Parametry eksploracji są zapisywane w chwili rozpoczęcia wyprawy, by zmiana wyposażenia w trakcie wyprawy nie zmieniała wyniku.
+- Wsteczna zgodność z dotychczasowym zapisem i raportami.
+
 # ASHEN v0.1.44 — trzy sloty akcesoriów
 
 - Dodano Akcesorium I / II / III; pierwszy slot zachowuje dawny identyfikator `extra` i dotychczasowy przedmiot.
