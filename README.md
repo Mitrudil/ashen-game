@@ -1,3 +1,14 @@
+# ASHEN v0.1.39 — zestawy z prefiksów ubioru
+
+- Trzy założone elementy ubioru z tym samym prefiksem aktywują bonus zestawu.
+- Każdy kolejny element (maksymalnie sześć różnych slotów) zwiększa wartość bonusu.
+- Siła premii zależy od średniej jakości wszystkich założonych przedmiotów danego zestawu (zwykły ×1, ulepszony ×1,2, rzadki ×1,5, epicki ×2, legendarny ×2,5).
+- Bonusy trafiają do rzeczywistych atrybutów postaci lub wartości pancerza podczas walki.
+- Siedem zestawów: Wzmocniony, Pancerny, Elastyczny, Lekki, Odporny, Tropicielski i Żelazny.
+- W zakładce Postać wyświetla się postęp każdego aktualnie kompletowanego zestawu, a w szczegółach przedmiotu informacja o jego zestawie.
+- Zgodność z dotychczasowym kluczem zapisu `ashen-save-v010`; przedmioty z dawnymi prefiksami Wzmocniony, Pancerny i Lekki też wliczają się do zestawów.
+- Nowe zasady nie powodują naliczania setów z broni ani akcesoriów.
+
 # ASHEN v0.1.38 — oddzielne prefiksy i sufiksy
 
 - 18 nowych prefiksów: 6 dla broni, 7 dla ubioru, 5 dla akcesoriów.

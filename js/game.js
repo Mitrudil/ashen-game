@@ -1,4 +1,4 @@
-const APP_VERSION='0.1.38';
+const APP_VERSION='0.1.39';
 
 (()=>{'use strict';const KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 const rarities=[{name:'Zwykły',color:'#b8bfc3',weight:58,mult:1},{name:'Ulepszony',color:'#8ac78b',weight:25,mult:1.14},{name:'Rzadki',color:'#77afe5',weight:12,mult:1.32},{name:'Epicki',color:'#c391e4',weight:4,mult:1.58},{name:'Legendarny',color:'#f2bb65',weight:1,mult:1.95}];
@@ -285,7 +285,69 @@ const PAGE_IDS=new Set(['home','character','companion','transport','missions','i
 let page='home',message='',invFilter='all',selectedUid=null,workshopUid=null;
 try{const previousPage=localStorage.getItem(PAGE_KEY);if(PAGE_IDS.has(previousPage))page=previousPage}catch{}
 function setPage(next){page=PAGE_IDS.has(next)?next:'home';try{localStorage.setItem(PAGE_KEY,page)}catch{}}let bulkSelected=new Set();const $=id=>document.getElementById(id),item=id=>items.find(x=>x.id===id),rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,clamp=(v,a,b)=>Math.min(b,Math.max(a,v));const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{message='Nie można zapisać postępu w tej przeglądarce.'}}function attrs(){const a={...state.attrs};Object.values(state.equip).filter(Boolean).forEach(uid=>{for(const [k,v] of Object.entries(statsOf(instance(uid))?.bonus||{}))a[k]+=v});return a}function maxHp(){return 60+attrs().end*10}function xpNeed(){return Math.floor(80*Math.pow(state.level,1.35))}function regen(){let now=Date.now(),ticks=Math.floor((now-state.lastRegen)/45000);if(ticks>0){state.energy=Math.min(100,state.energy+ticks);state.lastRegen+=ticks*45000}}function levelUp(){let n=0;while(state.xp>=xpNeed()){state.xp-=xpNeed();state.level++;state.points+=3;n++}return n}function damage(p,e){let base=rand(p.min,p.max)+Math.floor(e.str/3);return Math.max(1,Math.floor(base*(1-clamp((e.armor||0)/100,0,.6))))}function fight(enemy){
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{message='Nie można zapisać postępu w tej przeglądarce.'}}// ASHEN v0.1.39 — zestawy ubioru rozpoznawane po prefiksie, a nie nazwie przedmiotu.
+// Stare identyfikatory prefiksów są mapowane na ich współczesne odpowiedniki.
+const SETS={
+ armor_reinforced:{name:'Wzmocniony',attribute:'end',start:2,step:1},
+ armor_plated:{name:'Pancerny',armorPct:true,start:6,step:3},
+ armor_flexible:{name:'Elastyczny',attribute:'dex',start:2,step:1},
+ armor_light:{name:'Lekki',attribute:'per',start:2,step:1},
+ armor_resistant:{name:'Odporny',attribute:'end',start:2,step:1},
+ armor_tracker:{name:'Tropicielski',attribute:'per',start:2,step:1},
+ armor_iron:{name:'Żelazny',attribute:'str',start:2,step:1}
+};
+function setPrefixId(inst){
+ const d=def(inst);if(!d||!clothingSlots.has(d.slot))return null;
+ const p=findModifier(prefixDefs,inst?.prefix);
+ return p&&p.setId&&SETS[p.setId]?p.setId:null;
+}
+function setQuality(inst){const i=Math.max(0,Math.min(4,Number(inst?.rarity)||0));return [1,1.2,1.5,2,2.5][i]}
+function setResults(){
+ const groups={};
+ for(const slot of clothingSlots){
+  const inst=instance(state.equip?.[slot]);if(!inst)continue;
+  const id=setPrefixId(inst);if(!id)continue;
+  (groups[id]??=[]).push({slot,inst});
+ }
+ return Object.entries(groups).map(([id,members])=>{
+  const config=SETS[id],count=members.length;
+  const avg=members.reduce((sum,m)=>sum+setQuality(m.inst),0)/count;
+  const base=count>=3?config.start+Math.max(0,count-3)*config.step:0;
+  const amount=count>=3?Math.round(base*avg):0;
+  return {id,name:config.name,config,members,count,avg,base,amount,active:count>=3};
+ });
+}
+function activeSetBonuses(){
+ const bonus={},results=setResults();let armorPct=0;
+ for(const s of results){if(!s.active)continue;
+  if(s.config.armorPct)armorPct+=s.amount;
+  else bonus[s.config.attribute]=(bonus[s.config.attribute]||0)+s.amount;
+ }
+ return {bonus,armorPct,results};
+}
+function setBonusDescription(result){
+ if(!result)return '';
+ return result.config.armorPct?`Pancerz +${result.amount}%`:`${attrNames[result.config.attribute]} +${result.amount}`;
+}
+function setSummaryCard(result){
+ const missing=Math.max(0,3-result.count);
+ const items=result.members.map(m=>`<div class="ashen-set-member"><span>${escape(slotLabels[m.slot])}</span><strong>${escape(statsOf(m.inst)?.name||def(m.inst)?.name||'Przedmiot')}</strong><span class="ashen-set-quality">${escape(rarities[Math.max(0,Math.min(4,Number(m.inst.rarity)||0))].name)}</span></div>`).join('');
+ const bonus=result.active?setBonusDescription(result):`Brakuje ${missing} ${missing===1?'elementu':'elementów'} do aktywacji`;
+ return `<article class="ashen-set-card ${result.active?'is-active':''}"><div class="ashen-set-top"><strong>Zestaw ${escape(result.name)}</strong><span class="ashen-set-count">${result.count}/6 · ${result.active?'AKTYWNY':'NIEAKTYWNY'}</span></div><div class="ashen-set-track">${Array.from({length:6},(_,i)=>`<i class="${i<result.count?'filled':''}"></i>`).join('')}</div><div class="ashen-set-members">${items}</div><div class="ashen-set-bottom"><span>${escape(bonus)}</span><small>Śr. jakość ×${result.avg.toFixed(2).replace('.',',')}${result.active?' · premia doliczona':''}</small></div></article>`;
+}
+function characterSetsPanel(){
+ const results=setResults();
+ return `<section class="ashen-sets-section"><div class="ashen-sets-title"><h3>Zestawy wyposażenia</h3><p>Załóż 3 elementy ubioru z tym samym prefiksem. Każdy następny zwiększa premię, którą wzmacnia średnia jakość wszystkich części. Liczą się tylko założone przedmioty — nie broń ani akcesoria.</p></div><div class="ashen-sets-grid">${results.length?results.map(setSummaryCard).join(''):'<div class="ashen-sets-empty">Nie masz jeszcze założonych przedmiotów z prefiksami zestawowymi.</div>'}</div></section>`;
+}
+function itemSetPanel(inst){
+ const id=setPrefixId(inst);if(!id)return '';
+ const result=setResults().find(s=>s.id===id);
+ const count=result?.count||0;
+ const config=SETS[id];
+ const active=Boolean(result?.active);
+ return `<div class="ashen-set-item-info"><strong>Zestaw ${escape(config.name)}</strong><div>${active?`Aktywny (${count}/6): ${escape(setBonusDescription(result))}`:`Założono ${count}/3 wymaganych elementów`}</div><small>Do zestawu liczą się wszystkie założone części ubioru z tym samym prefiksem, niezależnie od rzadkości. Jakość wpływa na siłę premii.</small></div>`;
+}
+function attrs(){const a={...state.attrs};Object.values(state.equip).filter(Boolean).forEach(uid=>{for(const [k,v] of Object.entries(statsOf(instance(uid))?.bonus||{}))a[k]+=v});for(const [k,v] of Object.entries(activeSetBonuses().bonus))a[k]=(a[k]||0)+v;return a}function maxHp(){return 60+attrs().end*10}function xpNeed(){return Math.floor(80*Math.pow(state.level,1.35))}function regen(){let now=Date.now(),ticks=Math.floor((now-state.lastRegen)/45000);if(ticks>0){state.energy=Math.min(100,state.energy+ticks);state.lastRegen+=ticks*45000}}function levelUp(){let n=0;while(state.xp>=xpNeed()){state.xp-=xpNeed();state.level++;state.points+=3;n++}return n}function damage(p,e){let base=rand(p.min,p.max)+Math.floor(e.str/3);return Math.max(1,Math.floor(base*(1-clamp((e.armor||0)/100,0,.6))))}function fight(enemy){
  const a=attrs();
  const hands=[state.dominantHand,state.dominantHand==='right'?'left':'right'];
  const mainInst=instance(state.equip[hands[0]]),offInst=instance(state.equip[hands[1]]);
@@ -298,7 +360,8 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{messag
  if(!attacks.length)attacks.push({weapon:statsOf({id:'knife',rarity:0}),hand:hands[0],power:1});
  const armor=Object.entries(state.equip).filter(([k])=>!['right','left'].includes(k))
    .reduce((sum,[,uid])=>sum+(statsOf(instance(uid))?.armor||0),0);
- const hero={hp:maxHp(),acc:6+a.per*1.3,dodge:3+a.dex*1.1,armor:armor+Math.floor(a.end/4)};
+ const setArmor=activeSetBonuses().armorPct;
+ const hero={hp:maxHp(),acc:6+a.per*1.3,dodge:3+a.dex*1.1,armor:armor+Math.round(armor*setArmor/100)+Math.floor(a.end/4)};
  const foe={...enemy},lines=[];
  const hitAttack=(attacker,defender,who,r,weapon=null)=>{
    const chance=clamp(70+2*(attacker.acc-defender.dodge)+(who==='hero'?(weapon?.weapon.accuracy||0):0),15,95);
@@ -455,7 +518,7 @@ function home(){return `<div class="hero"><div class="sub">SEKTOR 17 · ROK 2197
 function characterPortrait(id){return `./assets/characters/${['fighter','tech','scout'].includes(id)?id:'scout'}.webp`}
 function characterFigure(id){return `./assets/characters/${['fighter','tech','scout'].includes(id)?id:'scout'}-full.png`}
 function companionVisual(id){if(id==='dog')return '<img src="./assets/companions/dog.webp" alt="Pies towarzysz">'; if(id==='cat')return '<div class="character-side-emoji">🐈</div>'; if(id==='falcon')return '<div class="character-side-emoji">🦅</div>'; return '<div class="character-side-emoji">?</div>'}
-function character(){let a=attrs();const comp=companionId()?COMPANIONS[companionId()]:null;const vehicle=vehicleDef();const travelBonus=Math.round((1-vehicle.factor*(1-.08*vehicleStage()))*100);return section('Postać',`<div class="character-screen-modern"><div class="character-top-grid"><div class="character-figure-panel"><div class="character-figure-frame"><img src="${characterFigure(state.origin)}" alt="Pełna sylwetka postaci – ${origins[state.origin]?.title||'Ocalały'}"></div><div class="character-figure-caption">${origins[state.origin]?.title||'Ocalały'}</div></div><div class="character-info-panel"><div class="character-heading"><div><div class="tag">OCALAŁY · POZIOM ${state.level}</div><h3>${escape(state.name)}</h3><p class="small muted">Wybrany wygląd zależy od pochodzenia postaci i pozostaje stały.</p></div><button data-action="rename">Zmień imię</button></div>${bar('Doświadczenie',state.xp,xpNeed(),'gold')}<div class="character-meta-line"><span><strong>Ręka dominująca:</strong> ${state.dominantHand==='left'?'lewa':'prawa'}</span><span><strong>Punkty atrybutów:</strong> ${state.points}</span></div><div class="actions"><button data-dominant="right" ${state.dominantHand==='right'?'disabled':''}>Prawa ręka</button><button data-dominant="left" ${state.dominantHand==='left'?'disabled':''}>Lewa ręka</button></div><div class="character-sidecards"><div class="character-sidecard"><div class="character-sidevisual ${comp?'':'placeholder'}">${comp?companionVisual(state.companion):'<div class="character-side-emoji">🐾</div>'}</div><div class="character-sidecontent"><div class="tag">AKTYWNY TOWARZYSZ</div><h4>${comp?comp.name:'Brak towarzysza'}</h4><p class="small muted">${comp?comp.desc:`Towarzysz odblokuje się na poziomie 20. Obecny poziom: ${state.level}.`}</p><p class="good small">${comp?comp.bonus:'Jeszcze niedostępny'}</p><button data-page="companion">${comp?'Zmień towarzysza':'Przejdź do towarzyszy'}</button></div></div><div class="character-sidecard"><div class="character-sidevisual transport"><div class="character-vehicle-big">${vehicle.icon}</div></div><div class="character-sidecontent"><div class="tag">AKTUALNY TRANSPORT</div><h4>${vehicle.name}</h4><p class="small muted">Przyspieszenie wypraw: <strong>${travelBonus}%</strong>. Usprawnienie: ${vehicleStage()+1}/3.</p><p class="good small">Skraca czas podróży, nie wpływa na walkę ani łupy.</p><button data-page="transport">Zarządzaj transportem</button></div></div></div></div></div><div class="character-attr-grid">${Object.entries(attrNames).map(([k,n])=>`<div class="character-attr-card"><div class="character-attr-head"><span>${n}</span><strong>${a[k]}</strong></div><div class="small muted">Baza ${state.attrs[k]}${a[k]!==state.attrs[k]?` · Sprzęt ${a[k]-state.attrs[k]>=0?'+':''}${a[k]-state.attrs[k]}`:''}</div><button data-attr="${k}" ${state.points<=0?'disabled':''}>+1</button></div>`).join('')}</div></div>`)}
+function character(){let a=attrs();const comp=companionId()?COMPANIONS[companionId()]:null;const vehicle=vehicleDef();const travelBonus=Math.round((1-vehicle.factor*(1-.08*vehicleStage()))*100);return section('Postać',`<div class="character-screen-modern"><div class="character-top-grid"><div class="character-figure-panel"><div class="character-figure-frame"><img src="${characterFigure(state.origin)}" alt="Pełna sylwetka postaci – ${origins[state.origin]?.title||'Ocalały'}"></div><div class="character-figure-caption">${origins[state.origin]?.title||'Ocalały'}</div></div><div class="character-info-panel"><div class="character-heading"><div><div class="tag">OCALAŁY · POZIOM ${state.level}</div><h3>${escape(state.name)}</h3><p class="small muted">Wybrany wygląd zależy od pochodzenia postaci i pozostaje stały.</p></div><button data-action="rename">Zmień imię</button></div>${bar('Doświadczenie',state.xp,xpNeed(),'gold')}<div class="character-meta-line"><span><strong>Ręka dominująca:</strong> ${state.dominantHand==='left'?'lewa':'prawa'}</span><span><strong>Punkty atrybutów:</strong> ${state.points}</span></div><div class="actions"><button data-dominant="right" ${state.dominantHand==='right'?'disabled':''}>Prawa ręka</button><button data-dominant="left" ${state.dominantHand==='left'?'disabled':''}>Lewa ręka</button></div><div class="character-sidecards"><div class="character-sidecard"><div class="character-sidevisual ${comp?'':'placeholder'}">${comp?companionVisual(state.companion):'<div class="character-side-emoji">🐾</div>'}</div><div class="character-sidecontent"><div class="tag">AKTYWNY TOWARZYSZ</div><h4>${comp?comp.name:'Brak towarzysza'}</h4><p class="small muted">${comp?comp.desc:`Towarzysz odblokuje się na poziomie 20. Obecny poziom: ${state.level}.`}</p><p class="good small">${comp?comp.bonus:'Jeszcze niedostępny'}</p><button data-page="companion">${comp?'Zmień towarzysza':'Przejdź do towarzyszy'}</button></div></div><div class="character-sidecard"><div class="character-sidevisual transport"><div class="character-vehicle-big">${vehicle.icon}</div></div><div class="character-sidecontent"><div class="tag">AKTUALNY TRANSPORT</div><h4>${vehicle.name}</h4><p class="small muted">Przyspieszenie wypraw: <strong>${travelBonus}%</strong>. Usprawnienie: ${vehicleStage()+1}/3.</p><p class="good small">Skraca czas podróży, nie wpływa na walkę ani łupy.</p><button data-page="transport">Zarządzaj transportem</button></div></div></div></div></div><div class="character-attr-grid">${Object.entries(attrNames).map(([k,n])=>`<div class="character-attr-card"><div class="character-attr-head"><span>${n}</span><strong>${a[k]}</strong></div><div class="small muted">Baza ${state.attrs[k]}${a[k]!==state.attrs[k]?` · Sprzęt i zestawy ${a[k]-state.attrs[k]>=0?'+':''}${a[k]-state.attrs[k]}`:''}</div><button data-attr="${k}" ${state.points<=0?'disabled':''}>+1</button></div>`).join('')}</div>${characterSetsPanel()}</div>`)}
 function companion(){
  const selected=companionId(),active=selected?COMPANIONS[selected]:null;
  const visual=id=>id==='dog'?'<img src="./assets/companions/dog.webp" alt="Pies">':`<span role="img" aria-label="${COMPANIONS[id].name}">${COMPANIONS[id].icon}</span>`;
@@ -544,7 +607,7 @@ function itemDetailContent(){if(!openItemDetail)return '';
  const defn=owned?def(owned):item(openItemDetail.id);
  if(!defn)return '';
  const o=owned?statsOf(owned):{...defn,rarity:'Zwykły',name:defn.name,bonus:defn.bonus||{}};
- return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${1+(Number(o.extraAttacks)||0)}</strong></div>`:''}<div class="detail-affix"><strong>Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span><small>Ikona prefiksu – w przyszłości</small></div><div class="detail-affix"><strong>Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span><small>Ikona sufiksu – w przyszłości</small></div>${owned?`<div class="small muted">${statDetails(o)}</div>`:''}</div></div><div class="actions"><button class="primary" data-item-close>Zamknij</button></div></div></div>`
+ return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${1+(Number(o.extraAttacks)||0)}</strong></div>`:''}<div class="detail-affix"><strong>Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span><small>Ikona prefiksu – w przyszłości</small></div><div class="detail-affix"><strong>Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span><small>Ikona sufiksu – w przyszłości</small></div>${owned?`<div class="small muted">${statDetails(o)}</div>${itemSetPanel(owned)}`:''}</div></div><div class="actions"><button class="primary" data-item-close>Zamknij</button></div></div></div>`
 }
 function slotChip(slot,uid){
  const inst=instance(uid),o=statsOf(inst),empty=!o,label=slotLabels[slot];
@@ -707,7 +770,7 @@ function inventory(){
  <div class="bulk-summary">Wartość zaznaczonych: <strong>${bulkSum.credits.toLocaleString('pl-PL')} kredytów</strong><br>Materiały z rozłożenia: <strong>${selectedForBulk.length?salvageLabel(bulkSum.mats):'—'}</strong></div>
  <div class="actions"><button class="primary" data-action="bulk-sell" ${selectedForBulk.length?'':'disabled'}>Sprzedaj zaznaczone (${selectedForBulk.length})</button><button data-action="bulk-salvage" ${selectedForBulk.length?'':'disabled'}>Rozłóż zaznaczone (${selectedForBulk.length})</button></div>
  <div class="bulk-hint">Założone i zabezpieczone przedmioty nie mogą zostać zaznaczone. Potwierdzenie pokaże łączną nagrodę. Zaznaczenie nie jest zapisywane między uruchomieniami gry.</div></div>`;
- return section('Ekwipunek',`${wallet()}<p class="muted">Masz ${state.inventory.length} przedmiotów. Ikona i nazwa przedmiotu otwierają szczegóły; nowe przedmioty odkrywasz podczas wypraw. Dominująca ręka: <strong>${state.dominantHand==='left'?'lewa':'prawa'}</strong>.</p>
+ return section('Ekwipunek',`${wallet()}<p class="muted">Masz ${state.inventory.length} przedmiotów. Ikona i nazwa przedmiotu otwierają szczegóły. Prefiksy ubrań tworzą zestawy od 3 założonych elementów; nowe przedmioty odkrywasz podczas wypraw. Dominująca ręka: <strong>${state.dominantHand==='left'?'lewa':'prawa'}</strong>.</p>
  <div class="equip-stage section">
    <div class="paperdoll-wrap"><div class="paperdoll-title"><div><h3 style="color:var(--gold);margin:0">Wyposażenie postaci</h3><div class="small muted">Kliknij ikonę albo nazwę przedmiotu, aby zobaczyć jego parametry.</div></div><div class="small muted">Poziom ${state.level}</div></div>
      <div class="paperdoll">
