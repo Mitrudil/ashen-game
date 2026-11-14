@@ -363,3 +363,12 @@ W sypialni zastosowano realistyczne tło `assets/bunker/rooms/bedroom-base.webp`
 - Rozwój towarzyszy kosztuje kredyty, złom i części i zapisuje się wraz z postacią.
 - Rozwój pojazdów nadal skraca czas wypraw. Przestarzałe pojazdy starego prototypu mapowane są do aktualnych linii.
 - Usunięto wyłącznie dekoracyjny pasek Transport/Towarzysz pod nagłówkiem Wybierz wyprawę. Pasek odliczania działa podczas aktywnej wyprawy.
+
+
+## 0.1.50 — Czyste kadry i rozszerzona flota
+- Zachowano oryginalne cztery linie pojazdów (rower, motocykl, buggy, ciężarówka) i ich trzy etapy; wycięto kadry bez podpisów i strzałek z zatwierdzonej planszy.
+- Czterej towarzysze otrzymali komplet 12 czystych ilustracji, z całymi sylwetkami w centrum kadru. Zachowano ich wcześniejszą estetykę.
+- Dodano grafikę podróży pieszo oraz samochód osobowy i van/kamper (po trzy etapy graficzne).
+- Transport: pieszo → rower → motocykl → buggy → samochód → van/kamper → ciężarówka.
+- Auto i kamper mają odrębne koszty i przyspieszenia, a stare stany pozostają dostępne.
+- Zaktualizowano kontrolę obrazów i responsywność kart.
