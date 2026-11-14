@@ -468,3 +468,48 @@ h1, h2, h3, h4, h5, h6, button,
  .ashen-wide-shell .sidebar .nav button{display:inline-flex!important;align-items:center;justify-content:center;flex:0 0 auto!important;width:auto!important;min-width:max-content;max-width:none;white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important;line-height:1.35!important;padding:10px 12px!important;}
  .ashen-wide-shell .sidebar{min-width:0;overflow:hidden;}
 }
+
+/* ASHEN v0.1.31 — shared width for Warehouse, Hideout, Reports */
+.ashen-wide-shell .main,.ashen-wide-shell .section{min-width:0}
+.ashen-premium-shell .hideout-screen,.ashen-premium-shell .panel,.ashen-premium-shell .material-grid{max-width:none}
+.ashen-premium-shell .hideout-screen{width:100%}
+.ashen-premium-shell .bunker-focused{min-width:0}
+.ashen-premium-shell .material-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.ashen-premium-shell .stack>.panel{padding:18px}
+/* Equipment avatar is exactly the same character art as on the Postać screen */
+.ashen-premium-shell .figure-stage{display:flex;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(circle at 50% 26%,#28323b,#11171c 72%);min-height:500px}
+.ashen-premium-shell .figure-stage .inventory-figure{position:relative;width:100%;height:450px;object-fit:contain;object-position:center center;z-index:1;filter:drop-shadow(0 16px 15px #0008)}
+.ashen-premium-shell .figure-stage .figure-caption{position:relative;z-index:2;margin:8px 0;color:#e9d7b8;font-weight:750;text-align:center}
+/* Clickable item summaries and weapon catalog */
+.item-view-name,.item-view-icon{border:0;background:transparent;padding:0;box-shadow:none;font:inherit;cursor:pointer;text-align:left}
+.item-view-name{font-weight:750;text-decoration:underline;text-decoration-color:#8c7146;text-decoration-thickness:1px;text-underline-offset:4px;overflow-wrap:anywhere}
+.item-view-name:hover{color:#ffe2a0!important}
+.item-view-icon{display:block;border-radius:10px}
+.item-view-icon:hover{outline:1px solid #d38f42}
+.weapon-catalog{margin-top:16px}
+.weapon-catalog h3{margin-top:0;color:#ecd5aa}.weapon-catalog h4{margin:16px 0 10px;color:#e7c68e}
+.weapon-catalog-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.weapon-catalog-card{background:#151b1e;border:1px solid #59462f;border-radius:12px;min-height:148px;display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px;min-width:0;color:#eee0c9;box-shadow:inset 0 1px #ffffff10,0 5px 14px #0005;text-align:center}
+.weapon-catalog-card:hover{border-color:#d8943d;background:#202328}
+.weapon-catalog-card span{overflow-wrap:anywhere;font-weight:700;line-height:1.35}
+.weapon-catalog-card strong{color:#efb865}
+.weapon-catalog-card .iconbox{width:64px;height:64px}
+/* Detailed item dialog — ready for future artwork and affix badges */
+.ashen-item-overlay{position:fixed;inset:0;z-index:500;display:grid;place-items:center;background:rgba(2,6,9,.85);padding:18px;overflow-y:auto}
+.ashen-item-modal{width:min(780px,100%);position:relative;max-height:min(92vh,900px);overflow-y:auto;border-radius:18px;border:1px solid #9d7441;padding:24px;background:linear-gradient(140deg,#242b2f,#11171b 75%);box-shadow:0 26px 65px #000a,inset 0 1px #f2cf9b25}
+.ashen-item-modal h2{margin:7px 40px 18px 0;font:800 28px/1.25 'Segoe UI',Arial,sans-serif;color:#f4e8d3}
+.ashen-item-modal-grid{display:grid;grid-template-columns:minmax(170px,270px) minmax(0,1fr);gap:20px}
+.ashen-item-close{position:absolute;right:14px;top:12px;min-width:38px;min-height:38px}
+.ashen-item-art{min-height:280px;background:radial-gradient(circle,#30383a,#111619 76%);border-radius:12px;border:1px solid #5c4932;padding:14px;display:grid;place-items:center}
+.detail-placeholder{display:grid;justify-items:center;gap:14px;color:#c9bb9f;font-size:13px;text-align:center}
+.detail-placeholder .iconbox{width:150px;height:150px}
+.detail-placeholder .iconbox svg{width:100%;height:100%}
+.ashen-item-facts{display:grid;align-content:start;gap:10px;min-width:0}
+.detail-stat{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #564631;padding:7px 0}
+.detail-stat span{color:#bfb3a0}.detail-stat strong{color:#f6d6a0}
+.detail-affix{display:grid;gap:4px;border:1px dashed #625039;border-radius:9px;padding:9px 12px;grid-template-columns:1fr auto}
+.detail-affix strong{color:#eacb98}.detail-affix small{grid-column:1/-1;color:#938877}
+.ashen-item-modal>.actions{justify-content:flex-end;margin-top:16px}
+@media(max-width:1120px){.weapon-catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:800px){.weapon-catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ashen-premium-shell .figure-stage .inventory-figure{height:385px}}
+@media(max-width:520px){.weapon-catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.weapon-catalog-card{padding:9px}.ashen-item-modal{padding:18px}.ashen-item-modal-grid{grid-template-columns:1fr}.ashen-item-art{min-height:180px}.detail-placeholder .iconbox{width:112px;height:112px}.ashen-item-modal h2{font-size:22px}}
