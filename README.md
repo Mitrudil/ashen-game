@@ -1,3 +1,7 @@
+# ASHEN v0.1.36 — Rękawice i karwasze
+
+Osiem indywidualnych grafik WebP podpiętych do wyposażenia, listy ekwipunku oraz szczegółów przedmiotu. Zachowano nazwy, statystyki i identyfikatory z v0.1.35, a także zgodność zapisu. Nowe pliki: `assets/items/hands/*.webp`.
+
 # ASHEN v0.1.35 — Koszulki i nakrycia głowy
 
 Nowości: 11 nowych grafik WebP, realistyczne opisy przedmiotów, bazowy pancerz koszulek i nakryć głowy uporządkowany od najniższego do najwyższego. Maska filtracyjna nadal zajmuje slot głowy. Zapis zachowuje klucz `ashen-save-v010`, ID przedmiotów pozostają bez zmian.
