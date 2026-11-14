@@ -1,4 +1,4 @@
-const APP_VERSION='0.1.37.4';
+const APP_VERSION='0.1.38';
 
 (()=>{'use strict';const KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 const rarities=[{name:'Zwykły',color:'#b8bfc3',weight:58,mult:1},{name:'Ulepszony',color:'#8ac78b',weight:25,mult:1.14},{name:'Rzadki',color:'#77afe5',weight:12,mult:1.32},{name:'Epicki',color:'#c391e4',weight:4,mult:1.58},{name:'Legendarny',color:'#f2bb65',weight:1,mult:1.95}];
@@ -116,43 +116,105 @@ const feminineItemIds=new Set(['shotgun','crossbow','pipe','machete','jacket','v
 const pluralItemIds=new Set(['jeans','cargo','scoutpants','kevlarpants','radiopants','sneakers','workboots','combatboots','silentboots','hazboots','goggles','gloves','dustglasses','nightgoggles','parts','fingerless','workgloves','tacticalgloves','leathergloves','steelbracers','scoutbracers','kevlarbracers','zerobracers']);
 const femininePrefix={precise:'Precyzyjna',brutal:'Brutalna',agile:'Zwinna',reinforced:'Wzmocniona',technical:'Techniczna',light:'Lekka',armored:'Pancerna',destructive:'Niszczycielska',lethal:'Zabójcza',scrap:'Złomowa'};
 const pluralPrefix={precise:'Precyzyjne',brutal:'Brutalne',agile:'Zwinne',reinforced:'Wzmocnione',technical:'Techniczne',light:'Lekkie',armored:'Pancerne',destructive:'Niszczycielskie',lethal:'Zabójcze',scrap:'Złomowe'};
-function prefixLabel(mod,base){if(!mod)return null;return pluralItemIds.has(base.id)?pluralPrefix[mod.id]||mod.name:feminineItemIds.has(base.id)?femininePrefix[mod.id]||mod.name:mod.name}
+function prefixLabel(mod,base){
+ if(!mod)return null;
+ const form=pluralItemIds.has(base.id)?'p':feminineItemIds.has(base.id)?'f':'m';
+ if(mod.forms)return mod.forms[form]||mod.name;
+ return form==='p'?pluralPrefix[mod.id]||mod.name:form==='f'?femininePrefix[mod.id]||mod.name:mod.name;
+}
 // Rzadkość jest częścią pełnej nazwy. Zwykły pozostaje bez dodatkowego przymiotnika.
 const rarityForms={f:['','Ulepszona','Rzadka','Epicka','Legendarna'],p:['','Ulepszone','Rzadkie','Epickie','Legendarne'],m:['','Ulepszony','Rzadki','Epicki','Legendarny']};
 function rarityPrefix(inst,d){let n=Number(inst?.rarity)||0;let form=pluralItemIds.has(d.id)?'p':feminineItemIds.has(d.id)?'f':'m';return rarityForms[form][n]||'';}
 
 
-const prefixDefs=[
- {id:'precise',name:'Precyzyjny',bonus:{per:2},on:'weapon'},
- {id:'brutal',name:'Brutalny',bonus:{str:2},on:'weapon'},
- {id:'agile',name:'Zwinny',bonus:{dex:2},on:'any'},
- {id:'reinforced',name:'Wzmocniony',bonus:{end:2},on:'armor'},
- {id:'technical',name:'Techniczny',bonus:{int:2},on:'any'},
- {id:'light',name:'Lekki',bonus:{dex:1,per:1},on:'armor'},
- {id:'armored',name:'Pancerny',armorPct:15,on:'armor'},
- {id:'destructive',name:'Niszczycielski',damagePct:12,on:'weapon'},
- {id:'lethal',name:'Zabójczy',critPp:5,on:'weapon'},
- {id:'scrap',name:'Złomowy',damagePct:-10,armorPct:-10,on:'any',maxRarity:1}
+// Prefiksy z dawnych zapisów pozostają czytelne i nie zmieniają swojego ID,
+// ale nigdy nie są losowane po aktualizacji. Nowe modyfikatory mają osobne
+// przestrzenie identyfikatorów dla broni, ubioru i akcesoriów.
+const legacyPrefixDefs=[
+ {id:'precise',name:'Precyzyjny',bonus:{per:2},on:'weapon',legacyOnly:true},
+ {id:'brutal',name:'Brutalny',bonus:{str:2},on:'weapon',legacyOnly:true},
+ {id:'agile',name:'Zwinny',bonus:{dex:2},on:'any',legacyOnly:true},
+ {id:'reinforced',name:'Wzmocniony',bonus:{end:2},on:'clothing',legacyOnly:true,setId:'armor_reinforced'},
+ {id:'technical',name:'Techniczny',bonus:{int:2},on:'any',legacyOnly:true},
+ {id:'light',name:'Lekki',bonus:{dex:1,per:1},on:'clothing',legacyOnly:true,setId:'armor_light'},
+ {id:'armored',name:'Pancerny',armorPct:15,on:'clothing',legacyOnly:true,setId:'armor_plated'},
+ {id:'destructive',name:'Niszczycielski',damagePct:12,on:'weapon',legacyOnly:true},
+ {id:'lethal',name:'Zabójczy',critPp:5,on:'weapon',legacyOnly:true},
+ // Dawny ujemny prefiks nie wypada już w łupach i nie osłabia zdobytego wyposażenia.
+ {id:'scrap',name:'Odzyskany',forms:{m:'Odzyskany',f:'Odzyskana',p:'Odzyskane'},bonus:{end:1},on:'any',legacyOnly:true}
 ];
-const suffixDefs=[
- {id:'hunter',name:'Łowcy',bonus:{per:2},on:'any'},
- {id:'strong',name:'Siłacza',bonus:{str:2},on:'any'},
- {id:'shadow',name:'Cienia',bonus:{dex:2},on:'any'},
- {id:'veteran',name:'Weterana',bonus:{str:1,end:1},on:'any'},
- {id:'technician',name:'Technika',bonus:{int:2},on:'any'},
- {id:'sniper',name:'Snajpera',bonus:{per:3},on:'ranged'},
- {id:'berserker',name:'Berserkera',damagePct:8,bonus:{end:-1},on:'weapon'},
- {id:'survivor',name:'Ocalonego',bonus:{end:3},on:'armor'},
- {id:'commander',name:'Dowódcy',bonus:{cha:2},on:'any'},
- {id:'mutant',name:'Mutanta',bonus:{str:3,cha:-2},on:'any'}
+const newPrefixDefs=[
+ // BROŃ
+ {id:'weapon_precise',name:'Precyzyjny',forms:{m:'Precyzyjny',f:'Precyzyjna',p:'Precyzyjne'},bonus:{per:2},on:'weapon'},
+ {id:'weapon_brutal',name:'Brutalny',forms:{m:'Brutalny',f:'Brutalna',p:'Brutalne'},bonus:{str:2},on:'weapon'},
+ {id:'weapon_destructive',name:'Niszczycielski',forms:{m:'Niszczycielski',f:'Niszczycielska',p:'Niszczycielskie'},damagePct:12,on:'weapon'},
+ {id:'weapon_lethal',name:'Zabójczy',forms:{m:'Zabójczy',f:'Zabójcza',p:'Zabójcze'},critPp:5,on:'weapon'},
+ // Szybki działa wyłącznie na lekkiej broni (jedna dodatkowa próba ataku w rundzie).
+ {id:'weapon_quick',name:'Szybki',forms:{m:'Szybki',f:'Szybka',p:'Szybkie'},extraAttacks:1,on:'lightWeapon'},
+ {id:'weapon_stable',name:'Stabilny',forms:{m:'Stabilny',f:'Stabilna',p:'Stabilne'},accuracy:8,on:'weapon'},
+ // UBIÓR: tylko te prefiksy mogą budować zestawy w v0.1.39.
+ {id:'armor_reinforced',name:'Wzmocniony',forms:{m:'Wzmocniony',f:'Wzmocniona',p:'Wzmocnione'},bonus:{end:2},on:'clothing',setId:'armor_reinforced'},
+ {id:'armor_plated',name:'Pancerny',forms:{m:'Pancerny',f:'Pancerna',p:'Pancerne'},armorPct:15,on:'clothingArmor',setId:'armor_plated'},
+ {id:'armor_flexible',name:'Elastyczny',forms:{m:'Elastyczny',f:'Elastyczna',p:'Elastyczne'},bonus:{dex:2},on:'clothing',setId:'armor_flexible'},
+ {id:'armor_light',name:'Lekki',forms:{m:'Lekki',f:'Lekka',p:'Lekkie'},bonus:{dex:1,per:1},on:'clothing',setId:'armor_light'},
+ {id:'armor_resistant',name:'Odporny',forms:{m:'Odporny',f:'Odporna',p:'Odporne'},armorPct:8,bonus:{end:1},on:'clothingArmor',setId:'armor_resistant'},
+ {id:'armor_tracker',name:'Tropicielski',forms:{m:'Tropicielski',f:'Tropicielska',p:'Tropicielskie'},bonus:{per:2},on:'clothing',setId:'armor_tracker'},
+ {id:'armor_iron',name:'Żelazny',forms:{m:'Żelazny',f:'Żelazna',p:'Żelazne'},bonus:{str:3},on:'clothing',setId:'armor_iron'},
+ // AKCESORIA, oddzielne od odzieży i broni
+ {id:'accessory_technical',name:'Techniczny',forms:{m:'Techniczny',f:'Techniczna',p:'Techniczne'},bonus:{int:2},on:'accessory'},
+ {id:'accessory_observant',name:'Spostrzegawczy',forms:{m:'Spostrzegawczy',f:'Spostrzegawcza',p:'Spostrzegawcze'},bonus:{per:2},on:'accessory'},
+ {id:'accessory_persuasive',name:'Przekonujący',forms:{m:'Przekonujący',f:'Przekonująca',p:'Przekonujące'},bonus:{cha:2},on:'accessory'},
+ {id:'accessory_reflexive',name:'Refleksyjny',forms:{m:'Refleksyjny',f:'Refleksyjna',p:'Refleksyjne'},bonus:{dex:2},on:'accessory'},
+ {id:'accessory_versatile',name:'Wszechstronny',forms:{m:'Wszechstronny',f:'Wszechstronna',p:'Wszechstronne'},bonus:{per:1,int:1},on:'accessory'}
 ];
+const prefixDefs=[...legacyPrefixDefs,...newPrefixDefs];
+const legacySuffixDefs=[
+ {id:'hunter',name:'Łowcy',bonus:{per:2},on:'any',legacyOnly:true},
+ {id:'strong',name:'Siłacza',bonus:{str:2},on:'any',legacyOnly:true},
+ {id:'shadow',name:'Cienia',bonus:{dex:2},on:'any',legacyOnly:true},
+ {id:'veteran',name:'Weterana',bonus:{str:1,end:1},on:'any',legacyOnly:true},
+ {id:'technician',name:'Technika',bonus:{int:2},on:'any',legacyOnly:true},
+ {id:'sniper',name:'Snajpera',bonus:{per:3},on:'ranged',legacyOnly:true},
+ {id:'berserker',name:'Berserkera',damagePct:8,on:'weapon',legacyOnly:true},
+ {id:'survivor',name:'Ocalonego',bonus:{end:3},on:'clothing',legacyOnly:true},
+ {id:'commander',name:'Dowódcy',bonus:{cha:2},on:'any',legacyOnly:true},
+ {id:'mutant',name:'Mutanta',bonus:{str:3},on:'any',legacyOnly:true}
+];
+const newSuffixDefs=[
+ {id:'weapon_hunter',name:'Łowcy',bonus:{per:2},on:'weapon'},
+ {id:'weapon_sniper',name:'Snajpera',bonus:{per:3},on:'ranged'},
+ {id:'weapon_berserker',name:'Berserkera',damagePct:8,on:'weapon'},
+ {id:'weapon_executioner',name:'Egzekutora',critPp:4,on:'weapon'},
+ {id:'weapon_warrior',name:'Wojownika',bonus:{str:2},on:'weapon'},
+ {id:'weapon_destroyer',name:'Niszczyciela',damagePct:6,on:'weapon'},
+ {id:'armor_survivor',name:'Ocalonego',bonus:{end:3},on:'clothing'},
+ {id:'armor_guard',name:'Strażnika',armorPct:10,on:'clothingArmor'},
+ {id:'armor_wanderer',name:'Wędrowca',bonus:{end:1,per:1},on:'clothing'},
+ {id:'armor_scout',name:'Zwiadowcy',bonus:{dex:2},on:'clothing'},
+ {id:'armor_tough',name:'Twardziela',bonus:{str:2},on:'clothing'},
+ {id:'armor_ironwill',name:'Żelaznej Woli',bonus:{end:1,int:1},on:'clothing'},
+ {id:'accessory_technician',name:'Technika',bonus:{int:3},on:'accessory'},
+ {id:'accessory_negotiator',name:'Negocjatora',bonus:{cha:3},on:'accessory'},
+ {id:'accessory_tracker',name:'Tropiciela',bonus:{per:3},on:'accessory'},
+ {id:'accessory_leader',name:'Przywódcy',bonus:{cha:2,end:1},on:'accessory'},
+ {id:'accessory_explorer',name:'Odkrywcy',bonus:{int:1,per:1},on:'accessory'},
+ {id:'accessory_survivor',name:'Ocalałego',bonus:{end:2},on:'accessory'}
+];
+const suffixDefs=[...legacySuffixDefs,...newSuffixDefs];
+const clothingSlots=new Set(['head','shirt','outer','hands','pants','boots']);
+const lightWeaponIds=new Set(['knife','pipe','machete','hatchet','baton','wrench','cleaver','saber','pistol','revolver','smg']);
+function categoryOf(d){return weaponSlot(d.slot)?'weapon':clothingSlots.has(d.slot)?'clothing':d.slot==='extra'?'accessory':'other'}
 const prefixChance=[.18,.32,.50,.70,.85],suffixChance=[.06,.15,.29,.55,.78];
 function suitable(mod,d,rar){
- if(!mod||!d||d.slot==='material'||(mod.maxRarity!==undefined&&rar>mod.maxRarity))return false;
- if(mod.on==='weapon'&&!weaponSlot(d.slot))return false;
- if(mod.on==='armor'&&weaponSlot(d.slot))return false;
- if(mod.on==='ranged'&&!rangedIds.has(d.id))return false;
- if(mod.armorPct&&!weaponSlot(d.slot)&&!d.armor)return false; // Nie dajemy procentów pancerza ubraniom bez pancerza.
+ if(!mod||!d||d.slot==='material'||mod.legacyOnly||(mod.maxRarity!==undefined&&rar>mod.maxRarity))return false;
+ const cat=categoryOf(d);
+ if(mod.on==='weapon'&&cat!=='weapon')return false;
+ if(mod.on==='ranged'&&(cat!=='weapon'||!rangedIds.has(d.id)))return false;
+ if(mod.on==='lightWeapon'&&(cat!=='weapon'||!lightWeaponIds.has(d.id)))return false;
+ if(mod.on==='clothing'&&cat!=='clothing')return false;
+ if(mod.on==='clothingArmor'&&(cat!=='clothing'||!(d.armor>0)))return false;
+ if(mod.on==='accessory'&&cat!=='accessory')return false;
+ if(mod.armorPct&&!(d.armor>0))return false;
  return true;
 }
 function findModifier(collection,id){return collection.find(x=>x.id===id)}
@@ -173,7 +235,7 @@ function statsOf(inst){
  const d=def(inst);if(!d)return null;
  const m=rarity(inst).mult,mods=modifiersOf(inst);
  const pct=(key)=>mods.reduce((sum,x)=>sum+(x[key]||0),0);
- const dmgPct=pct('damagePct'),armorPct=pct('armorPct'),critPp=pct('critPp');
+ const dmgPct=pct('damagePct'),armorPct=pct('armorPct'),critPp=pct('critPp'),accuracy=pct('accuracy'),extraAttacks=pct('extraAttacks');
  const pref=findModifier(prefixDefs,inst?.prefix),suf=findModifier(suffixDefs,inst?.suffix);
  const legacy=mods.find(x=>x.legacy);
  const name=[rarityPrefix(inst,d),prefixLabel(pref,d)||legacy?.name,d.name,suf?.name].filter(Boolean).join(' ');
@@ -184,7 +246,7 @@ function statsOf(inst){
   min:weapon?Math.max(1,Math.round(d.min*m*(1+dmgPct/100))+UPGRADE_POWER[upgrade]):undefined,
   max:weapon?Math.max(1,Math.round(d.max*m*(1+dmgPct/100))+UPGRADE_POWER[upgrade]):undefined,
   armor:!weapon&&d.slot!=='material'?Math.max(0,Math.round((d.armor||0)*m*(1+armorPct/100))+((d.armor||0)===0 ? [0,1,2,3,5][Math.min(4,Math.max(0,Number(inst?.rarity)||0))] : 0)+armorUp):undefined,
-  bonus:rolledBonus(inst),critPp,damagePct:dmgPct,armorPct,
+  bonus:rolledBonus(inst),critPp,accuracy,extraAttacks,damagePct:dmgPct,armorPct,
   prefixName:prefixLabel(pref,d)||null,suffixName:suf?.name||null,
   effects:mods.map(x=>({name:x===pref?prefixLabel(x,d):x.name,description:modifierText(x)}))};
 }
@@ -197,9 +259,9 @@ function rollItem(id){
  return {uid:'loot-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),id,rarity:rar,prefix,suffix,locked:rar>=3};
 }
 function bonusText(b){return Object.entries(b||{}).filter(([,v])=>v!==0).map(([k,v])=>`${attrNames[k]} ${v>0?'+':''}${v}`).join(' · ')}
-function modifierText(m){return [bonusText(m.bonus),m.damagePct?`Obrażenia ${m.damagePct>0?'+':''}${m.damagePct}%`:null,m.armorPct?`Pancerz ${m.armorPct>0?'+':''}${m.armorPct}%`:null,m.critPp?`Szansa trafienia krytycznego +${m.critPp} p.p.`:null].filter(Boolean).join(' · ')}
+function modifierText(m){return [bonusText(m.bonus),m.damagePct?`Obrażenia ${m.damagePct>0?'+':''}${m.damagePct}%`:null,m.armorPct?`Pancerz ${m.armorPct>0?'+':''}${m.armorPct}%`:null,m.critPp?`Szansa trafienia krytycznego +${m.critPp} p.p.`:null,m.accuracy?`Celność +${m.accuracy} pkt`:null,m.extraAttacks?`Ataki na rundę +${m.extraAttacks}`:null].filter(Boolean).join(' · ')}
 function slotName(slot){return slotLabels[slot]||({hand1:'Broń jednoręczna',hand2:'Broń dwuręczna',material:'Surowiec'})[slot]||slot}
-function statDetails(o){return `${weaponSlot(o.slot)?`Obrażenia ${o.min}–${o.max}${o.slot==='hand2'?' · obie ręce':''}`:o.slot==='material'?'Materiał':`Pancerz ${o.armor||0}`}${bonusText(o.bonus)?' · '+bonusText(o.bonus):''}${o.critPp?` · Krytyk +${o.critPp} p.p.`:''}`}
+function statDetails(o){return `${weaponSlot(o.slot)?`Obrażenia ${o.min}–${o.max}${o.slot==='hand2'?' · obie ręce':''}`:o.slot==='material'?'Materiał':`Pancerz ${o.armor||0}`}${bonusText(o.bonus)?' · '+bonusText(o.bonus):''}${o.critPp?` · Krytyk +${o.critPp} p.p.`:''}${o.accuracy?` · Celność +${o.accuracy} pkt`:''}${o.extraAttacks?` · Dodatkowy atak +${o.extraAttacks}`:''}`}
 function affixDetails(o){return (o.effects||[]).length?`<div class="small muted" style="margin-top:5px">${o.effects.map(x=>`<div>↳ ${escape(x.name)}: ${escape(x.description)}</div>`).join('')}</div>`:''}
 function pickLoot(loc){
  // Każda wyprawa: 1 przedmiot pewny; 28% szans na drugi, 7% na trzeci.
@@ -229,9 +291,9 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{messag
  const mainInst=instance(state.equip[hands[0]]),offInst=instance(state.equip[hands[1]]);
  const main=statsOf(mainInst),off=statsOf(offInst);
  const attacks=[];
- if(main)attacks.push({weapon:main,hand:hands[0],power:1});
+ if(main){attacks.push({weapon:main,hand:hands[0],power:1});if(main.extraAttacks>0&&main.slot==='hand1')attacks.push({weapon:main,hand:hands[0],power:.65});}
  if(off&&off.slot==='hand2'){attacks.length=0;attacks.push({weapon:off,hand:hands[1],power:1});}
- else if(off&&off.slot==='hand1')attacks.push({weapon:off,hand:hands[1],power:.8});
+ else if(off&&off.slot==='hand1'){attacks.push({weapon:off,hand:hands[1],power:.8});if(off.extraAttacks>0)attacks.push({weapon:off,hand:hands[1],power:.5});}
  // Broń założona tylko w niedominującej ręce nadal daje jeden atak, przy 80% mocy.
  if(!attacks.length)attacks.push({weapon:statsOf({id:'knife',rarity:0}),hand:hands[0],power:1});
  const armor=Object.entries(state.equip).filter(([k])=>!['right','left'].includes(k))
@@ -239,7 +301,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{messag
  const hero={hp:maxHp(),acc:6+a.per*1.3,dodge:3+a.dex*1.1,armor:armor+Math.floor(a.end/4)};
  const foe={...enemy},lines=[];
  const hitAttack=(attacker,defender,who,r,weapon=null)=>{
-   const chance=clamp(70+2*(attacker.acc-defender.dodge),15,95);
+   const chance=clamp(70+2*(attacker.acc-defender.dodge)+(who==='hero'?(weapon?.weapon.accuracy||0):0),15,95);
    const handName=weapon?' ('+(weapon.hand==='right'?'prawa':'lewa')+' ręka, '+Math.round(weapon.power*100)+'%)':'';
    if(Math.random()*100>=chance){lines.push(`Runda ${r}: ${who==='hero'?'Chybiasz':'Przeciwnik chybia'}${handName}.`);return}
    const critical=who==='hero'&&Math.random()<clamp(.05+a.per*.005+(weapon?.weapon.critPp||0)/100,0,.35);
@@ -482,7 +544,7 @@ function itemDetailContent(){if(!openItemDetail)return '';
  const defn=owned?def(owned):item(openItemDetail.id);
  if(!defn)return '';
  const o=owned?statsOf(owned):{...defn,rarity:'Zwykły',name:defn.name,bonus:defn.bonus||{}};
- return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div>`:''}<div class="detail-affix"><strong>Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span><small>Ikona prefiksu – w przyszłości</small></div><div class="detail-affix"><strong>Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span><small>Ikona sufiksu – w przyszłości</small></div>${owned?`<div class="small muted">${statDetails(o)}</div>`:''}</div></div><div class="actions"><button class="primary" data-item-close>Zamknij</button></div></div></div>`
+ return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${1+(Number(o.extraAttacks)||0)}</strong></div>`:''}<div class="detail-affix"><strong>Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span><small>Ikona prefiksu – w przyszłości</small></div><div class="detail-affix"><strong>Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span><small>Ikona sufiksu – w przyszłości</small></div>${owned?`<div class="small muted">${statDetails(o)}</div>`:''}</div></div><div class="actions"><button class="primary" data-item-close>Zamknij</button></div></div></div>`
 }
 function slotChip(slot,uid){
  const inst=instance(uid),o=statsOf(inst),empty=!o,label=slotLabels[slot];

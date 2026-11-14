@@ -1,3 +1,26 @@
+# ASHEN v0.1.38 — oddzielne prefiksy i sufiksy
+
+- 18 nowych prefiksów: 6 dla broni, 7 dla ubioru, 5 dla akcesoriów.
+- 18 nowych sufiksów: po 6 dla każdej kategorii.
+- Nazwy i identyfikatory w losowaniu są odseparowane między kategoriami.
+- Premie procentowe pancerza losują się tylko na częściach ubioru posiadających bazowy pancerz.
+- Prefiks „Szybki” działa na wskazanej lekkiej broni: dodatkowy osłabiony atak w rundzie; „Stabilny” dodaje 8 punktów procentowych do trafienia.
+- Negatywny „Złomowy” nie pojawia się w nowych łupach; dawne egzemplarze zachowują się pod nazwą „Odzyskany” z pozytywnym bonusem.
+- Dawne sufiksy „Berserkera” i „Mutanta” nie mają już ujemnych kar.
+- Istniejące identyfikatory i lokalny zapis `ashen-save-v010` bez zmian. Nowe zestawy aktywowane po 3 prefiksach ubioru będą wdrożone w v0.1.39.
+- Aktualizacja: wyłącznie `index.html`, `js/game.js` i `README.md` (3 pliki).
+
+---
+
+# ASHEN v0.1.37.4 — jednolity układ i szczegóły łupów
+
+- Wszystkie strony (włącznie z Pulpitem) mają tę samą maksymalną szerokość i wspólny wygląd menu po lewej.
+- Ostatnia zakładka jest zapamiętywana pod osobnym kluczem `ashen-active-page`, niezależnie od zapisu postaci.
+- Kliknięcie ikony lub nazwy przedmiotu z łupów w Wyprawach, Raportach i podsumowaniu otwiera okno szczegółów jak w Ekwipunku. Jeśli przedmiot został już sprzedany lub rozłożony, widok katalogowy pokazuje podstawowy opis i grafikę.
+- Statystyki prefiksów i sufiksów oraz mechanika gry pozostają bez zmian.
+- Do aktualizacji istniejącej instalacji na GitHub Pages wystarczą 3 pliki: `index.html`, `css/style.css`, `js/game.js`. Nie trzeba ponownie wrzucać zasobów `assets`.
+- Zapis gry nadal używa `ashen-save-v010` i zachowuje zgodność z poprzednią wersją.
+
 # ASHEN v0.1.37.3 — komplet grafik broni od użytkownika
 
 - Wszystkie 24 bronie z bazy mają osobne grafiki WebP z obrazów przesłanych przez użytkownika.
