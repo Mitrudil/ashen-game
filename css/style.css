@@ -656,3 +656,8 @@ h1, h2, h3, h4, h5, h6, button,
 .ashen-set-detail-equation{margin:7px 0;font-size:.8rem;color:#c3c7c4}
 .ashen-set-item-info.is-pending .ashen-set-detail-main{color:#f0a39c}
 .ashen-set-item-info.is-active .ashen-set-detail-main{color:#91ebaf}
+
+/* ASHEN v0.1.41 — specjalizacje uzbrojenia */
+.ashen-combat-specialization{display:flex;flex-direction:column;gap:4px;margin-top:12px;padding:10px 12px;border:1px solid rgba(170,122,69,.36);border-radius:7px;background:rgba(123,79,30,.13)}
+.ashen-combat-specialization strong{color:#f3cf97;font-size:.83rem}
+.ashen-combat-specialization span{color:#bbc4c6;font-size:.78rem;line-height:1.55}

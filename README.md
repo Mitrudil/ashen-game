@@ -1,3 +1,13 @@
+# ASHEN v0.1.41 — Specjalizacje broni i atrybutów
+
+- Cztery grupy: broń biała jednoręczna (ZRĘ/SIŁ), biała dwuręczna (SIŁ/ZRĘ), palna/technologiczna (PER/ZRĘ) oraz dystansowa niepalna (PER/ZRĘ).
+- Celność oraz bonus obrażeń pochodzą z **wspólnych funkcji** używanych przez symulację walki i tabelę Siła bojowa; wynik zależy od rzeczywiście trzymanej broni.
+- Siła nie wzmacnia już wprost każdej broni palnej. Wartości skalowano, aby zachować znaczenie bazowych obrażeń przedmiotu, jego rzadkości i poziomu ulepszenia.
+- Tabela Siła bojowa podaje specjalizację, główny/pomocniczy atrybut, bonus obrażeń z atrybutów i celność każdej używanej broni.
+- Wskazówki przy atrybutach odzwierciedlają nowe zasady.
+- Dawne akcesoria z prefiksem Zwinny pokazują odtąd nazwę Refleksyjny (bez zmiany zapisanych identyfikatorów i bonusu +2 ZRĘ). Ubrania z dawnym prefiksem Zwinny nadal liczą się do zestawu Zwinny.
+- Bez zmian: zapis `ashen-save-v010`, właściwości posiadanych przedmiotów, mechanika i rzadkość setów, szansa na krytyk, inicjatywa i liczba ataków na rundę.
+
 # ASHEN v0.1.40.2 — Czytelny Ekwipunek i szczegóły setów
 
 - Kolorowe komunikaty o bonusach setów zostały usunięte z głównej listy Ekwipunku, miejsc na wyposażenie oraz skróconych kart przedmiotów. Powrócił zwarty widok.

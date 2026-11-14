@@ -1,4 +1,4 @@
-const APP_VERSION='0.1.40.2';
+const APP_VERSION='0.1.41';
 
 (()=>{'use strict';const KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 const rarities=[{name:'Zwykły',color:'#b8bfc3',weight:58,mult:1},{name:'Ulepszony',color:'#8ac78b',weight:25,mult:1.14},{name:'Rzadki',color:'#77afe5',weight:12,mult:1.32},{name:'Epicki',color:'#c391e4',weight:4,mult:1.58},{name:'Legendarny',color:'#f2bb65',weight:1,mult:1.95}];
@@ -119,6 +119,8 @@ const pluralPrefix={precise:'Precyzyjne',brutal:'Brutalne',agile:'Zwinne',reinfo
 function prefixLabel(mod,base){
  if(!mod)return null;
  const form=pluralItemIds.has(base.id)?'p':feminineItemIds.has(base.id)?'f':'m';
+ // Dawne akcesoria 'Zwinne' pozostają sprawne, ale wyświetlamy osobną nazwę.
+ if(base.slot==='extra'&&mod.id==='agile')return {m:'Refleksyjny',f:'Refleksyjna',p:'Refleksyjne'}[form];
  if(mod.forms)return mod.forms[form]||mod.name;
  return form==='p'?pluralPrefix[mod.id]||mod.name:form==='f'?femininePrefix[mod.id]||mod.name:mod.name;
 }
@@ -238,7 +240,8 @@ function statsOf(inst){
  const dmgPct=pct('damagePct'),armorPct=pct('armorPct'),critPp=pct('critPp'),accuracy=pct('accuracy'),extraAttacks=pct('extraAttacks');
  const pref=findModifier(prefixDefs,inst?.prefix),suf=findModifier(suffixDefs,inst?.suffix);
  const legacy=mods.find(x=>x.legacy);
- const name=[rarityPrefix(inst,d),prefixLabel(pref,d)||legacy?.name,d.name,suf?.name].filter(Boolean).join(' ');
+ const legacyLabel=legacy?.name==='Zwinny'&&d.slot==='extra'?prefixLabel({id:'agile',name:'Zwinny'},d):legacy?.name;
+ const name=[rarityPrefix(inst,d),prefixLabel(pref,d)||legacyLabel,d.name,suf?.name].filter(Boolean).join(' ');
  const weapon=weaponSlot(d.slot),upgrade=Math.min(5,Math.max(0,Number(inst?.upgrade)||0));
  const upgradedName=upgrade?name+' +'+upgrade:name;
  const armorUp=UPGRADE_POWER[upgrade];
@@ -377,7 +380,48 @@ function itemSetPanel(inst){
  const note=active?'Ta premia jest już doliczana do statystyk postaci.':equipped?'Premia jest nieaktywna — załóż brakujące elementy z tym samym prefiksem.':'Przedmiot nie jest założony. Prognoza uwzględnia zastąpienie wyposażenia w tym samym slocie.';
  return `<div class="ashen-set-item-info ${active?'is-active':'is-pending'}"><strong>${active?'✓ AKTYWNY':equipped?'◌ NIEAKTYWNY':'◇ ELEMENT ZESTAWU'} · Zestaw ${escape(config.name)} (${count}/6 założonych)</strong><div class="ashen-set-detail-main">${text}</div><small>${escape(note)}</small><details class="ashen-set-breakdown"><summary>Skąd bierze się premia? · Założone elementy i jakość</summary><div class="ashen-set-detail-members">${membersHtml||'<div class="muted">Brak założonych elementów tego zestawu.</div>'}</div><div class="ashen-set-detail-equation">${count?`Średnia jakości: (${members.map(m=>setQuality(m.inst).toFixed(2).replace('.',',')).join(' + ')}) / ${count} = ×${currentAvg.toFixed(2).replace('.',',')}`:'Średnia jakości zostanie obliczona z założonych części.'}</div>${result?.active?`<div class="ashen-set-detail-equation">Bonus bazowy: ${result.base} × ${result.avg.toFixed(2).replace('.',',')} → ${escape(setBonusDescription(result))}</div>`:`<div class="ashen-set-detail-equation">Do aktywacji potrzeba minimum 3 części z tym samym prefiksem. Kolejne części wzmacniają premię.</div>`}</details></div>`;
 }
-function attrs(){const a={...state.attrs};Object.values(state.equip).filter(Boolean).forEach(uid=>{for(const [k,v] of Object.entries(statsOf(instance(uid))?.bonus||{}))a[k]+=v});for(const [k,v] of Object.entries(activeSetBonuses().bonus))a[k]=(a[k]||0)+v;return a}function maxHp(){return 60+attrs().end*10}function xpNeed(){return Math.floor(80*Math.pow(state.level,1.35))}function regen(){let now=Date.now(),ticks=Math.floor((now-state.lastRegen)/45000);if(ticks>0){state.energy=Math.min(100,state.energy+ticks);state.lastRegen+=ticks*45000}}function levelUp(){let n=0;while(state.xp>=xpNeed()){state.xp-=xpNeed();state.level++;state.points+=3;n++}return n}function damage(p,e){let base=rand(p.min,p.max)+Math.floor(e.str/3);return Math.max(1,Math.floor(base*(1-clamp((e.armor||0)/100,0,.6))))}// Jedno źródło prawdy dla liczby ataków: bitwa i karta postaci.
+function attrs(){const a={...state.attrs};Object.values(state.equip).filter(Boolean).forEach(uid=>{for(const [k,v] of Object.entries(statsOf(instance(uid))?.bonus||{}))a[k]+=v});for(const [k,v] of Object.entries(activeSetBonuses().bonus))a[k]=(a[k]||0)+v;return a}function maxHp(){return 60+attrs().end*10}function xpNeed(){return Math.floor(80*Math.pow(state.level,1.35))}function regen(){let now=Date.now(),ticks=Math.floor((now-state.lastRegen)/45000);if(ticks>0){state.energy=Math.min(100,state.energy+ticks);state.lastRegen+=ticks*45000}}function levelUp(){let n=0;while(state.xp>=xpNeed()){state.xp-=xpNeed();state.level++;state.points+=3;n++}return n}// Jedna klasyfikacja dla obrażeń, celności i opisu w zakładce Postać.
+// Typ broni wynika z niezmiennego identyfikatora — nie z jej nazwy ani prefiksu.
+const MELEE_ONE_IDS=new Set(['knife','pipe','machete','cleaver','wrench','hatchet','baton','saber']);
+const MELEE_TWO_IDS=new Set(['hammer','crowbar','sledge']);
+const NONFIRE_RANGED_IDS=new Set(['crossbow','harpoon']);
+const WEAPON_STYLES={
+ melee1:{label:'Broń biała jednoręczna',main:'Zręczność',secondary:'Siła',desc:'Zręczność zwiększa celność, a Siła i Zręczność zwiększają obrażenia.'},
+ melee2:{label:'Broń biała dwuręczna',main:'Siła',secondary:'Zręczność',desc:'Siła zwiększa przede wszystkim obrażenia, a Siła i Zręczność wspierają celność.'},
+ firearm:{label:'Broń palna / technologiczna',main:'Percepcja',secondary:'Zręczność',desc:'Percepcja zwiększa celność i obrażenia; Zręczność wspomaga celność.'},
+ nonfire:{label:'Broń dystansowa niepalna',main:'Percepcja',secondary:'Zręczność',desc:'Percepcja i Zręczność wspólnie zwiększają celność i obrażenia.'}
+};
+function weaponStyle(weapon){
+ const id=weapon?.id;
+ if(MELEE_ONE_IDS.has(id))return 'melee1';
+ if(MELEE_TWO_IDS.has(id))return 'melee2';
+ if(NONFIRE_RANGED_IDS.has(id))return 'nonfire';
+ return 'firearm';
+}
+function weaponAttributeDamage(a,weapon){
+ const str=a.str||0,dex=a.dex||0,per=a.per||0;
+ switch(weaponStyle(weapon)){
+  case 'melee1':return Math.floor(str/5+dex/10);
+  case 'melee2':return Math.floor(str/3.5+dex/18);
+  case 'nonfire':return Math.floor(per/9+dex/9);
+  default:return Math.floor(per/6);
+ }
+}
+function weaponAccuracy(a,weapon){
+ const str=a.str||0,dex=a.dex||0,per=a.per||0;
+ switch(weaponStyle(weapon)){
+  case 'melee1':return 6+dex*1.25+per*.25;
+  case 'melee2':return 6+str*.5+dex*.75+per*.15;
+  case 'nonfire':return 6+per*.9+dex*.7;
+  default:return 6+per*1.4+dex*.25;
+ }
+}
+function weaponDamageRange(a,weapon,power=1){
+ const bonus=weaponAttributeDamage(a,weapon),low=Math.max(1,Math.floor(((weapon?.min||1)+bonus)*power));
+ return {low,high:Math.max(low,Math.floor(((weapon?.max||1)+bonus)*power)),bonus};
+}
+function damage(p,e){let base=rand(p.min,p.max)+Math.floor(e.str/3);return Math.max(1,Math.floor(base*(1-clamp((e.armor||0)/100,0,.6))))}
+// Jedno źródło prawdy dla liczby ataków: bitwa i karta postaci.
 function heroAttacks(){
  const hands=[state.dominantHand,state.dominantHand==='right'?'left':'right'];
  const main=statsOf(instance(state.equip[hands[0]])),off=statsOf(instance(state.equip[hands[1]]));
@@ -397,12 +441,13 @@ function fight(enemy){
  const hero={hp:maxHp(),acc:6+a.per*1.3,dodge:3+a.dex*1.1,armor:armor+Math.round(armor*setArmor/100)+Math.floor(a.end/4)};
  const foe={...enemy},lines=[];
  const hitAttack=(attacker,defender,who,r,weapon=null)=>{
-   const chance=clamp(70+2*(attacker.acc-defender.dodge)+(who==='hero'?(weapon?.weapon.accuracy||0):0),15,95);
+   const accuracy=who==='hero'&&weapon?weaponAccuracy(a,weapon.weapon):attacker.acc;
+   const chance=clamp(70+2*(accuracy-defender.dodge)+(who==='hero'?(weapon?.weapon.accuracy||0):0),15,95);
    const handName=weapon?' ('+(weapon.hand==='right'?'prawa':'lewa')+' ręka, '+Math.round(weapon.power*100)+'%)':'';
    if(Math.random()*100>=chance){lines.push(`Runda ${r}: ${who==='hero'?'Chybiasz':'Przeciwnik chybia'}${handName}.`);return}
    const critical=who==='hero'&&Math.random()<clamp(.05+a.per*.005+(weapon?.weapon.critPp||0)/100,0,.35);
    let raw;
-   if(weapon){raw=Math.max(1,Math.floor((rand(weapon.weapon.min,weapon.weapon.max)+Math.floor(a.str/3))*weapon.power));}
+   if(weapon){raw=Math.max(1,Math.floor((rand(weapon.weapon.min,weapon.weapon.max)+weaponAttributeDamage(a,weapon.weapon))*weapon.power));}
    else raw=rand(attacker.atk[0],attacker.atk[1]);
    if(critical)raw=Math.floor(raw*1.6);
    const dmg=Math.max(1,Math.floor(raw*(1-clamp(defender.armor/100,0,.6))));
@@ -557,26 +602,26 @@ function combatPanel(){
  const a=attrs(),attacks=heroAttacks(),setArmor=activeSetBonuses().armorPct;
  const equipArmor=Object.entries(state.equip).filter(([slot])=>!['right','left'].includes(slot)).reduce((sum,[,uid])=>sum+(statsOf(instance(uid))?.armor||0),0);
  const armor=Math.round(equipArmor*(1+setArmor/100))+Math.floor(a.end/4);
- const accuracy=6+a.per*1.3,dodge=3+a.dex*1.1;
+ const dodge=3+a.dex*1.1;
  const cr=attacks.map(x=>Math.round(Math.min(.35,.05+a.per*.005+(x.weapon.critPp||0)/100)*1000)/10);
- const displayedAttack=(attack)=>{
-  const w=attack.weapon;
-  const low=Math.max(1,Math.floor((w.min+Math.floor(a.str/3))*attack.power));
-  const high=Math.max(low,Math.floor((w.max+Math.floor(a.str/3))*attack.power));
-  return {low,high};
- };
- const attackRows=attacks.map((x,i)=>{const range=displayedAttack(x);return `<tr><td>${i+1}. ${escape(x.weapon.name)}<small>${x.hand==='right'?'Prawa':'Lewa'} ręka · ${Math.round(x.power*100)}% mocy</small></td><td>${range.low}–${range.high}</td><td>+${x.weapon.accuracy||0} pkt</td><td>${cr[i].toFixed(1).replace('.',',')}%</td></tr>`}).join('');
+ const attackRows=attacks.map((x,i)=>{
+  const w=x.weapon,style=WEAPON_STYLES[weaponStyle(w)],range=weaponDamageRange(a,w,x.power),acc=weaponAccuracy(a,w);
+  return `<tr><td>${i+1}. ${escape(w.name)}<small>${escape(style.label)} · ${x.hand==='right'?'Prawa':'Lewa'} ręka · ${Math.round(x.power*100)}% mocy</small><small>Główny: ${style.main} · dodatkowy: ${style.secondary}</small></td><td>${range.low}–${range.high}<small>Atrybuty: +${range.bonus} przed mnożnikiem</small></td><td>${acc.toFixed(1).replace('.',',')} + ${w.accuracy||0}<small>Atrybuty + modyfikator broni</small></td><td>${cr[i].toFixed(1).replace('.',',')}%</td></tr>`;
+ }).join('');
+ const mainStyle=WEAPON_STYLES[weaponStyle(attacks[0].weapon)],mainAcc=weaponAccuracy(a,attacks[0].weapon);
  return `<section class="ashen-combat-panel" aria-label="Siła bojowa"><div class="ashen-combat-heading"><div><span class="tag">STATYSTYKI WALKI</span><h3>⚔ Siła bojowa</h3></div><span class="ashen-combat-attack-count">${attacks.length} ${attacks.length===1?'atak':'ataki'} / rundę</span></div>
- <div class="ashen-combat-grid"><div class="ashen-combat-card"><h4>ATAK</h4><div class="ashen-combat-scroll"><table class="ashen-combat-table"><thead><tr><th>Broń / kolejność</th><th>Obrażenia*</th><th>Celność broni</th><th>Krytyk</th></tr></thead><tbody>${attackRows}</tbody></table></div>
- <div class="ashen-combat-metrics"><div><span>Celność postaci</span><strong>${accuracy.toFixed(1).replace('.',',')}</strong></div><div><span>Inicjatywa</span><strong>k20 + ${a.dex} ZR</strong></div><div><span>Siła krytyka</span><strong>×1,60</strong></div></div>
- <p class="ashen-combat-note">* Obrażenia przed pancerzem przeciwnika. Rzeczywista szansa trafienia zależy od uników wroga (15–95%). Kolejne ataki drugą ręką lub z prefiksu „Szybki” mają obniżoną moc.</p></div>
+ <div class="ashen-combat-grid"><div class="ashen-combat-card"><h4>ATAK</h4><div class="ashen-combat-scroll"><table class="ashen-combat-table"><thead><tr><th>Broń / specjalizacja</th><th>Obrażenia*</th><th>Celność**</th><th>Krytyk</th></tr></thead><tbody>${attackRows}</tbody></table></div>
+ <div class="ashen-combat-metrics"><div><span>Celność broni głównej</span><strong>${mainAcc.toFixed(1).replace('.',',')} pkt</strong></div><div><span>Inicjatywa</span><strong>k20 + ${a.dex} ZR</strong></div><div><span>Siła krytyka</span><strong>×1,60</strong></div></div>
+ <div class="ashen-combat-specialization"><strong>${escape(mainStyle.label)}</strong><span>${escape(mainStyle.desc)}</span></div>
+ <p class="ashen-combat-note">* Obrażenia przed pancerzem przeciwnika. ** Celność pokazuje wynik z atrybutów i osobno premię broni; rzeczywista szansa trafienia zależy od uników wroga i wynosi 15–95%. Kolejne ataki drugą ręką lub z prefiksu „Szybki” mają obniżoną moc.</p></div>
  <div class="ashen-combat-card"><h4>OBRONA</h4><div class="ashen-combat-metrics defense"><div><span>Punkty życia</span><strong>${maxHp()}</strong></div><div><span>Pancerz łącznie</span><strong>${armor}</strong></div><div><span>Uniki</span><strong>${dodge.toFixed(1).replace('.',',')}</strong></div><div><span>Ochrona przed obrażeniami</span><strong>${Math.min(60,Math.max(0,armor))}%</strong></div><div><span>Premia pancerza z zestawów</span><strong>+${setArmor}%</strong></div><div><span>Odporność (WYT)</span><strong>${a.end}</strong></div></div><p class="ashen-combat-note">Pancerz zmniejsza otrzymane obrażenia maksymalnie o 60%. Uniki przeciwnika wpływają na skuteczność jego i Twoich trafień.</p></div></div></section>`;
 }
+
 const ATTRIBUTE_HELP={
- str:'Dodaje 1 punkt obrażeń za każde 3 punkty Siły. Wartość jest doliczana przed mnożnikiem ataku i redukcją pancerza.',
- dex:'Zwiększa uniki o 1,1 pkt na każdy punkt i wspomaga inicjatywę (rzut k20 + Zręczność).',
+ str:'Najważniejsza dla ciężkiej broni białej (obrażenia i celność); wspiera obrażenia lekkiej broni białej. Nie wzmacnia bezpośrednio broni palnej.',
+ dex:'Zwiększa uniki o 1,1 pkt na punkt oraz inicjatywę (k20 + Zręczność). Decyduje o celności lekkiej broni białej, pomaga ciężkiej, palnej i dystansowej; zwiększa obrażenia broni białej i dystansowej niepalnej.',
  end:'Każdy punkt dodaje 10 maksymalnych punktów życia; co 4 punkty zwiększa pancerz o 1.',
- per:'Każdy punkt dodaje 1,3 pkt celności oraz 0,5 punktu procentowego szansy na trafienie krytyczne (z limitem 35%).',
+ per:'Kluczowa dla broni palnej i dystansowej: zwiększa ich celność i obrażenia. Daje też 0,5 punktu procentowego szansy na trafienie krytyczne na punkt (maks. 35%).',
  int:'Obecnie służy jako atrybut wyposażenia i premii; bez bezpośredniego wpływu na aktualną symulację walki. Rozwój zdolności technicznych jest planowany.',
  cha:'Obecnie służy jako atrybut wyposażenia i premii; bez bezpośredniego wpływu na aktualną symulację walki. Handel i rozmowy są planowane.'
 };
