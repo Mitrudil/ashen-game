@@ -1,4 +1,4 @@
-const APP_VERSION='0.1.47';
+const APP_VERSION='0.1.48';
 
 (()=>{'use strict';const KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 const rarities=[{name:'Zwykły',color:'#b8bfc3',weight:58,mult:1},{name:'Ulepszony',color:'#8ac78b',weight:25,mult:1.14},{name:'Rzadki',color:'#77afe5',weight:12,mult:1.32},{name:'Epicki',color:'#c391e4',weight:4,mult:1.58},{name:'Legendarny',color:'#f2bb65',weight:1,mult:1.95}];
@@ -9,27 +9,47 @@ const items=[
 {id:'goggles',name:'Gogle zwiadowcy',flavor:'Zmatowiałe, terenowe gogle pomagające wypatrywać ruchu i osłaniające oczy przed pyłem.',slot:'accessory',bonus:{per:2}},{id:'gloves',name:'Rękawice technika',slot:'accessory',bonus:{int:2}},{id:'mask',name:'Maska filtracyjna',flavor:'Dwu-filtrowa półmaska z zapasowymi wkładami. Używana do eksploracji zadymionych ruin.',slot:'accessory',armor:2,bonus:{end:2}},{id:'compass',name:'Kompas tropiciela',flavor:'Wysłużony kompas polowy ułatwiający orientację w ruinach i szybką zmianę kierunku.',slot:'accessory',bonus:{dex:1,per:1}},{id:'bracelet',name:'Bransoleta strażnika',flavor:'Ciężka bransoleta z przedwojennego posterunku. Dodaje pewności ciosu.',slot:'accessory',bonus:{str:1}},{id:'radio',name:'Moduł łączności',flavor:'Przenośny moduł radiowy z improwizowaną anteną. Poprawia koordynację i wymianę informacji.',slot:'accessory',bonus:{int:1,cha:1}},{id:'scope',name:'Celownik optyczny',slot:'accessory',bonus:{per:3}},{id:'injector',name:'Wzmacniacz odruchów',slot:'accessory',bonus:{dex:2}},{id:'badge',name:'Naszyjnik ocalałego',flavor:'Składany z odzyskanych drobiazgów naszyjnik – symbol człowieka, który już zbyt wiele przetrwał.',slot:'accessory',bonus:{cha:1}},{id:'module',name:'Moduł neurotechniczny',slot:'accessory',bonus:{int:3}},
 {id:'scrap',name:'Złom',slot:'material',bonus:{}},{id:'circuits',name:'Elektronika',slot:'material',bonus:{}},{id:'fuel',name:'Paliwo',slot:'material',bonus:{}},{id:'chemicals',name:'Chemikalia',slot:'material',bonus:{}},{id:'parts',name:'Części zamienne',slot:'material',bonus:{}}];
 
-// ASHEN v0.1.46: autorskie artefakty Rezonansu, osobna kategoria przedmiotów.
-const ARTIFACT_SETS=Object.freeze({
- seeker:{name:'Ślady Wędrowca',ids:['ash_needle','ash_eye','ash_dust'],luck:5,explore:8,bonus:{},description:'Szczęście +5 i skuteczność eksploracji +8 p.p.'},
- guardian:{name:'Pieczęć Burzy',ids:['ash_core','ash_ember','ash_shard'],luck:0,explore:0,bonus:{end:3,per:2},description:'Wytrzymałość +3 i Percepcja +2'}
+// ASHEN v0.1.48 — artefakty mają własne prefiksy i sufiksy.
+// Zestaw powstaje z trzech RÓŻNYCH założonych artefaktów o wspólnym modyfikatorze.
+// Prefiks i sufiks mogą tworzyć odrębne rezonanse; główną nagrodą jest Szczęście.
+const ARTIFACT_PREFIX_SETS=Object.freeze({
+ art_fortunate:{name:'Pomyślny',luck:4,explore:0,bonus:{},description:'Szczęście +4'},
+ art_echo:{name:'Nasłuchujący',luck:3,explore:5,bonus:{},description:'Szczęście +3 · Eksploracja +5 p.p.'},
+ art_ward:{name:'Osłonowy',luck:2,explore:0,bonus:{end:2},description:'Szczęście +2 · Wytrzymałość +2'}
 });
+const ARTIFACT_SUFFIX_SETS=Object.freeze({
+ art_find:{name:'Odkrywcy',luck:3,explore:0,bonus:{},description:'Szczęście +3'},
+ art_path:{name:'Wędrowca',luck:2,explore:5,bonus:{},description:'Szczęście +2 · Eksploracja +5 p.p.'},
+ art_survive:{name:'Ocalałego',luck:2,explore:0,bonus:{end:1},description:'Szczęście +2 · Wytrzymałość +1'}
+});
+const artifactPrefixDefs=[
+ {id:'art_fortunate',name:'Pomyślny',forms:{m:'Pomyślny',f:'Pomyślna',p:'Pomyślne'},luck:1,on:'artifact'},
+ {id:'art_echo',name:'Nasłuchujący',forms:{m:'Nasłuchujący',f:'Nasłuchująca',p:'Nasłuchujące'},luck:1,on:'artifact'},
+ {id:'art_ward',name:'Osłonowy',forms:{m:'Osłonowy',f:'Osłonowa',p:'Osłonowe'},luck:1,on:'artifact'}
+];
+const artifactSuffixDefs=[
+ {id:'art_find',name:'Odkrywcy',luck:1,on:'artifact'},
+ {id:'art_path',name:'Wędrowca',luck:1,on:'artifact'},
+ {id:'art_survive',name:'Ocalałego',luck:1,on:'artifact'}
+];
 const artifactItems=[
  {id:'ash_needle',name:'Igła północy',flavor:'Drga nawet w bezwietrznej ciszy. Nie wskazuje kierunku, tylko miejsca, które ktoś zapomniał.',slot:'extra',artifact:true,artifactSet:'seeker',artifactLuck:1,artifactSign:'✧',bonus:{per:1}},
  {id:'ash_eye',name:'Oko martwej strefy',flavor:'Matowe szkiełko, w którym błyskają światła nieistniejących zabudowań.',slot:'extra',artifact:true,artifactSet:'seeker',artifactLuck:1,artifactSign:'◉',bonus:{int:1}},
  {id:'ash_dust',name:'Pył wspomnień',flavor:'Pył zamknięty w starej fiolce. Układa się w ślady stóp, gdy nikt nie patrzy.',slot:'extra',artifact:true,artifactSet:'seeker',artifactLuck:2,artifactSign:'✺',bonus:{dex:1}},
- {id:'ash_core',name:'Rdzeń szkwału',flavor:'Ciepły fragment metalu, który pulsuje jakby był częścią czegoś żywego.',slot:'extra',artifact:true,artifactSet:'guardian',artifactLuck:0,artifactSign:'✹',bonus:{end:1}},
- {id:'ash_ember',name:'Żar bez płomienia',flavor:'Zaczerwieniony kamień oddający ciepło dopiero w chwili zagrożenia.',slot:'extra',artifact:true,artifactSet:'guardian',artifactLuck:0,artifactSign:'◆',bonus:{str:1}},
- {id:'ash_shard',name:'Odłamek ciszy',flavor:'Ciemny kryształ, przy którym odgłosy broni brzmią jak dalekie echo.',slot:'extra',artifact:true,artifactSet:'guardian',artifactLuck:0,artifactSign:'◇',bonus:{per:1}}
+ {id:'ash_core',name:'Rdzeń szkwału',flavor:'Ciepły fragment metalu, który pulsuje jakby był częścią czegoś żywego.',slot:'extra',artifact:true,artifactSet:'guardian',artifactLuck:1,artifactSign:'✹',bonus:{end:1}},
+ {id:'ash_ember',name:'Żar bez płomienia',flavor:'Zaczerwieniony kamień oddający ciepło dopiero w chwili zagrożenia.',slot:'extra',artifact:true,artifactSet:'guardian',artifactLuck:1,artifactSign:'◆',bonus:{str:1}},
+ {id:'ash_shard',name:'Odłamek ciszy',flavor:'Ciemny kryształ, przy którym odgłosy broni brzmią jak dalekie echo.',slot:'extra',artifact:true,artifactSet:'guardian',artifactLuck:1,artifactSign:'◇',bonus:{per:1}}
 ];
 items.push(...artifactItems);
 function resonanceResults(){
  const worn=['extra','extra2','extra3'].map(slot=>({slot,inst:instance(state.equip?.[slot])})).filter(x=>x.inst&&def(x.inst)?.artifact);
- return Object.entries(ARTIFACT_SETS).map(([id,config])=>{
-  const unique=new Set();const members=[];
-  for(const row of worn){if(def(row.inst).artifactSet===id&&!unique.has(row.inst.id)){unique.add(row.inst.id);members.push(row)}}
-  return {id,config,members,count:members.length,active:members.length===3};
- });
+ const results=[];
+ for(const [kind,configs] of [['prefix',ARTIFACT_PREFIX_SETS],['suffix',ARTIFACT_SUFFIX_SETS]])for(const [id,config] of Object.entries(configs)){
+  const seen=new Set(),members=[];
+  for(const row of worn){if(row.inst[kind]!==id||seen.has(row.inst.id))continue;seen.add(row.inst.id);members.push(row)}
+  if(members.length)results.push({id,kind,config,members,count:members.length,active:members.length===3});
+ }
+ return results;
 }
 function resonanceBonuses(){
  const active=resonanceResults().filter(x=>x.active),bonus={};let luck=0,explore=0;
@@ -38,13 +58,18 @@ function resonanceBonuses(){
 }
 function resonancePanel(){
  const results=resonanceResults();
- const cards=results.map(r=>`<div class="ashen-resonance-card ${r.active?'active':'pending'}"><div class="ashen-resonance-title"><strong>${escape(r.config.name)}</strong><span>${r.count}/3 · ${r.active?'AKTYWNY':'NIEAKTYWNY'}</span></div><p class="small ${r.active?'good':'muted'}">${escape(r.config.description)}</p><div class="ashen-resonance-members">${r.config.ids.map(id=>{const found=r.members.find(m=>m.inst.id===id);return `<span class="${found?'found':''}" title="${escape(item(id)?.name||id)}">${found?'✓':'◇'} ${escape(item(id)?.name||id)}</span>`}).join('')}</div></div>`).join('');
- return `<section class="ashen-resonance-panel"><h3>◈ Rezonans artefaktów</h3><p class="small muted">Załóż trzy <strong>różne</strong> artefakty z jednej kolekcji do slotów Akcesorium I–III. Zwykłe akcesoria nadal można z nimi łączyć; dwa identyczne artefakty nie zaliczają się podwójnie.</p><div class="ashen-resonance-grid">${cards}</div></section>`;
+ const cards=results.map(r=>`<div class="ashen-resonance-card ${r.active?'active':'pending'}"><div class="ashen-resonance-title"><strong>${r.kind==='prefix'?'Prefiks':'Sufiks'}: ${escape(r.config.name)}</strong><span>${r.count}/3 · ${r.active?'AKTYWNY':'NIEAKTYWNY'}</span></div><p class="small ${r.active?'good':'muted'}">${escape(r.config.description)}</p><div class="ashen-resonance-members">${r.members.map(m=>`<span class="found">✓ ${escape(statsOf(m.inst).name)} · ${escape(slotLabels[m.slot])}</span>`).join('')}</div>${r.active?'':'<div class="small muted">Brakuje '+(3-r.count)+' innego artefaktu z tym modyfikatorem.</div>'}</div>`).join('');
+ return `<section class="ashen-resonance-panel"><h3>◈ Rezonans artefaktów</h3><p class="small muted">Każdy artefakt ma bazowe Szczęście i może mieć prefiks oraz sufiks. <strong>Trzy różne artefakty z tym samym prefiksem lub sufiksem</strong> uruchamiają bonus zestawu. Zwykłe akcesoria nie liczą się do rezonansu. Prefiks i sufiks to dwa niezależne typy zestawów.</p><div class="ashen-resonance-grid">${cards||'<div class="ashen-resonance-card">Załóż artefakt z modyfikatorem, aby zobaczyć postęp zestawu.</div>'}</div></section>`;
 }
 function artifactDetailPanel(inst){
  const d=def(inst);if(!d?.artifact)return '';
- const r=resonanceResults().find(x=>x.id===d.artifactSet),equipped=Object.values(state.equip).includes(inst.uid);
- return `<section class="ashen-artifact-detail ${r?.active&&equipped?'active':'pending'}"><strong>◈ ${escape(r.config.name)} · ${r.count}/3 ${r.active&&equipped?'— AKTYWNY':'— zestaw niepełny'}</strong><p class="small">${escape(r.config.description)} ${equipped?'':'(zestaw działa wyłącznie po założeniu trzech różnych części)'}</p><details><summary>Pokaż elementy zestawu</summary>${r.config.ids.map(id=>`<div>${r.members.some(m=>m.inst.id===id)?'✓':'◇'} ${escape(item(id)?.name||id)}</div>`).join('')}</details></section>`;
+ const equipped=Object.values(state.equip).includes(inst.uid),results=resonanceResults(),names=[];
+ for(const [kind,configs] of [['prefix',ARTIFACT_PREFIX_SETS],['suffix',ARTIFACT_SUFFIX_SETS]]){
+  const id=inst[kind],cfg=configs[id];if(!cfg)continue;
+  const r=results.find(x=>x.kind===kind&&x.id===id),count=r?.count||0,active=equipped&&r?.active;
+  names.push(`<div class="ashen-artifact-affix ${active?'is-active':'is-pending'}"><strong>${kind==='prefix'?'Prefiks':'Sufiks'}: ${escape(cfg.name)} · ${count}/3 · ${active?'AKTYWNY':'NIEAKTYWNY'}</strong><div>${escape(cfg.description)}</div><div class="small">${active?'Komplet trzech różnych artefaktów.':!equipped?'Ten artefakt nie jest założony; wybierz jeden ze slotów 1–3.':`Do aktywacji brakuje ${Math.max(0,3-count)} różnych artefaktów.`}</div>${r?.members?.length?`<details><summary>Elementy zestawu</summary>${r.members.map(m=>`<div>${escape(statsOf(m.inst).name)}</div>`).join('')}</details>`:''}</div>`);
+ }
+ return `<section class="ashen-artifact-detail"><strong>◈ Rezonans i Szczęście</strong><p class="small">Bazowe Szczęście: +${d.artifactLuck||0}. Bonusy prefiksu i sufiksu działają również bez kompletu.</p>${names.join('')||'<p class="small">Ten artefakt nie ma jeszcze modyfikatorów.</p>'}</section>`;
 }
 
 // Nowy model slotów: dwie ręce i osobne elementy ubioru.
@@ -150,7 +175,7 @@ for(const inst of state.inventory){if(typeof inst.locked!=='boolean')inst.locked
 const rangedIds=new Set(['pistol','revolver','smg','deserteagle','rifle','shotgun','crossbow','carbine','sniper','flame','rail','lmg','harpoon']);
 const weaponSlot=s=>s==='hand1'||s==='hand2';
 // Naturalne odmiany nazw prefiksów dla żeńskich i mnogich nazw sprzętu.
-const feminineItemIds=new Set(['shotgun','crossbow','pipe','machete','jacket','vest','radio','bracelet','cap','scarf','bandana','mask','scope','saber','hatchet','sledge','rail','lmg','nightgoggles2','thermal','armorshirt','techshirt','scoutshirt','tshirt','deserteagle2','sneakers2','hood2']);
+const feminineItemIds=new Set(['ash_needle','shotgun','crossbow','pipe','machete','jacket','vest','radio','bracelet','cap','scarf','bandana','mask','scope','saber','hatchet','sledge','rail','lmg','nightgoggles2','thermal','armorshirt','techshirt','scoutshirt','tshirt','deserteagle2','sneakers2','hood2']);
 const pluralItemIds=new Set(['jeans','cargo','scoutpants','kevlarpants','radiopants','sneakers','workboots','combatboots','silentboots','hazboots','goggles','gloves','dustglasses','nightgoggles','parts','fingerless','workgloves','tacticalgloves','leathergloves','steelbracers','scoutbracers','kevlarbracers','zerobracers']);
 const femininePrefix={precise:'Precyzyjna',brutal:'Brutalna',agile:'Zwinna',reinforced:'Wzmocniona',technical:'Techniczna',light:'Lekka',armored:'Pancerna',destructive:'Niszczycielska',lethal:'Zabójcza',scrap:'Złomowa'};
 const pluralPrefix={precise:'Precyzyjne',brutal:'Brutalne',agile:'Zwinne',reinforced:'Wzmocnione',technical:'Techniczne',light:'Lekkie',armored:'Pancerne',destructive:'Niszczycielskie',lethal:'Zabójcze',scrap:'Złomowe'};
@@ -207,7 +232,7 @@ const newPrefixDefs=[
  {id:'accessory_reflexive',name:'Refleksyjny',forms:{m:'Refleksyjny',f:'Refleksyjna',p:'Refleksyjne'},bonus:{dex:2},on:'accessory'},
  {id:'accessory_versatile',name:'Wszechstronny',forms:{m:'Wszechstronny',f:'Wszechstronna',p:'Wszechstronne'},bonus:{per:1,int:1},on:'accessory'}
 ];
-const prefixDefs=[...legacyPrefixDefs,...newPrefixDefs];
+const prefixDefs=[...legacyPrefixDefs,...newPrefixDefs,...artifactPrefixDefs];
 const legacySuffixDefs=[
  {id:'hunter',name:'Łowcy',bonus:{per:2},on:'any',legacyOnly:true},
  {id:'strong',name:'Siłacza',bonus:{str:2},on:'any',legacyOnly:true},
@@ -240,10 +265,17 @@ const newSuffixDefs=[
  {id:'accessory_explorer',name:'Odkrywcy',bonus:{int:1,per:1},on:'accessory'},
  {id:'accessory_survivor',name:'Ocalałego',bonus:{end:2},on:'accessory'}
 ];
-const suffixDefs=[...legacySuffixDefs,...newSuffixDefs];
+const suffixDefs=[...legacySuffixDefs,...newSuffixDefs,...artifactSuffixDefs];
+// Jednorazowa, bezstratna migracja artefaktów z 0.1.46–0.1.47:
+// stare kolekcje otrzymują odpowiedniki prefiksów; oryginalne UID i rzadkość zostają.
+for(const inst of state.inventory){
+ const d=def(inst);if(!d?.artifact||inst.artifactAffixesInitialized)continue;
+ if(!inst.prefix)inst.prefix=d.artifactSet==='seeker'?'art_fortunate':'art_ward';
+ inst.artifactAffixesInitialized=true;
+}
 const clothingSlots=new Set(['head','shirt','outer','hands','pants','boots']);
 const lightWeaponIds=new Set(['knife','pipe','machete','hatchet','baton','wrench','cleaver','saber','pistol','revolver','smg']);
-function categoryOf(d){return weaponSlot(d.slot)?'weapon':clothingSlots.has(d.slot)?'clothing':d.slot==='extra'?'accessory':'other'}
+function categoryOf(d){return weaponSlot(d.slot)?'weapon':clothingSlots.has(d.slot)?'clothing':d.artifact?'artifact':d.slot==='extra'?'accessory':'other'}
 const prefixChance=[.18,.32,.50,.70,.85],suffixChance=[.06,.15,.29,.55,.78];
 function suitable(mod,d,rar){
  if(!mod||!d||d.slot==='material'||mod.legacyOnly||(mod.maxRarity!==undefined&&rar>mod.maxRarity))return false;
@@ -254,6 +286,7 @@ function suitable(mod,d,rar){
  if(mod.on==='clothing'&&cat!=='clothing')return false;
  if(mod.on==='clothingArmor'&&(cat!=='clothing'||!(d.armor>0)))return false;
  if(mod.on==='accessory'&&cat!=='accessory')return false;
+ if(mod.on==='artifact'&&cat!=='artifact')return false;
  if(mod.armorPct&&!(d.armor>0))return false;
  return true;
 }
@@ -307,7 +340,7 @@ function explorationStats(){
  for(const slot of ['extra','extra2','extra3']){
   const inst=instance(state.equip?.[slot]);
   if(!inst)continue;
-  const pts=(LUCK_ITEMS[inst.id]||0)+(def(inst)?.artifactLuck||0);
+  const pts=(LUCK_ITEMS[inst.id]||0)+(def(inst)?.artifactLuck||0)+modifiersOf(inst).reduce((sum,mod)=>sum+(mod.luck||0),0);
   if(pts){luck+=pts;sources.push({name:statsOf(inst).name,value:pts});}
  }
  const resonance=resonanceBonuses();
@@ -395,12 +428,12 @@ function rollItem(id,expedition=null,luck=0){
  // Artefakty zaczynają się od rzadkiej jakości; legenda tylko na dalekiej wyprawie.
  if(d?.artifact){weights=weights.map((w,i)=>i>=2?w:0);if(!weights.some(Boolean))weights=[0,0,1,0,0]}
  const rar=rollRarity(weights);
- const prefix=d?.slot!=='material'&&!d?.artifact&&Math.random()<prefixChance[rar]?pickModifier(prefixDefs,d,rar):null;
- const suffix=d?.slot!=='material'&&!d?.artifact&&Math.random()<suffixChance[rar]?pickModifier(suffixDefs,d,rar):null;
- return {uid:'loot-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),id,rarity:rar,prefix,suffix,locked:rar>=3};
+ const prefix=d?.artifact?pickModifier(artifactPrefixDefs,d,rar):d?.slot!=='material'&&Math.random()<prefixChance[rar]?pickModifier(prefixDefs,d,rar):null;
+ const suffix=d?.artifact?(Math.random()<(rar>=4?.9:rar>=3?.75:.5)?pickModifier(artifactSuffixDefs,d,rar):null):d?.slot!=='material'&&Math.random()<suffixChance[rar]?pickModifier(suffixDefs,d,rar):null;
+ return {uid:'loot-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),id,rarity:rar,prefix,suffix,artifactAffixesInitialized:!!d?.artifact,locked:rar>=3};
 }
 function bonusText(b){return Object.entries(b||{}).filter(([,v])=>v!==0).map(([k,v])=>`${attrNames[k]} ${v>0?'+':''}${v}`).join(' · ')}
-function modifierText(m){return [bonusText(m.bonus),m.damagePct?`Obrażenia ${m.damagePct>0?'+':''}${m.damagePct}%`:null,m.armorPct?`Pancerz ${m.armorPct>0?'+':''}${m.armorPct}%`:null,m.critPp?`Szansa trafienia krytycznego +${m.critPp} p.p.`:null,m.accuracy?`Celność +${m.accuracy} pkt`:null,m.extraAttacks?`Ataki na rundę +${m.extraAttacks}`:null].filter(Boolean).join(' · ')}
+function modifierText(m){return [m.luck?`Szczęście +${m.luck}`:null,bonusText(m.bonus),m.damagePct?`Obrażenia ${m.damagePct>0?'+':''}${m.damagePct}%`:null,m.armorPct?`Pancerz ${m.armorPct>0?'+':''}${m.armorPct}%`:null,m.critPp?`Szansa trafienia krytycznego +${m.critPp} p.p.`:null,m.accuracy?`Celność +${m.accuracy} pkt`:null,m.extraAttacks?`Ataki na rundę +${m.extraAttacks}`:null].filter(Boolean).join(' · ')}
 function slotName(slot){return slotLabels[slot]||({hand1:'Broń jednoręczna',hand2:'Broń dwuręczna',material:'Surowiec'})[slot]||slot}
 function statDetails(o){return `${weaponSlot(o.slot)?`Obrażenia ${o.min}–${o.max}${o.slot==='hand2'?' · obie ręce':''}`:o.slot==='material'?'Materiał':`Pancerz ${o.armor||0}`}${bonusText(o.bonus)?' · '+bonusText(o.bonus):''}${o.critPp?` · Krytyk +${o.critPp} p.p.`:''}${o.accuracy?` · Celność +${o.accuracy} pkt`:''}${o.extraAttacks?` · Dodatkowy atak +${o.extraAttacks}`:''}`}
 function affixDetails(o){return (o.effects||[]).length?`<div class="small muted" style="margin-top:5px">${o.effects.map(x=>`<div>↳ ${escape(x.name)}: ${escape(x.description)}</div>`).join('')}</div>`:''}
@@ -856,7 +889,7 @@ const ACCESSORY_ART_IDS=new Set(['goggles','scarf','bandana','dustglasses','badg
 const EXTRA_HANDS_ART_IDS=new Set(['gloves']);
 const MATERIAL_ART_IDS=new Set(['scrap','circuits','fuel','chemicals','parts']);
 function itemArtUrl(d){if(!d)return null; if(WEAPON_ART_IDS.has(d.id))return `./assets/items/weapons/${d.id}.webp`; if(ARMOR_ART_IDS.has(d.id))return `./assets/items/armor/${d.id}.webp`; if(PANTS_ART_IDS.has(d.id))return `./assets/items/pants/${d.id}.webp`; if(BOOTS_ART_IDS.has(d.id))return `./assets/items/boots/${d.id}.webp`; if(SHIRT_ART_IDS.has(d.id))return `./assets/items/shirts/${d.id}.webp`; if(HEAD_ART_IDS.has(d.id))return `./assets/items/head/${d.id}.webp`; if(HANDS_ART_IDS.has(d.id))return `./assets/items/hands/${d.id}.webp`; if(ACCESSORY_ART_IDS.has(d.id))return `./assets/items/accessories/${d.id}.webp`; if(EXTRA_HANDS_ART_IDS.has(d.id))return `./assets/items/hands/${d.id}.webp`; if(MATERIAL_ART_IDS.has(d.id))return `./assets/items/materials/${d.id}.webp`; return null}
-function itemIcon(instOrDef,size=''){const d=instOrDef&&instOrDef.id&&instOrDef.uid===undefined?instOrDef:def(instOrDef); const r=instOrDef&&instOrDef.uid!==undefined?rarity(instOrDef):null; const color=r?.color||'#9ba7ad'; const kind=d?itemFamily(d):'empty'; return `<div class="iconbox ${size} ${itemArtUrl(d)?'has-item-art':''} ${d?.artifact?'ashen-artifact-icon':''}">${d?.artifact?`<span class="ashen-artifact-glyph" style="color:${color}">${d.artifactSign||'◈'}</span>`:itemArtUrl(d)?`<img class="inventory-item-art" src="${itemArtUrl(d)}" alt="${escape(d.name)}" loading="lazy">`:svgIcon(kind,color)}</div>`}
+function itemIcon(instOrDef,size=''){const d=instOrDef&&instOrDef.id&&instOrDef.uid===undefined?instOrDef:def(instOrDef); const r=instOrDef&&instOrDef.uid!==undefined?rarity(instOrDef):null; const color=r?.color||'#9ba7ad'; const kind=d?itemFamily(d):'empty'; return `<div class="iconbox ${size} ${r?'ashen-rarity-'+Math.min(4,Math.max(0,Number(instOrDef.rarity)||0)):''} ${itemArtUrl(d)?'has-item-art':''} ${d?.artifact?'ashen-artifact-icon':''}">${d?.artifact?`<span class="ashen-artifact-glyph" style="color:${color}">${d.artifactSign||'◈'}</span>`:itemArtUrl(d)?`<img class="inventory-item-art" src="${itemArtUrl(d)}" alt="${escape(d.name)}" loading="lazy">`:svgIcon(kind,color)}</div>`}
 const WEAPON_CATEGORIES={
  'hand1-melee':{name:'Broń biała jednoręczna',ids:['baton','pipe','wrench','knife','cleaver','hatchet','saber','machete']},
  'hand1-gun':{name:'Broń palna jednoręczna',ids:['pistol','deserteagle','revolver','smg']},
@@ -869,16 +902,49 @@ function inventoryMatchesFilter(inst,filter){const d=def(inst);if(!d)return fals
 let openItemDetail=null;
 function weaponFamilyLabel(d){const c=weaponCategoryFor(d);return c?WEAPON_CATEGORIES[c].name:slotName(d?.slot||'')}
 function itemDetailImage(d){if(itemArtUrl(d))return `<img class="ashen-detail-artwork" src="${itemArtUrl(d)}" alt="${escape(d.name)}">`;return d?.id&&!!weaponCategoryFor(d)?`<div class="detail-placeholder" aria-label="Grafika przedmiotu będzie dodana później">${itemIcon(d,'')}<span>Grafika w przygotowaniu</span></div>`:itemIcon(d,'')}
-// Symboliczne znaki przedrostków i przyrostków: nie wymagają osobnych plików graficznych.
-function modifierGlyph(kind,d){
- const category=categoryOf(d||{});
- const glyph=kind==='prefix'?(category==='weapon'?'⚔':category==='clothing'?'⛨':'◈'):'✦';
- const title=kind==='prefix'?'Prefiks':'Sufiks';
- return `<span class="ashen-mod-icon ${kind} ${category}" aria-hidden="true" title="${title}">${glyph}</span>`;
+// Wektorowe piktogramy: rozpoznawalne motywy modyfikatora, a nie jeden znak na kategorię.
+const MOD_SYMBOLS=Object.freeze({
+ luck:'<path d="M12 10C6 2 2 7 7 12c-7-1-7 7 1 7l4-6 4 6c8 0 8-8 1-7 5-5 1-10-5-2Z"/><path d="M12 13v8"/>',
+ eye:'<path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+ ward:'<path d="M12 2 20 5v6c0 5-3.6 8.5-8 11-4.4-2.5-8-6-8-11V5Z"/><path d="m8.5 12 2.3 2.5 4.8-5"/>',
+ compass:'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.5 6.5-4.5.5 2.5-6.5Z"/>',
+ spark:'<path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z"/>',
+ survival:'<path d="M12 22s8-4 8-11a8 8 0 0 0-16 0c0 7 8 11 8 11Z"/><path d="M12 7v8m-4-4h8"/>',
+ blade:'<path d="M21 3 9 15 5 19l-2 2 4-1 3-4L21 3Z"/><path d="m8 14 2 2M5 17l2 2"/>',
+ bolt:'<path d="m13 2-9 11h7l-1 9 10-12h-7Z"/>',
+ skill:'<path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+ shield:'<path d="M12 2 20 5v6c0 5-4 9-8 11-4-2-8-6-8-11V5Z"/><path d="M9 12h6m-3-3v6"/>',
+ circuit:'<circle cx="12" cy="12" r="4"/><path d="M12 2v6m0 8v6M2 12h6m8 0h6M5 5l4 4m6 6 4 4M19 5l-4 4m-6 6-4 4"/>',
+ speed:'<path d="M3 7h12M3 12h9M3 17h12m0-13 6 8-6 8"/>',
+ focus:'<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1v5m0 12v5M1 12h5m12 0h5"/>'
+});
+function modifierMotif(mod,kind){
+ const id=mod?.id||'',b=mod?.bonus||{};
+ // Najpierw konkretny typ rezonansu, później ogólne właściwości.
+ if(id==='art_fortunate'||id==='art_find')return 'luck';
+ if(id==='art_echo')return 'eye';
+ if(id==='art_ward')return 'ward';
+ if(id==='art_path')return 'compass';
+ if(id==='art_survive')return 'survival';
+ if(mod?.luck)return 'luck';
+ if(id.includes('tracker')||b.per)return 'eye';
+ if(b.end||mod?.armorPct)return 'ward';
+ if(id.includes('path')||id.includes('explore'))return 'compass';
+ if(mod?.accuracy)return 'focus';
+ if(mod?.critPp)return 'spark';
+ if(mod?.extraAttacks||b.dex)return 'speed';
+ if(mod?.damagePct||b.str)return 'blade';
+ if(b.int)return 'circuit';
+ return kind==='prefix'?'shield':'spark';
 }
-function itemAffixBadges(o,d){
+function modifierGlyph(kind,d,mod=null){
+ const cat=categoryOf(d||{}),motif=modifierMotif(mod,kind);
+ const title=(kind==='prefix'?'Prefiks':'Sufiks')+(mod?': '+mod.name:'');
+ return `<span class="ashen-mod-icon ${kind} ${cat}" title="${escape(title)}" role="img" aria-label="${escape(title)}"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${MOD_SYMBOLS[motif]}</svg></span>`;
+}
+function itemAffixBadges(o,d,inst=null){
  if(!o?.prefixName&&!o?.suffixName)return '';
- return `<span class="ashen-mod-badges" aria-label="Modyfikatory przedmiotu">${o.prefixName?`<span title="Prefiks: ${escape(o.prefixName)}">${modifierGlyph('prefix',d)}</span>`:''}${o.suffixName?`<span title="Sufiks: ${escape(o.suffixName)}">${modifierGlyph('suffix',d)}</span>`:''}</span>`;
+ return `<span class="ashen-mod-badges" aria-label="Modyfikatory przedmiotu">${o.prefixName?modifierGlyph('prefix',d,findModifier(prefixDefs,inst?.prefix)):''}${o.suffixName?modifierGlyph('suffix',d,findModifier(suffixDefs,inst?.suffix)):''}</span>`;
 }
 // Sumaryczne parametry walki zapisywane przy ukończeniu wyprawy. Historyczne
 // raporty pozbawione statystyk odczytujemy z ich tekstu, bez zgadywania krytyków wroga.
@@ -907,7 +973,7 @@ function itemDetailContent(){if(!openItemDetail)return '';
  const defn=owned?def(owned):item(openItemDetail.id);
  if(!defn)return '';
  const o=owned?statsOf(owned):{...defn,rarity:'Zwykły',name:defn.name,bonus:defn.bonus||{}};
- return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${1+(Number(o.extraAttacks)||0)}</strong></div>`:''}<div class="detail-affix"><strong>${modifierGlyph('prefix',defn)} Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span></div><div class="detail-affix"><strong>${modifierGlyph('suffix',defn)} Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span></div>${owned?`<div class="small muted">${statDetails(o)}</div>${itemSetPanel(owned)}${artifactDetailPanel(owned)}`:''}</div></div><div class="actions"><button class="primary" data-item-close>Zamknij</button></div></div></div>`
+ return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${1+(Number(o.extraAttacks)||0)}</strong></div>`:''}<div class="detail-affix"><strong>${modifierGlyph('prefix',defn,owned?findModifier(prefixDefs,owned.prefix):null)} Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span></div><div class="detail-affix"><strong>${modifierGlyph('suffix',defn,owned?findModifier(suffixDefs,owned.suffix):null)} Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span></div>${owned?`<div class="small muted">${statDetails(o)}</div>${itemSetPanel(owned)}${artifactDetailPanel(owned)}`:''}</div></div><div class="actions"><button class="primary" data-item-close>Zamknij</button></div></div></div>`
 }
 function slotChip(slot,uid){
  const inst=instance(uid),o=statsOf(inst),empty=!o,label=slotLabels[slot];
@@ -916,7 +982,7 @@ function slotChip(slot,uid){
  return `<div class="slot-anchor ${empty?'empty':''}" data-slot="${slot}"><div class="label">${label}</div>${icon}${name}</div>`
 }
 function equippedDetail(slot){const uid=state.equip[slot],inst=instance(uid),o=statsOf(inst); return `<div class="eq-detail"><div>${o?itemIcon(inst):`<div class="iconbox">${svgIcon(slotPlaceholder(slot),'#64717a')}</div>`}</div><div class="grow"><div class="slotname">${slotLabels[slot]}</div>${o?`<button class="item-view-name" style="color:${rarities.find(r=>r.name===o.rarity)?.color}" data-item-open="${inst.uid}">${escape(o.name)}</button><div class="small muted">${statDetails(o)}</div>${affixDetails(o)}<div class="actions"><button data-unequip="${slot}">Zdejmij</button></div>`:`<div class="muted">Brak przedmiotu.</div>`}</div></div>`}
-function itemSummary(inst,o,showSlot=true){return `<div class="itemline"><button class="item-view-icon" data-item-open="${escape(inst.uid)}" aria-label="Otwórz opis: ${escape(o.name)}">${itemIcon(inst)}</button><div class="grow"><button class="item-view-name" data-item-open="${escape(inst.uid)}" style="color:${rarity(inst).color}">${escape(o.name)}</button>${itemAffixBadges(o,def(inst))}</div></div>`}
+function itemSummary(inst,o,showSlot=true){return `<div class="itemline"><button class="item-view-icon" data-item-open="${escape(inst.uid)}" aria-label="Otwórz opis: ${escape(o.name)}">${itemIcon(inst)}</button><div class="grow"><button class="item-view-name" data-item-open="${escape(inst.uid)}" style="color:${rarity(inst).color}">${escape(o.name)}</button>${itemAffixBadges(o,def(inst),inst)}</div></div>`}
 
 // Ekonomia v0.1.24: wartości testowe, łatwo zmienialne w jednym miejscu.
 const ECONOMY={saleBase:8,saleRarity:[1,1.5,2.4,4.5,8],yieldRarity:[1,1.2,1.5,2,2.7],prefixValue:1.18,suffixValue:1.18};
@@ -1070,7 +1136,7 @@ function inventory(){
  <div class="bulk-summary">Wartość zaznaczonych: <strong>${bulkSum.credits.toLocaleString('pl-PL')} kredytów</strong><br>Materiały z rozłożenia: <strong>${selectedForBulk.length?salvageLabel(bulkSum.mats):'—'}</strong></div>
  <div class="actions"><button class="primary" data-action="bulk-sell" ${selectedForBulk.length?'':'disabled'}>Sprzedaj zaznaczone (${selectedForBulk.length})</button><button data-action="bulk-salvage" ${selectedForBulk.length?'':'disabled'}>Rozłóż zaznaczone (${selectedForBulk.length})</button></div>
  <div class="bulk-hint">Założone i zabezpieczone przedmioty nie mogą zostać zaznaczone. Potwierdzenie pokaże łączną nagrodę. Zaznaczenie nie jest zapisywane między uruchomieniami gry.</div></div>`;
- return section('Ekwipunek',`${wallet()}<p class="muted">Masz ${state.inventory.length} przedmiotów. Artefakty działają w trzech slotach akcesoriów i mogą tworzyć rezonansowe zestawy. Ikona i nazwa przedmiotu otwierają szczegóły. Prefiksy ubrań tworzą zestawy od 3 założonych elementów; nowe przedmioty odkrywasz podczas wypraw. Dominująca ręka: <strong>${state.dominantHand==='left'?'lewa':'prawa'}</strong>.</p>
+ return section('Ekwipunek',`${wallet()}<p class="muted">Masz ${state.inventory.length} przedmiotów. Artefakty w trzech slotach akcesoriów wzmacniają Szczęście. Ich prefiksy i sufiksy tworzą niezależne rezonansowe zestawy 3/3. Ikona i nazwa przedmiotu otwierają szczegóły. Prefiksy ubrań tworzą zestawy od 3 założonych elementów; nowe przedmioty odkrywasz podczas wypraw. Dominująca ręka: <strong>${state.dominantHand==='left'?'lewa':'prawa'}</strong>.</p>
  <div class="equip-stage section">
    <div class="paperdoll-wrap"><div class="paperdoll-title"><div><h3 style="color:var(--gold);margin:0">Wyposażenie postaci</h3><div class="small muted">Kliknij ikonę albo nazwę przedmiotu, aby zobaczyć jego parametry.</div></div><div class="small muted">Poziom ${state.level}</div></div>
      <div class="paperdoll">
@@ -1086,7 +1152,7 @@ function inventory(){
  <div class="ashen-inventory-sortbar"><label for="ashen-inventory-sort">Sortuj przedmioty</label><select id="ashen-inventory-sort" class="input" data-inventory-sort>${INVENTORY_SORTS.map(([id,label])=>`<option value="${id}" ${(state.inventorySort||'rarity-desc')===id?'selected':''}>${label}</option>`).join('')}</select><div class="small muted">Domyślnie: legendarne → epickie → rzadkie → ulepszone → zwykłe</div></div>
  ${bulkUi}
 
- <div class="stack">${visible.map(({inst,o})=>{let worn=Object.values(state.equip).includes(inst.uid);let weapon=o.slot==='hand1';let buttons=o.slot==='material'?'':worn?`<span class="tag">Założony</span><button data-unequip="${Object.keys(state.equip).find(k=>state.equip[k]===inst.uid)||''}">Zdejmij</button>`:weapon?`<button class="primary" data-equip="${inst.uid}" data-hand="right">Prawa ręka</button><button data-equip="${inst.uid}" data-hand="left">Lewa ręka</button>`:(o.slot==='extra'?['extra','extra2','extra3'].map((s,i)=>`<button class="${state.equip[s]?'':'primary'}" data-equip="${inst.uid}" data-extra-slot="${s}" title="${state.equip[s]?'Zastąpi aktualne akcesorium w tym slocie':'Wolny slot akcesorium'}">${i+1}${state.equip[s]?' ↺':''}</button>`).join(''):`<button class="primary" data-equip="${inst.uid}">Załóż</button>`);return `<div class="item ${bulkSelected.has(inst.uid)?'bulk-picked':''}"><div class="row wrap"><label class="bulk-select" title="Zaznacz do operacji zbiorczej"><input type="checkbox" data-bulk-uid="${inst.uid}" ${bulkSelected.has(inst.uid)?'checked':''} ${eligibleForBulk(inst)?'':'disabled'}></label><div class="grow">${itemSummary(inst,o)}</div><div class="actions"><button data-workshop-select="${inst.uid}" data-page="workshop" title="Ulepsz w warsztacie">🔧 Warsztat</button>${buttons}<button data-lock="${inst.uid}" class="${inst.locked?'islocked':''}" title="${inst.locked?'Odblokuj':'Zabezpiecz'} przedmiot">${inst.locked?'🔒 Odblokuj':'🔓 Zabezpiecz'}</button>${o.slot==='material'?'':`<button data-sale="${inst.uid}" ${worn||inst.locked?'disabled':''}>Sprzedaj · ${saleValue(inst)} kr.</button><button data-salvage="${inst.uid}" ${worn||inst.locked?'disabled':''}>Rozłóż</button>`}</div></div></div>`}).join('')||'<div class="panel muted">Brak przedmiotów w wybranej kategorii.</div>'}</div>`)}
+ <div class="stack">${visible.map(({inst,o})=>{let worn=Object.values(state.equip).includes(inst.uid);let weapon=o.slot==='hand1';let buttons=o.slot==='material'?'':worn?`<span class="tag">Założony</span><button data-unequip="${Object.keys(state.equip).find(k=>state.equip[k]===inst.uid)||''}">Zdejmij</button>`:weapon?`<button class="primary" data-equip="${inst.uid}" data-hand="right">Prawa ręka</button><button data-equip="${inst.uid}" data-hand="left">Lewa ręka</button>`:(o.slot==='extra'?['extra','extra2','extra3'].map((s,i)=>`<button class="${state.equip[s]?'':'primary'}" data-equip="${inst.uid}" data-extra-slot="${s}" title="${state.equip[s]?'Zastąpi aktualne akcesorium w tym slocie':'Wolny slot akcesorium'}">${i+1}${state.equip[s]?' ↺':''}</button>`).join(''):`<button class="primary" data-equip="${inst.uid}">Załóż</button>`);return `<div class="item ashen-rarity-${Math.min(4,Math.max(0,Number(inst.rarity)||0))} ${bulkSelected.has(inst.uid)?'bulk-picked':''}"><div class="row wrap"><label class="bulk-select" title="Zaznacz do operacji zbiorczej"><input type="checkbox" data-bulk-uid="${inst.uid}" ${bulkSelected.has(inst.uid)?'checked':''} ${eligibleForBulk(inst)?'':'disabled'}></label><div class="grow">${itemSummary(inst,o)}</div><div class="actions"><button data-workshop-select="${inst.uid}" data-page="workshop" title="Ulepsz w warsztacie">🔧 Warsztat</button>${buttons}<button data-lock="${inst.uid}" class="${inst.locked?'islocked':''}" title="${inst.locked?'Odblokuj':'Zabezpiecz'} przedmiot">${inst.locked?'🔒 Odblokuj':'🔓 Zabezpiecz'}</button>${o.slot==='material'?'':`<button data-sale="${inst.uid}" ${worn||inst.locked?'disabled':''}>Sprzedaj · ${saleValue(inst)} kr.</button><button data-salvage="${inst.uid}" ${worn||inst.locked?'disabled':''}>Rozłóż</button>`}</div></div></div>`}).join('')||'<div class="panel muted">Brak przedmiotów w wybranej kategorii.</div>'}</div>`)}
 
 function specialLoot(r){const p=r?.special||{};return (p.cores||p.schematics)?`<div class="notice" style="margin-top:10px"><strong>Rzadkie znaleziska:</strong> ${[p.cores?`⚙ Rdzeń technologiczny × ${p.cores}`:'',p.schematics?`📜 Schemat przedwojenny × ${p.schematics}`:''].filter(Boolean).join(' · ')}</div>`:''}
 function foundLootPreview(r){return `<div class="panel section"><h3 style="color:var(--gold)">Ostatnia ukończona wyprawa: ${escape(r.location)}</h3><p class="small muted">${escape(r.at)}</p><p>Znalazłeś:</p>${(r.drops||[]).map(x=>`<details class="loot-detail"><summary><div class="loot-row">${lootDetailButton(x)}<div>${lootDetailName(x)}<div class="small muted">Kliknij, aby rozwinąć opis</div></div></div></summary><div class="small muted">${escape(x.details||'Brak zapisanych parametrów')} · ${escape(x.slot?slotName(x.slot):'')}${(x.effects||[]).map(e=>`<div>↳ ${escape(e.name)}: ${escape(e.description)}</div>`).join('')}</div></details>`).join('')||'<p class="muted">Sprawdź starszy raport w zakładce Raporty.</p>'}${specialLoot(r)}<button data-page="inventory">Przejdź do ekwipunku</button></div>`}

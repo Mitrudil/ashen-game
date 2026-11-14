@@ -713,3 +713,25 @@ h1, h2, h3, h4, h5, h6, button,
 .ashen-anomaly-modifiers span{display:inline-block;padding:5px 9px;border-radius:6px;background:#8d79422e;border:1px solid #bfa36557;color:#eed7a8;font-size:12px}
 .ashen-anomaly-odds{font-size:12px;color:#dec39a;margin:6px 0 10px}
 @media(max-width:480px){.ashen-anomaly-heading{flex-direction:column;align-items:flex-start;gap:5px}.ashen-anomaly-report{padding:12px}}
+
+/* ASHEN v0.1.48 — wektorowe ikony modyfikatorów, wyraźne ramki rzadkości. */
+.ashen-mod-icon{width:30px;height:30px;flex:0 0 30px;border-radius:8px;background:radial-gradient(circle at 28% 18%,#64705b55,transparent 60%),linear-gradient(140deg,#253337,#101c23);box-shadow:inset 0 1px 1px #ffffff30,0 2px 5px #0009;border-width:1.5px}
+.ashen-mod-icon svg{display:block;width:21px;height:21px;filter:drop-shadow(0 0 2px currentColor)}
+.ashen-mod-icon.prefix.artifact{background:linear-gradient(145deg,#4b324c,#1b182a);border-color:#ba82cc;color:#efd0ff}
+.ashen-mod-icon.suffix.artifact{background:linear-gradient(145deg,#234348,#17202d);border-color:#74b8ba;color:#b1f4ee}
+.ashen-mod-badges{gap:7px;margin-top:5px}
+.ashen-premium-shell .item.ashen-rarity-0{border-color:#6b777e;box-shadow:inset 0 0 0 1px #afb5b51a,0 8px 24px #0004}
+.ashen-premium-shell .item.ashen-rarity-1{border-color:#6ebf82;box-shadow:inset 0 0 0 1px #8de7a344,0 0 16px #4bba6630}
+.ashen-premium-shell .item.ashen-rarity-2{border-color:#69a9ec;box-shadow:inset 0 0 0 1px #9fd4ff55,0 0 18px #3388ed3c}
+.ashen-premium-shell .item.ashen-rarity-3{border-color:#c278ef;box-shadow:inset 0 0 0 1px #e8b5ff66,0 0 20px #9c40df54}
+.ashen-premium-shell .item.ashen-rarity-4{border-color:#f7bf56;box-shadow:inset 0 0 0 1px #ffe1a777,0 0 22px #ffc15059}
+.iconbox.ashen-rarity-0{border-color:#76818a!important}
+.iconbox.ashen-rarity-1{border-color:#6ebf82!important;box-shadow:0 0 0 1px #8de7a344,0 0 12px #4bba6630!important}
+.iconbox.ashen-rarity-2{border-color:#69a9ec!important;box-shadow:0 0 0 1px #9fd4ff55,0 0 12px #3388ed3c!important}
+.iconbox.ashen-rarity-3{border-color:#c278ef!important;box-shadow:0 0 0 1px #e8b5ff66,0 0 14px #9c40df54!important}
+.iconbox.ashen-rarity-4{border-color:#f7bf56!important;box-shadow:0 0 0 1px #ffe1a777,0 0 16px #ffc15059!important}
+.ashen-artifact-affix{padding:9px 10px;border-radius:7px;border:1px solid #735767;margin-top:8px;background:#281d2a}
+.ashen-artifact-affix.is-active{border-color:#5fbd8c;background:#15281f;color:#9ee5b6}
+.ashen-artifact-affix.is-pending{color:#edacb9}
+.ashen-artifact-affix strong{display:block;margin-bottom:4px}
+.ashen-artifact-affix details{margin-top:6px}

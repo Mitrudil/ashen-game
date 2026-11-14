@@ -1,4 +1,4 @@
-# ASHEN v0.1.47 — Anomalie i wydarzenia Rezonansu
+# ASHEN v0.1.48 — Anomalie i wydarzenia Rezonansu
 
 - Bliskie wyprawy: 18% szansy na zjawisko, średnie: 32%, dalekie: 50%. Brak anomalii pozostaje możliwy.
 - Sześć autorskich wydarzeń, w tym Echo nieobecnych, Błysk drugiej szansy, Szept w przewodach, Martwy depozyt, Strefa ciszy i Puls Pustkowi.
@@ -6,7 +6,7 @@
 - Trzyczęściowe sety rezonansowe neutralizują negatywny efekt zagrożeń; ich ochrona jest pokazana w raporcie.
 - Anomalie są losowane po zakończeniu wyprawy i zapisywane we wszystkich wariantach raportu; stare raporty bez zdarzeń wyświetlają się jak dotąd.
 - Nie zmieniono podstawowych szans rzadkości ani ich limitów na konkretnych wyprawach, ekwipunku, walki ani klucza zapisu.
-- Następny etap: zebrać uwagi do v0.1.43–0.1.47, sprawdzić balans i poprawić zgłoszone błędy przed nowymi aktywnościami bojowymi.
+- Następny etap: zebrać uwagi do v0.1.43–0.1.48, sprawdzić balans i poprawić zgłoszone błędy przed nowymi aktywnościami bojowymi.
 
 # ASHEN v0.1.46 — Szczęście i eksploracja
 
@@ -37,7 +37,7 @@
 - W kartach wypraw widoczne są szanse na jakość łupu. Pula *typów przedmiotów*, dotychczasowa liczba łupów, walka i pozostałe nagrody nie zostały zmienione.
 - Nie dodano jeszcze Szczęścia ani testu eksploracji — te mechaniki w kolejnych wersjach; ograniczenia maksymalnych rzadkości pozostaną twarde.
 - Zapis postaci pozostaje zgodny (`ashen-save-v010`); starsze znalezione przedmioty pozostają bez zmian.
-- Następny plan: v0.1.44 trzy sloty na akcesoria; v0.1.46 Szczęście i eksploracja; v0.1.46 artefakty i zestawy rezonansowe; v0.1.47 anomalie i wyjątkowe wydarzenia. Zmiana zestawów wyposażenia pod różne aktywności dopiero, gdy pojawi się walka poza wyprawami.
+- Następny plan: v0.1.44 trzy sloty na akcesoria; v0.1.46 Szczęście i eksploracja; v0.1.46 artefakty i zestawy rezonansowe; v0.1.48 anomalie i wyjątkowe wydarzenia. Zmiana zestawów wyposażenia pod różne aktywności dopiero, gdy pojawi się walka poza wyprawami.
 
 # ASHEN v0.1.42 — ikony modyfikatorów i podsumowanie obrażeń
 
@@ -346,3 +346,11 @@ W sypialni zastosowano realistyczne tło `assets/bunker/rooms/bedroom-base.webp`
 - Działają wyłącznie 3 różne założone artefakty z jednej kolekcji.
 - Nowe karty w Postaci, Ekwipunku oraz szczegóły artefaktów.
 - Bez zmian identyfikatora i formatu starego zapisu.
+
+
+## v0.1.48 — grafika modyfikatorów, ramki jakości, zestawy artefaktów
+- Piktogramy SVG przypisane do właściwości prefiksów i sufiksów.
+- Ramki ekwipunku i miniaturek w kolorach jakości przedmiotów.
+- Artefakty mogą losować prefiksy i sufiksy i kompletować zestawy z 3 różnymi artefaktami mającymi wspólny modyfikator.
+- Stare artefakty zostają przepisane bez usuwania: Ślady Wędrowca → Pomyślny, Pieczęć Burzy → Osłonowy.
+- Zestawy artefaktów wspierają przede wszystkim Szczęście; nadal obowiązuje limit +15.
