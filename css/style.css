@@ -634,3 +634,13 @@ h1, h2, h3, h4, h5, h6, button,
 @media(hover:hover){.ashen-attr-help:not([open]):hover .ashen-attr-help-content{display:block}}
 @media(max-width:880px){.ashen-combat-grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:560px){.ashen-combat-panel{padding:12px}.ashen-combat-card{padding:10px}.ashen-combat-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.ashen-combat-table{font-size:.73rem}}
+
+/* v0.1.40.1 – kontrastowa informacja o setach (inspiracja czytelnością Bloodwars) */
+.ashen-set-inline{display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin:7px 0;padding:8px 10px;border-radius:6px;border:1px solid;font-size:.78rem;line-height:1.4;overflow-wrap:anywhere}
+.ashen-set-inline.is-active,.ashen-set-item-info.is-active{color:#91ebaf;background:rgba(23,84,48,.22);border-color:rgba(96,213,128,.62)}
+.ashen-set-inline.is-pending,.ashen-set-item-info.is-pending{color:#f0a39c;background:rgba(102,38,37,.19);border-color:rgba(221,92,83,.55)}
+.ashen-set-inline strong,.ashen-set-inline span,.ashen-set-item-info.is-pending strong,.ashen-set-item-info.is-pending small{color:inherit}
+.ashen-set-item-info.is-pending{border-style:solid}
+.ashen-set-card:not(.is-active) .ashen-set-bottom span{color:#efa19a}
+.slot-anchor .ashen-set-inline{font-size:.65rem;padding:5px 6px;margin-top:5px}
+@media(max-width:650px){.slot-anchor .ashen-set-inline{font-size:.59rem;word-break:break-word}.ashen-set-inline{padding:7px 8px}}

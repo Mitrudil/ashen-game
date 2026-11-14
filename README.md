@@ -1,3 +1,12 @@
+# ASHEN v0.1.40.1 – widoczne premie setów i nazewnictwo
+
+- Naprawiono starszy prefiks **Zwinny**: 3 założone ubrania z tym prefiksem aktywują teraz zestaw Zwinny.
+- W panelu Postać, Ekwipunku i szczegółach wyposażenia widać premię setu: zieloną dla aktywnych, czerwoną dla nieaktywnych.
+- Nieaktywny zestaw pokazuje prognozę premii po założeniu trzech części i liczbę brakujących elementów.
+- Ujednolicono pisownię nazw przedmiotów: opisowe człony typu „warty”, „zwiadowcy”, „wędrowca” są pisane małą literą.
+- Zachowano dotychczasowe ID, bonusy modyfikatorów, zapis gry i obrazy.
+- Względna prognoza uwzględnia aktualną średnią jakość; premia po dobraniu następnego przedmiotu może się zmienić.
+
 # ASHEN v0.1.40 — Siła bojowa
 
 - Zakładka Postać: dynamiczna tabela ATAK / OBRONA z parametrami wynikającymi z założonego wyposażenia i aktywnych setów.
