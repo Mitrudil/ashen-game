@@ -513,3 +513,14 @@ h1, h2, h3, h4, h5, h6, button,
 @media(max-width:1120px){.weapon-catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:800px){.weapon-catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ashen-premium-shell .figure-stage .inventory-figure{height:385px}}
 @media(max-width:520px){.weapon-catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.weapon-catalog-card{padding:9px}.ashen-item-modal{padding:18px}.ashen-item-modal-grid{grid-template-columns:1fr}.ashen-item-art{min-height:180px}.detail-placeholder .iconbox{width:112px;height:112px}.ashen-item-modal h2{font-size:22px}}
+
+/* ASHEN v0.1.32: Statystyki wyłącznie w oknie szczegółów; klikane sloty wyposażenia. */
+.slot-anchor .equipped-item-trigger{display:block;max-width:100%;margin:0 auto;background:transparent;border:0;box-shadow:none;padding:0;cursor:pointer;min-width:0;white-space:normal;text-align:center;line-height:1.3}
+.slot-anchor .item-view-name{padding:4px 5px;font-family:var(--ashen-ui-font,Arial,sans-serif);font-size:12px;overflow-wrap:anywhere;text-shadow:none;line-height:1.35}
+.slot-anchor .item-view-icon{border-radius:8px}
+.slot-anchor .equipped-item-trigger:hover,.slot-anchor .equipped-item-trigger:focus-visible{outline:2px solid #d99c57;outline-offset:2px}
+.itemline .item-view-name{overflow-wrap:anywhere;text-align:left;white-space:normal;line-height:1.4}
+.itemline .item-view-icon{cursor:pointer}
+
+.itemline .grow{display:flex;align-items:center;min-width:0;flex-wrap:wrap;gap:4px 10px}
+.itemline .item-view-name{display:inline-block;max-width:100%;min-width:0;word-break:normal;overflow-wrap:break-word}
