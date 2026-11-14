@@ -339,3 +339,48 @@ h1, h2, h3, h4, h5, h6, button,
 @media(max-width:1180px){.character-top-grid{grid-template-columns:1fr}.character-figure-panel{min-height:unset}.character-figure-frame{min-height:560px}.character-sidecards{grid-template-columns:1fr}}
 @media(max-width:760px){.character-attr-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.character-sidecard{grid-template-columns:110px minmax(0,1fr)}.character-heading h3{font-size:30px}}
 @media(max-width:560px){.character-attr-grid{grid-template-columns:1fr}.character-sidecard{grid-template-columns:1fr}.character-sidevisual{min-height:180px}.character-figure-frame{min-height:460px}.character-figure-caption{font-size:18px}.character-heading h3{font-size:28px}}
+
+
+/* ASHEN v0.1.29.1 — Postać: ta sama szerokość co Wyprawy, czytelne karty */
+.ashen-character-shell{max-width:1570px;width:100%;}
+.ashen-character-shell .layout{grid-template-columns:200px minmax(0,1fr);gap:18px;}
+.ashen-character-shell .main{min-width:0;width:100%;}
+.ashen-character-shell .section{min-width:0;}
+.ashen-character-shell .character-screen-modern{min-width:0;}
+.ashen-character-shell .character-top-grid{grid-template-columns:minmax(285px,360px) minmax(0,1fr);align-items:stretch;gap:18px;}
+.ashen-character-shell .character-info-panel{min-width:0;padding:24px;gap:17px;}
+.ashen-character-shell .character-sidecards{grid-template-columns:minmax(0,1fr);gap:16px;margin-top:10px;}
+.ashen-character-shell .character-sidecard{grid-template-columns:145px minmax(0,1fr);gap:20px;align-items:center;min-width:0;padding:18px;border-radius:9px;}
+.ashen-character-shell .character-sidecontent{min-width:0;overflow-wrap:anywhere;word-break:normal;}
+.ashen-character-shell .character-sidecontent h4{font-family:var(--ashen-ui-font);font-size:23px;font-weight:750;line-height:1.3;margin:7px 0 10px;}
+.ashen-character-shell .character-sidecontent p{line-height:1.55;max-width:100%;margin:5px 0;}
+.ashen-character-shell .character-sidecontent button{max-width:100%;white-space:normal;overflow-wrap:break-word;margin-top:13px;line-height:1.5;}
+.ashen-character-shell .character-sidevisual{height:156px;min-height:156px;}
+.ashen-character-shell .character-figure-panel{min-width:0;}
+.ashen-character-shell .character-attr-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+.ashen-character-shell .character-attr-card{min-width:0;}
+.ashen-character-shell .character-meta-line{line-height:1.5;}
+@media(max-width:1150px){
+ .ashen-character-shell .character-top-grid{grid-template-columns:minmax(0,1fr);}
+ .ashen-character-shell .character-figure-panel{min-height:auto;}
+ .ashen-character-shell .character-figure-frame{height:540px;min-height:540px;}
+ .ashen-character-shell .character-figure-frame img{max-height:520px;}
+ .ashen-character-shell .character-sidecard{grid-template-columns:145px minmax(0,1fr);}
+}
+@media(max-width:800px){
+ .ashen-character-shell .layout{display:block;}
+ .ashen-character-shell .sidebar{margin-bottom:14px;}
+ .ashen-character-shell .character-attr-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(max-width:540px){
+ .ashen-character-shell .character-info-panel{padding:15px;}
+ .ashen-character-shell .character-figure-frame{height:460px;min-height:460px;}
+ .ashen-character-shell .character-figure-frame img{max-height:440px;}
+ .ashen-character-shell .character-sidecard{grid-template-columns:96px minmax(0,1fr);gap:12px;padding:12px;}
+ .ashen-character-shell .character-sidevisual{height:118px;min-height:118px;}
+ .ashen-character-shell .character-side-emoji,.ashen-character-shell .character-vehicle-big{font-size:57px;}
+ .ashen-character-shell .character-sidecontent h4{font-size:19px;}
+ .ashen-character-shell .character-sidecontent p{font-size:12px;}
+ .ashen-character-shell .character-sidecontent .tag{font-size:10px;}
+ .ashen-character-shell .character-attr-grid{grid-template-columns:1fr;}
+}
