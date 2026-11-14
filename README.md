@@ -1,3 +1,35 @@
+# ASHEN v0.1.33 — sortowanie i pancerze
+
+Domyślny porządek ekwipunku: legendarne, epickie, rzadkie, ulepszone, zwykłe. Do wyboru jest siedem sposobów sortowania. Preferencja sortowania jest zapisywana razem z postacią. Nowe grafiki WebP: 10 pancerzy, w `assets/items/armor/`; obrazy pojawiają się w ekwipunku, slotach i oknie szczegółów. Podstawowe wartości pancerza ustalono rosnąco od Podartej kurtki do Pancerza Strażnika Zero. Identyfikatory przedmiotów oraz klucz zapisu pozostają bez zmian.
+
+# ASHEN v0.1.32 — Odkrywanie broni i odchudzony ekwipunek
+
+* Szczegóły i statystyki przedmiotów wyświetlane są dopiero po kliknięciu nazwy lub ikony w oknie szczegółów.
+* Zarówno ikony, jak i nazwy wyposażenia założonego przy sylwetce otwierają to samo okno.
+* Usunięto publiczny katalog całego uzbrojenia, aby gracz odkrywał przedmioty w wyprawach. Usunięto dublujący panel „Założone przedmioty” i panel porównania.
+* Nowe kategorie broni dwuręcznej: palna, dystansowa, biała, po 5/3/4 przedmioty; obrażenia bazowe stopniują się zgodnie z ustaloną kolejnością.
+* Zachowano identyfikatory wyposażenia oraz format zapisów `ashen-save-v010`.
+* Grafiki broni pozostają w przygotowaniu, obecnie używane są czytelne ikony zastępcze.
+
+# ASHEN v0.1.31 — pierwsza seria broni jednoręcznej
+
+- Pełna sylwetka w Ekwipunku jak w zakładce Postać
+- Szeroki układ Magazynu, Kryjówki i Raportów
+- Rozdział broni jednoręcznej na białą i palną w filtrach
+- 12 broni z określoną kolejnością bazowych obrażeń
+- Kliknięcie ikony lub nazwy przedmiotu otwiera okno szczegółów
+- Katalog 12 broni w Ekwipunku, bez dodawania darmowych egzemplarzy graczowi
+- Miejsce na przyszłe zdjęcia przedmiotów i ikony prefiksów/sufiksów
+- Zachowane identyfikatory przedmiotów i klucz zapisów `ashen-save-v010`
+
+# ASHEN v0.1.30 — ujednolicone zakładki
+
+Nowe szerokie układy dla Towarzysza, Transportu, Ekwipunku i Warsztatu. Nowe karty dla zwierząt i pojazdów, wyróżnienie aktywnego wyboru, przestronniejsze karty i przyciski. Logika rozwoju, walka, zapisy i koszty bez zmian.
+
+# ASHEN v0.1.29.1 – poprawka szerokości ekranu Postać
+
+Zakładka Postać korzysta z tej samej szerokości co Wyprawy (do 1570 px) oraz tego samego układu nawigacji. Karty Towarzysz i Transport są teraz ułożone jedna pod drugą, z osobnymi miejscami na obraz, tytuł, opis i przycisk. Zmieniono też punkty przełamania układu na tabletach i telefonach. Nie zmieniono logiki gry ani identyfikatora zapisu.
+
 # ASHEN v0.1.29 — zakładka Postać
 
 Dodano pełną sylwetkę postaci w zakładce Postać, przebudowano układ ekranu w stylu ekranów Wypraw oraz dodano widoczność aktualnego towarzysza i środka transportu bezpośrednio w tym panelu.
