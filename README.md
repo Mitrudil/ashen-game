@@ -1,3 +1,9 @@
+# ASHEN v0.1.35 — Koszulki i nakrycia głowy
+
+Nowości: 11 nowych grafik WebP, realistyczne opisy przedmiotów, bazowy pancerz koszulek i nakryć głowy uporządkowany od najniższego do najwyższego. Maska filtracyjna nadal zajmuje slot głowy. Zapis zachowuje klucz `ashen-save-v010`, ID przedmiotów pozostają bez zmian.
+
+Grafiki: `assets/items/shirts/` (5) i `assets/items/head/` (6).
+
 # ASHEN v0.1.33 — sortowanie i pancerze
 
 Domyślny porządek ekwipunku: legendarne, epickie, rzadkie, ulepszone, zwykłe. Do wyboru jest siedem sposobów sortowania. Preferencja sortowania jest zapisywana razem z postacią. Nowe grafiki WebP: 10 pancerzy, w `assets/items/armor/`; obrazy pojawiają się w ekwipunku, slotach i oknie szczegółów. Podstawowe wartości pancerza ustalono rosnąco od Podartej kurtki do Pancerza Strażnika Zero. Identyfikatory przedmiotów oraz klucz zapisu pozostają bez zmian.
