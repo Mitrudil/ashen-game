@@ -1,3 +1,12 @@
+# ASHEN v0.1.40.2 — Czytelny Ekwipunek i szczegóły setów
+
+- Kolorowe komunikaty o bonusach setów zostały usunięte z głównej listy Ekwipunku, miejsc na wyposażenie oraz skróconych kart przedmiotów. Powrócił zwarty widok.
+- Informacja o secie (zielona aktywna / czerwona nieaktywna) jest widoczna dopiero w oknie szczegółów przedmiotu.
+- W szczegółach przedmiotu można rozwinąć listę **faktycznie założonych** części danego zestawu, ich jakość, średnią oraz sposób obliczenia bonusu.
+- Podgląd niezałożonego elementu nie traktuje go jako założonego, a prognoza uwzględnia zastąpienie przedmiotu w tym samym slocie.
+- Panel „Zestawy ubioru” w Postaci pozostaje podsumowaniem rzeczywiście założonych zestawów.
+- Bez zmian w balansie, identyfikatorach przedmiotów i kluczu zapisów gry.
+
 # ASHEN v0.1.40.1 – widoczne premie setów i nazewnictwo
 
 - Naprawiono starszy prefiks **Zwinny**: 3 założone ubrania z tym prefiksem aktywują teraz zestaw Zwinny.

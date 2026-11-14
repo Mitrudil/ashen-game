@@ -644,3 +644,15 @@ h1, h2, h3, h4, h5, h6, button,
 .ashen-set-card:not(.is-active) .ashen-set-bottom span{color:#efa19a}
 .slot-anchor .ashen-set-inline{font-size:.65rem;padding:5px 6px;margin-top:5px}
 @media(max-width:650px){.slot-anchor .ashen-set-inline{font-size:.59rem;word-break:break-word}.ashen-set-inline{padding:7px 8px}}
+
+/* v0.1.40.2: Set bonus messages only inside the expanded item detail modal. */
+.ashen-set-detail-main{font-weight:650;line-height:1.45}
+.ashen-set-breakdown{margin-top:9px;padding-top:9px;border-top:1px solid rgba(190,195,178,.20);color:#ced9d2}
+.ashen-set-breakdown summary{cursor:pointer;color:#d9c2a1;font-weight:650;font-size:.82rem;list-style:revert}
+.ashen-set-detail-members{margin:10px 0;display:grid;gap:7px}
+.ashen-set-detail-member{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 12px;font-size:.81rem;color:#d4ddd8}
+.ashen-set-detail-member span:last-child{color:#bdc1b5;font-size:.75rem}
+.ashen-set-detail-member strong{font-weight:600;color:#f0e4d2}
+.ashen-set-detail-equation{margin:7px 0;font-size:.8rem;color:#c3c7c4}
+.ashen-set-item-info.is-pending .ashen-set-detail-main{color:#f0a39c}
+.ashen-set-item-info.is-active .ashen-set-detail-main{color:#91ebaf}
