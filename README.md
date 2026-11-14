@@ -1,4 +1,4 @@
-# ASHEN v0.1.45 — Szczęście i eksploracja
+# ASHEN v0.1.46 — Szczęście i eksploracja
 
 - Test eksploracji zależny od Percepcji, Inteligencji i Zręczności; szansa ograniczona do 15–80%.
 - Udany test daje 1 dodatkowy przedmiot obok dotychczasowych 1–3 znalezisk.
@@ -27,7 +27,7 @@
 - W kartach wypraw widoczne są szanse na jakość łupu. Pula *typów przedmiotów*, dotychczasowa liczba łupów, walka i pozostałe nagrody nie zostały zmienione.
 - Nie dodano jeszcze Szczęścia ani testu eksploracji — te mechaniki w kolejnych wersjach; ograniczenia maksymalnych rzadkości pozostaną twarde.
 - Zapis postaci pozostaje zgodny (`ashen-save-v010`); starsze znalezione przedmioty pozostają bez zmian.
-- Następny plan: v0.1.44 trzy sloty na akcesoria; v0.1.45 Szczęście i eksploracja; v0.1.46 artefakty i zestawy rezonansowe; v0.1.47 anomalie i wyjątkowe wydarzenia. Zmiana zestawów wyposażenia pod różne aktywności dopiero, gdy pojawi się walka poza wyprawami.
+- Następny plan: v0.1.44 trzy sloty na akcesoria; v0.1.46 Szczęście i eksploracja; v0.1.46 artefakty i zestawy rezonansowe; v0.1.47 anomalie i wyjątkowe wydarzenia. Zmiana zestawów wyposażenia pod różne aktywności dopiero, gdy pojawi się walka poza wyprawami.
 
 # ASHEN v0.1.42 — ikony modyfikatorów i podsumowanie obrażeń
 
@@ -326,3 +326,13 @@ W sypialni zastosowano realistyczne tło `assets/bunker/rooms/bedroom-base.webp`
 - dodano grafiki dla 5 par spodni i 5 par butów,
 - podpięto grafiki w ekwipunku i w oknie szczegółów przedmiotu,
 - poprawiono nazwy: `Zniesione trampki` → `Zniszczone trampki`, `Buty uszczelnione` → `Buty trapera`.
+
+
+## v0.1.46 — Artefakty i Rezonans
+- 6 nowych artefaktów, dwa zestawy po 3 odrębne części.
+- Artefakty: rzadkie znaleziska ze średnich i dalekich wypraw (bliska: bez artefaktów).
+- Zestaw „Ślady Wędrowca”: Szczęście +5 i szansa eksploracji +8 p.p.
+- Zestaw „Pieczęć Burzy”: Wytrzymałość +3 i Percepcja +2.
+- Działają wyłącznie 3 różne założone artefakty z jednej kolekcji.
+- Nowe karty w Postaci, Ekwipunku oraz szczegóły artefaktów.
+- Bez zmian identyfikatora i formatu starego zapisu.
