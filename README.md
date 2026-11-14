@@ -1,3 +1,13 @@
+# ASHEN v0.1.47 — Anomalie i wydarzenia Rezonansu
+
+- Bliskie wyprawy: 18% szansy na zjawisko, średnie: 32%, dalekie: 50%. Brak anomalii pozostaje możliwy.
+- Sześć autorskich wydarzeń, w tym Echo nieobecnych, Błysk drugiej szansy, Szept w przewodach, Martwy depozyt, Strefa ciszy i Puls Pustkowi.
+- Zdarzenia mogą modyfikować Szczęście, skuteczność eksploracji, nagrodę złomu lub dawać dodatkowe znalezisko.
+- Trzyczęściowe sety rezonansowe neutralizują negatywny efekt zagrożeń; ich ochrona jest pokazana w raporcie.
+- Anomalie są losowane po zakończeniu wyprawy i zapisywane we wszystkich wariantach raportu; stare raporty bez zdarzeń wyświetlają się jak dotąd.
+- Nie zmieniono podstawowych szans rzadkości ani ich limitów na konkretnych wyprawach, ekwipunku, walki ani klucza zapisu.
+- Następny etap: zebrać uwagi do v0.1.43–0.1.47, sprawdzić balans i poprawić zgłoszone błędy przed nowymi aktywnościami bojowymi.
+
 # ASHEN v0.1.46 — Szczęście i eksploracja
 
 - Test eksploracji zależny od Percepcji, Inteligencji i Zręczności; szansa ograniczona do 15–80%.

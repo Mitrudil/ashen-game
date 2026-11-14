@@ -701,3 +701,15 @@ h1, h2, h3, h4, h5, h6, button,
 
 /* v0.1.46 — artefakty i zestawy rezonansowe */
 .ashen-resonance-panel{margin:18px 0;padding:17px 18px;background:linear-gradient(125deg,#1b2429,#28262b);border:1px solid #715e72;border-radius:12px;min-width:0}.ashen-resonance-panel h3{margin:0 0 8px;color:#d3b0eb}.ashen-resonance-panel p{line-height:1.55}.ashen-resonance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px;margin-top:14px}.ashen-resonance-card{border-radius:9px;padding:12px;background:#141c20;border:1px solid #554c59;min-width:0}.ashen-resonance-card.active{border-color:#64997e;background:#15271f}.ashen-resonance-title{display:flex;justify-content:space-between;flex-wrap:wrap;gap:7px}.ashen-resonance-title strong{color:#dbc2ed}.ashen-resonance-title span{font-size:11px;color:#c89e9e}.ashen-resonance-card.active .ashen-resonance-title span{color:#94d6aa}.ashen-resonance-members{display:grid;gap:5px;font-size:12px}.ashen-resonance-members span{color:#9ca6ad}.ashen-resonance-members span.found{color:#a9dfb8}.ashen-artifact-icon{background:radial-gradient(circle,#4a3659 0%,#191820 73%)!important;border:1px solid #886ba0!important}.ashen-artifact-glyph{font-size:29px;line-height:1;filter:drop-shadow(0 0 6px #a879c0)}.ashen-artifact-detail{margin-top:12px;border:1px solid #725978;background:#292130;border-radius:9px;padding:12px;color:#dfb9eb}.ashen-artifact-detail.active{border-color:#609675;background:#172921;color:#a1dbb7}.ashen-artifact-detail details summary{cursor:pointer}.ashen-artifact-detail details div{font-size:12px;padding:4px 0}.ashen-artifact-detail .small{line-height:1.5}.ashen-resonance-panel,.ashen-artifact-detail{overflow-wrap:anywhere}
+
+/* ASHEN 0.1.47 — odrębne, czytelne wydarzenia Rezonansu w raportach */
+.ashen-anomaly-report{margin:12px 0;padding:14px 16px;border:1px solid #96784e88;border-radius:10px;background:linear-gradient(125deg,#212327,#151c1f);color:#e9e3d7;overflow-wrap:anywhere}
+.ashen-anomaly-report.hazard{border-color:#b65d548f;background:linear-gradient(125deg,#332023,#181b20)}
+.ashen-anomaly-heading{display:flex;gap:8px 16px;align-items:center;flex-wrap:wrap;color:#e5b871;font-size:13px;letter-spacing:.04em}
+.ashen-anomaly-report.hazard .ashen-anomaly-heading{color:#e8a098}
+.ashen-anomaly-heading strong{font-size:15px;color:#f2e8d8}
+.ashen-anomaly-report p{font-size:13px;line-height:1.6;margin:8px 0 0}
+.ashen-anomaly-modifiers{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ashen-anomaly-modifiers span{display:inline-block;padding:5px 9px;border-radius:6px;background:#8d79422e;border:1px solid #bfa36557;color:#eed7a8;font-size:12px}
+.ashen-anomaly-odds{font-size:12px;color:#dec39a;margin:6px 0 10px}
+@media(max-width:480px){.ashen-anomaly-heading{flex-direction:column;align-items:flex-start;gap:5px}.ashen-anomaly-report{padding:12px}}
