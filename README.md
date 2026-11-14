@@ -1,3 +1,9 @@
+# ASHEN v0.1.29 — zakładka Postać
+
+Dodano pełną sylwetkę postaci w zakładce Postać, przebudowano układ ekranu w stylu ekranów Wypraw oraz dodano widoczność aktualnego towarzysza i środka transportu bezpośrednio w tym panelu.
+
+Nowe pliki: `assets/characters/*-full.png`.
+
 # ASHEN v0.1.28.1 — poprawa czytelności
 
 Globalnie zastąpiono ciasną czcionkę nagłówków i przycisków czytelnym krojem interfejsowym. Zachowano metaliczne faktury, ale ograniczono cienie napisów, poprawiono odstępy i wysokości linii. Butelka z płynem jest podpisana **Chemikalia**. Wewnątrz zapisu gry klucz `tworzywo` pozostaje niezmieniony, aby starsze zapisy nadal działały. Usunięto zdublowany górny komunikat o zwycięstwie; wynik pozostaje w głównym raporcie wyprawy.

@@ -305,3 +305,37 @@ h1, h2, h3, h4, h5, h6, button,
     .ashen-missions-shell .mission-card-body h3 { font-size: 22px !important; }
     .ashen-missions-shell .mission-title h2 { font-size: 24px !important; }
 }
+
+
+/* ASHEN v0.1.29 — redesign zakładki Postać */
+.ashen-character-shell .section h2{font-family:var(--ashen-ui-font);font-size:34px;font-weight:800;letter-spacing:.02em;color:#eee1c9;text-shadow:none;margin-bottom:18px}
+.character-screen-modern{display:grid;gap:18px}
+.character-top-grid{display:grid;grid-template-columns:minmax(280px,380px) minmax(0,1fr);gap:18px;align-items:stretch}
+.character-figure-panel,.character-info-panel,.character-attr-card{background:linear-gradient(180deg,#1d2228,#11161a);border:1px solid #4e4230;border-radius:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 14px 34px rgba(0,0,0,.28)}
+.character-figure-panel{padding:16px;display:flex;flex-direction:column;justify-content:space-between;min-height:760px}
+.character-figure-frame{position:relative;flex:1;display:grid;place-items:center;background:radial-gradient(circle at top,#252d34 0%,#12161a 72%);border:1px solid rgba(220,171,93,.22);border-radius:14px;overflow:hidden;padding:12px;min-height:620px}
+.character-figure-frame::after{content:'';position:absolute;inset:auto 10% 12px 10%;height:30px;background:radial-gradient(ellipse at center, rgba(0,0,0,.55), rgba(0,0,0,0));pointer-events:none}
+.character-figure-frame img{max-width:100%;max-height:100%;object-fit:contain;display:block;filter:drop-shadow(0 22px 26px rgba(0,0,0,.36))}
+.character-figure-caption{margin-top:12px;text-align:center;font-size:20px;font-weight:800;color:#f1ddba;letter-spacing:.02em}
+.character-info-panel{padding:18px 20px;display:grid;gap:14px}
+.character-heading{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.character-heading h3{margin:6px 0 4px;font-size:34px;font-weight:800;color:#f3e7d0;line-height:1.15}
+.character-meta-line{display:flex;flex-wrap:wrap;gap:10px 18px;color:#d0c4ab;font-size:14px;padding:6px 0 2px}
+.character-sidecards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:4px}
+.character-sidecard{display:grid;grid-template-columns:130px minmax(0,1fr);gap:14px;background:linear-gradient(180deg,#151b20,#0f1418);border:1px solid #3f3527;border-radius:16px;padding:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.character-sidevisual{display:grid;place-items:center;background:radial-gradient(circle at top,#232a31 0%,#10151a 72%);border-radius:12px;min-height:160px;border:1px solid rgba(255,255,255,.05);overflow:hidden}
+.character-sidevisual img{width:100%;height:100%;object-fit:cover}
+.character-sidevisual.transport{background:radial-gradient(circle at top,#2a2018 0%,#151008 70%)}
+.character-sidevisual.placeholder{opacity:.82}
+.character-sidecontent h4{margin:6px 0 8px;font-size:24px;font-weight:800;color:#f1ddba;line-height:1.18}
+.character-sidecontent button{margin-top:10px}
+.character-side-emoji{font-size:74px;line-height:1;filter:drop-shadow(0 6px 12px rgba(0,0,0,.25))}
+.character-vehicle-big{font-size:82px;line-height:1;filter:drop-shadow(0 6px 12px rgba(0,0,0,.25))}
+.character-attr-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.character-attr-card{padding:16px;display:grid;gap:10px}
+.character-attr-head{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#e9d7b6;font-size:17px;font-weight:700}
+.character-attr-head strong{font-size:30px;color:#fff3d8}
+.character-attr-card button{justify-self:start}
+@media(max-width:1180px){.character-top-grid{grid-template-columns:1fr}.character-figure-panel{min-height:unset}.character-figure-frame{min-height:560px}.character-sidecards{grid-template-columns:1fr}}
+@media(max-width:760px){.character-attr-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.character-sidecard{grid-template-columns:110px minmax(0,1fr)}.character-heading h3{font-size:30px}}
+@media(max-width:560px){.character-attr-grid{grid-template-columns:1fr}.character-sidecard{grid-template-columns:1fr}.character-sidevisual{min-height:180px}.character-figure-frame{min-height:460px}.character-figure-caption{font-size:18px}.character-heading h3{font-size:28px}}
