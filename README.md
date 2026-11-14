@@ -1,3 +1,11 @@
+# ASHEN v0.1.37.2 — Test czterech grafik broni (SVG)
+
+- Dodano indywidualne ikony SVG dla Zardzewiałego noża (`knife`), Toporka z odzysku (`hatchet`), Pistoletu M-9 (`pistol`) i Karabinu Szabrownika (`rifle`).
+- Grafiki wyświetlają się w Ekwipunku, w wyposażonych slotach oraz w oknie szczegółów przedmiotu.
+- Zachowano parametry, dropy i format zapisu postaci.
+- Ujednolicono numer wersji na `0.1.37.2`.
+- To próbny styl ilustracyjny przed stworzeniem grafik dla pozostałej broni.
+
 # ASHEN v0.1.37.1 – uzupełnienie grafik i licznik wyprawy
 
 - Uzupełniono brakujące grafiki: Gogle noktowizyjne, Celownik optyczny, Moduł neurotechniczny, Wzmacniacz odruchów, Komin filtrujący, Rękawice technika, a także grafiki surowców-przedmiotów.
