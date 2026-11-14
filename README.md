@@ -1,3 +1,12 @@
+# ASHEN v0.1.44 — trzy sloty akcesoriów
+
+- Dodano Akcesorium I / II / III; pierwszy slot zachowuje dawny identyfikator `extra` i dotychczasowy przedmiot.
+- Trzy niezależne sloty liczą bonusy do atrybutów, także po zapisaniu i odświeżeniu strony.
+- Przy przedmiotach-akcesoriach w Ekwipunku pojawiają się przyciski 1 / 2 / 3; przy zajętym slocie symbol ↺ oznacza zamianę.
+- Założone akcesoria można otwierać i zdejmować osobno, podobnie jak inne wyposażenie.
+- Zgodność starszych zapisów i importów zachowana (`ashen-save-v010`, `version:1`).
+- Nie dodano jeszcze Szczęścia ani artefaktów; to kolejne etapy.
+
 # ASHEN v0.1.43 — jakość łupów zależna od wyprawy
 
 - Bliska wyprawa: zwykły 78%, ulepszony 22%; rzadkie, epickie i legendarne **niedostępne**.
