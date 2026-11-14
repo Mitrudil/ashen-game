@@ -546,3 +546,33 @@ h1, h2, h3, h4, h5, h6, button,
 .mission-active-track{height:9px;margin-top:13px;background:#0d1214;border-radius:20px;overflow:hidden;border:1px solid #574129}
 .mission-active-track>div{height:100%;background:linear-gradient(90deg,#a65017,#e39330,#f2bd66);border-radius:20px;transition:width .8s linear;box-shadow:0 0 9px #e29b3980}
 @media(max-width:520px){.mission-active-main{align-items:flex-start}.mission-active-time{white-space:normal}}
+
+
+/* ASHEN v0.1.37.4 — one width and consistent navigation for all tabs */
+.ashen-wide-shell{width:100%;max-width:1570px;margin-inline:auto}
+.ashen-wide-shell .layout{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;align-items:start}
+.ashen-wide-shell .main{width:100%;min-width:0}
+.ashen-wide-shell .sidebar{min-width:0;align-self:start;overflow:visible;background:linear-gradient(160deg,#1e2428,#101519 85%);border:1px solid #584632;border-radius:13px;padding:16px}
+.ashen-wide-shell .sidebar .nav{display:grid!important;grid-template-columns:minmax(0,1fr);gap:7px;overflow:visible!important;width:100%;margin-top:17px;padding:0;max-width:100%}
+.ashen-wide-shell .sidebar .nav button{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;white-space:normal!important;text-align:left!important;padding:10px 12px!important;border-radius:7px!important;font-family:var(--ashen-ui-font,system-ui),sans-serif!important;line-height:1.35!important;letter-spacing:normal!important}
+.ashen-wide-shell .sidebar .nav button.active{background:#354049;border:1px solid #96754f;color:#f4d5a3}
+.ashen-wide-shell .sidebar .nav button:not(.active){background:transparent;border:1px solid transparent;color:#ddd8ce}
+.ashen-wide-shell .sidebar .nav button:hover:not(.active){background:#303a3e;border-color:#615442}
+.ashen-wide-shell .hero{padding:clamp(20px,3vw,42px);border:1px solid #584632;border-radius:14px;background:linear-gradient(125deg,#272b2b,#141b1f 68%)}
+.ashen-wide-shell .hero h1{font:800 clamp(26px,2.5vw,36px)/1.18 var(--ashen-ui-font,system-ui),sans-serif;color:#f0e4ce}
+.ashen-wide-shell .tile{min-height:135px}
+.ashen-wide-shell .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.loot-open-icon,.loot-open-name{background:transparent;border:0;box-shadow:none;margin:0;padding:0;text-align:left;cursor:pointer;color:inherit}
+.loot-open-icon:hover,.loot-open-name:hover{background:transparent;filter:brightness(1.24)}
+.loot-open-icon:focus-visible,.loot-open-name:focus-visible{outline:2px solid #e4ab68;outline-offset:3px}
+.loot-open-name{font-weight:800;font-size:14px;line-height:1.35;overflow-wrap:anywhere}
+.loot-open-icon .iconbox{pointer-events:none}
+.loot-open-icon:hover .iconbox{border-color:#dba55e}
+@media(max-width:850px){
+ .ashen-wide-shell .layout{display:block}
+ .ashen-wide-shell .sidebar{margin-bottom:14px}
+ .ashen-wide-shell .sidebar .nav{display:flex!important;flex-wrap:nowrap;overflow-x:auto!important;gap:7px;scrollbar-width:thin;padding-bottom:7px}
+ .ashen-wide-shell .sidebar .nav button{flex:0 0 auto!important;width:auto!important;min-width:max-content!important;white-space:nowrap!important;padding:9px 12px!important}
+ .ashen-wide-shell .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){.ashen-wide-shell .grid{grid-template-columns:1fr}.ashen-wide-shell .sidebar{padding:12px}}
