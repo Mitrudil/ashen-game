@@ -735,3 +735,13 @@ h1, h2, h3, h4, h5, h6, button,
 .ashen-artifact-affix.is-pending{color:#edacb9}
 .ashen-artifact-affix strong{display:block;margin-bottom:4px}
 .ashen-artifact-affix details{margin-top:6px}
+
+/* v0.1.49 — finalne grafiki towarzyszy i transportu */
+.premium-choice-image img,.premium-active-picture img,.character-sidevisual img{object-fit:contain!important;object-position:center center;background:#11171b}
+.premium-choice-image,.premium-active-picture,.character-sidevisual{background:#11171b!important}
+.premium-active-picture img{padding:2px}
+.ashen-onfoot{font-size:76px;line-height:1}
+.ashen-roster-details{margin:16px 0 0;border:1px solid #594c3d;border-radius:10px;padding:12px;background:#11171b}
+.ashen-roster-details summary{cursor:pointer;font-weight:700;color:#f1c489}
+.ashen-roster-details img{display:block;margin:12px auto 0;width:100%;max-width:760px;height:auto;border-radius:8px}
+.premium-choice-body .premium-bonus{line-height:1.35}

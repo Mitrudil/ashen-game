@@ -354,3 +354,12 @@ W sypialni zastosowano realistyczne tło `assets/bunker/rooms/bedroom-base.webp`
 - Artefakty mogą losować prefiksy i sufiksy i kompletować zestawy z 3 różnymi artefaktami mającymi wspólny modyfikator.
 - Stare artefakty zostają przepisane bez usuwania: Ślady Wędrowca → Pomyślny, Pieczęć Burzy → Osłonowy.
 - Zestawy artefaktów wspierają przede wszystkim Szczęście; nadal obowiązuje limit +15.
+
+
+## 0.1.49 — Towarzysze i transport (finalne grafiki)
+- Usunięto osobną nawigację Pulpit; start gry kieruje do Postaci.
+- Dodano autorskie grafiki 4 towarzyszy i 4 linii pojazdów, każdy w 3 etapach rozwoju, oraz plansze podglądowe.
+- Pies otrzymał najmocniejszy bonus do dodatkowego łupu, kot do złomu, kruk do doświadczenia, dzik do ochrony.
+- Rozwój towarzyszy kosztuje kredyty, złom i części i zapisuje się wraz z postacią.
+- Rozwój pojazdów nadal skraca czas wypraw. Przestarzałe pojazdy starego prototypu mapowane są do aktualnych linii.
+- Usunięto wyłącznie dekoracyjny pasek Transport/Towarzysz pod nagłówkiem Wybierz wyprawę. Pasek odliczania działa podczas aktywnej wyprawy.
