@@ -372,3 +372,10 @@ W sypialni zastosowano realistyczne tło `assets/bunker/rooms/bedroom-base.webp`
 - Transport: pieszo → rower → motocykl → buggy → samochód → van/kamper → ciężarówka.
 - Auto i kamper mają odrębne koszty i przyspieszenia, a stare stany pozostają dostępne.
 - Zaktualizowano kontrolę obrazów i responsywność kart.
+
+
+## v0.1.50.1 — poprawka kadrowania ilustracji
+- Zrekonstruowano 31 osobnych grafik zwierząt i pojazdów, bez napisów, strzałek i obciętych kół.
+- Wszystkie grafiki są umieszczone na jednolitym płótnie 760×460 i wycentrowane.
+- Zmieniono proporcje ramki na zgodne z ilustracją w widoku desktop/mobile oraz podczas podglądu aktywnego towarzysza/pojazdu.
+- Mechanika, ceny i zapisy pozostają bez zmian.
