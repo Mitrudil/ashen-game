@@ -1,3 +1,12 @@
+# ASHEN v0.1.37.3 — komplet grafik broni od użytkownika
+
+- Wszystkie 24 bronie z bazy mają osobne grafiki WebP z obrazów przesłanych przez użytkownika.
+- Wcześniejsze cztery testowe ilustracje SVG zastąpiono obrazami z nowej serii.
+- Grafiki są używane w Ekwipunku, na slocie postaci i w szczegółach przedmiotu.
+- Bez zmian nazw, obrażeń, statystyk, rzadkości, dropów i formatu zapisów (`ashen-save-v010`).
+- W folderze `assets/items/weapons/` jest 24 plików `.webp`; ich nazwy odpowiadają identyfikatorom z `js/game.js`.
+- Jeśli przedmiot ma podobną sylwetkę do innego, pliki można później wymienić bez zmian w kodzie.
+
 # ASHEN v0.1.37.2 — Test czterech grafik broni (SVG)
 
 - Dodano indywidualne ikony SVG dla Zardzewiałego noża (`knife`), Toporka z odzysku (`hatchet`), Pistoletu M-9 (`pistol`) i Karabinu Szabrownika (`rifle`).
