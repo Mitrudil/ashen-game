@@ -605,3 +605,32 @@ h1, h2, h3, h4, h5, h6, button,
 .ashen-set-item-info strong{color:#97d7b4}
 .ashen-set-item-info small{color:#aebdb7;line-height:1.5}
 @media(max-width:600px){.ashen-sets-section{padding:12px}.ashen-set-card{padding:12px}.ashen-set-bottom{align-items:flex-start}}
+
+/* ASHEN v0.1.40 — live combat breakdown and attribute help */
+.ashen-combat-panel{margin-top:22px;min-width:0;padding:18px;border:1px solid #76573a;border-radius:12px;background:linear-gradient(135deg,#252b2c,#10171b)}
+.ashen-combat-heading{display:flex;align-items:end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:15px}
+.ashen-combat-heading h3{color:#efd1a3;margin:5px 0 0;font-size:1.3rem}
+.ashen-combat-attack-count{padding:8px 13px;border:1px solid #936b40;border-radius:7px;color:#f6d4a5;background:#36281b;font-size:.88rem;font-weight:800}
+.ashen-combat-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr);gap:14px;min-width:0}
+.ashen-combat-card{min-width:0;background:rgba(8,15,19,.75);border:1px solid rgba(166,136,94,.27);border-radius:9px;padding:14px}
+.ashen-combat-card h4{margin:0 0 12px;color:#e8bc7f;letter-spacing:.08em;font-size:.85rem}
+.ashen-combat-scroll{overflow-x:auto;max-width:100%}
+.ashen-combat-table{width:100%;border-collapse:collapse;font-size:.82rem;white-space:nowrap}
+.ashen-combat-table th{text-align:left;background:#3c4850;color:#e7eff2;padding:9px 8px;font-weight:750}
+.ashen-combat-table td{padding:10px 8px;color:#e7ded0;border-bottom:1px solid #3c4547}
+.ashen-combat-table tbody tr:nth-child(2n){background:rgba(111,137,147,.12)}
+.ashen-combat-table td small{display:block;color:#9eabad;font-size:.72rem;margin-top:3px}
+.ashen-combat-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.ashen-combat-metrics.defense{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ashen-combat-metrics>div{padding:10px;min-width:0;border-radius:6px;background:rgba(95,112,118,.14);border:1px solid rgba(135,143,146,.13)}
+.ashen-combat-metrics span{display:block;font-size:.72rem;color:#adb9bd;margin-bottom:4px}
+.ashen-combat-metrics strong{display:block;color:#f0d9b8;font-size:1rem}
+.ashen-combat-note{font-size:.77rem;color:#a8b3b6;line-height:1.55;margin:12px 0 0}
+.ashen-attr-help{display:inline-block;position:relative;margin-left:4px;vertical-align:middle}
+.ashen-attr-help summary{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1px solid #987e59;color:#f6d7a5;font-size:13px;cursor:pointer;list-style:none;background:#28333a}
+.ashen-attr-help summary::-webkit-details-marker{display:none}
+.ashen-attr-help-content{position:absolute;z-index:80;top:25px;left:0;width:min(290px,70vw);padding:10px 12px;border:1px solid #a57c4b;border-radius:7px;background:#111b21;color:#e7e0d5;box-shadow:0 8px 24px #000a;font-size:.81rem;line-height:1.5;text-align:left;font-weight:normal}
+.ashen-attr-help:not([open]) .ashen-attr-help-content{display:none}
+@media(hover:hover){.ashen-attr-help:not([open]):hover .ashen-attr-help-content{display:block}}
+@media(max-width:880px){.ashen-combat-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:560px){.ashen-combat-panel{padding:12px}.ashen-combat-card{padding:10px}.ashen-combat-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.ashen-combat-table{font-size:.73rem}}

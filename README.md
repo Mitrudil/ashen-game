@@ -1,3 +1,12 @@
+# ASHEN v0.1.40 — Siła bojowa
+
+- Zakładka Postać: dynamiczna tabela ATAK / OBRONA z parametrami wynikającymi z założonego wyposażenia i aktywnych setów.
+- Liczba ataków na rundę oraz kolejność i siła poszczególnych ataków są liczone przez tę samą funkcję co realna walka.
+- Szczegółowe objaśnienia sześciu atrybutów: najedź na symbol informacji lub dotknij go na telefonie.
+- Szansa trafienia zależy od przeciwnika, dlatego ekran pokazuje składowe celności, nie fikcyjną stałą szansę.
+- Dotychczasowe zapisy (`ashen-save-v010`) i statystyki broni pozostają bez zmian.
+- Aktualizacja wymaga tylko `index.html`, `js/game.js`, `css/style.css`, `README.md`.
+
 # ASHEN v0.1.39 — zestawy z prefiksów ubioru
 
 - Trzy założone elementy ubioru z tym samym prefiksem aktywują bonus zestawu.
