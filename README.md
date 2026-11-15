@@ -1,3 +1,5 @@
+ASHEN v0.1.56.3 — rezonanse artefaktów liczą osobne założone egzemplarze (UID), także powtórzone typy. Działa niezależnie dla prefiksu i sufiksu. Zaktualizowane opisy. Bez zmiany zapisów i zestawów odzieży.
+
 ASHEN v0.1.56.2 — poprawa układu slotów wokół postaci. Karty z prawej i lewej strony mieszczą się w panelu Ekwipunku, bez wychodzenia poza ramkę.
 
 ## ASHEN v0.1.56.1

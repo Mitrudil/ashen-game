@@ -1,4 +1,4 @@
-const APP_VERSION='0.1.56.2';
+const APP_VERSION='0.1.56.3';
 
 (()=>{'use strict';const KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 const rarities=[{name:'Zwykły',color:'#b8bfc3',weight:58,mult:1},{name:'Ulepszony',color:'#8ac78b',weight:25,mult:1.14},{name:'Rzadki',color:'#77afe5',weight:12,mult:1.32},{name:'Epicki',color:'#c391e4',weight:4,mult:1.58},{name:'Legendarny',color:'#f2bb65',weight:1,mult:1.95}];
@@ -10,7 +10,7 @@ const items=[
 {id:'scrap',name:'Złom',slot:'material',bonus:{}},{id:'circuits',name:'Elektronika',slot:'material',bonus:{}},{id:'fuel',name:'Paliwo',slot:'material',bonus:{}},{id:'chemicals',name:'Chemikalia',slot:'material',bonus:{}},{id:'parts',name:'Części zamienne',slot:'material',bonus:{}}];
 
 // ASHEN v0.1.48 — artefakty mają własne prefiksy i sufiksy.
-// Zestaw powstaje z trzech RÓŻNYCH założonych artefaktów o wspólnym modyfikatorze.
+// Zestaw powstaje z trzech osobno założonych egzemplarzy artefaktów o wspólnym modyfikatorze. Powtórzone typy są dozwolone.
 // Prefiks i sufiks mogą tworzyć odrębne rezonanse; główną nagrodą jest Szczęście.
 const ARTIFACT_PREFIX_SETS=Object.freeze({
  art_fortunate:{name:'Pomyślny',luck:4,explore:0,bonus:{},description:'Szczęście +4'},
@@ -45,9 +45,15 @@ function resonanceResults(){
  const worn=['extra','extra2','extra3'].map(slot=>({slot,inst:instance(state.equip?.[slot])})).filter(x=>x.inst&&def(x.inst)?.artifact);
  const results=[];
  for(const [kind,configs] of [['prefix',ARTIFACT_PREFIX_SETS],['suffix',ARTIFACT_SUFFIX_SETS]])for(const [id,config] of Object.entries(configs)){
-  const seen=new Set(),members=[];
-  for(const row of worn){if(row.inst[kind]!==id||seen.has(row.inst.id))continue;seen.add(row.inst.id);members.push(row)}
-  if(members.length)results.push({id,kind,config,members,count:members.length,active:members.length===3});
+  // Liczymy fizyczne egzemplarze (UID), nie typy przedmiotów (id).
+  // Każdy slot jest odwiedzany raz; zabezpieczenie UID chroni przed
+  // ewentualnym błędnym zapisem tego samego egzemplarza w kilku slotach.
+  const seenUids=new Set(),members=[];
+  for(const row of worn){
+   if(row.inst[kind]!==id||seenUids.has(row.inst.uid))continue;
+   seenUids.add(row.inst.uid);members.push(row);
+  }
+  if(members.length)results.push({id,kind,config,members,count:members.length,active:members.length>=3});
  }
  return results;
 }
@@ -58,8 +64,8 @@ function resonanceBonuses(){
 }
 function resonancePanel(){
  const results=resonanceResults();
- const cards=results.map(r=>`<div class="ashen-resonance-card ${r.active?'active':'pending'}"><div class="ashen-resonance-title"><strong>${r.kind==='prefix'?'Prefiks':'Sufiks'}: ${escape(r.config.name)}</strong><span>${r.count}/3 · ${r.active?'AKTYWNY':'NIEAKTYWNY'}</span></div><p class="small ${r.active?'good':'muted'}">${escape(r.config.description)}</p><div class="ashen-resonance-members">${r.members.map(m=>`<span class="found">✓ ${escape(statsOf(m.inst).name)} · ${escape(slotLabels[m.slot])}</span>`).join('')}</div>${r.active?'':'<div class="small muted">Brakuje '+(3-r.count)+' innego artefaktu z tym modyfikatorem.</div>'}</div>`).join('');
- return `<section class="ashen-resonance-panel"><h3>◈ Rezonans artefaktów</h3><p class="small muted">Każdy artefakt ma bazowe Szczęście i może mieć prefiks oraz sufiks. <strong>Trzy różne artefakty z tym samym prefiksem lub sufiksem</strong> uruchamiają bonus zestawu. Zwykłe akcesoria nie liczą się do rezonansu. Prefiks i sufiks to dwa niezależne typy zestawów.</p><div class="ashen-resonance-grid">${cards||'<div class="ashen-resonance-card">Załóż artefakt z modyfikatorem, aby zobaczyć postęp zestawu.</div>'}</div></section>`;
+ const cards=results.map(r=>`<div class="ashen-resonance-card ${r.active?'active':'pending'}"><div class="ashen-resonance-title"><strong>${r.kind==='prefix'?'Prefiks':'Sufiks'}: ${escape(r.config.name)}</strong><span>${r.count}/3 · ${r.active?'AKTYWNY':'NIEAKTYWNY'}</span></div><p class="small ${r.active?'good':'muted'}">${escape(r.config.description)}</p><div class="ashen-resonance-members">${r.members.map(m=>`<span class="found">✓ ${escape(statsOf(m.inst).name)} · ${escape(slotLabels[m.slot])}</span>`).join('')}</div>${r.active?'':'<div class="small muted">Brakuje '+(3-r.count)+' '+(3-r.count===1?'założonego artefaktu':'założonych artefaktów')+' z tym modyfikatorem.</div>'}</div>`).join('');
+ return `<section class="ashen-resonance-panel"><h3>◈ Rezonans artefaktów</h3><p class="small muted">Każdy artefakt ma bazowe Szczęście i może mieć prefiks oraz sufiks. <strong>Trzy założone egzemplarze artefaktów z tym samym prefiksem lub sufiksem (mogą być identyczne)</strong> uruchamiają bonus zestawu. Zwykłe akcesoria nie liczą się do rezonansu. Prefiks i sufiks to dwa niezależne typy zestawów.</p><div class="ashen-resonance-grid">${cards||'<div class="ashen-resonance-card">Załóż artefakt z modyfikatorem, aby zobaczyć postęp zestawu.</div>'}</div></section>`;
 }
 function artifactDetailPanel(inst){
  const d=def(inst);if(!d?.artifact)return '';
@@ -67,7 +73,7 @@ function artifactDetailPanel(inst){
  for(const [kind,configs] of [['prefix',ARTIFACT_PREFIX_SETS],['suffix',ARTIFACT_SUFFIX_SETS]]){
   const id=inst[kind],cfg=configs[id];if(!cfg)continue;
   const r=results.find(x=>x.kind===kind&&x.id===id),count=r?.count||0,active=equipped&&r?.active;
-  names.push(`<div class="ashen-artifact-affix ${active?'is-active':'is-pending'}"><strong>${kind==='prefix'?'Prefiks':'Sufiks'}: ${escape(cfg.name)} · ${count}/3 · ${active?'AKTYWNY':'NIEAKTYWNY'}</strong><div>${escape(cfg.description)}</div><div class="small">${active?'Komplet trzech różnych artefaktów.':!equipped?'Ten artefakt nie jest założony; wybierz jeden ze slotów 1–3.':`Do aktywacji brakuje ${Math.max(0,3-count)} różnych artefaktów.`}</div>${r?.members?.length?`<details><summary>Elementy zestawu</summary>${r.members.map(m=>`<div>${escape(statsOf(m.inst).name)}</div>`).join('')}</details>`:''}</div>`);
+  names.push(`<div class="ashen-artifact-affix ${active?'is-active':'is-pending'}"><strong>${kind==='prefix'?'Prefiks':'Sufiks'}: ${escape(cfg.name)} · ${count}/3 · ${active?'AKTYWNY':'NIEAKTYWNY'}</strong><div>${escape(cfg.description)}</div><div class="small">${active?'Komplet trzech założonych artefaktów.':!equipped?'Ten artefakt nie jest założony; wybierz jeden ze slotów 1–3.':`Do aktywacji brakuje ${Math.max(0,3-count)} ${3-count===1?'założonego artefaktu':'założonych artefaktów'} z tym modyfikatorem.`}</div>${r?.members?.length?`<details><summary>Elementy zestawu</summary>${r.members.map(m=>`<div>${escape(statsOf(m.inst).name)}</div>`).join('')}</details>`:''}</div>`);
  }
  return `<section class="ashen-artifact-detail"><strong>◈ Rezonans i Szczęście</strong><p class="small">Bazowe Szczęście: +${d.artifactLuck||0}. Bonusy prefiksu i sufiksu działają również bez kompletu.</p>${names.join('')||'<p class="small">Ten artefakt nie ma jeszcze modyfikatorów.</p>'}</section>`;
 }
