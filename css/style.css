@@ -932,3 +932,66 @@ h1, h2, h3, h4, h5, h6, button,
 .ashen-modal-equip-actions{gap:9px;flex-wrap:wrap}
 @media(max-width:1100px){.inventory-group-nav{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:620px){.inventory-group-nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.inventory-group-choice{padding:10px 6px;font-size:12px}.inventory-premium-head{grid-template-columns:34px 56px minmax(0,1fr)}.inventory-bulk-marker{grid-column:1;grid-row:1;align-self:center}.inventory-premium-icon{grid-column:2;grid-row:1}.inventory-premium-copy{grid-column:3;grid-row:1}.inventory-premium-name{font-size:14px}.inventory-premium-badges{gap:4px}.inventory-premium-badges>span{font-size:9px}.inventory-item-expanded .inventory-premium-actions button{min-height:36px}}
+
+/* ASHEN v0.1.56.2 — poprawka rzeczywistych szerokości kolumn paperdoll.
+   Stare minmax(240px ... 320px ... 240px) wymuszało minimum
+   736px + padding i odstępy nawet w panelu o mniejszej szerokości. */
+.ashen-premium-shell .inventory-premium-maincol,
+.ashen-premium-shell .inventory-premium-stage,
+.ashen-premium-shell .paperdoll-wrap{min-width:0;max-width:100%;box-sizing:border-box}
+.ashen-premium-shell .paperdoll-wrap{container-type:inline-size}
+.ashen-premium-shell .paperdoll{
+  box-sizing:border-box;
+  width:100%;max-width:100%;
+  grid-template-columns:minmax(0,1fr) minmax(155px,205px) minmax(0,1fr);
+  gap:10px;padding:12px;
+}
+.ashen-premium-shell .paperdoll-col,
+.ashen-premium-shell .paperdoll .slot-anchor,
+.ashen-premium-shell .paperdoll .slot-anchor[data-slot],
+.ashen-premium-shell .paperdoll .slot-anchor .item-view-name{min-width:0;max-width:100%;box-sizing:border-box}
+.ashen-premium-shell .paperdoll .slot-anchor,
+.ashen-premium-shell .paperdoll .slot-anchor[data-slot]{
+  grid-template-columns:46px minmax(0,1fr);
+  column-gap:7px;padding:8px;min-height:74px;
+}
+.ashen-premium-shell .paperdoll .slot-anchor .iconbox{width:44px;height:44px}
+.ashen-premium-shell .paperdoll .slot-anchor .label{font-size:11px;overflow-wrap:anywhere}
+.ashen-premium-shell .paperdoll .slot-anchor .mini{font-size:11px;overflow-wrap:anywhere}
+.ashen-premium-shell .figure-stage{min-width:0;max-width:100%}
+.ashen-premium-shell .figure-stage .inventory-figure{width:100%;max-width:100%;object-fit:contain}
+/* Gdy sama rama jest zbyt wąska, przenosimy dwie grupy slotów pod sylwetkę.
+   Container query zależy od faktycznej szerokości ramy, nie okna przeglądarki. */
+@container (max-width:680px){
+  .ashen-premium-shell .paperdoll{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-areas:'figure figure' 'left right';
+    gap:12px;padding:10px;
+  }
+  .ashen-premium-shell .figure-stage{min-height:350px;max-height:none}
+  .ashen-premium-shell .paperdoll-left,.ashen-premium-shell .paperdoll-right{justify-content:flex-start}
+}
+@container (max-width:420px){
+  .ashen-premium-shell .paperdoll{
+    grid-template-columns:1fr;
+    grid-template-areas:'figure' 'left' 'right';
+  }
+  .ashen-premium-shell .paperdoll .slot-anchor,
+  .ashen-premium-shell .paperdoll .slot-anchor[data-slot]{
+    display:grid;grid-template-columns:48px minmax(0,1fr);
+    grid-template-rows:auto auto;text-align:left;align-items:center;
+    min-height:78px;padding:8px;
+  }
+  .ashen-premium-shell .paperdoll .slot-anchor .label{grid-column:2;grid-row:1}
+  .ashen-premium-shell .paperdoll .slot-anchor .mini{grid-column:2;grid-row:2}
+  .ashen-premium-shell .figure-stage{min-height:315px}
+}
+
+/* Spójność z odziedziczonym breakpointem 1100px: bez mieszania grid-area i 3 kolumn. */
+@media (max-width:1180px){
+ .ashen-premium-shell .paperdoll{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-areas:'figure figure' 'left right';
+ }
+ .ashen-premium-shell .paperdoll-left,.ashen-premium-shell .paperdoll-right{justify-content:flex-start}
+}

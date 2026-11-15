@@ -1,3 +1,5 @@
+ASHEN v0.1.56.2 — poprawa układu slotów wokół postaci. Karty z prawej i lewej strony mieszczą się w panelu Ekwipunku, bez wychodzenia poza ramkę.
+
 ## ASHEN v0.1.56.1
 - Załóż/Zdejmij bezpośrednio w oknie szczegółów, obsługa wyboru ręki i trzech slotów akcesoriów.
 - Łączne obrażenia wszystkich ataków na rundę, z rozwijaną rozpiską; wartości przed redukcją pancerza/unikami/krytykami.
