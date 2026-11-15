@@ -1,3 +1,9 @@
+## v0.1.58.5 — Poprawka synergii Ekwipunku
+
+- Usunięto ograniczenie wyświetlania do trzech nieaktywnych zestawów ubioru w sekcji Synergie w Ekwipunku.
+- Nieaktywne zestawy pokazują postęp aktywacji 1/3 lub 2/3; po aktywacji pozostaje licznik do sześciu części i wzmacnianie premii.
+- Zakładka Postać i Ekwipunek korzystają z tego samego źródła setResults(); bez zmian w balansie, naliczaniu premii, zapisie gry i przedmiotach.
+
 ## ASHEN v0.1.58.4 — poprawki raportów Starć
 
 - Raport Starcia otwiera się jako okno modalne nad planszą. Zamknięcie: przycisk, kliknięcie poza oknem lub Esc.

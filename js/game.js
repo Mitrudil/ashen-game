@@ -1,4 +1,4 @@
-const APP_VERSION='0.1.58.4';
+const APP_VERSION='0.1.58.5';
 
 (()=>{'use strict';const KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 const rarities=[{name:'Zwykły',color:'#b8bfc3',weight:58,mult:1},{name:'Ulepszony',color:'#8ac78b',weight:25,mult:1.14},{name:'Rzadki',color:'#77afe5',weight:12,mult:1.32},{name:'Epicki',color:'#c391e4',weight:4,mult:1.58},{name:'Legendarny',color:'#f2bb65',weight:1,mult:1.95}];
@@ -1491,7 +1491,7 @@ function inventorySummaryPanels(){
  ].map(([label,val])=>`<div class="inventory-metric"><span>${label}</span><strong>${val}</strong></div>`).join('');
  const attrBlock=Object.entries(attrNames).map(([id,label])=>`<div class="inventory-attr"><span>${label}</span><strong>${a[id]||0}</strong></div>`).join('');
  const support=`<div class="inventory-support-line"><span>Towarzysz</span><strong>${companionId()?COMPANIONS[companionId()].name+' · '+companionBonus():'Brak'}</strong></div><div class="inventory-support-line"><span>Transport</span><strong>${vehicleDef().name}${vehicleDef().id!=='foot'?' · etap '+(vehicleStage()+1):''}</strong></div>`;
- const setHtml=activeSets.map(s=>`<div class="inventory-set-card active"><strong>${escape(s.config.name)}</strong><span>${setBonusDescription(s)}</span><small>${s.count}/6 elementów · średnia jakości ×${s.avg.toFixed(2).replace('.',',')}</small></div>`).join('') + pendingSets.slice(0,3).map(s=>`<div class="inventory-set-card pending"><strong>${escape(s.config.name)}</strong><span>Postęp ${s.count}/6 · premia za 3/3: ${escape(projectedSetBonus(s.config,s.avg))}</span></div>`).join('');
+ const setHtml=activeSets.map(s=>`<div class="inventory-set-card active"><strong>${escape(s.config.name)}</strong><span>${setBonusDescription(s)}</span><small>${s.count}/6 elementów · średnia jakości ×${s.avg.toFixed(2).replace('.',',')}</small></div>`).join('') + pendingSets.map(s=>`<div class="inventory-set-card pending"><strong>${escape(s.config.name)}</strong><span>Postęp ${s.count}/3 · premia za 3/3: ${escape(projectedSetBonus(s.config,s.avg))}</span></div>`).join('');
  const resonanceHtml=(resonance.active||[]).map(r=>`<div class="inventory-set-card active"><strong>${r.kind==='prefix'?'Prefiks':'Sufiks'} · ${escape(r.config.name)}</strong><span>${escape(r.config.description)}</span><small>Bonus: ${Object.keys(r.config.bonus||{}).length?Object.entries(r.config.bonus).map(([k,v])=>`${attrNames[k]} +${v}`).join(' · '):'brak statystyk'}${r.config.luck?` · Szczęście +${r.config.luck}`:''}${r.config.explore?` · Eksploracja +${r.config.explore}%`:''}</small></div>`).join('');
  return `
  <aside class="inventory-summary-stack">
