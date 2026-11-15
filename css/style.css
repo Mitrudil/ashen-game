@@ -1206,8 +1206,8 @@ body.arena-report-modal-open{overflow:hidden}
 .expedition-header,.expedition-history-head,.expedition-clan-strip,.expedition-active-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
 .expedition-progress-pill,.expedition-active-pill{padding:10px 14px;border-radius:999px;background:rgba(212,170,71,.12);border:1px solid rgba(212,170,71,.28);color:var(--gold);font-weight:700}
 .expedition-panel{margin-bottom:16px}
-.expedition-boss-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:14px}
-.expedition-boss-card{border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;background:linear-gradient(180deg,rgba(26,33,38,.96),rgba(18,23,28,.96));box-shadow:0 10px 24px rgba(0,0,0,.18)}
+.expedition-boss-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:14px}
+.expedition-boss-card{border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:18px;background:linear-gradient(180deg,rgba(26,33,38,.96),rgba(18,23,28,.96));box-shadow:0 10px 24px rgba(0,0,0,.18)}
 .expedition-boss-card.is-locked{opacity:.62;filter:saturate(.7)}
 .expedition-boss-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}
 .expedition-difficulty{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
@@ -1231,9 +1231,9 @@ body.arena-report-modal-open{overflow:hidden}
 
 
 .expedition-boss-art,.expedition-active-art{position:relative;overflow:hidden;border-radius:18px;border:1px solid rgba(212,170,71,.22);background:linear-gradient(180deg,rgba(22,28,34,.95),rgba(12,16,20,.95));box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
-.expedition-boss-art{aspect-ratio:4/3;margin:10px 0 14px}
-.expedition-active-art{width:220px;min-width:220px;aspect-ratio:3/4}
-.expedition-boss-art img,.expedition-active-art img,.expedition-enemy-portrait img{width:100%;height:100%;display:block;object-fit:cover}
+.expedition-boss-art{height:360px;margin:12px 0 14px}
+.expedition-active-art{width:260px;min-width:260px;height:340px}
+.expedition-boss-art img,.expedition-active-art img,.expedition-enemy-portrait img{width:100%;height:100%;display:block;object-fit:cover;object-position:center top}
 .expedition-active-layout{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
 .expedition-active-main{flex:1 1 420px;min-width:0}
 .expedition-tactics{margin:16px 0;padding:14px;border-radius:16px;border:1px solid rgba(212,170,71,.16);background:rgba(212,170,71,.05)}
@@ -1248,4 +1248,4 @@ body.arena-report-modal-open{overflow:hidden}
 .expedition-tactic-btn:disabled{opacity:.7;cursor:not-allowed}
 .expedition-team-grid.is-enemies .arena-fighter-portrait{border-color:rgba(215,87,87,.28)}
 .expedition-enemy-portrait{width:108px;height:144px;border-radius:16px;overflow:hidden;margin:0 auto 10px;border:1px solid rgba(215,87,87,.28);background:linear-gradient(180deg,#28191b,#171114)}
-@media (max-width: 760px){.expedition-active-art{width:100%;min-width:0;max-width:320px}.expedition-active-layout{flex-direction:column}.expedition-boss-art{aspect-ratio:3/4}}
+@media (max-width: 760px){.expedition-active-art{width:100%;min-width:0;max-width:340px;height:340px}.expedition-active-layout{flex-direction:column}.expedition-boss-grid{grid-template-columns:1fr}.expedition-boss-art{height:340px}}

@@ -1,66 +1,40 @@
-# ASHEN v0.3.0 — grafiki bossów i taktyka ekspedycji
+# ASHEN v0.3.0.1 — poprawki grafik bossów
 
-Ta wersja rozwija **ekspedycje klanowe** o dwie rzeczy, które były kolejnym krokiem po v0.2.9.1:
+Ta wersja to szybka poprawka po v0.3.0.
 
-1. **indywidualne grafiki bossów i przeciwników**,  
-2. **taktykę drużyny wybieraną przed walką**.
+## Co poprawiono
 
-## Co doszło
+### Wybór bossa
+- powiększone ramki grafik bossów,
+- karty bossów są większe i bardziej prostokątne,
+- grafiki powinny lepiej mieścić się w podglądzie.
 
-### Grafiki bossów
-- każdy z 3 pierwszych bossów ma teraz własną grafikę,
-- **Brat Tarczownik**, **Brat Mechanik** i **Brat Strzelec** mają osobne portrety,
-- grafiki są widoczne:
-  - na kartach bossów,
-  - w aktywnej wyprawie,
-  - w raportach walki.
+### Trzej Bracia Rdzy
+- nowa grafika główna grupy **Trzej Bracia Rdzy** — wszyscy trzej razem,
+- nowe indywidualne grafiki:
+  - **Brat Tarczownik**
+  - **Brat Mechanik**
+  - **Brat Strzelec**
+- Bracia nie mają już tej samej twarzy co **Rzeźnik ze Złomowiska**.
 
-### Taktyka wyprawy
-Lider lub oficer może ustawić taktykę aktywnej wyprawy przed uruchomieniem walki:
-- **Dobić najsłabszych**
-- **Na największe zagrożenie**
-- **Rozproszyć ogień**
+### Raport ekspedycji
+- poprawione dobieranie grafik przeciwników w raporcie,
+- historyczne raporty Braci Rdzy powinny pokazywać osobne portrety po nazwach przeciwników, a nie jedno wspólne zdjęcie.
 
-Taktyka wpływa na wybór celu przez drużynę podczas rozliczania walki na serwerze.
+## SQL
+**Nie trzeba uruchamiać nowego SQL.**
 
-## Nadal bez zmian
-W tej wersji nadal **nie ma jeszcze**:
-- nagród za bossów,
-- łupów,
-- pełnej ekonomii ekspedycji,
-- pełnej kampanii 15–20 bossów.
-
-To będzie następny etap.
-
-## Wymagany SQL
-
-### Jeśli masz już v0.2.9 / v0.2.9.1
-Uruchom dodatkowo:
-- `multiplayer/supabase/007_expedition_tactics_and_boss_art.sql`
-
-### Jeśli stawiasz wszystko od zera
-Uruchom po kolei:
-- `002_cloud_saves.sql`
-- `003_online_pvp.sql`
-- `005_clans.sql`
-- `006_clan_expeditions.sql`
-- `007_expedition_tactics_and_boss_art.sql`
+To jest poprawka tylko po stronie plików gry / assetów.
 
 ## Najważniejsze zmienione pliki
 - `index.html`
 - `css/style.css`
 - `js/game.js`
 - `js/expeditions.js`
-- `assets/bosses/*`
-- `multiplayer/supabase/007_expedition_tactics_and_boss_art.sql`
+- `assets/bosses/boss-03-brothers-group.webp`
+- `assets/bosses/boss-03-tarczownik.webp`
+- `assets/bosses/boss-03-mechanik.webp`
+- `assets/bosses/boss-03-strzelec.webp`
 
-## Dokument uruchomienia
-Szczegóły: `multiplayer/URUCHOMIENIE_0.3.0.md`
-
-## Bez zmian
-Nie ruszałem:
-- lokalnego PvE,
-- lokalnego PvP testowego,
-- ekwipunku i rozwoju postaci,
-- systemu klanów poza ekspedycjami,
-- ALLADYN.
+## Instalacja
+Podmień pliki z paczki i odśwież stronę przez **Ctrl + F5**.
