@@ -1,4 +1,4 @@
-const APP_VERSION='0.1.55.1';
+const APP_VERSION='0.1.56';
 
 (()=>{'use strict';const KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 const rarities=[{name:'Zwykły',color:'#b8bfc3',weight:58,mult:1},{name:'Ulepszony',color:'#8ac78b',weight:25,mult:1.14},{name:'Rzadki',color:'#77afe5',weight:12,mult:1.32},{name:'Epicki',color:'#c391e4',weight:4,mult:1.58},{name:'Legendarny',color:'#f2bb65',weight:1,mult:1.95}];
@@ -1243,35 +1243,133 @@ function inventorySortEntries(rows){
   return rarityCompare||(Number(b.inst.upgrade)||0)-(Number(a.inst.upgrade)||0)||power(b)-power(a)||a.o.name.localeCompare(b.o.name,'pl')||a.originalIndex-b.originalIndex;
  });
 }
+
+function equippedArmorTotal(){
+ const base=Object.entries(state.equip).filter(([slot])=>!['right','left'].includes(slot)).reduce((sum,[,uid])=>sum+(statsOf(instance(uid))?.armor||0),0);
+ const setArmor=activeSetBonuses().armorPct||0;
+ const a=attrs();
+ const boar=companionId()==='boar'?(PET_BONUSES.boar[companionStage()]||0):0;
+ return base+Math.round(base*setArmor/100)+Math.floor((a.end||0)/4)+boar;
+}
+function inventoryCombatSummary(){
+ const a=attrs(),attacks=heroAttacks(),main=attacks[0],mainWeapon=main?.weapon||statsOf({id:'knife',rarity:0});
+ const range=weaponDamageRange(a,mainWeapon,main?.power||1);
+ const accuracy=Math.round(main?weaponAccuracy(a,mainWeapon):6+(a.per||0)*1.3);
+ const crit=Math.round(clamp(.05+(a.per||0)*.005+((mainWeapon?.critPp)||0)/100,0,.35)*100);
+ const dodge=Math.round(3+(a.dex||0)*1.1+(companionId()==='boar'?(PET_BONUSES.boar[companionStage()]||0):0));
+ return {range,accuracy,crit,dodge,armor:equippedArmorTotal(),hp:maxHp(),attacks:attacks.length,weapon:mainWeapon};
+}
+function inventorySummaryPanels(){
+ const combat=inventoryCombatSummary();
+ const a=attrs();
+ const sets=activeSetBonuses().results||[];
+ const activeSets=sets.filter(s=>s.active);
+ const pendingSets=sets.filter(s=>!s.active&&s.count>0);
+ const resonance=resonanceBonuses();
+ const lines=[
+  ['PŻ maks.',combat.hp],
+  ['Pancerz',combat.armor],
+  ['Unik',combat.dodge],
+  ['Celność',combat.accuracy+'%'],
+  ['Krytyk',combat.crit+'%'],
+  ['Ataki / runda',combat.attacks]
+ ].map(([label,val])=>`<div class="inventory-metric"><span>${label}</span><strong>${val}</strong></div>`).join('');
+ const attrBlock=Object.entries(attrNames).map(([id,label])=>`<div class="inventory-attr"><span>${label}</span><strong>${a[id]||0}</strong></div>`).join('');
+ const support=`<div class="inventory-support-line"><span>Towarzysz</span><strong>${companionId()?COMPANIONS[companionId()].name+' · '+companionBonus():'Brak'}</strong></div><div class="inventory-support-line"><span>Transport</span><strong>${vehicleDef().name}${vehicleDef().id!=='foot'?' · etap '+(vehicleStage()+1):''}</strong></div>`;
+ const setHtml=activeSets.map(s=>`<div class="inventory-set-card active"><strong>${escape(s.config.name)}</strong><span>${setBonusDescription(s)}</span><small>${s.count}/6 elementów · średnia jakości ×${s.avg.toFixed(2).replace('.',',')}</small></div>`).join('') + pendingSets.slice(0,3).map(s=>`<div class="inventory-set-card pending"><strong>${escape(s.config.name)}</strong><span>Postęp ${s.count}/6 · premia za 3/3: ${escape(projectedSetBonus(s.config,s.avg))}</span></div>`).join('');
+ const resonanceHtml=(resonance.active||[]).map(r=>`<div class="inventory-set-card active"><strong>${r.kind==='prefix'?'Prefiks':'Sufiks'} · ${escape(r.config.name)}</strong><span>${escape(r.config.description)}</span><small>Bonus: ${Object.keys(r.config.bonus||{}).length?Object.entries(r.config.bonus).map(([k,v])=>`${attrNames[k]} +${v}`).join(' · '):'brak statystyk'}${r.config.luck?` · Szczęście +${r.config.luck}`:''}${r.config.explore?` · Eksploracja +${r.config.explore}%`:''}</small></div>`).join('');
+ return `
+ <aside class="inventory-summary-stack">
+   <section class="inventory-summary-card inventory-overview-card">
+      <div class="inventory-summary-head"><div><span class="tag">PODSUMOWANIE BOJOWE</span><h3>Stan ocalałego</h3></div><div class="inventory-rarity-chip">Broń główna: ${escape(combat.weapon?.name||'Nóż')}</div></div>
+      <div class="inventory-metric-grid">${lines}</div>
+      <div class="inventory-damage-highlight"><span>Atak główny</span><strong>${combat.range.low}–${combat.range.high}</strong><small>${combat.weapon?.slot==='hand2'?'Broń dwuręczna':'Aktywna konfiguracja broni'} · ${weaponFamilyLabel(combat.weapon)}</small></div>
+   </section>
+   <section class="inventory-summary-card">
+      <div class="inventory-summary-head"><div><span class="tag">Atrybuty</span><h3>Profil postaci</h3></div><div class="inventory-rarity-chip">Poziom ${state.level}</div></div>
+      <div class="inventory-attr-grid">${attrBlock}</div>
+      <div class="inventory-support-box">${support}</div>
+   </section>
+   <section class="inventory-summary-card">
+      <div class="inventory-summary-head"><div><span class="tag">Synergie</span><h3>Zestawy i rezonans</h3></div><div class="inventory-rarity-chip">Aktywne: ${activeSets.length+(resonance.active||[]).length}</div></div>
+      <div class="inventory-bonus-overview"><span>Zestawy pancerza / ubrań</span><strong>${activeSets.length?activeSets.length+' aktywnych':'Brak aktywnych'}</strong></div>
+      <div class="inventory-bonus-overview"><span>Rezonans artefaktów</span><strong>${(resonance.active||[]).length?`Szczęście +${resonance.luck}${resonance.explore?` · Eksploracja +${resonance.explore}%`:''}`:'Brak aktywnego'}</strong></div>
+      <div class="inventory-set-stack">${setHtml||'<div class="muted small">Załóż trzy zgodne elementy ubioru, aby aktywować pierwszy zestaw.</div>'}${resonanceHtml||'<div class="muted small">Artefakty z tym samym prefiksem lub sufiksem uruchomią rezonans 3/3.</div>'}</div>
+   </section>
+ </aside>`;
+}
+function inventoryItemCard(inst,o){
+ const worn=Object.values(state.equip).includes(inst.uid);
+ const weapon=o.slot==='hand1';
+ const rarityMeta=rarity(inst);
+ const slotLabel=slotName(o.slot);
+ const buttons=o.slot==='material'?'':worn?`<span class="inventory-action-tag equipped">Założony</span><button data-unequip="${Object.keys(state.equip).find(k=>state.equip[k]===inst.uid)||''}">Zdejmij</button>`:weapon?`<button class="primary" data-equip="${inst.uid}" data-hand="right">Prawa ręka</button><button data-equip="${inst.uid}" data-hand="left">Lewa ręka</button>`:(o.slot==='extra'?['extra','extra2','extra3'].map((s,i)=>`<button class="${state.equip[s]?'':'primary'}" data-equip="${inst.uid}" data-extra-slot="${s}" title="${state.equip[s]?'Zastąpi aktualne akcesorium w tym slocie':'Wolny slot akcesorium'}">Slot ${i+1}${state.equip[s]?' ↺':''}</button>`).join(''):`<button class="primary" data-equip="${inst.uid}">Załóż</button>`);
+ return `<article class="item inventory-premium-item ashen-rarity-${Math.min(4,Math.max(0,Number(inst.rarity)||0))} ${bulkSelected.has(inst.uid)?'bulk-picked':''}">
+   <div class="inventory-premium-head">
+      <label class="bulk-select inventory-bulk-marker" title="Zaznacz do operacji zbiorczej"><input type="checkbox" data-bulk-uid="${inst.uid}" ${bulkSelected.has(inst.uid)?'checked':''} ${eligibleForBulk(inst)?'':'disabled'}></label>
+      <button class="item-view-icon inventory-premium-icon" data-item-open="${escape(inst.uid)}" aria-label="Otwórz opis: ${escape(o.name)}">${itemIcon(inst)}</button>
+      <div class="inventory-premium-copy">
+         <div class="inventory-premium-badges"><span class="inventory-slot-chip">${escape(slotLabel)}</span><span class="inventory-rarity-chip" style="--rarity:${rarityMeta.color}">${escape(rarityMeta.name)}</span>${worn?'<span class="inventory-action-tag equipped">Założony</span>':''}${inst.locked?'<span class="inventory-action-tag locked">Zabezpieczony</span>':''}</div>
+         <button class="item-view-name inventory-premium-name" data-item-open="${escape(inst.uid)}" style="color:${rarityMeta.color}">${escape(o.name)}</button>
+         <div class="inventory-premium-stats">${escape(statDetails(o))}</div>
+         ${itemAffixBadges(o,def(inst),inst)}
+         ${setStatusText(inst)}
+      </div>
+   </div>
+   <div class="inventory-premium-foot">
+      <div class="inventory-premium-actions"><button data-workshop-select="${inst.uid}" data-page="workshop" title="Ulepsz w warsztacie">🔧 Warsztat</button>${buttons}<button data-lock="${inst.uid}" class="${inst.locked?'islocked':''}" title="${inst.locked?'Odblokuj':'Zabezpiecz'} przedmiot">${inst.locked?'🔒 Odblokuj':'🔓 Zabezpiecz'}</button>${o.slot==='material'?'':`<button data-sale="${inst.uid}" ${worn||inst.locked?'disabled':''}>Sprzedaj · ${saleValue(inst)} kr.</button><button data-salvage="${inst.uid}" ${worn||inst.locked?'disabled':''}>Rozłóż</button>`}</div>
+   </div>
+ </article>`;
+}
+
 function inventory(){
  const filters=[['all','Wszystko'],...Object.entries(WEAPON_CATEGORIES).map(([id,v])=>[id,v.name]),['shirt','Koszulki'],['pants','Spodnie'],['boots','Buty'],['outer','Kurtki / pancerze'],['head','Nakrycia głowy'],['hands','Rękawice / karwasze'],['extra','Akcesoria']];
  const visible=inventorySortEntries(state.inventory.map(inst=>({inst,o:statsOf(inst)})).filter(x=>x.o&&inventoryMatchesFilter(x.inst,invFilter)));
  for(const uid of [...bulkSelected])if(!eligibleForBulk(instance(uid)))bulkSelected.delete(uid);
- const selectedForBulk=bulkSelectedItems();const bulkSum=bulkTotals(selectedForBulk);
+ const selectedForBulk=bulkSelectedItems();
+ const bulkSum=bulkTotals(selectedForBulk);
  const eligibleShown=bulkEligibleVisible(invFilter);
  const allShown=eligibleShown.length>0&&eligibleShown.every(x=>bulkSelected.has(x.uid));
- const bulkUi=`<div class="bulk-panel"><div class="bulk-head"><h3>Zarządzanie wieloma przedmiotami</h3><span class="tag">Zaznaczono: ${selectedForBulk.length} / dostępnych ${state.inventory.filter(eligibleForBulk).length}</span></div>
+ const bulkUi=`<div class="bulk-panel inventory-bulk-panel"><div class="bulk-head"><div><span class="tag">Operacje zbiorcze</span><h3>Zarządzanie zapasowym wyposażeniem</h3></div><span class="tag">Zaznaczono: ${selectedForBulk.length} / dostępnych ${state.inventory.filter(eligibleForBulk).length}</span></div>
  <div class="actions"><button data-action="bulk-visible">${allShown?'Odznacz widoczne':'Zaznacz widoczne'} (${eligibleShown.length})</button><button data-action="bulk-all">Zaznacz wszystkie dostępne</button><button data-action="bulk-clear">Odznacz wszystkie</button></div>
  <div class="bulk-summary">Wartość zaznaczonych: <strong>${bulkSum.credits.toLocaleString('pl-PL')} kredytów</strong><br>Materiały z rozłożenia: <strong>${selectedForBulk.length?salvageLabel(bulkSum.mats):'—'}</strong></div>
  <div class="actions"><button class="primary" data-action="bulk-sell" ${selectedForBulk.length?'':'disabled'}>Sprzedaj zaznaczone (${selectedForBulk.length})</button><button data-action="bulk-salvage" ${selectedForBulk.length?'':'disabled'}>Rozłóż zaznaczone (${selectedForBulk.length})</button></div>
  <div class="bulk-hint">Założone i zabezpieczone przedmioty nie mogą zostać zaznaczone. Potwierdzenie pokaże łączną nagrodę. Zaznaczenie nie jest zapisywane między uruchomieniami gry.</div></div>`;
- return section('Ekwipunek',`<p class="muted">Masz ${state.inventory.length} przedmiotów. Artefakty w trzech slotach akcesoriów wzmacniają Szczęście. Ich prefiksy i sufiksy tworzą niezależne rezonansowe zestawy 3/3. Ikona i nazwa przedmiotu otwierają szczegóły. Prefiksy ubrań tworzą zestawy od 3 założonych elementów; nowe przedmioty odkrywasz podczas wypraw. Dominująca ręka: <strong>${state.dominantHand==='left'?'lewa':'prawa'}</strong>.</p>
- <div class="equip-stage section">
-   <div class="paperdoll-wrap"><div class="paperdoll-title"><div><h3 style="color:var(--gold);margin:0">Wyposażenie postaci</h3><div class="small muted">Kliknij ikonę albo nazwę przedmiotu, aby zobaczyć jego parametry.</div></div><div class="small muted">Poziom ${state.level}</div></div>
-     <div class="paperdoll">
-       <div class="paperdoll-col paperdoll-left">${['head','shirt','right','hands','pants'].map(slot=>slotChip(slot,state.equip[slot])).join('')}</div>
-       <div class="figure-stage"><div class="figure-halo"></div><img class="inventory-figure" src="${characterFigure(state.origin)}" alt="Sylwetka postaci ${escape(state.name)}"><div class="figure-caption">${escape(state.name)} · ${state.origin==='scout'?'Zwiadowca':state.origin==='fighter'?'Najemnik':'Mechanik'}</div></div>
-       <div class="paperdoll-col paperdoll-right">${['extra','extra2','extra3','outer','left','boots'].map(slot=>slotChip(slot,state.equip[slot])).join('')}</div>
-     </div>
+ return section('Ekwipunek',`
+ <div class="inventory-premium-intro">
+   <div class="inventory-premium-copyblock">
+      <span class="tag">SEKTOR OPERACYJNY</span>
+      <h3>Uzbrojenie, pancerz i synergie ekwipunku</h3>
+      <p class="muted">To jest robocza wersja premium ekwipunku: papierowa sylwetka pozostała funkcjonalna, ale układ, hierarchia informacji i listy przedmiotów zostały uporządkowane tak, aby całość była bliżej grafiki koncepcyjnej i wygodniejsza w obsłudze.</p>
    </div>
-
+   <div class="inventory-premium-quickstrip">
+      <div class="inventory-quick-pill"><span>Przedmioty</span><strong>${state.inventory.length}</strong></div>
+      <div class="inventory-quick-pill"><span>Założone sloty</span><strong>${Object.values(state.equip).filter(Boolean).length}</strong></div>
+      <div class="inventory-quick-pill"><span>Artefakty</span><strong>${['extra','extra2','extra3'].filter(s=>instance(state.equip[s])&&def(instance(state.equip[s]))?.artifact).length}/3</strong></div>
+      <div class="inventory-quick-pill"><span>Dominująca ręka</span><strong>${state.dominantHand==='left'?'Lewa':'Prawa'}</strong></div>
+   </div>
  </div>
- ${resonancePanel()}
- <div class="actions section">${filters.map(([id,n])=>`<button data-filter="${id}" class="${invFilter===id?'primary':''}">${n}</button>`).join('')}</div>
- <div class="ashen-inventory-sortbar"><label for="ashen-inventory-sort">Sortuj przedmioty</label><select id="ashen-inventory-sort" class="input" data-inventory-sort>${INVENTORY_SORTS.map(([id,label])=>`<option value="${id}" ${(state.inventorySort||'rarity-desc')===id?'selected':''}>${label}</option>`).join('')}</select><div class="small muted">Domyślnie: legendarne → epickie → rzadkie → ulepszone → zwykłe</div></div>
- ${bulkUi}
-
- <div class="stack">${visible.map(({inst,o})=>{let worn=Object.values(state.equip).includes(inst.uid);let weapon=o.slot==='hand1';let buttons=o.slot==='material'?'':worn?`<span class="tag">Założony</span><button data-unequip="${Object.keys(state.equip).find(k=>state.equip[k]===inst.uid)||''}">Zdejmij</button>`:weapon?`<button class="primary" data-equip="${inst.uid}" data-hand="right">Prawa ręka</button><button data-equip="${inst.uid}" data-hand="left">Lewa ręka</button>`:(o.slot==='extra'?['extra','extra2','extra3'].map((s,i)=>`<button class="${state.equip[s]?'':'primary'}" data-equip="${inst.uid}" data-extra-slot="${s}" title="${state.equip[s]?'Zastąpi aktualne akcesorium w tym slocie':'Wolny slot akcesorium'}">${i+1}${state.equip[s]?' ↺':''}</button>`).join(''):`<button class="primary" data-equip="${inst.uid}">Załóż</button>`);return `<div class="item ashen-rarity-${Math.min(4,Math.max(0,Number(inst.rarity)||0))} ${bulkSelected.has(inst.uid)?'bulk-picked':''}"><div class="row wrap"><label class="bulk-select" title="Zaznacz do operacji zbiorczej"><input type="checkbox" data-bulk-uid="${inst.uid}" ${bulkSelected.has(inst.uid)?'checked':''} ${eligibleForBulk(inst)?'':'disabled'}></label><div class="grow">${itemSummary(inst,o)}</div><div class="actions"><button data-workshop-select="${inst.uid}" data-page="workshop" title="Ulepsz w warsztacie">🔧 Warsztat</button>${buttons}<button data-lock="${inst.uid}" class="${inst.locked?'islocked':''}" title="${inst.locked?'Odblokuj':'Zabezpiecz'} przedmiot">${inst.locked?'🔒 Odblokuj':'🔓 Zabezpiecz'}</button>${o.slot==='material'?'':`<button data-sale="${inst.uid}" ${worn||inst.locked?'disabled':''}>Sprzedaj · ${saleValue(inst)} kr.</button><button data-salvage="${inst.uid}" ${worn||inst.locked?'disabled':''}>Rozłóż</button>`}</div></div></div>`}).join('')||'<div class="panel muted">Brak przedmiotów w wybranej kategorii.</div>'}</div>`)}
+ <div class="inventory-premium-layout">
+   <div class="inventory-premium-maincol">
+     <div class="equip-stage section inventory-premium-stage">
+       <div class="paperdoll-wrap"><div class="paperdoll-title"><div><span class="tag">AKTYWNE WYPOSAŻENIE</span><h3 style="color:var(--gold);margin:4px 0 0">Wyposażenie postaci</h3><div class="small muted">Kliknij ikonę albo nazwę przedmiotu, aby zobaczyć jego parametry. Slot lewej ręki zostanie oznaczony jako zajęty, gdy korzystasz z broni dwuręcznej.</div></div><div class="small muted">Poziom ${state.level}</div></div>
+         <div class="paperdoll">
+           <div class="paperdoll-col paperdoll-left">${['head','shirt','right','hands','pants'].map(slot=>slotChip(slot,state.equip[slot])).join('')}</div>
+           <div class="figure-stage"><div class="figure-halo"></div><img class="inventory-figure" src="${characterFigure(state.origin)}" alt="Sylwetka postaci ${escape(state.name)}"><div class="figure-caption">${escape(state.name)} · ${state.origin==='scout'?'Zwiadowca':state.origin==='fighter'?'Najemnik':'Mechanik'}</div></div>
+           <div class="paperdoll-col paperdoll-right">${['extra','extra2','extra3','outer','left','boots'].map(slot=>slotChip(slot,state.equip[slot])).join('')}</div>
+         </div>
+       </div>
+     </div>
+     ${resonancePanel()}
+   </div>
+   ${inventorySummaryPanels()}
+ </div>
+ <div class="inventory-controls-panel">
+   <div class="actions section inventory-filter-row">${filters.map(([id,n])=>`<button data-filter="${id}" class="${invFilter===id?'primary':''}">${n}</button>`).join('')}</div>
+   <div class="ashen-inventory-sortbar inventory-sortbar-premium"><label for="ashen-inventory-sort">Sortowanie listy łupów</label><select id="ashen-inventory-sort" class="input" data-inventory-sort>${INVENTORY_SORTS.map(([id,label])=>`<option value="${id}" ${(state.inventorySort||'rarity-desc')===id?'selected':''}>${label}</option>`).join('')}</select><div class="small muted">Kolejność domyślna premiuje jakość, potem ulepszenia i moc bojową.</div></div>
+   ${bulkUi}
+ </div>
+ <div class="inventory-premium-list">${visible.map(({inst,o})=>inventoryItemCard(inst,o)).join('')||'<div class="panel muted">Brak przedmiotów w wybranej kategorii.</div>'}</div>`)}
 
 function specialLoot(r){const p=r?.special||{};return (p.cores||p.schematics)?`<div class="notice" style="margin-top:10px"><strong>Rzadkie znaleziska:</strong> ${[p.cores?`⚙ Rdzeń technologiczny × ${p.cores}`:'',p.schematics?`📜 Schemat przedwojenny × ${p.schematics}`:''].filter(Boolean).join(' · ')}</div>`:''}
 function foundLootPreview(r){return `<div class="panel section"><h3 style="color:var(--gold)">Ostatnia ukończona wyprawa: ${escape(r.location)}</h3><p class="small muted">${escape(r.at)}</p><p>Znalazłeś:</p>${(r.drops||[]).map(x=>`<details class="loot-detail"><summary><div class="loot-row">${lootDetailButton(x)}<div>${lootDetailName(x)}${lootAffixBadges(x)}<div class="small muted">Kliknij, aby rozwinąć opis</div></div></div></summary><div class="small muted">${escape(x.details||'Brak zapisanych parametrów')} · ${escape(x.slot?slotName(x.slot):'')}${(x.effects||[]).map(e=>`<div>↳ ${escape(e.name)}: ${escape(e.description)}</div>`).join('')}</div></details>`).join('')||'<p class="muted">Sprawdź starszy raport w zakładce Raporty.</p>'}${specialLoot(r)}<button data-page="inventory">Przejdź do ekwipunku</button></div>`}

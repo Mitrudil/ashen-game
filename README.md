@@ -102,3 +102,9 @@ Podmiana trzech scen sypialni 1–3; wymuszenie przeładowania obrazów po aktua
 
 - Zakładka Postać: dynamiczna tabela ATAK / OBRONA z parametrami wynikającymi z założonego wyposażenia i aktywnych setów.
 - Liczba ataków na rundę 
+
+## v0.1.56
+- premium pass dla zakładki Ekwipunek
+- nowy panel podsumowania postaci, obrażeń i synergi
+- uporządkowana lista przedmiotów z lepszymi badge'ami i akcjami
+- zachowana pełna funkcjonalność ekwipowania, sprzedaży, rozkładania i tooltipów
