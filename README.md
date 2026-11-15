@@ -1,3 +1,12 @@
+## ASHEN v0.2.2 — lokalne PvP
+
+- Nowa zakładka PvP, walka między zapisanymi profilami testowymi.
+- Każdy walczy na podstawie własnych atrybutów, wyposażenia, zestawów i broni.
+- Maksymalnie 10 rund, inicjatywa, trafienia, uniki i krytyki, raport każdej rundy.
+- Oddzielne HP dla każdej walki. Brak trwałych obrażeń oraz strat ekwipunku, zasobów lub EXP.
+- Wynik walki zapisuje się po stronie atakującego i obrońcy; ranking lokalny.
+- Jest to prototyp offline, nie prawdziwa rozgrywka sieciowa.
+
 ## Zmiany w v0.2.1
 
 - 5 slotów postaci (1 główna + 4 testowe).
