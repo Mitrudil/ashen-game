@@ -153,3 +153,10 @@ Podmiana trzech scen sypialni 1–3; wymuszenie przeładowania obrazów po aktua
 - nowy panel podsumowania postaci, obrażeń i synergi
 - uporządkowana lista przedmiotów z lepszymi badge'ami i akcjami
 - zachowana pełna funkcjonalność ekwipowania, sprzedaży, rozkładania i tooltipów
+
+
+## v0.1.58.3 — raport Starć na osobnym ekranie
+- Po Starciu ekran automatycznie pokazuje pełny raport; powrót do planszy osobnym przyciskiem.
+- Postęp: zwycięstwa zielone, porażki czerwone, remisy pomarańczowe. Liczniki porażek i remisów są utrwalane; przy migracji starych zapisów rekonstruowane wyłącznie z zachowanej historii (do 40 raportów).
+- Usunięty zdublowany oryginalny dziennik zdarzeń.
+- Rozszerzona pionowa tabela porównawcza postać/przeciwnik; przeciwnik ma opisowy profil taktyczny wyliczony z realnych parametrów walki, niewpływający dodatkowo na mechanikę.

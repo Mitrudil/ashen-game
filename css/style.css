@@ -1099,3 +1099,20 @@ h1, h2, h3, h4, h5, h6, button,
 .arena-screen,.arena-screen>*,.arena-hero,.arena-hero>div,.arena-progress,.arena-report{min-width:0;max-width:100%}
 .arena-hero h3,.arena-hero p{overflow-wrap:anywhere}
 @media(max-width:540px){.arena-hero{display:grid;grid-template-columns:minmax(0,1fr)}.arena-progress{width:100%}.arena-report{padding:12px}}
+
+/* ASHEN v0.1.58.3 — pełny ekran raportu, porównanie pionowe, rozliczenie prób */
+.arena-report-view{width:100%;max-width:100%;min-width:0}
+.arena-report-view-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border:1px solid #695136;border-radius:13px;background:linear-gradient(110deg,#262119,#161c20);margin-bottom:14px}
+.arena-report-view-nav>span{font-size:12px;letter-spacing:.12em;color:#e9c58b;font-weight:700}
+.arena-report-view .arena-report{margin-top:0}
+.arena-progress-stats strong.good{color:#8fd3a1!important}
+.arena-progress-stats strong.bad{color:#f28d80!important}
+.arena-progress-stats .good{color:#8fd3a1!important}
+.arena-progress-stats .bad{color:#f28d80!important}
+.arena-comparison-expanded .arena-attribute-start>th,.arena-comparison-expanded .arena-attribute-start>td{border-top:2px solid #947048}
+.arena-comparison-expanded .arena-attribute-row th{color:#e8c58f}
+.arena-comparison-expanded .arena-attribute-row td{font-variant-numeric:tabular-nums}
+.arena-profile-explainer{font-size:12px;line-height:1.5;color:#b8bec0;margin:12px 0}
+.arena-profile-weapons{padding:12px 14px;border:1px solid #564937;border-radius:10px;background:#172026;font-size:13px}
+.arena-profile-weapons>div{margin-top:8px}
+@media(max-width:540px){.arena-report-view-nav{flex-direction:column;align-items:stretch}.arena-report-view-nav button{width:100%}.arena-comparison-expanded{font-size:12px;min-width:0}.arena-comparison-expanded th,.arena-comparison-expanded td{padding:7px 6px!important;overflow-wrap:anywhere;word-break:normal}}
