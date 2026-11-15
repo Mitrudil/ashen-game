@@ -1301,3 +1301,11 @@ body.arena-report-modal-open{overflow:hidden}
 .ashen-player-modal-content{overflow:auto;padding:18px 22px}
 .ashen-player-modal-content .ashen-player-hero{margin:5px 0 18px}
 @media(max-width:600px){.ashen-player-modal-overlay{padding:8px}.ashen-player-modal{max-height:94dvh}.ashen-player-modal-content{padding:14px}.ashen-player-modal-content .ashen-player-hero img{width:105px;height:135px}.ashen-mail-tools .actions{margin-left:0;width:100%}}
+
+/* ASHEN v0.3.5 — indywidualne łupy ekspedycji */
+.expedition-rewards-panel{border-color:rgba(212,170,71,.3)}
+.expedition-reward-row{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:13px 0;border-top:1px solid rgba(255,255,255,.09)}
+.expedition-reward-row p{margin:7px 0 0}
+.expedition-first-clear{margin-left:9px;display:inline-block;color:#e7bc77;border:1px solid rgba(212,170,71,.4);border-radius:8px;padding:2px 7px;font-size:11px}
+.expedition-reward-history{margin-top:14px;padding:12px 0;border-top:1px solid rgba(255,255,255,.09)}
+.expedition-reward-history summary{cursor:pointer;color:var(--gold);font-weight:700}

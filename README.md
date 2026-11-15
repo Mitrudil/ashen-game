@@ -1,37 +1,60 @@
-# ASHEN v0.3.4 — skrzynka wiadomości i profile graczy
+# ASHEN v0.3.5 — indywidualne nagrody za bossów
 
-Aktualizacja do v0.3.3. Dalszy rozwój społecznościowego systemu wiadomości i profili.
+Wersja bazuje na działającym ASHEN v0.3.4, nie zmienia mechaniki walk, zaproszeń, rekrutacji ani harmonogramu wypraw.
 
-## Nowości
+## Co nowego
 
-- **Odpowiedz** bezpośrednio podczas czytania wiadomości prywatnej: pole odpowiedzi i przycisk wysłania, bez konieczności otwierania profilu.
-- **Profil gracza w niezależnym oknie (modal)**, bez opuszczania obecnej zakładki (np. Klany, Wiadomości, PvP).
-- **Zbiorcze zaznaczanie i usuwanie wiadomości**. Przy usunięciu skasowana jest tylko widoczność wiadomości dla bieżącego konta. Drugie konto zachowuje swoją kopię. Raport walki nadal pozostaje w historii.
-- **Zbiorcze „Oznacz jako przeczytane”** dla odebranych wiadomości prywatnych, powiadomień o PvP oraz ekspedycjach.
-- **Raporty PvP w Odebranych**, zarówno dla atakującego jak i obrońcy. W **Wysłanych** pozostają tylko prywatne wiadomości napisane przez gracza.
-- Każdy uczestnik raportu ma **własny stan przeczytania**.
+- Każdy **uczestnik zwycięskiej** ekspedycji klanowej otrzymuje **własną** nagrodę — serwer zapisuje wynik osobno dla każdego konta.
+- Gwarantowane nagrody: doświadczenie (EXP), kredyty oraz złom.
+- Losowa szansa na jeden przedmiot pasujący do istniejącego katalogu wyposażenia.
+- Premia +50% zasobów i EXP za **pierwsze zwycięstwo nad danym bossem** (per konto i boss).
+- Nowy panel **🎁 Moje nagrody z ekspedycji**, z przyciskiem **Odbierz nagrodę** oraz listą ostatnich odebranych nagród.
+- Odbiór daje prawdziwy przedmiot w Ekwipunku i zasoby postaci, a nie tylko tekst w raporcie.
+- Identyfikator nagrody zapisuje się w postaci przed potwierdzeniem odbioru w Supabase, więc ponowienie żądania po utracie połączenia nie nalicza jej dwa razy.
+- Nagrody indywidualne, nie ma wspólnego podziału przedmiotów ani rywalizacji o łup.
+
+## Tabela testowa nagród
+
+| Boss | EXP | Kredyty | Złom | Szansa na przedmiot |
+| --- | ---: | ---: | ---: | ---: |
+| Rzeźnik ze Złomowiska | 45 | 45 | 12 | 28% |
+| Kanałowy Pożeracz | 80 | 90 | 22 | 42% |
+| Trzej Bracia Rdzy | 125 | 140 | 36 | 58% |
+
+Premia pierwszego zwycięstwa: +50% EXP, kredytów i złomu (zaokrąglenie do pełnych liczb). Losowe przedmioty korzystają z już istniejących typów i rzadkości; boss 1 daje przedmioty do rzadkiej jakości, bossowie 2–3 mogą dać także epickie i bardzo rzadko legendarne.
+
+### Ważne ograniczenia tej wersji
+
+- Nagrody są generowane tylko dla **nowych zwycięstw, już po uruchomieniu skryptu SQL 013**. Stare raporty są zachowane, ale nie otrzymują łupów wstecz.
+- **Odbiór jest ręczny**. Walka może rozegrać się automatycznie, gdy gracz jest offline; po zalogowaniu nagroda czeka w zakładce Ekspedycje.
+- Przed odbiorem aktywna lokalna postać musi być przypisana do zalogowanego konta w panelu ☁ Konto online. Nie odbieraj łupu na przypadkowym profilu testowym.
+- Gra wciąż korzysta z lokalnych zapisów oraz synchronizacji w chmurze. To prototyp, **nie pełny serwerowo autorytatywny ekwipunek**. Przed zmianą przeglądarki poczekaj na synchronizację; nie przywracaj starej kopii postaci, bo może nie zawierać odebranych nagród.
+- Przedmioty pochodzą na razie z istniejącego katalogu. Osobne unikatowe przedmioty przypisane do bossów zostawiamy na kolejny etap.
 
 ## Instalacja
 
-1. Wgraj nowe pliki gry na GitHub (zalecana paczka „Aktualizacja GitHub”).
-2. W **oddzielnym projekcie Supabase ASHEN**, w SQL Editor uruchom tylko:
-   `multiplayer/supabase/012_mail_and_profiles.sql`
-3. Odśwież stronę gry przez Ctrl + F5.
-
-**Nie uruchamiaj tego skryptu w projekcie ALLADYN.**
+1. Wgraj zawartość paczki aktualizacyjnej na GitHub (pliki bez dodatkowego katalogu nadrzędnego).
+2. W SQL Editor **wyłącznie projektu Supabase ASHEN** uruchom **nowy** skrypt:
+   `multiplayer/supabase/013_individual_boss_rewards.sql`
+3. Nie uruchamiaj ponownie skryptów 001–012.
+4. Odśwież grę przez Ctrl + F5.
 
 ## Test
 
-1. Konto Mitrudil wysyła prywatną wiadomość do Kowala.
-2. Kowal otwiera wiadomość i odpisuje bez przechodzenia do profilu.
-3. W Odebranych zaznacza kilka pozycji, oznacza je jako przeczytane, a następnie usuwa część.
-4. Sprawdza, że Mitrudil nadal ma swoją historię korespondencji.
-5. Oba konta sprawdzają, że raport PvP jest w Odebranych, a nie w Wysłanych.
-6. Z listy Klanu, PvP lub Wiadomości otwiera profil gracza jako nakładane osobne okno.
+1. Na dwóch kontach online (np. Mitrudil i Kowal) opublikuj/przypisz właściwe lokalne postaci.
+2. Rozegraj **nową** zwycięską ekspedycję. Możesz skrócić zbiórkę.
+3. Wejdź na każdym koncie do **☠ Ekspedycje → 🎁 Moje nagrody z ekspedycji**.
+4. Sprawdź, że oba konta widzą **swoje** nagrody; przedmiot może wypaść tylko jednemu z graczy.
+5. Odbierz nagrodę na każdym koncie; sprawdź kredyty, złom, EXP i Ekwipunek.
+6. Ponownie odśwież grę / kliknij odbiór: drugi raz nie można przyznać tej samej nagrody.
+7. Powtórz walkę z tym samym bossem: premia za pierwsze zwycięstwo nie powinna pojawić się ponownie.
 
-## Techniczne uwagi
+## Zmodyfikowane pliki
 
-- Uruchom skrypt 012 po 011; nie wykonuj ponownie starych skryptów 003/011, ponieważ nadpisałyby najnowsze funkcje serwera.
-- Usuwanie to tzw. **miękkie usuwanie** (ukrycie dla bieżącego uczestnika), nie kasowanie rekordów bazy ani zapisanych walk.
-- Nowe powiadomienia PvP dla atakującego będą nieprzeczytane; historyczne powiadomienia są traktowane jako przeczytane.
-- Po stronie klienta testowano składnię JS i podstawowe interakcje na symulowanych odpowiedziach serwera. Konieczny jest test z prawdziwym Supabase.
+- `index.html`
+- `js/game.js`
+- `js/expeditions.js`
+- `css/style.css`
+- `multiplayer/supabase/013_individual_boss_rewards.sql`
+
+Systemy ALLADYN nie są w żaden sposób zmieniane.

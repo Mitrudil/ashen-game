@@ -1,4 +1,4 @@
-const APP_VERSION='0.3.4';
+const APP_VERSION='0.3.5';
 
 (()=>{'use strict';const LEGACY_KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 
@@ -2060,6 +2060,42 @@ function pvpSnapshot(profileSave){
    dodge:3+a.dex*1.1+pet,acc:6+a.per*1.3};
  }finally{state=previous}
 }
+// ASHEN 0.3.5: indywidualne nagrody klanowe. Idempotencja w zapisie postaci,
+// niezależnie od potwierdzenia odbioru po stronie Supabase.
+window.ASHEN_APPLY_EXPEDITION_REWARD=function(reward){
+ const cloud=window.ASHEN_CLOUD;
+ if(!cloud?.getSession()?.user?.id || cloud.getBoundSlot()!==cloud.currentSlot())
+  throw Error('Najpierw przypisz aktywną postać do zalogowanego konta w panelu Konto online.');
+ if(!state.created)throw Error('Aktywna postać nie jest utworzona.');
+ const id=Number(reward?.id);
+ if(!Number.isSafeInteger(id)||id<1)throw Error('Błędny identyfikator nagrody.');
+ const key=String(id),history=Array.isArray(state.expeditionRewardIds)?state.expeditionRewardIds:[];
+ if(history.includes(key))return {alreadyApplied:true,name:state.name,levels:0};
+ const xp=Number(reward.xp),credits=Number(reward.credits),scrap=Number(reward.scrap);
+ if(![xp,credits,scrap].every(n=>Number.isSafeInteger(n)&&n>=0&&n<=100000))throw Error('Nieprawidłowe wartości nagrody.');
+ const itemId=reward.item_id==null?null:String(reward.item_id),rar=Number(reward.item_rarity);
+ if(itemId&&(!items.some(x=>x.id===itemId&&x.slot!=='material')||!Number.isInteger(rar)||rar<0||rar>4))
+  throw Error('Nieznany przedmiot w nagrodzie — nie można bezpiecznie odebrać łupu.');
+ const previous=JSON.stringify(state),prevMessage=message;
+ try{
+  state.expeditionRewardIds=[...history,key];
+  state.xp+=xp; state.credits+=credits; state.scrap+=scrap;
+  if(itemId)state.inventory.push({uid:'raid-'+key,id:itemId,rarity:rar,prefix:null,suffix:null,locked:rar>=3});
+  const levels=levelUp();
+  const data=JSON.stringify(state);
+  localStorage.setItem(KEY,data);
+  if(localStorage.getItem(KEY)!==data)throw Error('Przeglądarka nie potwierdziła zapisu nagrody.');
+  if(devActiveId()==='main')localStorage.setItem(devProfileSaveKey('main'),data);
+  window.ASHEN_ONLINE?.localChanged?.();
+  message='Odebrano nagrodę za ekspedycję: '+xp+' EXP, '+credits+' kredytów, '+scrap+' złomu'+(itemId?' oraz przedmiot':'')+'.';
+  render();
+  return {alreadyApplied:false,name:state.name,levels};
+ }catch(err){
+  state=JSON.parse(previous);message=prevMessage;
+  try{localStorage.setItem(KEY,previous);if(devActiveId()==='main')localStorage.setItem(devProfileSaveKey('main'),previous)}catch{}
+  throw err;
+ }
+};
 window.ASHEN_GET_ONLINE_SNAPSHOT=()=>pvpSnapshot(state);
 function pvpResolve(first,second){
  const fighters=[{...first,hp:first.hp},{...second,hp:second.hp}];

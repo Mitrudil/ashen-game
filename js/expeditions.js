@@ -1,10 +1,10 @@
-/* ASHEN v0.3.2 — poprawki grafik bossów i raportów.
+/* ASHEN v0.3.5 — nagrody indywidualne za bossów.
  * Wymaga 005_clans.sql i 006_clan_expeditions.sql.
  * Dla aktualizacji z v0.2.9.x uruchom także 007_expedition_tactics_and_boss_art.sql.
  */
 (()=>{'use strict';
 let state=null,loading=false,busy=false,error='',info='',lastIdentity='',requests=0;
-let openedReportId=null,openedReport=null,reportLoading=false;
+let openedReportId=null,openedReport=null,reportLoading=false,rewards=[];
 const cloud=()=>window.ASHEN_CLOUD;
 const client=()=>cloud()?.getClient();
 const user=()=>cloud()?.getSession()?.user?.id;
@@ -41,9 +41,9 @@ const DEFAULT_BOSSES=[
  {id:3,name:'Trzej Bracia Rdzy',location:'Opuszczona Fabryka',difficulty:'Średni+',kind:'Grupa elit',summary:'Trzech przeciwników o różnych rolach. To jeszcze nie endgame, ale już trzeba dobrze dobrać drużynę.',min_players:2,max_players:5,portrait:'boss-03-tarczownik.webp'}
 ];
 async function rpc(name,args={}){if(!active())throw Error('Zaloguj się w panelu ☁ Konto online.');const {data,error}=await client().rpc(name,args);if(error)throw error;return data}
-async function refresh(){const id=identity(),n=++requests;lastIdentity=id;state=null;error='';loading=true;redraw();try{if(!active())return;state=await rpc('ashen_expedition_state')}catch(e){if(n===requests)setError(e)}finally{if(n===requests){loading=false;redraw()}}}
+async function refresh(){const id=identity(),n=++requests;lastIdentity=id;state=null;error='';loading=true;redraw();try{if(!active())return;const [freshState,freshRewards]=await Promise.all([rpc('ashen_expedition_state'),rpc('ashen_expedition_my_rewards')]);if(n===requests&&id===identity()){state=freshState;rewards=Array.isArray(freshRewards)?freshRewards:[]}}catch(e){if(n===requests)setError(e)}finally{if(n===requests){loading=false;redraw()}}}
 async function loadReport(id){if(!id)return;reportLoading=true;openedReportId=id;openedReport=null;error='';redraw();try{openedReport=await rpc('ashen_expedition_report',{p_id:id})}catch(e){setError(e);openedReportId=null;openedReport=null}finally{reportLoading=false;redraw()}}
-function ensure(){const id=identity();if(id!==lastIdentity){lastIdentity=id;state=null;info='';error='';openedReportId=null;openedReport=null;void refresh()}}
+function ensure(){const id=identity();if(id!==lastIdentity){lastIdentity=id;state=null;rewards=[];info='';error='';openedReportId=null;openedReport=null;void refresh()}}
 function hp(v,m){const value=Math.max(0,Number(v)||0),max=Math.max(1,Number(m)||1);return `<div class="arena-health-track" role="progressbar" aria-valuemin="0" aria-valuemax="${Math.round(max)}" aria-valuenow="${Math.round(Math.min(value,max))}"><span style="width:${Math.max(0,Math.min(100,value/max*100))}%"></span></div>`}
 function hpEnemy(v,m){const value=Math.max(0,Number(v)||0),max=Math.max(1,Number(m)||1);return `<div class="arena-health-track" role="progressbar" aria-valuemin="0" aria-valuemax="${Math.round(max)}" aria-valuenow="${Math.round(Math.min(value,max))}"><span class="is-enemy" style="width:${Math.max(0,Math.min(100,value/max*100))}%"></span></div>`}
 function hpLabel(v,m){return `${Math.max(0,Math.round(Number(v)||0))} / ${Math.max(1,Math.round(Number(m)||1))}`}
@@ -72,7 +72,17 @@ function reportHtml(report){if(!report)return '<p class="muted">Nie znaleziono r
  </section>
  <section class="arena-round-review"><div class="arena-battle-section-title"><span>02 / RUNDY</span><h4>Przebieg walki</h4></div><div class="arena-rounds-list">${rounds.map(r=>`<details class="arena-round-card"><summary><span class="arena-round-number">RUNDA ${r.number}</span><span class="arena-round-damage">Drużyna zadała ${hpLost(r.enemy_hp_before,r.enemy_hp)} · Otrzymała ${hpLost(r.hero_hp_before,r.hero_hp)}</span><span class="arena-round-expand">Szczegóły</span></summary><div class="arena-round-card-body"><div class="expedition-round-health"><div><h5>Drużyna</h5>${heroes.map((h,i)=>`<div class="expedition-round-bar"><span>${esc(h.name)}</span><strong>${hpLabel((r.hero_hp||[])[i],maxHero[i])}</strong>${hp((r.hero_hp||[])[i],maxHero[i])}</div>`).join('')}</div><div><h5>Przeciwnicy</h5>${enemies.map((en,i)=>`<div class="expedition-round-bar"><span>${esc(en.name)}</span><strong>${hpLabel((r.enemy_hp||[])[i],maxEnemy[i])}</strong>${hpEnemy((r.enemy_hp||[])[i],maxEnemy[i])}</div>`).join('')}</div></div><div class="arena-round-events">${(r.events||[]).map(line=>`<p class="${eventTeam(line,heroes,enemies)}">${esc(line)}</p>`).join('')||'<p>Brak zapisanych zdarzeń.</p>'}</div></div></details>`).join('')||'<p class="muted">Brak zapisanych rund.</p>'}</div></section>
  <section class="arena-battle-finale"><div class="arena-battle-section-title"><span>03 / WYNIK</span><h4>Podsumowanie ekspedycji</h4></div><div class="arena-outcome-reason ${report.victory?'':'is-draw'}"><strong>${esc(outcome)}</strong><p>${esc(outcomeReason)}</p><div class="arena-final-hp"><div><span>Drużyna · PŻ po walce</span><strong>${(hpHero||[]).reduce((a,b)=>a+(Number(b)||0),0)} / ${(maxHero||[]).reduce((a,b)=>a+(Number(b)||0),0)}</strong>${hp((hpHero||[]).reduce((a,b)=>a+(Number(b)||0),0),(maxHero||[]).reduce((a,b)=>a+(Number(b)||0),1))}</div><div><span>Przeciwnicy · PŻ po walce</span><strong>${(hpEnemyArr||[]).reduce((a,b)=>a+(Number(b)||0),0)} / ${(maxEnemy||[]).reduce((a,b)=>a+(Number(b)||0),0)}</strong>${hpEnemy((hpEnemyArr||[]).reduce((a,b)=>a+(Number(b)||0),0),(maxEnemy||[]).reduce((a,b)=>a+(Number(b)||0),1))}</div></div></div></section>
- <div class="arena-report-reward"><strong>Wersja 0.3.2:</strong> czasowe ekspedycje rozgrywane przez serwer, grupowe zaproszenia i wcześniejsze zamknięcie rekrutacji. Nagrody pojawią się w kolejnym etapie.</div></div>`;
+ <div class="arena-report-reward"><strong>ASHEN v0.3.5:</strong> po zwycięstwie indywidualne nagrody czekają w panelu „Moje nagrody z ekspedycji”. Każdy uczestnik losuje własny łup.</div></div>`;
+}
+const RARITY_NAMES=['Zwykły','Ulepszony','Rzadki','Epicki','Legendarny'];
+function rewardSummary(r){return `+${Number(r.xp)||0} EXP · +${Number(r.credits)||0} kredytów · +${Number(r.scrap)||0} złomu${r.item_id?` · ${esc(r.item_name||r.item_id)} (${esc(RARITY_NAMES[r.item_rarity]||'Przedmiot')})`:''}`}
+function rewardsHtml(){
+ const pending=rewards.filter(r=>!r.claimed_at),claimed=rewards.filter(r=>r.claimed_at).slice(0,5);
+ return `<div class="panel expedition-panel expedition-rewards-panel"><div class="expedition-history-head"><h3>🎁 Moje nagrody z ekspedycji</h3><span class="tag">Do odbioru: ${pending.length}</span></div>
+ <p class="small muted">Każdy członek zwycięskiej drużyny otrzymuje własne, wylosowane na serwerze nagrody. Odbiór dodaje zasoby do aktualnie przypisanej postaci i przedmiot do ekwipunku.</p>
+ ${pending.length?pending.map(r=>`<div class="expedition-reward-row"><div><strong>${esc(r.boss_name)}</strong>${r.first_clear?'<span class="expedition-first-clear">Pierwsze zwycięstwo +50%</span>':''}<p class="small">${rewardSummary(r)}</p></div><button class="primary" data-expedition-reward-claim="${r.id}" ${busy?'disabled':''}>Odbierz nagrodę</button></div>`).join(''):'<p class="small muted">Nie masz nagród oczekujących na odbiór. Pokonaj bossa ze swoim klanem!</p>'}
+ ${claimed.length?`<details class="expedition-reward-history"><summary>Ostatnio odebrane nagrody</summary>${claimed.map(r=>`<p class="small muted">✓ ${esc(r.boss_name)} · ${rewardSummary(r)}</p>`).join('')}</details>`:''}
+ </div>`;
 }
 function dialog(){if(!openedReportId)return '';return `<div class="arena-report-overlay" data-expedition-overlay="1"><div class="arena-report-dialog" role="dialog" aria-modal="true" aria-label="Raport ekspedycji"><div class="arena-report-dialog-toolbar"><span>☠ RAPORT EKSPEDYCJI KLANOWEJ</span><button type="button" data-expedition-close-report="1">✕ Wróć</button></div><div class="arena-report-dialog-scroll">${reportLoading?'<p class="muted">Pobieranie raportu…</p>':reportHtml(openedReport)}</div></div></div>`}
 function tacticsHtml(expedition,isOrganizer){const current=tacticMeta(expedition?.tactic||'focus_weakest');return `<div class="expedition-tactics"><div class="expedition-tactics-head"><div><h4>Taktyka wyprawy</h4><p class="small muted">Obecnie: <strong>${esc(expedition?.tactic_label||current.label)}</strong></p></div></div><div class="expedition-tactics-grid">${TACTICS.map(t=>`<button type="button" class="expedition-tactic-btn ${current.id===t.id?'is-active':''}" data-expedition-tactic="${expedition.id}" data-value="${t.id}" ${!isOrganizer||busy?'disabled':''}><strong>${esc(t.label)}</strong><small>${esc(t.desc)}</small></button>`).join('')}</div><p class="small muted">Taktyka wpływa na wybór celów przez drużynę po rozpoczęciu walki. Możesz ją zmienić przed kliknięciem „Rozpocznij walkę z bossem”.</p></div>`}
@@ -116,7 +126,7 @@ function expeditionBlock(ex,role,members){
 }
 function html(){ensure();if(!active())return `<section class="section"><h2>☠ Ekspedycje</h2><div class="notice">Zaloguj się w ☁ Konto online, aby brać udział w ekspedycjach.</div></section>`;
  const c=state?.clan,role=state?.my_role,members=state?.members||[],bosses=state?.bosses||DEFAULT_BOSSES,activeExps=state?.active_expeditions||[],reports=state?.reports||[],progress=state?.progress||{highest_unlocked:3,boss_wins:[]},supplies=state?.supplies||{balance:0,max:12};
- const header=`<section class="section expedition-page"><div class="expedition-header"><div><span class="tag">ASHEN v0.3.2 · EKSPEDYCJE KLANOWE</span><h2>☠ Bossowie Pustkowi</h2><p class="small muted">Organizuj czasowe wyprawy, zaznaczaj zapraszanych członków klanu i zatwierdzaj zgłoszenia.</p></div><button data-expedition-refresh="1" ${loading||busy?'disabled':''}>↻ Odśwież</button></div>${error?`<div class="notice">⚠ ${esc(error)}</div>`:''}${info?`<div class="notice">✓ ${esc(info)}</div>`:''}${loading?'<p class="muted">Wczytywanie ekspedycji…</p>':''}`;
+ const header=`<section class="section expedition-page"><div class="expedition-header"><div><span class="tag">ASHEN v0.3.5 · EKSPEDYCJE KLANOWE</span><h2>☠ Bossowie Pustkowi</h2><p class="small muted">Organizuj czasowe wyprawy, zaznaczaj zapraszanych członków klanu i zatwierdzaj zgłoszenia.</p></div><button data-expedition-refresh="1" ${loading||busy?'disabled':''}>↻ Odśwież</button></div>${error?`<div class="notice">⚠ ${esc(error)}</div>`:''}${info?`<div class="notice">✓ ${esc(info)}</div>`:''}${loading?'<p class="muted">Wczytywanie ekspedycji…</p>':''}`;
  if(!state)return header+(!loading?'<p class="muted">Brak danych. Spróbuj odświeżyć.</p>':'')+'</section>';
  if(!c)return header+'<div class="notice">Najpierw dołącz do klanu w zakładce Klany.</div></section>'+dialog();
  const openCount=activeExps.length;
@@ -125,11 +135,36 @@ function html(){ensure();if(!active())return `<section class="section"><h2>☠ E
  const activeHtml=openCount?activeExps.map(ex=>expeditionBlock(ex,role,members)).join(''):'<div class="panel expedition-panel"><h3>Brak aktywnych wypraw</h3><p class="small muted">Lider lub oficer może rozpocząć organizowanie nowej ekspedycji.</p></div>';
  const bossCards=`<div class="expedition-boss-grid">${bosses.map(b=>{const unlocked=Number(b.id)<=Number(progress.highest_unlocked||3);const defeated=Array.isArray(progress.boss_wins)&&progress.boss_wins.map(Number).includes(Number(b.id));const cost={1:2,2:3,3:4}[b.id]||0,waitTime={1:"1 godz.",2:"1 godz. 30 min",3:"2 godz."}[b.id]||"do 8 godz.",levelCap={1:20,2:35,3:50}[b.id]||0;const canCreate=['leader','officer'].includes(role)&&unlocked&&!busy&&openCount<2&&!hasOrganized&&!isParticipating&&Number(supplies.balance)>=cost;
  return `<article class="expedition-boss-card ${unlocked?'':'is-locked'}"><div class="expedition-boss-top"><span class="tag">BOSS ${String(b.id).padStart(2,'0')}</span><span class="expedition-difficulty">${esc(b.difficulty||'—')}</span></div>${bossImage(bossCardPortraitFile(b,b.id),b.name)}<h3>${esc(b.name)}</h3><p class="small muted">${esc(b.kind||'Boss')} · ${esc(b.location||'')}</p><p>${esc(b.summary||'')}</p><div class="expedition-boss-meta"><span>2–5 graczy · maks. suma poziomów ${levelCap}</span><span>${defeated?'✓ Pokonany':'• Niepokonany'}</span></div><p class="small muted">Koszt: <strong>${cost} zapasów</strong> · Czas zbiórki: <strong>${waitTime}</strong></p><div class="actions"><button class="primary" data-expedition-create="${b.id}" ${canCreate?'':'disabled'}>Utwórz wyprawę</button></div></article>`}).join('')}</div>`;
- const reportsBox=`<div class="panel expedition-panel"><div class="expedition-history-head"><h3>Raporty ekspedycji</h3><span class="tag">Pokonane bossy: ${Array.isArray(progress.boss_wins)?progress.boss_wins.length:0}</span></div>${reports.length?`<div class="mail-list">${reports.map(r=>`<button class="mail-row" data-expedition-open-report="${r.id}"><strong>${r.victory?'✓':'✕'} ${esc(r.boss_name||'Boss')}</strong><span>${r.victory?'Zwycięstwo':'Porażka'} · ${esc(r.location||'')}</span><small>${fmt(r.created_at)}</small></button>`).join('')}</div>`:'<p class="small muted">Brak rozegranych wypraw.</p>'}<p class="small muted">Walka rozegra się po terminie zbiórki także wtedy, gdy nikt nie ma otwartej gry — wymaga uruchomienia serwerowego harmonogramu SQL 010. Nagrody dodamy później.</p></div>`;
- return header+`<div class="panel expedition-panel"><div class="expedition-clan-strip"><div><strong>[${esc(c.tag)}] ${esc(c.name)}</strong><p class="small muted">Twoja rola: ${roleName(role)} · Członków: ${members.length}</p></div><div class="expedition-progress-pill">Zapasy: ${Number(supplies.balance)||0} / 12 · regeneracja +1 / 6 h</div><div class="expedition-progress-pill">Aktywne: ${openCount} / 2</div></div></div>${activeHtml}<div class="panel expedition-panel"><h3>Wybierz bossa</h3><p class="small muted">Utworzenie wyprawy zużywa zapasy klanu. Organizator wybiera skład, a przyjęci gracze nie mogą brać udziału w innej aktywnej ekspedycji.</p>${bossCards}</div>${reportsBox}</section>${dialog()}`;
+ const reportsBox=`<div class="panel expedition-panel"><div class="expedition-history-head"><h3>Raporty ekspedycji</h3><span class="tag">Pokonane bossy: ${Array.isArray(progress.boss_wins)?progress.boss_wins.length:0}</span></div>${reports.length?`<div class="mail-list">${reports.map(r=>`<button class="mail-row" data-expedition-open-report="${r.id}"><strong>${r.victory?'✓':'✕'} ${esc(r.boss_name||'Boss')}</strong><span>${r.victory?'Zwycięstwo':'Porażka'} · ${esc(r.location||'')}</span><small>${fmt(r.created_at)}</small></button>`).join('')}</div>`:'<p class="small muted">Brak rozegranych wypraw.</p>'}<p class="small muted">Walka rozegra się po terminie zbiórki także wtedy, gdy nikt nie ma otwartej gry — wymaga uruchomienia serwerowego harmonogramu SQL 010. Nagrody można odebrać w panelu „Moje nagrody z ekspedycji”.</p></div>`;
+ return header+`<div class="panel expedition-panel"><div class="expedition-clan-strip"><div><strong>[${esc(c.tag)}] ${esc(c.name)}</strong><p class="small muted">Twoja rola: ${roleName(role)} · Członków: ${members.length}</p></div><div class="expedition-progress-pill">Zapasy: ${Number(supplies.balance)||0} / 12 · regeneracja +1 / 6 h</div><div class="expedition-progress-pill">Aktywne: ${openCount} / 2</div></div></div>${rewardsHtml()}${activeHtml}<div class="panel expedition-panel"><h3>Wybierz bossa</h3><p class="small muted">Utworzenie wyprawy zużywa zapasy klanu. Organizator wybiera skład, a przyjęci gracze nie mogą brać udziału w innej aktywnej ekspedycji.</p>${bossCards}</div>${reportsBox}</section>${dialog()}`;
 }
-async function mutate(fn){if(busy||loading)return;busy=true;error='';info='';redraw();try{info=await fn()||'Zapisano zmiany.';const id=identity(),n=++requests;state=await rpc('ashen_expedition_state');if(id!==identity()||n!==requests){} }catch(e){setError(e)}finally{busy=false;redraw()}}
+async function mutate(fn){if(busy||loading)return;busy=true;error='';info='';redraw();try{info=await fn()||'Zapisano zmiany.';const id=identity(),n=++requests;const [nextState,nextRewards]=await Promise.all([rpc('ashen_expedition_state'),rpc('ashen_expedition_my_rewards')]);if(id===identity()&&n===requests){state=nextState;rewards=Array.isArray(nextRewards)?nextRewards:[]}}catch(e){setError(e)}finally{busy=false;redraw()}}
+async function claimReward(id){
+ if(busy||loading)return;
+ const reward=rewards.find(r=>Number(r.id)===id&&!r.claimed_at);
+ if(!reward)return;
+ const expectedIdentity=identity();
+ if(cloud()?.getBoundSlot()!==cloud()?.currentSlot()){
+  setError('Przypisz bieżący lokalny profil do konta online przed odbiorem nagrody. Otwórz ☁ Konto online i wyślij postać.');redraw();return;
+ }
+ const apply=window.ASHEN_APPLY_EXPEDITION_REWARD;
+ if(typeof apply!=='function'){setError('Moduł ekwipunku nie jest gotowy. Odśwież grę.');redraw();return;}
+ busy=true;error='';info='';redraw();
+ try{
+  // Zawsze odczytaj nagrodę z serwera przed zastosowaniem, nie ufaj wartościom z HTML.
+  const fresh=await rpc('ashen_expedition_my_rewards');
+  const row=(fresh||[]).find(r=>Number(r.id)===id&&!r.claimed_at);
+  if(!row)throw Error('Nagroda została już odebrana lub nie należy do tego konta.');
+  if(identity()!==expectedIdentity || cloud()?.getBoundSlot()!==cloud()?.currentSlot())throw Error('Konto lub profil zmieniły się podczas odbioru. Spróbuj ponownie.');
+  apply(row); // trwały, idempotentny zapis lokalny przed ACK
+  const ok=await rpc('ashen_expedition_reward_ack',{p_id:id});
+  if(!ok)throw Error('Nie udało się potwierdzić nagrody na serwerze. Ponów odbiór — nie zostanie naliczona drugi raz.');
+  rewards=(await rpc('ashen_expedition_my_rewards'))||[];
+  info='Nagroda trafiła do Twojej postaci. Sprawdź Ekwipunek!';
+ }catch(e){setError(e)}finally{busy=false;redraw()}
+}
 document.addEventListener('click',e=>{if(e.target?.matches?.('[data-expedition-overlay]')){openedReportId=null;openedReport=null;redraw();return}const b=e.target.closest('button');if(!b)return;
+ if(b.hasAttribute('data-expedition-reward-claim')){void claimReward(Number(b.dataset.expeditionRewardClaim));return}
  if(b.hasAttribute('data-expedition-refresh')){void refresh();return}
  if(b.hasAttribute('data-expedition-open-report')){void loadReport(Number(b.dataset.expeditionOpenReport));return}
  if(b.hasAttribute('data-expedition-close-report')){openedReportId=null;openedReport=null;redraw();return}
