@@ -1,3 +1,5 @@
+ASHEN v0.1.55.1 — jeden styl paska zasobów jak we Wyprawach na wszystkich ekranach; usunięto przyciski Podgląd i panel Wybrany przedmiot z Ekwipunku, szczegóły nadal otwierają się bezpośrednio po kliknięciu ikony lub nazwy. Bez zmian mechaniki i zapisów.
+
 ASHEN v0.1.55 — Ekwipunek premium: uporządkowane sloty, wyróżnienie wybranego wyposażenia, karta podglądu z modyfikatorami i aktywnym zestawem, rozszerzone style szczegółów, podpowiedzi prefiksów/sufiksów pozycjonowane w oknie przeglądarki. Mechanika i zapisy bez zmian.
 
 ASHEN v0.1.54.5 — poprawiony, kompaktowy pasek zasobów poza zakładką Wyprawy; pełne tooltipy prefiksów i sufiksów przy wyposażeniu; roszady i lustrzane odbicia grafik samochodu osobowego oraz vana zgodnie z uwagami testowymi.
