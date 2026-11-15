@@ -1,3 +1,7 @@
+## ASHEN v0.1.54.2 — naprawa odświeżania grafik sypialni
+
+Podmiana trzech scen sypialni 1–3; wymuszenie przeładowania obrazów po aktualizacji dzięki parametrze wersji w adresie plików. Wgrywaj pliki zachowując strukturę katalogów, zastępując poprzednie wersje. Mechanika gry i zapisy pozostają niezmienione.
+
 # ASHEN v0.1.54 — Kryjówka: 15 gotowych scen
 
 - Sypialnia, magazyn i warsztat mają po pięć etapów rozwoju (15 scen).

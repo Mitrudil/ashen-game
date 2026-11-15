@@ -1,4 +1,4 @@
-const APP_VERSION='0.1.54';
+const APP_VERSION='0.1.54.2';
 
 (()=>{'use strict';const KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 const rarities=[{name:'Zwykły',color:'#b8bfc3',weight:58,mult:1},{name:'Ulepszony',color:'#8ac78b',weight:25,mult:1.14},{name:'Rzadki',color:'#77afe5',weight:12,mult:1.32},{name:'Epicki',color:'#c391e4',weight:4,mult:1.58},{name:'Legendarny',color:'#f2bb65',weight:1,mult:1.95}];
@@ -1329,7 +1329,7 @@ function hideoutSvgThing(slot,id){if(id==='none')return '';
  if(id==='trophy')content=`<path d="M-8 -82 h16 v50 h-16z" fill="#7c8b83"/><path d="M-43 -59 Q-23 -80 0 -62 Q23 -80 43 -59 Q51 -28 23 -17 L12 5 H-12 L-23 -17 Q-51 -28 -43 -59Z" fill="#695d4d" stroke="#b8a17d" stroke-width="5"/><path d="M-13 14 H13 L20 57 H-20 Z" fill="#726452"/><path d="M-33 65 H33" stroke="#b8a17d" stroke-width="9"/>`;
  return content?`<g transform="translate(${slot==='left'?218:slot==='center'?488:slot==='right'?759:480} ${slot==='wall'?174:405})">${content}</g>`:'';
 }
-const bedroomBackgroundByLevel=lvl=>`./assets/bunker/rooms/bedroom-level${Math.max(1,Math.min(5,lvl))}.webp`;
+const bedroomBackgroundByLevel=lvl=>`./assets/bunker/rooms/bedroom-level${Math.max(1,Math.min(5,lvl))}.webp?v=0.1.54.2`;
 function hideoutScene(h){
  const lvl=roomLevel('bedroom');
  const roomLabel=lvl===1?'Poziom 1 — surowa sypialnia':lvl===2?'Poziom 2 — odnowiona sypialnia':'Poziom 3 — wyposażona sypialnia';
