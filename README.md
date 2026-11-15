@@ -1,3 +1,11 @@
+## Zmiany w v0.2.1
+
+- 5 slotów postaci (1 główna + 4 testowe).
+- Wybór płci: mężczyzna / kobieta.
+- 3 pary archetypów 1:1: Zwiadowca/Zwiadowczyni, Wojownik/Wojowniczka, Technik/Techniczka.
+- Duże karty z pełnymi sylwetkami na ekranie tworzenia postaci.
+- Pełne karty w panelu profili.
+
 # ASHEN v0.2.0.2 — naprawa resetu profili testowych
 
 - Reset Testera korzysta z dwustopniowego potwierdzenia **w samej grze**, bez natywnego okna `confirm()`.
