@@ -1,3 +1,13 @@
+# ASHEN v0.2.0.2 — naprawa resetu profili testowych
+
+- Reset Testera korzysta z dwustopniowego potwierdzenia **w samej grze**, bez natywnego okna `confirm()`.
+- Po potwierdzeniu zapis Testera zostaje zastąpiony czystą postacią, a gra automatycznie otwiera właśnie tego Testera, wyświetlając tworzenie bohatera.
+- Przed resetem przechowujemy lokalną kopię poprzedniego zapisu Testera (`-backup-before-reset`).
+- Reset nie zmienia zapisu głównej postaci i innych profili.
+- Aktualizacja wersji i parametrów cache w `index.html`.
+- Przed instalacją zalecamy wyeksportowanie najważniejszych zapisów do plików JSON.
+- Nadal jest to lokalne laboratorium offline, nie multiplayer online.
+
 # ASHEN v0.2.0.1 — poprawka niezależności profili
 
 - Każdy profil testowy odczytuje i zapisuje dane pod osobnym kluczem; nie podmieniamy już wspólnego zapisu przy przełączaniu.
