@@ -779,3 +779,12 @@ h1, h2, h3, h4, h5, h6, button,
 .ashen-room-level-buttons button{min-width:0!important;width:auto!important;padding:8px 10px;font-size:12px;flex:1 1 70px}
 .ashen-room-level-buttons button.is-current{box-shadow:0 0 0 1px #c89e5b inset}
 @media(max-width:550px){.ashen-mod-tooltip{left:0;transform:translate(0,5px)}.ashen-mod-icon:hover .ashen-mod-tooltip,.ashen-mod-icon:focus .ashen-mod-tooltip{transform:translate(0,0)}}
+
+/* ASHEN 0.1.54.3 — przełączniki wariantów tylko na potrzeby testów */
+.ashen-roster-test-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;margin:12px 0;border:1px dashed #bc965f;background:rgba(166,112,41,.10);border-radius:10px;color:#d9c5a4;font-size:.87rem}
+.ashen-roster-test{margin:12px 0 8px;padding:11px;border:1px solid #53605f;background:rgba(10,17,20,.6);border-radius:9px}
+.ashen-roster-test-buttons{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.ashen-roster-test-buttons button{font-size:.84rem;min-width:71px;padding:8px 11px;border:1px solid #626e6b;border-radius:6px;background:#29343a;color:#f1e1cb;cursor:pointer}
+.ashen-roster-test-buttons button:hover{border-color:#dab072;background:#34444a}
+.ashen-roster-test-buttons button.is-current{background:#79501f;border-color:#edb765;color:#fff2d5;box-shadow:0 0 0 1px rgba(245,178,86,.25)}
+@media(max-width:500px){.ashen-roster-test-buttons button{flex:1;min-width:65px}.ashen-roster-test-banner{align-items:flex-start}}

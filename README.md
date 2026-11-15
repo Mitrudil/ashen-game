@@ -417,3 +417,10 @@ W sypialni zastosowano realistyczne tło `assets/bunker/rooms/bedroom-base.webp`
 - Najedź myszką lub ustaw fokus klawiaturą na ikonie, aby zobaczyć nazwę i konkretną premię prefiksu/sufiksu. Dla starszych raportów używane są dostępne migawki efektów.
 - W Kryjówce przyciskami „Poziom 1–5” można bezpłatnie przełączać dowolną scenę i aktywną premię, bez wymogów poziomu postaci i zasobów. To ułatwienie testowe, a nie docelowy balans rozwoju.
 - Sceny sypialni 1–3 zastąpiono gotowymi obrazami z meblami odpowiednimi do etapu. Sypialnia 4–5, Magazyn i Warsztat bez zmian.
+
+
+## v0.1.54.3 — czyste grafiki Kryjówki i testy Towarzyszy / Transportu
+- Usunięto nakładane na grafikę napisy „Schron 17”, „Sypialnia · poziom…”, „Magazyn · poziom…” i „Warsztat · poziom…” z dużych scen i miniatur Kryjówki. Podpisy poniżej miniatur i w nagłówku pozostają. Pliki ilustracji bez zmian.
+- Na kartach wszystkich zwierząt można testowo przełączać etapy 1, 2, 3 bez opłat i poziomu postaci. Wybór ustawia też aktualnego towarzysza. Możliwe jest też wyłączenie towarzysza.
+- Na kartach wszystkich środków transportu można testowo wybierać pojazd i jego etap 1, 2, 3 bez poziomu postaci i kosztów; pieszo ma jeden wariant.
+- Ustawienia testowe są zapisywane w dotychczasowym zapisie postaci, również po odświeżeniu. Zwykła mechanika odblokowań pozostaje w kodzie do czasu wyłączenia testów.
