@@ -1,15 +1,52 @@
-# ASHEN v0.2.8 — Klany Pustkowi
+# ASHEN v0.2.9 — Ekspedycje klanowe i pierwsi bossowie
 
-Nowa zakładka **☷ Klany** z prawdziwą obsługą między kontami Supabase ASHEN.
+Ta wersja rozwija system klanów i dodaje pierwszy działający fundament pod **wspólne walki z bossami online**.
 
-- Zakładanie klanu: nazwa, 2–5-znakowy skrót, opis.
-- Zapraszanie graczy z listy opublikowanych postaci online.
-- Akceptowanie i odrzucanie zaproszeń (7 dni ważności).
-- Lista członków (role, imiona, poziomy), limit 30.
-- Lider, oficer, członek; zarządzanie rolami oraz wyrzucanie.
-- Opuszczanie klanu; lider może rozwiązać pusty klan.
-- Serwerowe RPC z kontrolą autoryzacji, bez bezpośredniego dostępu do tabel.
+## Co doszło
 
-**WYMAGANY NOWY SQL:** `multiplayer/supabase/005_clans.sql` — tylko w projekcie ASHEN. Przewodnik: `multiplayer/URUCHOMIENIE_0.2.8.md`.
+### Nowa zakładka: **☠ Ekspedycje**
+- osobna karta w menu gry,
+- lista **3 pierwszych bossów**,
+- aktywna wyprawa klanu widoczna dla wszystkich członków,
+- historia ostatnich raportów wypraw.
 
-**Nie dodano jeszcze walk z bossami ani czatu klanowego.** Nie zmieniono dotychczasowego PvE, PvP, systemu zapisów ani ALLADYN.
+### System wypraw klanowych
+- **lider lub oficer** może utworzyć wyprawę na wybranego bossa,
+- pozostali członkowie klanu mogą **dołączać** i **opuszczać** skład,
+- skład: **2–5 graczy**,
+- jedna aktywna wyprawa na klan,
+- walka jest rozliczana przez **RPC po stronie serwera**,
+- raport zapisuje się dla całego klanu.
+
+### Pierwsi bossowie
+1. **Rzeźnik ze Złomowiska** — pierwszy prosty test grupy,
+2. **Kanałowy Pożeracz** — mocniejszy pojedynczy mutant,
+3. **Trzej Bracia Rdzy** — grupa elitarnych przeciwników.
+
+## Ważne ograniczenia tej wersji
+- to jeszcze **nie jest pełny endgame**,
+- boss nr 3 to dalej etap testowy, nie finał gry,
+- **brak nagród, łupów i ekonomii bossów**,
+- brak jeszcze pełnej kampanii 15–20 bossów,
+- brak rajdów klanowych / wieloetapowych lokacji.
+
+Czyli: to jest **gotowy fundament systemu**, na którym można dalej budować właściwą zawartość.
+
+## Wymagany SQL
+Uruchom w projekcie **ASHEN**:
+- najpierw wcześniejsze pliki, jeśli nie były uruchomione:
+  - `002_cloud_saves.sql`
+  - `003_online_pvp.sql`
+  - `005_clans.sql`
+- następnie nowy plik:
+  - `multiplayer/supabase/006_clan_expeditions.sql`
+
+## Dokument uruchomienia
+Szczegóły: `multiplayer/URUCHOMIENIE_0.2.9.md`
+
+## Bez zmian
+Nie ruszałem:
+- lokalnego PvE,
+- lokalnego PvP testowego,
+- systemu ekwipunku,
+- ALLADYN.

@@ -1200,3 +1200,31 @@ body.arena-report-modal-open{overflow:hidden}
 .ashen-clan-page .input{max-width:100%;min-width:0}
 .ashen-clan-page select.input{flex:1;min-width:190px}
 @media(max-width:600px){.ashen-clan-page .clan-panel{padding:14px}.ashen-clan-page .clan-member .actions{width:100%}}
+
+/* ASHEN v0.2.9 — ekspedycje klanowe */
+.expedition-page .notice{margin-bottom:14px}
+.expedition-header,.expedition-history-head,.expedition-clan-strip,.expedition-active-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.expedition-progress-pill,.expedition-active-pill{padding:10px 14px;border-radius:999px;background:rgba(212,170,71,.12);border:1px solid rgba(212,170,71,.28);color:var(--gold);font-weight:700}
+.expedition-panel{margin-bottom:16px}
+.expedition-boss-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:14px}
+.expedition-boss-card{border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;background:linear-gradient(180deg,rgba(26,33,38,.96),rgba(18,23,28,.96));box-shadow:0 10px 24px rgba(0,0,0,.18)}
+.expedition-boss-card.is-locked{opacity:.62;filter:saturate(.7)}
+.expedition-boss-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}
+.expedition-difficulty{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.expedition-boss-meta{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);margin:12px 0}
+.expedition-members{display:grid;gap:10px;margin:14px 0}
+.expedition-report .arena-report-header h3{margin-bottom:4px}
+.expedition-versus-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.expedition-team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.expedition-team-grid.is-enemies .arena-fighter-portrait{border-color:rgba(215,87,87,.28)}
+.expedition-enemy-avatar{width:86px;height:86px;border-radius:20px;display:flex;align-items:center;justify-content:center;position:relative;background:linear-gradient(180deg,#3b2020,#241214);font-size:34px;margin:0 auto 10px;border:1px solid rgba(215,87,87,.35)}
+.expedition-enemy-avatar span{position:absolute;right:8px;bottom:8px;width:24px;height:24px;border-radius:999px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:12px}
+.expedition-summary-tables{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.expedition-round-health{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.expedition-round-bar{display:grid;gap:6px;margin-bottom:10px}
+.expedition-round-bar span,.expedition-round-bar strong{font-size:13px}
+.expedition-round-bar strong{color:var(--text)}
+.expedition-history-head{margin-bottom:10px}
+@media (max-width:900px){
+ .expedition-versus-grid,.expedition-summary-tables,.expedition-round-health{grid-template-columns:1fr}
+}
