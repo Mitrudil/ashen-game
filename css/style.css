@@ -995,3 +995,40 @@ h1, h2, h3, h4, h5, h6, button,
  }
  .ashen-premium-shell .paperdoll-left,.ashen-premium-shell .paperdoll-right{justify-content:flex-start}
 }
+
+
+/* v0.1.57 — Starcia Pustkowi */
+.arena-screen{display:grid;gap:20px;min-width:0}
+.arena-hero{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:22px;background:linear-gradient(110deg,#272018,#131c21 70%),radial-gradient(circle at 90% 20%,#8a552737,transparent 65%);border:1px solid #84643e;border-radius:16px;box-shadow:inset 0 1px #e9ae5f35,0 10px 24px #0006}
+.arena-hero h3{font-size:26px;color:#f3d9aa;margin:8px 0}.arena-hero p{line-height:1.55;margin:0;max-width:700px;color:#c9c3b6}
+.arena-progress{text-align:center;min-width:150px;border:1px solid #7f5a32;padding:16px;border-radius:12px;background:#171b1e}
+.arena-progress strong{display:block;font-size:43px;color:#e6b46b;line-height:1.1}.arena-progress strong span{font-size:20px;color:#b6a590}.arena-progress small{font-size:10px;letter-spacing:.09em;color:#b8aa94}
+.arena-progress-track{height:6px;border-radius:5px;background:#3d342b;margin-top:10px;overflow:hidden}.arena-progress-track>div{height:100%;background:linear-gradient(90deg,#8b6338,#e2a85d)}
+.arena-level-grid{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px}
+.arena-level-btn{font-size:13px;min-height:50px;border:1px solid #5e5242;border-radius:10px;background:linear-gradient(160deg,#252a2d,#151b1d);color:#e2d9c9;padding:7px 3px;font-weight:700}
+.arena-level-btn.boss{border-color:#a36b42;color:#f4c38c;background:linear-gradient(150deg,#5a2e22,#231814)}
+.arena-level-btn.completed{border-color:#5e8b67;color:#c6e4ca}.arena-level-btn.locked{opacity:.62}
+.arena-level-btn.selected{outline:2px solid #e7ae5c;outline-offset:1px;box-shadow:0 0 15px #ad783a45}
+.arena-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(255px,.8fr);gap:18px;align-items:start;min-width:0}
+.arena-enemy-card{display:grid;grid-template-columns:minmax(180px,280px) minmax(0,1fr);gap:20px;background:linear-gradient(155deg,#222a2d,#10171b 80%);border:1px solid #786043;border-radius:16px;padding:16px;min-width:0}
+.arena-enemy-card.boss{border-color:#ad6848;box-shadow:0 0 0 1px #7b3a262b,inset 0 1px #ffc28924}
+.arena-portrait-wrap{position:relative;border:1px solid #796047;border-radius:12px;overflow:hidden;align-self:start;background:#111719;aspect-ratio:1}.arena-portrait-wrap img{width:100%;height:100%;display:block;object-fit:cover}
+.arena-portrait-number{position:absolute;bottom:0;left:0;right:0;padding:10px;background:linear-gradient(0deg,#090f14e8,transparent);font-size:12px;font-weight:750;letter-spacing:.1em;text-align:center;color:#ffe0aa}
+.arena-enemy-details{min-width:0}.arena-enemy-details h3{font-size:25px;margin:8px 0 2px;color:#f0dab5}.arena-epithet{color:#d6ad77;font-weight:650;margin:0 0 14px}
+.arena-enemy-details>p{line-height:1.52}.arena-story{border-left:2px solid #987042;padding-left:10px;font-style:italic;color:#c4beb2}
+.arena-stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+.arena-stat-grid>div{padding:10px;border:1px solid #4b4842;border-radius:9px;background:#171e22;display:flex;flex-direction:column;gap:4px}.arena-stat-grid span{font-size:11px;color:#aaaeb0}.arena-stat-grid strong{font-size:17px;color:#f2e4cc}
+.arena-reward-preview{display:flex;flex-direction:column;gap:6px;background:#272018;border:1px solid #765936;border-radius:10px;padding:12px;margin:10px 0 14px}.arena-reward-preview strong{color:#f0c78e}.arena-reward-preview span{color:#e4d4bc;font-size:13px}.arena-reward-preview small{color:#b4aaa0}
+.arena-enemy-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.arena-enemy-actions button{flex:1 1 200px;min-height:43px}
+.arena-sidebar{display:grid;gap:14px}.arena-note,.arena-reports-area,.arena-report-links{border:1px solid #685438;border-radius:14px;background:linear-gradient(150deg,#1e2529,#11181c);padding:18px;box-shadow:0 10px 24px #0005}.arena-note h3,.arena-reports-heading h3{margin:8px 0;color:#edd3a5}.arena-note p{color:#bec7c9;font-size:13px;line-height:1.6}
+.arena-progress-stats{display:grid;gap:8px}.arena-progress-stats>div,.arena-report-brief{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed #4f463a;padding:7px 0}.arena-progress-stats span,.arena-report-brief span{font-size:12px}.arena-progress-stats strong{color:#f2d4a3}
+.arena-reports-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.arena-reports-heading h3{margin-bottom:0}
+.arena-report-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.arena-history-button{display:flex;justify-content:space-between;gap:8px;min-width:0;flex-wrap:wrap;text-align:left;border:1px solid #4c4740;border-radius:9px;background:#192125;padding:12px;font-size:12px}.arena-history-button span:last-child{color:#a9b2b6;font-size:11px}
+.arena-report{margin-top:16px;border:1px solid #6c573b;background:linear-gradient(165deg,#252a2e,#0c1317);border-radius:12px;padding:16px;min-width:0}
+.arena-report-header{display:flex;align-items:start;justify-content:space-between;gap:15px;margin-bottom:14px}.arena-report-header h3{margin:7px 0}.arena-report-reward{border:1px solid #574a32;padding:11px;border-radius:10px;margin-top:12px;background:#241f18;font-size:13px}.arena-special-loot{margin-top:9px;color:#e5bdfa}
+.arena-battle-details{margin-top:14px}.arena-battle-details summary{color:#e9c38b;cursor:pointer}.arena-battle-log{max-height:360px;overflow-y:auto;margin-top:9px;padding:12px;background:#0f171b;border-radius:8px}.arena-battle-log>div{padding:3px 0;border-bottom:1px solid #ffffff0a;font-size:12px;color:#cfd5d7}
+.arena-future-note{color:#adaba6;font-size:12px;text-align:center;margin:0 0 10px}
+.arena-report-links{margin-bottom:18px}.arena-report-links h3{margin-top:0}.arena-report-brief{align-items:center;flex-wrap:wrap}
+@media(max-width:1100px){.arena-layout{grid-template-columns:1fr}.arena-hero{flex-wrap:wrap}.arena-progress{width:100%}}
+@media(max-width:720px){.arena-level-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.arena-enemy-card{grid-template-columns:1fr}.arena-portrait-wrap{width:min(100%,340px);justify-self:center}.arena-report-list{grid-template-columns:1fr}}
+@media(max-width:480px){.arena-hero{padding:16px}.arena-hero h3{font-size:22px}.arena-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.arena-note,.arena-reports-area{padding:13px}.arena-level-btn{font-size:12px;min-height:46px}.arena-report-header{flex-wrap:wrap}}

@@ -1,3 +1,9 @@
+ASHEN v0.1.57 — Starcia Pustkowi (Rozdział I: etapy 1–10).
+
+Dodano: osobna zakładka Starcia z 10 unikalnymi grafikami przeciwników, bossem na etapie 10, niezależnym od poziomu postaci odblokowywaniem kolejnych starć, automatyczną walką opartą na dotychczasowym wyposażeniu, historią prób i raportami obrażeń, nagrodami za pierwsze zwycięstwo oraz mniejszymi nagrodami za powtórki.
+
+Zapis pozostaje lokalny (ashen-save-v010), bez resetowania istniejących postaci.
+
 ASHEN v0.1.56.3 — rezonanse artefaktów liczą osobne założone egzemplarze (UID), także powtórzone typy. Działa niezależnie dla prefiksu i sufiksu. Zaktualizowane opisy. Bez zmiany zapisów i zestawów odzieży.
 
 ASHEN v0.1.56.2 — poprawa układu slotów wokół postaci. Karty z prawej i lewej strony mieszczą się w panelu Ekwipunku, bez wychodzenia poza ramkę.
