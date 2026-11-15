@@ -379,3 +379,11 @@ W sypialni zastosowano realistyczne tło `assets/bunker/rooms/bedroom-base.webp`
 - Wszystkie grafiki są umieszczone na jednolitym płótnie 760×460 i wycentrowane.
 - Zmieniono proporcje ramki na zgodne z ilustracją w widoku desktop/mobile oraz podczas podglądu aktywnego towarzysza/pojazdu.
 - Mechanika, ceny i zapisy pozostają bez zmian.
+
+
+## 0.1.51 — Grafiki magazynu i warsztatu w Kryjówce
+
+- W miniaturowym przekroju Schronu 17 i w dużym widoku wybranego pomieszczenia są teraz realistyczne ilustracje Magazynu i Warsztatu.
+- Nowe pliki: `assets/bunker/rooms/storage-level1.webp` i `assets/bunker/rooms/workshop-level1.webp`.
+- Sypialnia, jej personalizacja, mechanika rozbudowy pomieszczeń i istniejące zasoby pozostają bez zmian.
+- Do aktualizacji GitHuba wgraj `index.html`, `js/game.js`, `README.md` i dwa pliki WebP we wskazanym katalogu.
