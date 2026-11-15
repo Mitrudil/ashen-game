@@ -815,3 +815,53 @@ h1, h2, h3, h4, h5, h6, button,
 @media(max-width:900px){.ashen-global-resources.is-compact{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:520px){.ashen-global-resources.is-compact{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.ashen-global-resources.is-compact .mission-resource{padding:7px 8px;gap:8px}.ashen-global-resources.is-compact .mission-resource .ico{width:30px;height:30px;flex-basis:30px}.ashen-global-resources.is-compact .mission-resource .num{font-size:17px}}
 
+
+
+/* ASHEN v0.1.55 — interfejs premium ekwipunku (bez zmian w mechanice) */
+.ashen-premium-shell .paperdoll-wrap{border-color:#796042;background:linear-gradient(155deg,#1d252a,#0d1317 75%);box-shadow:inset 0 1px #f6cd8350,0 10px 28px #0005;overflow:visible}
+.ashen-premium-shell .paperdoll{border:1px solid #594b36;border-radius:12px;background:radial-gradient(ellipse at 50% 15%,#4b3e2938,transparent 55%),linear-gradient(180deg,#151f23,#101619)}
+.ashen-premium-shell .paperdoll .slot-anchor{border:1px solid #4d5958;background:linear-gradient(145deg,#232d31,#131b20);box-shadow:inset 0 1px #ffffff0b,0 5px 14px #0006;transition:border-color .15s,background .15s}
+.ashen-premium-shell .paperdoll .slot-anchor:hover,.ashen-premium-shell .paperdoll .slot-anchor:focus-within{border-color:#c4975c;z-index:20}
+.ashen-premium-shell .paperdoll .slot-anchor.ashen-preview-selected{border-color:#d5a259;box-shadow:inset 0 1px #f6d39038,0 0 0 1px #be863942,0 0 14px #b88a3930}
+.ashen-premium-shell .paperdoll .slot-anchor.empty{background:linear-gradient(145deg,#20282b,#141a1e);border-color:#3c494c;opacity:.72}
+.ashen-premium-shell .paperdoll .slot-anchor .label{color:#d2c9bb;font-weight:650}
+.ashen-premium-shell .figure-stage{border:1px solid #4e534e;background:radial-gradient(ellipse at 50% 28%,#53605b38,transparent 65%),linear-gradient(180deg,#1c282e,#0c141a);box-shadow:inset 0 0 32px #0009}
+.ashen-premium-shell .paperdoll .slot-anchor .ashen-mod-badges{grid-column:2;grid-row:auto;justify-content:flex-start;margin:2px 0;gap:5px}
+.ashen-premium-shell .paperdoll .slot-anchor .ashen-mod-icon{width:25px;height:25px;flex:0 0 25px;border-radius:6px}
+.ashen-premium-shell .paperdoll .slot-anchor .ashen-mod-icon svg{width:17px;height:17px}
+.ashen-slot-inspect{grid-column:2;grid-row:auto;justify-self:start;margin:2px 0 0;padding:3px 0;background:transparent!important;border:0!important;box-shadow:none!important;color:#dfbf8c;font-size:11px;font-weight:750}
+.ashen-slot-inspect:hover{text-decoration:underline;color:#ffe2aa}
+.ashen-premium-preview{margin:0 0 18px;padding:18px;border:1px solid #85663d;border-radius:12px;background:linear-gradient(128deg,#252b2c,#131b21 70%);box-shadow:inset 0 1px #f0c78733,0 8px 24px #0005;min-width:0}
+.ashen-preview-heading{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;color:#dcb77b;letter-spacing:.12em;font-weight:800;font-size:11px;margin-bottom:15px}
+.ashen-preview-heading span:last-child{color:#a4b3b6;letter-spacing:.03em}
+.ashen-preview-feature{display:flex;gap:14px;align-items:center;min-width:0;padding-bottom:13px;border-bottom:1px solid #53606766}
+.ashen-preview-image{height:90px;width:90px;flex:0 0 90px;display:grid;place-items:center;background:#111a20;border:1px solid #725c3e;border-radius:12px}
+.ashen-preview-image .iconbox{height:80px;width:80px}
+.ashen-preview-name{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ashen-preview-name strong{font-size:clamp(16px,1.7vw,22px);line-height:1.3;color:#f4e9d5;overflow-wrap:anywhere}
+.ashen-preview-name span{font-size:13px;font-weight:750}
+.ashen-preview-stat{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #52606770}
+.ashen-preview-stat span{color:#aebec0;font-size:12px;letter-spacing:.08em}
+.ashen-preview-stat strong{color:#eed19d;font-size:21px}
+.ashen-preview-affixes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:14px}
+.ashen-preview-affix{display:flex;align-items:flex-start;gap:10px;background:#10181db5;border:1px solid #48555a;border-radius:9px;padding:12px;min-width:0}
+.ashen-preview-affix .ashen-mod-icon{flex:0 0 35px;width:35px;height:35px}
+.ashen-preview-affix-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ashen-preview-affix-copy>span{font-size:10px;letter-spacing:.12em;color:#a8b6ba}
+.ashen-preview-affix-copy strong{color:#eac99a;overflow-wrap:anywhere}
+.ashen-preview-affix-copy small{color:#b9d1c9;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.ashen-preview-set{margin-top:12px;display:grid;gap:5px;padding:11px 12px;border-radius:8px;background:#281d1e;border:1px solid #9e716f;color:#f0b3ad}
+.ashen-preview-set.active{background:#172a22;border-color:#608e70;color:#a2e6b5}
+.ashen-preview-set small{color:inherit;line-height:1.5}
+.ashen-preview-flavor{color:#abb6b9;font-style:italic;line-height:1.55;margin:15px 0}
+.ashen-preview-detail{min-height:42px}
+.ashen-item-modal{border-color:#b38a55;box-shadow:0 28px 72px #000e,inset 0 1px #f6d3a04d}
+.ashen-item-modal .detail-affix{background:linear-gradient(110deg,#27252c,#1b2328);border-style:solid;border-color:#5e5263;align-items:center}
+.ashen-mod-tooltip{position:fixed!important;top:var(--ashen-tip-y,50vh)!important;left:var(--ashen-tip-x,50vw)!important;bottom:auto!important;transform:var(--ashen-tip-side,translate(-50%,-100%))!important;max-width:min(300px,calc(100vw - 24px));width:max-content;z-index:99999!important;border-color:#d8b579;background:linear-gradient(155deg,#263038,#0c151b);box-shadow:0 14px 38px #000f}
+.ashen-mod-icon:hover .ashen-mod-tooltip,.ashen-mod-icon:focus .ashen-mod-tooltip{transform:var(--ashen-tip-side,translate(-50%,-100%))!important}
+@media(max-width:700px){.ashen-preview-affixes{grid-template-columns:1fr}.ashen-premium-preview{padding:13px}.ashen-preview-feature{align-items:flex-start}.ashen-preview-image{height:75px;width:75px;flex-basis:75px}.ashen-preview-image .iconbox{width:68px;height:68px}.ashen-preview-stat strong{font-size:18px}}
+/* Równa typografia i pozycjonowanie aktywnych slotów */
+.ashen-premium-shell .paperdoll .slot-anchor .equipped-item-trigger{grid-column:2;grid-row:2;margin:0;text-align:left;justify-self:start;max-width:100%;overflow-wrap:anywhere}
+.ashen-premium-shell .paperdoll .slot-anchor .item-view-icon.equipped-item-trigger{grid-column:1;grid-row:1/span 3;justify-self:center}
+.ashen-premium-shell .paperdoll .slot-anchor .ashen-slot-inspect{grid-column:2;text-align:left}
+@media(max-width:520px){.ashen-premium-shell .paperdoll .slot-anchor .equipped-item-trigger,.ashen-premium-shell .paperdoll .slot-anchor .ashen-slot-inspect{max-width:100%;min-width:0}}

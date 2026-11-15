@@ -1,3 +1,7 @@
+ASHEN v0.1.55 — Ekwipunek premium: uporządkowane sloty, wyróżnienie wybranego wyposażenia, karta podglądu z modyfikatorami i aktywnym zestawem, rozszerzone style szczegółów, podpowiedzi prefiksów/sufiksów pozycjonowane w oknie przeglądarki. Mechanika i zapisy bez zmian.
+
+ASHEN v0.1.54.5 — poprawiony, kompaktowy pasek zasobów poza zakładką Wyprawy; pełne tooltipy prefiksów i sufiksów przy wyposażeniu; roszady i lustrzane odbicia grafik samochodu osobowego oraz vana zgodnie z uwagami testowymi.
+
 ASHEN v0.1.54.4 — stały pasek zasobów na wszystkich zakładkach, bez zdublowanych paneli ekwipunku i magazynu. Oznaczenie zajętej ręki przy dwuręcznej broni; widoczne ikony prefiksu i sufiksu przy wyposażeniu postaci; usunięcie spoilerowej planszy rozwoju towarzyszy; nowe warianty samochodu i vana.
 
 ## ASHEN v0.1.54.2 — naprawa odświeżania grafik sypialni
