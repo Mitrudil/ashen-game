@@ -1,3 +1,10 @@
+# ASHEN v0.2.9.1 — poprawki raportów ekspedycji
+
+- Kolory zdarzeń na podstawie faktycznego składu bohaterów i wrogów w zapisanym raporcie.
+- Wszyscy bohaterowie na zielono, przeciwnicy na czerwono; nieznany nadawca pozostaje neutralny.
+- Nagłówki rund wyraźnie pokazują: Drużyna zadała / Otrzymała.
+- Zmiana wyłącznie wyświetlania — bez zmian w SQL, balansie, danych postaci czy zapisanych walkach.
+
 # ASHEN v0.2.9 — Ekspedycje klanowe i pierwsi bossowie
 
 Ta wersja rozwija system klanów i dodaje pierwszy działający fundament pod **wspólne walki z bossami online**.
