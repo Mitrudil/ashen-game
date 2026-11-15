@@ -764,3 +764,18 @@ h1, h2, h3, h4, h5, h6, button,
 
 /* v0.1.52 — czytelny panel testowego cofania kryjówki */
 .ashen-room-test-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px}.ashen-room-test-actions button{white-space:normal;max-width:100%}@media(max-width:700px){.ashen-room-test-actions{justify-content:flex-start}}
+
+/* ASHEN 0.1.54 — tooltipy prefiksów i sufiksów oraz testowy podgląd Kryjówki */
+.ashen-mod-icon{position:relative;cursor:help;overflow:visible;isolation:isolate}
+.ashen-mod-icon:focus-visible{outline:2px solid #f2c87f;outline-offset:3px}
+.ashen-mod-tooltip{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translate(-50%,5px);opacity:0;visibility:hidden;pointer-events:none;z-index:1000;width:max-content;max-width:min(290px,76vw);min-width:155px;white-space:normal;text-align:left;color:#f5e9d8;background:#101a20;border:1px solid #a78956;border-radius:8px;padding:9px 11px;box-shadow:0 10px 28px #000d;line-height:1.45;font-size:12px;transition:opacity .12s ease,transform .12s ease}
+.ashen-mod-tooltip strong{display:block;color:#ecc78d;margin-bottom:4px}.ashen-mod-tooltip span{display:block;color:#d5e2e6}
+.ashen-mod-icon:hover .ashen-mod-tooltip,.ashen-mod-icon:focus .ashen-mod-tooltip{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.loot-affix-badges{margin:3px 0 4px 8px;vertical-align:middle;flex-wrap:wrap}
+.loot-affix-badges .ashen-mod-icon{width:26px;height:26px;flex-basis:26px}
+.loot-affix-badges .ashen-mod-icon svg{width:18px;height:18px}
+.ashen-room-level-selector{margin:10px 0;padding:10px;background:#111f25;border:1px solid #53606a;border-radius:8px;min-width:240px;max-width:440px}
+.ashen-room-level-buttons{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.ashen-room-level-buttons button{min-width:0!important;width:auto!important;padding:8px 10px;font-size:12px;flex:1 1 70px}
+.ashen-room-level-buttons button.is-current{box-shadow:0 0 0 1px #c89e5b inset}
+@media(max-width:550px){.ashen-mod-tooltip{left:0;transform:translate(0,5px)}.ashen-mod-icon:hover .ashen-mod-tooltip,.ashen-mod-icon:focus .ashen-mod-tooltip{transform:translate(0,0)}}

@@ -1,4 +1,4 @@
-# ASHEN v0.1.53 — Kryjówka: 15 gotowych scen
+# ASHEN v0.1.54 — Kryjówka: 15 gotowych scen
 
 - Sypialnia, magazyn i warsztat mają po pięć etapów rozwoju (15 scen).
 - Nowe obrazy są w jednym formacie 1280 × 720 (16:9), równo wykadrowane. Zmieniono wyłącznie kadry: bez przemalowywania wnętrz.
@@ -406,3 +406,10 @@ W sypialni zastosowano realistyczne tło `assets/bunker/rooms/bedroom-base.webp`
 - Najwyższy już opłacony poziom pomieszczenia można przywrócić bez ponownego płacenia (zapamiętane w `roomUnlocked`); nowe poziomy nadal wymagają standardowych zasobów.
 - Magazyn i Warsztat mają aktualnie po jednej ilustracji na wszystkie poziomy — różnice wizualne wymagają osobnych gotowych obrazów w kolejnej aktualizacji.
 - Plan docelowy: pięć etapów każdego modułu, rozszerzenie o kuchnię, punkt medyczny, generator i zbrojownię, po ustaleniu mechanik i wykonaniu ilustracji.
+
+
+## v0.1.54 — Ikony łupów, podpowiedzi i testowe poziomy Kryjówki
+- Prefiksy i sufiksy wyświetlają się przy przedmiotach w raporcie wyprawy, w podglądzie natychmiastowym i na liście raportów. Nowe raporty zapisują identyfikatory obu modyfikatorów, więc ikony pozostają widoczne nawet po sprzedaży łupu.
+- Najedź myszką lub ustaw fokus klawiaturą na ikonie, aby zobaczyć nazwę i konkretną premię prefiksu/sufiksu. Dla starszych raportów używane są dostępne migawki efektów.
+- W Kryjówce przyciskami „Poziom 1–5” można bezpłatnie przełączać dowolną scenę i aktywną premię, bez wymogów poziomu postaci i zasobów. To ułatwienie testowe, a nie docelowy balans rozwoju.
+- Sceny sypialni 1–3 zastąpiono gotowymi obrazami z meblami odpowiednimi do etapu. Sypialnia 4–5, Magazyn i Warsztat bez zmian.
