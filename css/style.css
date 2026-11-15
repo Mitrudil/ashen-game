@@ -1309,3 +1309,13 @@ body.arena-report-modal-open{overflow:hidden}
 .expedition-first-clear{margin-left:9px;display:inline-block;color:#e7bc77;border:1px solid rgba(212,170,71,.4);border-radius:8px;padding:2px 7px;font-size:11px}
 .expedition-reward-history{margin-top:14px;padding:12px 0;border-top:1px solid rgba(255,255,255,.09)}
 .expedition-reward-history summary{cursor:pointer;color:var(--gold);font-weight:700}
+
+/* ASHEN v0.3.6 — odznaki za pierwsze zwycięstwo nad bossem */
+.ashen-boss-badge-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+.ashen-boss-badge{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid rgba(214,173,112,.34);border-radius:13px;background:linear-gradient(115deg,rgba(103,80,48,.26),rgba(21,30,35,.94));min-width:0}
+.ashen-boss-badge-icon{flex:0 0 48px;width:48px;height:48px;display:grid;place-items:center;font-size:25px;background:radial-gradient(circle,rgba(235,197,116,.20),rgba(15,19,25,.95));border:1px solid rgba(219,178,95,.46);border-radius:50%;color:#e8ca92}
+.ashen-boss-badge strong{display:block;color:#eed8a8;font-size:13px;overflow-wrap:anywhere}
+.ashen-boss-badge small{display:block;color:var(--muted);font-size:11px;margin-top:5px;overflow-wrap:anywhere}
+.ashen-player-achievements{margin:16px 0;padding:14px;border:1px solid rgba(214,173,112,.20);border-radius:14px;background:rgba(12,17,23,.42)}
+.ashen-player-achievements h4{margin:0 0 10px}
+@media(max-width:600px){.ashen-boss-badge-grid{grid-template-columns:1fr}}
