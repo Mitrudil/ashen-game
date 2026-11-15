@@ -1139,3 +1139,8 @@ body.arena-report-modal-open{overflow:hidden}
 .arena-comparison-expanded td.arena-stat-even,.arena-profile-explainer .arena-stat-even{color:#f6b45d!important;font-weight:800}
 .arena-comparison-expanded td.arena-stat-neutral{color:#d0d5d4!important}
 @media(max-width:540px){.arena-report-overlay{padding:6px}.arena-report-dialog{max-height:calc(100dvh - 12px);border-radius:10px}.arena-report-dialog-scroll{padding:8px 10px 18px}.arena-report-dialog-toolbar{padding:8px 10px;gap:8px}.arena-report-dialog-toolbar button{font-size:12px;padding:8px}.arena-fighter-portraits{grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr);gap:5px}.arena-fighter-portrait img,.arena-portrait-unknown{height:145px;width:min(100%,150px)}.arena-fighter-portrait strong{font-size:12px}.arena-fighter-portrait small{font-size:10px}.arena-fighter-versus{font-size:13px}}
+
+/* ASHEN v0.1.59: trzy rozdziały Starć */
+.arena-chapter-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:900px){.arena-chapter-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){.arena-chapter-tabs{grid-template-columns:1fr}}

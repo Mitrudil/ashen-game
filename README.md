@@ -1,3 +1,11 @@
+## v0.1.59 — Starcia 21–30: Skażona strefa
+
+- Rozdział III, 10 nowych przeciwników i 10 osobnych grafik w `assets/enemies/`.
+- Boss etapu 30: Matka Skażenia; za pierwsze zwycięstwo przyznawana jest epicka, zabezpieczona odzież ochronna.
+- Przełączanie rozdziałów I–III; postęp, zasady 10 rund, remisy, porażki, raporty modalne i historia pozostają bez zmian.
+- Dostęp do poziomu 21 wymaga ukończenia poziomu 20. Balans walk wstępny, do późniejszego dopracowania.
+- Zapis zachowuje zgodność ze starszymi wersjami.
+
 ## v0.1.58.5 — Poprawka synergii Ekwipunku
 
 - Usunięto ograniczenie wyświetlania do trzech nieaktywnych zestawów ubioru w sekcji Synergie w Ekwipunku.
