@@ -112,7 +112,7 @@ function expeditionBlock(ex,role,members){
  <div class="expedition-timer"><strong>Automatyczny start:</strong> ${fmt(ex.starts_at)} · Pozostało około ${countdown}. ${ex.early_ready?'Zbiórka skrócona — oczekiwanie na uruchomienie przez serwer.':'Nie musisz być zalogowany w chwili rozpoczęcia.'}</div>
  <p class="small muted"><strong>Limit sumy poziomów:</strong> ${Number(ex.level_sum)||0} / ${Number(ex.max_levels)||20}. Minimum ${minimum} uczestników.</p>
  <div class="expedition-members">${(ex.participants||[]).map(p=>`<div class="clan-member"><div><strong>${esc(p.name)}</strong><p class="small muted">Poziom ${Number(p.level)||1} ${p.user_id===user()?'· Ty':''} ${p.user_id===ex.created_by?'· Organizator':''}</p></div><span class="tag">Przyjęty</span></div>`).join('')}</div>
- ${eventActions(ex,role,members)}${tacticsHtml(ex,isOrganizer)}<div class="actions">${isOrganizer?`<button class="primary" data-expedition-finish="${ex.id}" ${busy||count<minimum||ex.early_ready?'disabled':''}>⚔ Zakończ zbiórkę wcześniej</button><button data-expedition-cancel="${ex.id}" ${busy?'disabled':''}>Anuluj wyprawę</button>`:''}</div></div></div></div>`;
+ ${eventActions(ex,role,members)}${(boss?.enemies?.length||0)>1?tacticsHtml(ex,isOrganizer):'<p class="small muted">Pojedynczy przeciwnik — taktyka wyboru celu nie jest potrzebna.</p>'}<div class="actions">${isOrganizer?`<button class="primary" data-expedition-finish="${ex.id}" ${busy||count<minimum||ex.early_ready?'disabled':''}>⚔ Zakończ zbiórkę wcześniej</button><button data-expedition-cancel="${ex.id}" ${busy?'disabled':''}>Anuluj wyprawę</button>`:''}</div></div></div></div>`;
 }
 function html(){ensure();if(!active())return `<section class="section"><h2>☠ Ekspedycje</h2><div class="notice">Zaloguj się w ☁ Konto online, aby brać udział w ekspedycjach.</div></section>`;
  const c=state?.clan,role=state?.my_role,members=state?.members||[],bosses=state?.bosses||DEFAULT_BOSSES,activeExps=state?.active_expeditions||[],reports=state?.reports||[],progress=state?.progress||{highest_unlocked:3,boss_wins:[]},supplies=state?.supplies||{balance:0,max:12};
@@ -145,5 +145,5 @@ document.addEventListener('click',e=>{if(e.target?.matches?.('[data-expedition-o
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&openedReportId){openedReportId=null;openedReport=null;redraw()}});
 // Aktualizacja liczników i raportów bez ręcznego odświeżania strony, kiedy użytkownik ogląda ekspedycje.
 setInterval(()=>{if(active()&&!loading&&!busy&&!openedReportId&&document.querySelector('.expedition-page'))void refresh()},60000);
-window.ASHEN_EXPEDITIONS={html,refresh,isReportOpen:()=>Boolean(openedReportId)};
+window.ASHEN_EXPEDITIONS={html,refresh,openReport:loadReport,isReportOpen:()=>Boolean(openedReportId)};
 })();

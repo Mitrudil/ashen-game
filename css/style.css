@@ -1269,3 +1269,15 @@ body.arena-report-modal-open{overflow:hidden}
 .expedition-invite-choice input{width:18px;height:18px;accent-color:#d2a653;flex-shrink:0}
 .expedition-invite-choice:hover{border-color:rgba(210,166,83,.55)}
 .expedition-timer{padding:11px;border:1px solid rgba(210,166,83,.45);border-radius:12px;margin:12px 0;background:rgba(210,166,83,.08)}
+
+/* ASHEN v0.3.3 — profile i ranking */
+.ashen-player-top{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:15px}
+.ashen-player-search{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.ashen-player-search .input{flex:1;min-width:160px}
+.ashen-players-list{display:grid;gap:7px}
+.ashen-player-row{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:8px 12px;background:rgba(255,255,255,.025);color:inherit;cursor:pointer}
+.ashen-player-row:hover{border-color:rgba(212,170,71,.45)}.ashen-player-row>img{width:58px;height:65px;border-radius:10px;object-fit:contain;background:#181b20}
+.ashen-player-data{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}.ashen-player-data small{color:var(--muted)}
+.ashen-player-rank{font-size:18px;font-weight:750;color:var(--gold)}.ashen-player-action{font-size:12px;color:var(--muted)}
+.ashen-player-profile{margin-top:20px}.ashen-player-hero{display:flex;align-items:center;gap:20px;margin:15px 0;flex-wrap:wrap}
+.ashen-player-hero img{width:165px;height:215px;object-fit:contain;background:rgba(0,0,0,.24);border-radius:12px}
+.ashen-player-compose{display:grid;gap:10px}.ashen-player-compose button{justify-self:start}

@@ -3,7 +3,7 @@
  * This is a private testing build; uploaded equipment/stats are not anti-cheat validated.
  */
 (()=>{'use strict';
-let opponents=[],reports=[],mail=[],busy=false,error='',notice='',openedReport=null,openedReportSide='attack',reportContext='pvp',openedMail=null,mailFolder='inbox',loaded=false;
+let opponents=[],reports=[],mail=[],expeditionNotices=[],busy=false,error='',notice='',openedReport=null,openedReportSide='attack',reportContext='pvp',openedMail=null,mailFolder='inbox',loaded=false;
 let timer=null,lastSynced='',syncing=false,dirty=false,observed='',syncMessage='';
 const cloud=()=>window.ASHEN_CLOUD;
 const auth=()=>!!(cloud()?.getClient()&&cloud()?.getSession());
@@ -13,10 +13,10 @@ const fmt=v=>new Date(v).toLocaleString('pl-PL',{timeZone:'Europe/Warsaw'});
 const msg=e=>String(e?.message||e||'Błąd połączenia').slice(0,250);
 function draw(){window.ASHEN_FORCE_RENDER?.()}
 async function rpc(name,args={}){const c=cloud()?.getClient();if(!c||!auth())throw Error('Najpierw zaloguj się do Konta online.');const {data,error}=await c.rpc(name,args);if(error)throw error;return data}
-async function refresh(){if(!auth()){opponents=[];reports=[];mail=[];loaded=false;draw();return}
+async function refresh(){if(!auth()){opponents=[];reports=[];mail=[];expeditionNotices=[];loaded=false;draw();return}
  if(busy)return;busy=true;error='';draw();try{
-  const [a,b,c]=await Promise.all([rpc('ashen_online_list'),rpc('ashen_online_reports'),rpc('ashen_online_messages')]);
-  opponents=a||[];reports=b||[];mail=c||[];loaded=true;
+  const [a,b,c,d]=await Promise.all([rpc('ashen_online_list'),rpc('ashen_online_reports'),rpc('ashen_online_messages'),rpc('ashen_expedition_inbox')]);
+  opponents=a||[];reports=b||[];mail=c||[];expeditionNotices=d||[];loaded=true;
  }catch(e){error='Nie można wczytać PvP online: '+msg(e)+'. Sprawdź, czy uruchomiono 003_online_pvp.sql w projekcie ASHEN.';}finally{busy=false;draw()}}
 function activeRaw(){const slot=cloud()?.currentSlot();if(!slot)return '';return localStorage.getItem(slot==='main'?'ashen-save-v010':'ashen-dev-slot-v021:'+slot)||''}
 async function publish(){
@@ -49,7 +49,7 @@ async function publish(){
 function scheduleSync(delay=1800){if(timer)clearTimeout(timer);timer=setTimeout(()=>{timer=null;void publish()},delay)}
 function localChanged(){if(!bound())return;const raw=activeRaw();if(raw===observed)return;observed=raw;if(raw===lastSynced)return;dirty=true;scheduleSync()}
 function published(){lastSynced='';observed='';syncMessage='Oczekuje na synchronizację';if(bound())localChanged();void refresh()}
-function authChanged(){lastSynced='';observed='';if(timer){clearTimeout(timer);timer=null}dirty=false;syncMessage='';opponents=[];reports=[];mail=[];openedReport=null;openedMail=null;loaded=false;void refresh()}
+function authChanged(){lastSynced='';observed='';if(timer){clearTimeout(timer);timer=null}dirty=false;syncMessage='';opponents=[];reports=[];mail=[];expeditionNotices=[];openedReport=null;openedMail=null;loaded=false;void refresh()}
 async function action(fn){if(busy)return;busy=true;error='';notice='';draw();try{await fn()}catch(e){error=msg(e)}finally{busy=false;draw()}}
 function intro(){if(!auth())return '<p class="muted">Zaloguj się przez ☁ Konto online, aby korzystać z PvP między kontami.</p>';
  if(!bound())return '<p class="muted">W panelu ☁ Konto online wybierz postać, którą chcesz udostępnić innym graczom, i kliknij „Wyślij aktualną postać”. To przypisze ten lokalny profil do konta online. Innych testerów nie synchronizujemy automatycznie.</p>';
@@ -106,14 +106,18 @@ function reportDialog(){if(!openedReport)return '';
  return `<div class="arena-report-overlay" data-online-report-overlay="1"><div class="arena-report-dialog" role="dialog" aria-modal="true" aria-label="Raport PvP online"><div class="arena-report-dialog-toolbar"><span>⚔ RAPORT STARCIA · PvP ONLINE</span><button type="button" data-online-close-report="1">✕ Wróć</button></div><div class="arena-report-dialog-scroll">${renderReport(openedReport,openedReportSide)}</div></div></div>`;
 }
 function pvpHtml(){
- const entries=opponents.map(p=>`<article class="pvp-choice"><img src="${p.origin==='tech'?'./assets/characters/technician-'+p.gender+'.webp':p.origin==='fighter'?'./assets/characters/warrior-'+p.gender+'.webp':'./assets/characters/scout-'+p.gender+'.webp'}" onerror="this.style.display='none'" alt=""><div><h4>${esc(p.name)}</h4><p class="small muted">Poziom ${p.level} · ${esc(p.origin)} · ostatni zapis ${fmt(p.updated_at)}</p><p>Ataki dziś: ${p.attacks_today}/2</p><button class="primary" data-online-attack="${esc(p.user_id)}" ${!bound()||busy||p.attacks_today>=2?'disabled':''}>⚔ Zaatakuj online</button></div></article>`).join('');
+ const entries=opponents.map(p=>`<article class="pvp-choice"><img src="${p.origin==='tech'?'./assets/characters/technician-'+p.gender+'.webp':p.origin==='fighter'?'./assets/characters/warrior-'+p.gender+'.webp':'./assets/characters/scout-'+p.gender+'.webp'}" onerror="this.style.display='none'" alt=""><div><h4>${esc(p.name)}</h4><p class="small muted">Poziom ${p.level} · ${esc(p.origin)} · ostatni zapis ${fmt(p.updated_at)}</p><p>Ataki dziś: ${p.attacks_today}/2</p><button data-online-profile="${esc(p.user_id)}">Profil</button><button class="primary" data-online-attack="${esc(p.user_id)}" ${!bound()||busy||p.attacks_today>=2?'disabled':''}>⚔ Zaatakuj online</button></div></article>`).join('');
  return `<section class="section"><h2>🌐 PvP online — prawdziwe konta</h2><p class="small muted">Wyniki rozstrzyga Supabase, limit dwóch ataków na każdą postać resetuje się o północy czasu polskiego. Nie trzeba być zalogowanym, aby zostać zaatakowanym. Lokalny tryb testowy znajduje się niżej.</p>${intro()}${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}<div class="actions"><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież graczy i raporty</button></div><h3>Przeciwnicy (${opponents.length})</h3><div class="pvp-choices">${!auth()?'<p>Połącz konto ASHEN.</p>':!loaded?'<p class="muted">Odśwież listę, aby zobaczyć graczy.</p>':entries||'<p class="muted">Brak innych opublikowanych kont. Do testu potrzebne jest drugie konto e-mail z własną postacią.</p>'}</div><h3>Raporty walk online</h3>${reports.length?reports.slice(0,15).map(x=>{const own=x.side==='attack'?'Atak':'Obrona',r=x.report||{};return `<button class="mail-row" data-online-report="${x.id}"><strong>${own}: ${esc(r.attacker?.name)} vs ${esc(r.defender?.name)}</strong><small>${fmt(x.created_at)}</small></button>`}).join(''):'<p class="muted">Nie stoczono jeszcze walk online.</p>'}</section>${reportDialog()}`;
 }
 function mailHtml(){const uid=cloud()?.getSession()?.user?.id;
- const visible=mail.filter(x=>mailFolder==='inbox'?x.recipient_id===uid:x.sender_id===uid),unread=mail.filter(x=>x.recipient_id===uid&&!x.is_read).length;
- const opened=mail.find(x=>String(x.id)===String(openedMail));
- return `<section class="section" data-online-mail-view="1"><h2>✉ Wiadomości online</h2>${intro()}${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}<div class="actions"><button data-online-mail-folder="inbox" class="${mailFolder==='inbox'?'primary':''}">Odebrane (${unread} nowych)</button><button data-online-mail-folder="sent" class="${mailFolder==='sent'?'primary':''}">Wysłane</button><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież</button></div>${opened?`<div class="panel"><h3>${esc(opened.subject)}</h3><p class="muted small">${esc(opened.from_name)} → ${esc(opened.to_name)} · ${fmt(opened.created_at)}</p><p style="white-space:pre-wrap">${esc(opened.body)}</p>${opened.battle_id?`<button data-online-report="${opened.battle_id}">Pokaż raport walki</button>`:''}<button data-online-mail-back="1">Wróć do listy</button></div>`:`<div class="mail-list">${visible.map(x=>`<button class="mail-row ${x.is_read?'':'unread'}" data-online-mail-open="${x.id}"><strong>${esc(x.subject)}</strong><span>${esc(x.from_name)} → ${esc(x.to_name)}</span><small>${fmt(x.created_at)}</small></button>`).join('')||'<p class="muted">Brak wiadomości online.</p>'}</div>`}<div class="panel"><h3>Wyślij wiadomość online</h3><label for="online-mail-to">Odbiorca</label><select class="input" id="online-mail-to">${opponents.map(p=>`<option value="${esc(p.user_id)}">${esc(p.name)} (poziom ${p.level})</option>`).join('')}</select><label for="online-mail-text">Treść</label><textarea class="input" id="online-mail-text" rows="3" maxlength="1500" placeholder="Napisz wiadomość..."></textarea><div class="actions"><button class="primary" data-online-send="1" ${!bound()||busy||!opponents.length?'disabled':''}>Wyślij wiadomość</button></div></div><p class="small muted">Poniżej pozostawiono dotychczasową skrzynkę lokalnych testerów.</p></section>${reportDialog()}`;
+ const mailItems=mail.filter(x=>mailFolder==='inbox'?x.recipient_id===uid:x.sender_id===uid).map(x=>({...x,refType:'mail',key:'mail:'+x.id}));
+ const notices=mailFolder==='inbox'?expeditionNotices.map(x=>({...x,refType:'expedition',key:'expedition:'+x.id,from_name:'Ekspedycja klanowa',to_name:'Ty'})):[];
+ const visible=[...mailItems,...notices].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+ const unread=mail.filter(x=>x.recipient_id===uid&&!x.is_read).length+expeditionNotices.filter(x=>!x.is_read).length;
+ const opened=visible.find(x=>x.key===openedMail);
+ return `<section class="section" data-online-mail-view="1"><h2>✉ Wiadomości</h2><div class="actions"><button data-online-mail-folder="inbox" class="${mailFolder==='inbox'?'primary':''}">Odebrane (${unread} nowych)</button><button data-online-mail-folder="sent" class="${mailFolder==='sent'?'primary':''}">Wysłane</button><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież</button></div>${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}${opened?`<div class="panel"><span class="tag">${opened.refType==='expedition'?'RAPORT EKSPEDYCJI':'WIADOMOŚĆ ONLINE'}</span><h3>${esc(opened.subject)}</h3><p class="muted small">${esc(opened.from_name)}${opened.to_name?' → '+esc(opened.to_name):''} · ${fmt(opened.created_at)}</p><p style="white-space:pre-wrap">${esc(opened.body)}</p><div class="actions">${opened.refType==='expedition'?`<button data-online-expedition-report="${opened.expedition_id}" class="primary">☠ Otwórz raport ekspedycji</button>`:opened.battle_id?`<button data-online-report="${opened.battle_id}">⚔ Pokaż raport walki</button>`:''}${opened.refType==='mail'&&opened.sender_id!==uid?`<button data-online-profile="${esc(opened.sender_id)}">Profil nadawcy</button>`:''}<button data-online-mail-back="1">Wróć do listy</button></div></div>`:`<div class="mail-list">${visible.map(x=>`<button class="mail-row ${x.is_read?'':'unread'}" data-online-mail-open="${esc(x.key)}"><strong>${x.refType==='expedition'?'☠ ':''}${esc(x.subject)}</strong><span>${esc(x.from_name)}${x.refType==='mail'?' → '+esc(x.to_name):''}</span><small>${fmt(x.created_at)}</small></button>`).join('')||'<p class="muted">Brak wiadomości.</p>'}</div>`}<p class="small muted">Aby napisać do innego gracza, otwórz jego profil w zakładce <strong>Gracze</strong> lub z listy członków klanu.</p></section>${reportDialog()}`;
 }
+
 document.addEventListener('click',async e=>{
  if(e.target?.matches?.('[data-online-report-overlay]')){openedReport=null;reportContext='pvp';draw();return}
 
@@ -127,11 +131,16 @@ document.addEventListener('click',async e=>{
  }
  if(b.dataset.onlineMailFolder){mailFolder=b.dataset.onlineMailFolder;openedMail=null;openedReport=null;reportContext='pvp';draw();return}
  if(b.hasAttribute('data-online-mail-back')){openedMail=null;openedReport=null;reportContext='pvp';draw();return}
- if(b.dataset.onlineMailOpen){openedReport=null;reportContext='pvp';openedMail=b.dataset.onlineMailOpen;const m=mail.find(x=>String(x.id)===openedMail);if(m&&m.recipient_id===cloud()?.getSession()?.user?.id&&!m.is_read){try{await rpc('ashen_online_mark_read',{p_id:m.id});m.is_read=true}catch(e){error=msg(e)}}draw();return}
- if(b.hasAttribute('data-online-send')){const to=document.getElementById('online-mail-to')?.value,body=document.getElementById('online-mail-text')?.value||'';await action(async()=>{await rpc('ashen_online_send',{p_recipient:to,p_body:body});notice='Wiadomość online została wysłana.'});await refresh();return}
+ if(b.dataset.onlineMailOpen){openedReport=null;reportContext='pvp';openedMail=b.dataset.onlineMailOpen;
+  const [kind,id]=openedMail.split(':');const m=kind==='expedition'?expeditionNotices.find(x=>String(x.id)===id):mail.find(x=>String(x.id)===id);
+  if(m&&!m.is_read&&(kind==='expedition'||m.recipient_id===cloud()?.getSession()?.user?.id)){
+   try{await rpc(kind==='expedition'?'ashen_expedition_notice_read':'ashen_online_mark_read',{p_id:m.id});m.is_read=true}catch(e){error=msg(e)}
+  }draw();return}
+ if(b.hasAttribute('data-online-profile')){window.ASHEN_OPEN_PLAYER?.(b.dataset.onlineProfile);return}
+ if(b.hasAttribute('data-online-expedition-report')){window.ASHEN_OPEN_EXPEDITION_REPORT?.(Number(b.dataset.onlineExpeditionReport));return}
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&openedReport){openedReport=null;reportContext='pvp';draw()}});
-window.ASHEN_ONLINE={pvpHtml,mailHtml,localChanged,published,authChanged};
+window.ASHEN_ONLINE={pvpHtml,mailHtml,localChanged,published,authChanged,refresh,unreadCount:()=>mail.filter(x=>x.recipient_id===cloud()?.getSession()?.user?.id&&!x.is_read).length+expeditionNotices.filter(x=>!x.is_read).length};
 window.addEventListener('online',()=>{if(bound())scheduleSync(500);void refresh()});
 if(auth())void refresh();
 })();
