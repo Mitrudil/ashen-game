@@ -1,4 +1,13 @@
-## ASHEN v0.1.60 — Martwy Sektor
+## ASHEN v0.1.61 — Rdzeń Otchłani
+
+## Zmiany w v0.1.61
+
+- Dodano Rozdział V Starć: **Rdzeń Otchłani** (poziomy 41–50).
+- Dodano 10 nowych przeciwników oraz bossa kończącego pierwszy cykl Starć.
+- Dodano komplet nowych grafik przeciwników `starcia-41.webp` do `starcia-50.webp`.
+- Zaktualizowano ekran Starć do pełnej ścieżki 50 etapów i odblokowano Rozdział V.
+- Boss z poziomu 50 przy pierwszym zwycięstwie daje epicki pancerz **Pancerz strażnika Zero** (`sentinel`).
+
 
 - Nowy rozdział Starć IV: poziomy 31–40 i 10 unikalnych przeciwników z osobnymi portretami.
 - Poziom 40: Strażnik Zero, czwarty boss; jednorazowa nagroda epicka, zabezpieczony egzoszkielet.
