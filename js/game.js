@@ -1,4 +1,4 @@
-const APP_VERSION='0.2.4';
+const APP_VERSION='0.2.4.1';
 
 (()=>{'use strict';const LEGACY_KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 
@@ -1949,6 +1949,17 @@ function activateImportedSave(data,source){
  message=`${source}: „${state.name}”, poziom ${state.level}. Postać jest już aktywna.`;
  render();
 }
+// v0.2.4.1: cloud downloads must update both localStorage and the LIVE game state.
+// A reload alone can be defeated by in-memory state and periodic sync/save.
+window.ASHEN_APPLY_CLOUD_SAVE=function(raw){
+ const data=validImport(raw);
+ backupCurrentAndReplace(data);
+ if(devActiveId()==='main')localStorage.setItem(devProfileSaveKey('main'),JSON.stringify(data));
+ activateImportedSave(data,'Pobrano zapis z chmury');
+ const persisted=JSON.parse(localStorage.getItem(KEY)||'null');
+ if(!persisted||persisted.scrap!==data.scrap)throw Error('Nie udało się potwierdzić zapisu w aktywnym profilu.');
+ return {name:state.name,level:state.level,scrap:state.scrap};
+};
 async function importSaveFile(file){
  try{
   if(!file)return;
