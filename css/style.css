@@ -907,3 +907,28 @@ h1, h2, h3, h4, h5, h6, button,
 @media(max-width:1180px){.inventory-premium-layout{grid-template-columns:1fr}.inventory-summary-stack{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.inventory-summary-card:last-child{grid-column:1/-1}}
 @media(max-width:900px){.inventory-premium-intro{grid-template-columns:1fr}.inventory-summary-stack{grid-template-columns:1fr}.inventory-premium-head{grid-template-columns:auto minmax(0,1fr);}.inventory-bulk-marker{grid-column:1;grid-row:1;justify-self:start;align-self:start;padding-top:0}.inventory-premium-icon{grid-column:1;grid-row:2}.inventory-premium-copy{grid-column:2;grid-row:1/span 2}.inventory-premium-icon .iconbox{width:60px;height:60px}.inventory-premium-name{font-size:18px}}
 @media(max-width:620px){.inventory-premium-quickstrip{grid-template-columns:1fr 1fr}.inventory-metric-grid,.inventory-attr-grid{grid-template-columns:1fr}.inventory-premium-item{padding:13px}.inventory-premium-head{grid-template-columns:1fr}.inventory-bulk-marker{grid-row:auto;grid-column:auto}.inventory-premium-icon{grid-row:auto;grid-column:auto}.inventory-premium-copy{grid-row:auto;grid-column:auto}.inventory-premium-actions{flex-direction:column;align-items:stretch}.inventory-premium-actions button,.inventory-premium-actions .inventory-action-tag{width:100%;justify-content:center}.inventory-slot-chip,.inventory-rarity-chip,.inventory-action-tag{font-size:10px}}
+
+/* ASHEN v0.1.56.1 – minimalna lista łupów i podział filtrów */
+.inventory-group-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.inventory-group-choice{padding:12px 8px;min-height:52px;border-radius:10px;border:1px solid #60503b;background:linear-gradient(150deg,#242a2d,#12191d);color:#e0d4c5;font-weight:700;text-align:center;white-space:normal}
+.inventory-group-choice.chosen{border-color:#e7ae60;background:linear-gradient(155deg,#54402a,#28231b);color:#ffe4b4;box-shadow:inset 0 0 0 1px #ab794333}
+.inventory-filter-row{padding:9px 12px;background:#11191d;border:1px solid #4c4032;border-radius:10px}
+.inventory-premium-item{padding:11px 14px}
+.inventory-premium-icon .iconbox{height:56px;width:56px}
+.inventory-premium-name{font-size:16px;margin:0 0 3px;line-height:1.3}
+.inventory-premium-head{gap:10px;align-items:center}
+.inventory-premium-copy .ashen-mod-badges{margin:3px 0 0}
+.inventory-premium-badges{gap:5px;margin-bottom:3px}
+.inventory-premium-badges>span{font-size:10px;padding:3px 8px}
+.inventory-item-expand{margin-top:8px;border-top:1px solid #443a31;padding-top:7px}
+.inventory-item-expand>summary{color:#c4ac8b;font-size:12px;cursor:pointer;list-style-position:inside;padding:3px 0}
+.inventory-item-expand[open]>summary{color:#f2ce98}
+.inventory-item-expanded{margin-top:9px;padding:11px;background:#141c21;border-radius:10px;border:1px solid #494137}
+.inventory-item-expanded>p{margin:0 0 9px;line-height:1.5}
+.ashen-damage-breakdown{margin-top:12px;padding:9px;border:1px solid #6c5436;border-radius:8px;background:#18191a}
+.ashen-damage-breakdown summary{cursor:pointer;color:#edc68a;font-size:12px}
+.ashen-damage-breakdown div{display:flex;justify-content:space-between;gap:12px;padding:6px 2px;border-bottom:1px solid #52402b;font-size:12px;color:#cfc7ba}
+.ashen-damage-breakdown div:last-child{border:0}
+.ashen-modal-equip-actions{gap:9px;flex-wrap:wrap}
+@media(max-width:1100px){.inventory-group-nav{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:620px){.inventory-group-nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.inventory-group-choice{padding:10px 6px;font-size:12px}.inventory-premium-head{grid-template-columns:34px 56px minmax(0,1fr)}.inventory-bulk-marker{grid-column:1;grid-row:1;align-self:center}.inventory-premium-icon{grid-column:2;grid-row:1}.inventory-premium-copy{grid-column:3;grid-row:1}.inventory-premium-name{font-size:14px}.inventory-premium-badges{gap:4px}.inventory-premium-badges>span{font-size:9px}.inventory-item-expanded .inventory-premium-actions button{min-height:36px}}

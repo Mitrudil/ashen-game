@@ -1,3 +1,9 @@
+## ASHEN v0.1.56.1
+- Załóż/Zdejmij bezpośrednio w oknie szczegółów, obsługa wyboru ręki i trzech slotów akcesoriów.
+- Łączne obrażenia wszystkich ataków na rundę, z rozwijaną rozpiską; wartości przed redukcją pancerza/unikami/krytykami.
+- Zwarta lista przedmiotów, statystyki i akcje rozwijane dopiero po kliknięciu.
+- Filtry pogrupowane: broń, odzież, akcesoria i artefakty.
+
 ASHEN v0.1.55.1 — jeden styl paska zasobów jak we Wyprawach na wszystkich ekranach; usunięto przyciski Podgląd i panel Wybrany przedmiot z Ekwipunku, szczegóły nadal otwierają się bezpośrednio po kliknięciu ikony lub nazwy. Bez zmian mechaniki i zapisów.
 
 ASHEN v0.1.55 — Ekwipunek premium: uporządkowane sloty, wyróżnienie wybranego wyposażenia, karta podglądu z modyfikatorami i aktywnym zestawem, rozszerzone style szczegółów, podpowiedzi prefiksów/sufiksów pozycjonowane w oknie przeglądarki. Mechanika i zapisy bez zmian.

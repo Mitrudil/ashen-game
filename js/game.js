@@ -1,4 +1,4 @@
-const APP_VERSION='0.1.56';
+const APP_VERSION='0.1.56.1';
 
 (()=>{'use strict';const KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 const rarities=[{name:'Zwykły',color:'#b8bfc3',weight:58,mult:1},{name:'Ulepszony',color:'#8ac78b',weight:25,mult:1.14},{name:'Rzadki',color:'#77afe5',weight:12,mult:1.32},{name:'Epicki',color:'#c391e4',weight:4,mult:1.58},{name:'Legendarny',color:'#f2bb65',weight:1,mult:1.95}];
@@ -493,7 +493,7 @@ function pickLoot(loc,exploration=null,forcedCount=null){
 }
 const PAGE_KEY='ashen-active-page';
 const PAGE_IDS=new Set(['character','companion','transport','missions','inventory','workshop','storage','reports','bunker']);
-let page='character',message='',invFilter='all',selectedUid=null,workshopUid=null;
+let page='character',message='',invFilter='all',invGroup='all',selectedUid=null,workshopUid=null;
 try{const previousPage=localStorage.getItem(PAGE_KEY);if(PAGE_IDS.has(previousPage))page=previousPage}catch{}
 function setPage(next){page=PAGE_IDS.has(next)?next:'character';try{localStorage.setItem(PAGE_KEY,page)}catch{}}let bulkSelected=new Set();const $=id=>document.getElementById(id),item=id=>items.find(x=>x.id===id),rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,clamp=(v,a,b)=>Math.min(b,Math.max(a,v));const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{message='Nie można zapisać postępu w tej przeglądarce.'}}// ASHEN v0.1.39 — zestawy ubioru rozpoznawane po prefiksie, a nie nazwie przedmiotu.
@@ -1014,7 +1014,7 @@ const WEAPON_CATEGORIES={
  'hand2-melee':{name:'Broń biała dwuręczna',ids:['crowbar','hammer','rail','sledge']}
 };
 function weaponCategoryFor(d){return d?Object.keys(WEAPON_CATEGORIES).find(k=>WEAPON_CATEGORIES[k].ids.includes(d.id))||null:null}
-function inventoryMatchesFilter(inst,filter){const d=def(inst);if(!d)return false;if(filter==='all')return true;return WEAPON_CATEGORIES[filter]?weaponCategoryFor(d)===filter:d.slot===filter}
+function inventoryMatchesFilter(inst,filter){const d=def(inst);if(!d)return false;if(filter==='all')return true;if(filter==='weapons-all')return d.slot==='hand1'||d.slot==='hand2';if(filter==='clothing-all')return ['shirt','pants','boots','outer','head','hands'].includes(d.slot);if(filter==='accessories-all')return d.slot==='extra'&&!d.artifact;if(filter==='artifacts-all')return !!d.artifact;return WEAPON_CATEGORIES[filter]?weaponCategoryFor(d)===filter:d.slot===filter}
 let openItemDetail=null;
 function weaponFamilyLabel(d){const c=weaponCategoryFor(d);return c?WEAPON_CATEGORIES[c].name:slotName(d?.slot||'')}
 function itemDetailImage(d){if(itemArtUrl(d))return `<img class="ashen-detail-artwork" src="${itemArtUrl(d)}" alt="${escape(d.name)}">`;return d?.id&&!!weaponCategoryFor(d)?`<div class="detail-placeholder" aria-label="Grafika przedmiotu będzie dodana później">${itemIcon(d,'')}<span>Grafika w przygotowaniu</span></div>`:itemIcon(d,'')}
@@ -1091,7 +1091,9 @@ function itemDetailContent(){if(!openItemDetail)return '';
  const defn=owned?def(owned):item(openItemDetail.id);
  if(!defn)return '';
  const o=owned?statsOf(owned):{...defn,rarity:'Zwykły',name:defn.name,bonus:defn.bonus||{}};
- return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${1+(Number(o.extraAttacks)||0)}</strong></div>`:''}<div class="detail-affix"><strong>${modifierGlyph('prefix',defn,owned?findModifier(prefixDefs,owned.prefix):null)} Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span></div><div class="detail-affix"><strong>${modifierGlyph('suffix',defn,owned?findModifier(suffixDefs,owned.suffix):null)} Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span></div>${owned?`<div class="small muted">${statDetails(o)}</div>${itemSetPanel(owned)}${artifactDetailPanel(owned)}`:''}</div></div><div class="actions"><button class="primary" data-item-close>Zamknij</button></div></div></div>`
+ const wornSlot=owned?Object.keys(state.equip).find(slot=>state.equip[slot]===owned.uid):null;
+ const equipActions=!owned||defn.slot==='material'?'':wornSlot?`<button class="primary" data-unequip="${wornSlot}">Zdejmij</button>`:defn.slot==='hand1'?`<button class="primary" data-equip="${owned.uid}" data-hand="right">Załóż · prawa ręka</button><button data-equip="${owned.uid}" data-hand="left">Załóż · lewa ręka</button>`:defn.slot==='extra'?`<span class="small muted">Załóż do slotu:</span>${['extra','extra2','extra3'].map((slot,i)=>`<button class="${state.equip[slot]?'':'primary'}" data-equip="${owned.uid}" data-extra-slot="${slot}">${i+1}${state.equip[slot]?' · zamień':''}</button>`).join('')}`:`<button class="primary" data-equip="${owned.uid}">Załóż</button>`;
+ return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${1+(Number(o.extraAttacks)||0)}</strong></div>`:''}<div class="detail-affix"><strong>${modifierGlyph('prefix',defn,owned?findModifier(prefixDefs,owned.prefix):null)} Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span></div><div class="detail-affix"><strong>${modifierGlyph('suffix',defn,owned?findModifier(suffixDefs,owned.suffix):null)} Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span></div>${owned?`<div class="small muted">${statDetails(o)}</div>${itemSetPanel(owned)}${artifactDetailPanel(owned)}`:''}</div></div><div class="actions ashen-modal-equip-actions">${equipActions}<button data-item-close>Zamknij</button></div></div></div>`
 }
 function slotChip(slot,uid){
  const inst=instance(uid),o=statsOf(inst),empty=!o,label=slotLabels[slot];
@@ -1253,11 +1255,12 @@ function equippedArmorTotal(){
 }
 function inventoryCombatSummary(){
  const a=attrs(),attacks=heroAttacks(),main=attacks[0],mainWeapon=main?.weapon||statsOf({id:'knife',rarity:0});
- const range=weaponDamageRange(a,mainWeapon,main?.power||1);
+ const attackRanges=attacks.map(at=>({...weaponDamageRange(a,at.weapon,at.power),weapon:at.weapon,hand:at.hand,power:at.power}));
+ const range={low:attackRanges.reduce((sum,v)=>sum+v.low,0),high:attackRanges.reduce((sum,v)=>sum+v.high,0)};
  const accuracy=Math.round(main?weaponAccuracy(a,mainWeapon):6+(a.per||0)*1.3);
  const crit=Math.round(clamp(.05+(a.per||0)*.005+((mainWeapon?.critPp)||0)/100,0,.35)*100);
  const dodge=Math.round(3+(a.dex||0)*1.1+(companionId()==='boar'?(PET_BONUSES.boar[companionStage()]||0):0));
- return {range,accuracy,crit,dodge,armor:equippedArmorTotal(),hp:maxHp(),attacks:attacks.length,weapon:mainWeapon};
+ return {range,attackRanges,accuracy,crit,dodge,armor:equippedArmorTotal(),hp:maxHp(),attacks:attacks.length,weapon:mainWeapon};
 }
 function inventorySummaryPanels(){
  const combat=inventoryCombatSummary();
@@ -1283,7 +1286,7 @@ function inventorySummaryPanels(){
    <section class="inventory-summary-card inventory-overview-card">
       <div class="inventory-summary-head"><div><span class="tag">PODSUMOWANIE BOJOWE</span><h3>Stan ocalałego</h3></div><div class="inventory-rarity-chip">Broń główna: ${escape(combat.weapon?.name||'Nóż')}</div></div>
       <div class="inventory-metric-grid">${lines}</div>
-      <div class="inventory-damage-highlight"><span>Atak główny</span><strong>${combat.range.low}–${combat.range.high}</strong><small>${combat.weapon?.slot==='hand2'?'Broń dwuręczna':'Aktywna konfiguracja broni'} · ${weaponFamilyLabel(combat.weapon)}</small></div>
+      <div class="inventory-damage-highlight"><span>Łączne obrażenia na rundę · ${combat.attacks} ${combat.attacks===1?'atak':'ataki/ataków'}</span><strong>${combat.range.low}–${combat.range.high}</strong><small>Suma ${combat.attacks} ${combat.attacks===1?'ataku':'ataków'} przed redukcją pancerza, trafieniami i krytykami. Każdy atak uwzględnia swoją broń i mnożnik drugiej ręki.</small><details class="ashen-damage-breakdown"><summary>Rozpisz obrażenia poszczególnych ataków</summary>${combat.attackRanges.map((at,i)=>`<div><span>Atak ${i+1} · ${escape(at.weapon.name)} · ${Math.round(at.power*100)}%</span><strong>${at.low}–${at.high}</strong></div>`).join('')}</details></div>
    </section>
    <section class="inventory-summary-card">
       <div class="inventory-summary-head"><div><span class="tag">Atrybuty</span><h3>Profil postaci</h3></div><div class="inventory-rarity-chip">Poziom ${state.level}</div></div>
@@ -1311,19 +1314,17 @@ function inventoryItemCard(inst,o){
       <div class="inventory-premium-copy">
          <div class="inventory-premium-badges"><span class="inventory-slot-chip">${escape(slotLabel)}</span><span class="inventory-rarity-chip" style="--rarity:${rarityMeta.color}">${escape(rarityMeta.name)}</span>${worn?'<span class="inventory-action-tag equipped">Założony</span>':''}${inst.locked?'<span class="inventory-action-tag locked">Zabezpieczony</span>':''}</div>
          <button class="item-view-name inventory-premium-name" data-item-open="${escape(inst.uid)}" style="color:${rarityMeta.color}">${escape(o.name)}</button>
-         <div class="inventory-premium-stats">${escape(statDetails(o))}</div>
          ${itemAffixBadges(o,def(inst),inst)}
-         ${setStatusText(inst)}
       </div>
    </div>
-   <div class="inventory-premium-foot">
-      <div class="inventory-premium-actions"><button data-workshop-select="${inst.uid}" data-page="workshop" title="Ulepsz w warsztacie">🔧 Warsztat</button>${buttons}<button data-lock="${inst.uid}" class="${inst.locked?'islocked':''}" title="${inst.locked?'Odblokuj':'Zabezpiecz'} przedmiot">${inst.locked?'🔒 Odblokuj':'🔓 Zabezpiecz'}</button>${o.slot==='material'?'':`<button data-sale="${inst.uid}" ${worn||inst.locked?'disabled':''}>Sprzedaj · ${saleValue(inst)} kr.</button><button data-salvage="${inst.uid}" ${worn||inst.locked?'disabled':''}>Rozłóż</button>`}</div>
-   </div>
+   <details class="inventory-item-expand"><summary>Rozwiń szczegóły i działania</summary><div class="inventory-item-expanded"><p class="small muted">${escape(statDetails(o))}</p>${setStatusText(inst)}<div class="inventory-premium-actions"><button data-item-open="${escape(inst.uid)}">Pełny opis</button><button data-workshop-select="${inst.uid}" data-page="workshop" title="Ulepsz w warsztacie">🔧 Warsztat</button>${buttons}<button data-lock="${inst.uid}" class="${inst.locked?'islocked':''}" title="${inst.locked?'Odblokuj':'Zabezpiecz'} przedmiot">${inst.locked?'🔒 Odblokuj':'🔓 Zabezpiecz'}</button>${o.slot==='material'?'':`<button data-sale="${inst.uid}" ${worn||inst.locked?'disabled':''}>Sprzedaj · ${saleValue(inst)} kr.</button><button data-salvage="${inst.uid}" ${worn||inst.locked?'disabled':''}>Rozłóż</button>`}</div></div></details>
  </article>`;
 }
 
 function inventory(){
- const filters=[['all','Wszystko'],...Object.entries(WEAPON_CATEGORIES).map(([id,v])=>[id,v.name]),['shirt','Koszulki'],['pants','Spodnie'],['boots','Buty'],['outer','Kurtki / pancerze'],['head','Nakrycia głowy'],['hands','Rękawice / karwasze'],['extra','Akcesoria']];
+ const categories=[['all','▣ Wszystko','all'],['weapons','⚔ Broń','weapons-all'],['clothing','⬡ Odzież i pancerz','clothing-all'],['accessories','◈ Akcesoria','accessories-all'],['artifacts','✧ Artefakty','artifacts-all']];
+ const filtersByGroup={all:[],weapons:[['weapons-all','Wszystkie bronie'],...Object.entries(WEAPON_CATEGORIES).map(([id,v])=>[id,v.name])],clothing:[['clothing-all','Cała odzież'],['shirt','Koszulki'],['pants','Spodnie'],['boots','Buty'],['outer','Kurtki / pancerze'],['head','Nakrycia głowy'],['hands','Rękawice / karwasze']],accessories:[['accessories-all','Wszystkie akcesoria']],artifacts:[['artifacts-all','Wszystkie artefakty']]};
+ const filters=filtersByGroup[invGroup]||[];
  const visible=inventorySortEntries(state.inventory.map(inst=>({inst,o:statsOf(inst)})).filter(x=>x.o&&inventoryMatchesFilter(x.inst,invFilter)));
  for(const uid of [...bulkSelected])if(!eligibleForBulk(instance(uid)))bulkSelected.delete(uid);
  const selectedForBulk=bulkSelectedItems();
@@ -1340,7 +1341,7 @@ function inventory(){
    <div class="inventory-premium-copyblock">
       <span class="tag">SEKTOR OPERACYJNY</span>
       <h3>Uzbrojenie, pancerz i synergie ekwipunku</h3>
-      <p class="muted">To jest robocza wersja premium ekwipunku: papierowa sylwetka pozostała funkcjonalna, ale układ, hierarchia informacji i listy przedmiotów zostały uporządkowane tak, aby całość była bliżej grafiki koncepcyjnej i wygodniejsza w obsłudze.</p>
+      <p class="muted">Przeglądaj założone wyposażenie, sprawdzaj premie zestawów i zarządzaj zdobytymi przedmiotami. Szczegóły przedmiotów otworzysz po kliknięciu ich nazwy lub ikony.</p>
    </div>
    <div class="inventory-premium-quickstrip">
       <div class="inventory-quick-pill"><span>Przedmioty</span><strong>${state.inventory.length}</strong></div>
@@ -1365,7 +1366,7 @@ function inventory(){
    ${inventorySummaryPanels()}
  </div>
  <div class="inventory-controls-panel">
-   <div class="actions section inventory-filter-row">${filters.map(([id,n])=>`<button data-filter="${id}" class="${invFilter===id?'primary':''}">${n}</button>`).join('')}</div>
+   <div class="inventory-group-nav">${categories.map(([id,label])=>`<button class="inventory-group-choice ${invGroup===id?'chosen':''}" data-inv-group="${id}">${label}</button>`).join('')}</div>${filters.length?`<div class="actions section inventory-filter-row">${filters.map(([id,n])=>`<button data-filter="${id}" class="${invFilter===id?'primary':''}">${n}</button>`).join('')}</div>`:''}
    <div class="ashen-inventory-sortbar inventory-sortbar-premium"><label for="ashen-inventory-sort">Sortowanie listy łupów</label><select id="ashen-inventory-sort" class="input" data-inventory-sort>${INVENTORY_SORTS.map(([id,label])=>`<option value="${id}" ${(state.inventorySort||'rarity-desc')===id?'selected':''}>${label}</option>`).join('')}</select><div class="small muted">Kolejność domyślna premiuje jakość, potem ulepszenia i moc bojową.</div></div>
    ${bulkUi}
  </div>
@@ -1608,7 +1609,7 @@ if(b.dataset.action==='bulk-sell'){disposeBulk('sell');return}
 if(b.dataset.action==='bulk-salvage'){disposeBulk('salvage');return}
 if(b.dataset.sale){disposeItem(b.dataset.sale,'sell');return}
 if(b.dataset.salvage){disposeItem(b.dataset.salvage,'salvage');return}
-if(b.dataset.filter){invFilter=b.dataset.filter;render();return}if(b.dataset.inspect){selectedUid=b.dataset.inspect;render();return}if(b.dataset.action==='close-inspect'){selectedUid=null;render();return}if(b.dataset.unequip){let slot=b.dataset.unequip;if(slot in state.equip){state.equip[slot]=null;message='Zdjęto przedmiot.';save();render()}return}
+if(b.dataset.invGroup){const groups={all:'all',weapons:'weapons-all',clothing:'clothing-all',accessories:'accessories-all',artifacts:'artifacts-all'};if(Object.prototype.hasOwnProperty.call(groups,b.dataset.invGroup)){invGroup=b.dataset.invGroup;invFilter=groups[invGroup];render()}return}if(b.dataset.filter){invFilter=b.dataset.filter;render();return}if(b.dataset.inspect){selectedUid=b.dataset.inspect;render();return}if(b.dataset.action==='close-inspect'){selectedUid=null;render();return}if(b.dataset.unequip){let slot=b.dataset.unequip;if(slot in state.equip){state.equip[slot]=null;openItemDetail=null;message='Zdjęto przedmiot.';save();render()}return}
 if(b.dataset.equip!==undefined){
  let inst=instance(b.dataset.equip),obj=def(inst);if(!obj||obj.slot==='material')return;
  let slot=(obj.slot==='hand1')?(b.dataset.hand==='left'?'left':'right'):obj.slot==='hand2'?'right':obj.slot==='extra'?(['extra','extra2','extra3'].includes(b.dataset.extraSlot)?b.dataset.extraSlot:['extra','extra2','extra3'].find(s=>!state.equip[s])||'extra'):obj.slot;
@@ -1618,7 +1619,7 @@ if(b.dataset.equip!==undefined){
   if(state.equip.right&&def(instance(state.equip.right))?.slot==='hand2')state.equip.right=null;
   state.equip[slot]=inst.uid;
  }else state.equip[slot]=inst.uid;
- message='Założono: '+statsOf(inst).name;save();render();return
+ openItemDetail=null;message='Założono: '+statsOf(inst).name;save();render();return
 }if(b.dataset.action==='rename'){let name=prompt('Imię postaci (2–24 znaki):',state.name);if(name!==null&&name.trim().length>=2&&name.trim().length<=24){state.name=name.trim();save();render()}return}if(b.dataset.action==='heal'){if(state.scrap>=20&&state.hp<maxHp()){state.scrap-=20;message='Zdrowie przywrócone.';save();render()}return}if(b.dataset.action==='import'){$('ashen-import-file')?.click();return}if(b.dataset.action==='restore-backup'){restoreSaveBackup();return}if(b.dataset.action==='reset'){if(confirm('Rozpocząć nową grę? Bieżący postęp zostanie zastąpiony, ale zapiszemy jego kopię w tej przeglądarce.')){try{backupCurrentAndReplace(fresh());location.reload()}catch(err){message=err.message;render()}}return}if(b.dataset.action==='export'){exportSave();return}}
 document.addEventListener('change',e=>{if(e.target.dataset.inventorySort!==undefined){if(INVENTORY_SORTS.some(([id])=>id===e.target.value)){state.inventorySort=e.target.value;save();render()}return}if(e.target.id==='ashen-import-file'){const file=e.target.files?.[0];if(file)importSaveFile(file);return}if(e.target.dataset.bulkUid){const uid=e.target.dataset.bulkUid;const inst=instance(uid);if(e.target.checked&&eligibleForBulk(inst))bulkSelected.add(uid);else bulkSelected.delete(uid);render();return}if(e.target.name==='dominantHand'){state.dominantHand=e.target.value;return}if(e.target.name==='origin'&&origins[e.target.value]){let n=$('hero-name')?.value;state.origin=e.target.value;render();if(n)$('hero-name').value=n}});document.addEventListener('click',act);if(!state.created)setPage('character');render();setInterval(()=>{let prev=state.mission?.id;sync();if(prev&&!state.mission){setPage('missions');render();}else{let c=$('countdown');if(c&&state.mission)c.textContent=Math.max(0,Math.ceil((state.mission.ends-Date.now())/1000))+' s';let f=$('mission-progress-fill');if(f&&state.mission){const loc=locations.find(l=>l.id===state.mission.id)||locations[0];const duration=state.mission.durationMs||travelSeconds(loc)*1000;f.style.width=Math.max(0,Math.min(100,100*(1-(state.mission.ends-Date.now())/duration)))+'%'}}},1000);
 function positionPremiumTooltip(target){
