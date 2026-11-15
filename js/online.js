@@ -1,10 +1,10 @@
-/* ASHEN v0.2.6 online PvP + inbox (separate from existing local test battles).
+/* ASHEN v0.2.6.1 online PvP + inbox (separate from existing local test battles).
  * No secret keys. Online match is settled in PostgreSQL via authenticated RPC.
  * This is a private testing build; uploaded equipment/stats are not anti-cheat validated.
  */
 (()=>{'use strict';
 const BOUND_KEY='ashen-online-bound-v025';
-let opponents=[],reports=[],mail=[],busy=false,error='',notice='',openedReport=null,reportContext='pvp',openedMail=null,mailFolder='inbox',loaded=false;
+let opponents=[],reports=[],mail=[],busy=false,error='',notice='',openedReport=null,openedReportSide='attack',reportContext='pvp',openedMail=null,mailFolder='inbox',loaded=false;
 let timer=null,lastSynced='',syncing=false,dirty=false;
 const cloud=()=>window.ASHEN_CLOUD;
 const auth=()=>!!(cloud()?.getClient()&&cloud()?.getSession());
@@ -56,11 +56,19 @@ function health(value,max,enemy=false){
 }
 function hpLabel(value,max){return `${Math.max(0,Math.round(num(value)))} / ${Math.round(num(max))}`}
 function outcome(r){return r?.winner===0?'Zwycięstwo atakującego':r?.winner===1?'Zwycięstwo obrońcy':'Remis'}
-function renderReport(r){
+function renderReport(r,side='attack'){
  if(!r)return '<p>Nie znaleziono raportu.</p>';
- const a=r.attacker||{},d=r.defender||{},hp=Array.isArray(r.hp)?r.hp:[],max=Array.isArray(r.maxHp)?r.maxHp:[],tot=Array.isArray(r.totals)?r.totals:[],rnd=Array.isArray(r.rounds)?r.rounds:[];
- const vals=[a,d], names=[a.name||'Atakujący',d.name||'Obrońca'];
- const rows=[['PŻ na początku',max[0],max[1]],['Pancerz',a.armor,d.armor],['Unik',a.dodge,d.dodge],['Celność',a.acc,d.acc],['Siła',a.attrs?.str,d.attrs?.str],['Zręczność',a.attrs?.dex,d.attrs?.dex],['Wytrzymałość',a.attrs?.end,d.attrs?.end],['Percepcja',a.attrs?.per,d.attrs?.per],['Inteligencja',a.attrs?.int,d.attrs?.int],['Charyzma',a.attrs?.cha,d.attrs?.cha]];
+ // A report always stores [attacker, defender]; display order depends on the viewer.
+ // In defense reports, defender is the player's own character and must be on the left.
+ const reverse=side==='defense',order=reverse?[1,0]:[0,1];
+ const raw=[r.attacker||{},r.defender||{}],fighters=order.map(i=>raw[i]);
+ const names=fighters.map((x,i)=>x.name||(i===0?'Twoja postać':'Przeciwnik'));
+ const maxRaw=Array.isArray(r.maxHp)?r.maxHp:[],hpRaw=Array.isArray(r.hp)?r.hp:[],totRaw=Array.isArray(r.totals)?r.totals:[];
+ const max=order.map(i=>maxRaw[i]),hp=order.map(i=>hpRaw[i]),tot=order.map(i=>totRaw[i]);
+ const rnd=Array.isArray(r.rounds)?r.rounds:[];
+ const roles=reverse?['Obrońca','Atakujący']:['Atakujący','Obrońca'];
+ const result=r.winner===null?'Remis':r.winner===order[0]?'Zwycięstwo':'Porażka';
+ const rows=[['PŻ na początku',max[0],max[1]],['Pancerz',fighters[0].armor,fighters[1].armor],['Unik',fighters[0].dodge,fighters[1].dodge],['Celność',fighters[0].acc,fighters[1].acc],['Siła',fighters[0].attrs?.str,fighters[1].attrs?.str],['Zręczność',fighters[0].attrs?.dex,fighters[1].attrs?.dex],['Wytrzymałość',fighters[0].attrs?.end,fighters[1].attrs?.end],['Percepcja',fighters[0].attrs?.per,fighters[1].attrs?.per],['Inteligencja',fighters[0].attrs?.int,fighters[1].attrs?.int],['Charyzma',fighters[0].attrs?.cha,fighters[1].attrs?.cha]];
  const table=rows.map(([label,v1,v2],i)=>{
   const n1=Number(v1),n2=Number(v2),both=v1!==undefined&&v1!==null&&v2!==undefined&&v2!==null&&Number.isFinite(n1)&&Number.isFinite(n2);
   const cs=both?(n1===n2?['arena-stat-even','arena-stat-even']:n1>n2?['arena-stat-better','arena-stat-worse']:['arena-stat-worse','arena-stat-better']):['arena-stat-neutral','arena-stat-neutral'];
@@ -68,20 +76,22 @@ function renderReport(r){
  }).join('');
  const arms=profile=>(profile.attacks||[]).map(x=>`${esc(x.weapon?.name||'Broń')} (${x.hand==='left'?'lewa':'prawa'} ręka${x.weapon?.min!==undefined?`, ${esc(x.weapon.min)}–${esc(x.weapon.max)} obr.`:''})`).join(' · ')||'Brak danych o broni';
  const rounds=rnd.map(x=>{
-  const roundHp=Array.isArray(x.hp)?x.hp:[];
-  const damage=Array.isArray(x.damage)?x.damage:[];
-  return `<details class="arena-round-card"><summary><span class="arena-round-number">RUNDA ${esc(x.number)}</span><span class="arena-round-damage">Zadane: atakujący ${num(damage[1])} · obrońca ${num(damage[0])} obr.</span><span class="arena-round-expand">Szczegóły</span></summary><div class="arena-round-card-body"><div class="arena-round-hp-grid"><div><span>${esc(names[0])} · PŻ</span><strong>${hpLabel(roundHp[0],max[0])}</strong>${health(roundHp[0],max[0])}</div><div><span>${esc(names[1])} · PŻ</span><strong>${hpLabel(roundHp[1],max[1])}</strong>${health(roundHp[1],max[1],true)}</div></div><div class="arena-round-events">${(x.events||[]).map(e=>`<p>${esc(e)}</p>`).join('')||'<p>Brak zapisanych zdarzeń.</p>'}</div></div></details>`;
+  const roundRaw=Array.isArray(x.hp)?x.hp:[],damageRaw=Array.isArray(x.damage)?x.damage:[];
+  const roundHp=order.map(i=>roundRaw[i]);
+  // Server stores damage inflicted ON [attacker, defender], not dealt BY them.
+  const dealt=[damageRaw[order[1]],damageRaw[order[0]]];
+  return `<details class="arena-round-card"><summary><span class="arena-round-number">RUNDA ${esc(x.number)}</span><span class="arena-round-damage">Zadane: ${esc(names[0])} ${num(dealt[0])} · ${esc(names[1])} ${num(dealt[1])} obr.</span><span class="arena-round-expand">Szczegóły</span></summary><div class="arena-round-card-body"><div class="arena-round-hp-grid"><div><span>${esc(names[0])} · PŻ</span><strong>${hpLabel(roundHp[0],max[0])}</strong>${health(roundHp[0],max[0])}</div><div><span>${esc(names[1])} · PŻ</span><strong>${hpLabel(roundHp[1],max[1])}</strong>${health(roundHp[1],max[1],true)}</div></div><div class="arena-round-events">${(x.events||[]).map(e=>`<p>${esc(e)}</p>`).join('')||'<p>Brak zapisanych zdarzeń.</p>'}</div></div></details>`;
  }).join('');
  const percent=t=>num(t?.attempts)?`${Math.round(num(t.hits)/num(t.attempts)*100)}%`:'—';
- const statrows=[['Zadane obrażenia',num(tot[0]?.damage),num(tot[1]?.damage)],['Trafienia / próby',`${num(tot[0]?.hits)} / ${num(tot[0]?.attempts)}`,`${num(tot[1]?.hits)} / ${num(tot[1]?.attempts)}`],['Skuteczność',percent(tot[0]),percent(tot[1])],['Trafienia krytyczne',num(tot[0]?.critical),num(tot[1]?.critical)]].map(([k,l,r])=>`<tr><th scope="row">${esc(k)}</th><td>${esc(l)}</td><td>${esc(r)}</td></tr>`).join('');
- return `<div class="arena-report ashen-online-arena-report"><div class="arena-report-header"><div><span class="tag">RAPORT · PvP ONLINE</span><h3>${esc(outcome(r))} — ${esc(names[0])} vs ${esc(names[1])}</h3><p class="small muted">${esc(r.at||'')} · ${rnd.length} ${rnd.length===1?'runda':'rund'} · walka rozliczona na serwerze</p></div></div>
- <section class="arena-combat-profile"><div class="arena-battle-section-title"><span>01 / PORÓWNANIE</span><h4>Statystyki przed walką</h4></div><div class="arena-fighter-portraits"><div class="arena-fighter-portrait is-hero">${portrait(a)}<strong>${esc(names[0])}</strong><small>Atakujący · Poziom ${esc(a.level??'—')}</small></div><span class="arena-fighter-versus">VS</span><div class="arena-fighter-portrait is-enemy">${portrait(d)}<strong>${esc(names[1])}</strong><small>Obrońca · Poziom ${esc(d.level??'—')}</small></div></div><div class="arena-combat-table-wrap"><table class="arena-combat-table arena-comparison-expanded"><thead><tr><th>Parametr</th><th>${esc(names[0])}</th><th>${esc(names[1])}</th></tr></thead><tbody>${table}</tbody></table></div><p class="arena-profile-explainer">Kolory pokazują porównanie zapisanych parametrów z chwili walki. Obrażenia PvP nie powodują trwałej utraty PŻ ani wyposażenia.</p><div class="arena-profile-weapons"><strong>Uzbrojenie atakującego:</strong> ${arms(a)}<div><strong>Uzbrojenie obrońcy:</strong> ${arms(d)}</div></div></section>
+ const statrows=[['Zadane obrażenia',num(tot[0]?.damage),num(tot[1]?.damage)],['Trafienia / próby',`${num(tot[0]?.hits)} / ${num(tot[0]?.attempts)}`,`${num(tot[1]?.hits)} / ${num(tot[1]?.attempts)}`],['Skuteczność',percent(tot[0]),percent(tot[1])],['Trafienia krytyczne',num(tot[0]?.critical),num(tot[1]?.critical)]].map(([k,l,v])=>`<tr><th scope="row">${esc(k)}</th><td>${esc(l)}</td><td>${esc(v)}</td></tr>`).join('');
+ return `<div class="arena-report ashen-online-arena-report"><div class="arena-report-header"><div><span class="tag">RAPORT · PvP ONLINE</span><h3>${esc(result)} — ${esc(names[0])} vs ${esc(names[1])}</h3><p class="small muted">${esc(r.at||'')} · ${rnd.length} ${rnd.length===1?'runda':'rund'} · walka rozliczona na serwerze</p></div></div>
+ <section class="arena-combat-profile"><div class="arena-battle-section-title"><span>01 / PORÓWNANIE</span><h4>Statystyki przed walką</h4></div><div class="arena-fighter-portraits"><div class="arena-fighter-portrait is-hero">${portrait(fighters[0])}<strong>${esc(names[0])}</strong><small>Twoja postać · ${roles[0]} · Poziom ${esc(fighters[0].level??'—')}</small></div><span class="arena-fighter-versus">VS</span><div class="arena-fighter-portrait is-enemy">${portrait(fighters[1])}<strong>${esc(names[1])}</strong><small>Przeciwnik · ${roles[1]} · Poziom ${esc(fighters[1].level??'—')}</small></div></div><div class="arena-combat-table-wrap"><table class="arena-combat-table arena-comparison-expanded"><thead><tr><th>Parametr</th><th>${esc(names[0])} (Ty)</th><th>${esc(names[1])}</th></tr></thead><tbody>${table}</tbody></table></div><p class="arena-profile-explainer">Kolory pokazują porównanie zapisanych parametrów z chwili walki. Obrażenia PvP nie powodują trwałej utraty PŻ ani wyposażenia.</p><div class="arena-profile-weapons"><strong>Twoje uzbrojenie:</strong> ${arms(fighters[0])}<div><strong>Uzbrojenie przeciwnika:</strong> ${arms(fighters[1])}</div></div></section>
  <section class="arena-round-review"><div class="arena-battle-section-title"><span>02 / RUNDY</span><h4>Przebieg starcia</h4></div><div class="arena-rounds-list">${rounds||'<p class="muted">W tym raporcie nie zapisano przebiegu rund.</p>'}</div></section>
- <section class="arena-battle-finale"><div class="arena-battle-section-title"><span>03 / WYNIK</span><h4>Podsumowanie starcia</h4></div><div class="arena-outcome-reason ${r.winner===null?'is-draw':''}"><strong>${esc(outcome(r))}</strong><p>${r.winner===null?'Po 10 rundach nie wyłoniono zwycięzcy.':`Wynik rozstrzygnął serwer. ${rnd.length} ${rnd.length===1?'runda':'rund'}.`}</p><div class="arena-final-hp"><div><span>${esc(names[0])} · PŻ po walce</span><strong>${hpLabel(hp[0],max[0])}</strong>${health(hp[0],max[0])}</div><div><span>${esc(names[1])} · PŻ po walce</span><strong>${hpLabel(hp[1],max[1])}</strong>${health(hp[1],max[1],true)}</div></div></div></section>
- <div class="ashen-damage-summary"><div class="ashen-damage-header"><strong>⚔ PODSUMOWANIE WALKI</strong><span>${rnd.length} ${rnd.length===1?'runda':'rund'}</span></div><div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Parametr</th><th>Atakujący</th><th>Obrońca</th></tr></thead><tbody>${statrows}</tbody></table></div></div><div class="arena-report-reward"><strong>PvP online:</strong> bez nagród i bez utraty przedmiotów lub trwałego PŻ.</div></div>`;
+ <section class="arena-battle-finale"><div class="arena-battle-section-title"><span>03 / WYNIK</span><h4>Podsumowanie starcia</h4></div><div class="arena-outcome-reason ${r.winner===null?'is-draw':''}"><strong>${esc(result)}</strong><p>${r.winner===null?'Po 10 rundach nie wyłoniono zwycięzcy.':`Wynik rozstrzygnął serwer. ${rnd.length} ${rnd.length===1?'runda':'rund'}.`}</p><div class="arena-final-hp"><div><span>${esc(names[0])} · PŻ po walce</span><strong>${hpLabel(hp[0],max[0])}</strong>${health(hp[0],max[0])}</div><div><span>${esc(names[1])} · PŻ po walce</span><strong>${hpLabel(hp[1],max[1])}</strong>${health(hp[1],max[1],true)}</div></div></div></section>
+ <div class="ashen-damage-summary"><div class="ashen-damage-header"><strong>⚔ PODSUMOWANIE WALKI</strong><span>${rnd.length} ${rnd.length===1?'runda':'rund'}</span></div><div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Parametr</th><th>Twoja postać</th><th>Przeciwnik</th></tr></thead><tbody>${statrows}</tbody></table></div></div><div class="arena-report-reward"><strong>PvP online:</strong> bez nagród i bez utraty przedmiotów lub trwałego PŻ.</div></div>`;
 }
 function reportDialog(){if(!openedReport)return '';
- return `<div class="arena-report-overlay" data-online-report-overlay="1"><div class="arena-report-dialog" role="dialog" aria-modal="true" aria-label="Raport PvP online"><div class="arena-report-dialog-toolbar"><span>⚔ RAPORT STARCIA · PvP ONLINE</span><button type="button" data-online-close-report="1">✕ Wróć</button></div><div class="arena-report-dialog-scroll">${renderReport(openedReport)}</div></div></div>`;
+ return `<div class="arena-report-overlay" data-online-report-overlay="1"><div class="arena-report-dialog" role="dialog" aria-modal="true" aria-label="Raport PvP online"><div class="arena-report-dialog-toolbar"><span>⚔ RAPORT STARCIA · PvP ONLINE</span><button type="button" data-online-close-report="1">✕ Wróć</button></div><div class="arena-report-dialog-scroll">${renderReport(openedReport,openedReportSide)}</div></div></div>`;
 }
 function pvpHtml(){
  const entries=opponents.map(p=>`<article class="pvp-choice"><img src="${p.origin==='tech'?'./assets/characters/technician-'+p.gender+'.webp':p.origin==='fighter'?'./assets/characters/warrior-'+p.gender+'.webp':'./assets/characters/scout-'+p.gender+'.webp'}" onerror="this.style.display='none'" alt=""><div><h4>${esc(p.name)}</h4><p class="small muted">Poziom ${p.level} · ${esc(p.origin)} · ostatni zapis ${fmt(p.updated_at)}</p><p>Ataki dziś: ${p.attacks_today}/2</p><button class="primary" data-online-attack="${esc(p.user_id)}" ${!bound()||busy||p.attacks_today>=2?'disabled':''}>⚔ Zaatakuj online</button></div></article>`).join('');
@@ -98,10 +108,10 @@ document.addEventListener('click',async e=>{
  const b=e.target.closest('button');if(!b)return;
  if(b.hasAttribute('data-online-refresh')){e.preventDefault();await refresh();return}
  if(b.hasAttribute('data-online-close-report')){openedReport=null;reportContext='pvp';draw();return}
- if(b.dataset.onlineReport){const item=reports.find(x=>String(x.id)===b.dataset.onlineReport);if(item){openedReport=item.report;reportContext=b.closest('[data-online-mail-view]')?'mail':'pvp';error='';draw();return}error='Nie znaleziono raportu walki na liście pobranych raportów. Kliknij Odśwież i spróbuj ponownie.';draw();return}
+ if(b.dataset.onlineReport){const item=reports.find(x=>String(x.id)===b.dataset.onlineReport);if(item){openedReport=item.report;openedReportSide=item.side==='defense'?'defense':'attack';reportContext=b.closest('[data-online-mail-view]')?'mail':'pvp';error='';draw();return}error='Nie znaleziono raportu walki na liście pobranych raportów. Kliknij Odśwież i spróbuj ponownie.';draw();return}
  if(b.dataset.onlineAttack){const id=b.dataset.onlineAttack,p=opponents.find(x=>x.user_id===id);if(!p||!bound())return;
   if(!confirm(`Zaatakować gracza ${p.name} (poziom ${p.level})?\nWalka jest rozliczana na serwerze. Limit: 2 dziennie.`))return;
-  await action(async()=>{const r=await rpc('ashen_online_attack',{p_defender:id});openedReport=r;reportContext='pvp';notice='Walka zakończona. Raport trafił do obu kont.'});await refresh();return;
+  await action(async()=>{const r=await rpc('ashen_online_attack',{p_defender:id});openedReport=r;openedReportSide='attack';reportContext='pvp';notice='Walka zakończona. Raport trafił do obu kont.'});await refresh();return;
  }
  if(b.dataset.onlineMailFolder){mailFolder=b.dataset.onlineMailFolder;openedMail=null;openedReport=null;reportContext='pvp';draw();return}
  if(b.hasAttribute('data-online-mail-back')){openedMail=null;openedReport=null;reportContext='pvp';draw();return}

@@ -1,3 +1,10 @@
+## ASHEN v0.2.6.1 — poprawki raportu PvP online
+
+- Pełne sylwetki obu graczy w ramkach bez przycinania.
+- Zawsze własna postać po lewej (dla obrońcy zamieniona kolejność względem rekordu serwera).
+- Statystyki, paski PŻ, obrażenia rund i wynik pokazane z perspektywy właściciela raportu.
+- Brak zmian SQL / serwera i brak zmian lokalnych zapisów.
+
 ## ASHEN v0.2.6 — wspólny wygląd raportów Starcia / PvP online
 
 Raport online otwiera się teraz w oknie podobnym do Starć, używając wspólnych klas CSS: portrety, porównanie statystyk, rundy, paski PŻ, wynik i tabela obrażeń. Zachowano obsługę starych raportów oraz istniejące połączenie Supabase. Nie trzeba uruchamiać nowego SQL.
