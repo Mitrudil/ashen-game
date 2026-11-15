@@ -1116,3 +1116,26 @@ h1, h2, h3, h4, h5, h6, button,
 .arena-profile-weapons{padding:12px 14px;border:1px solid #564937;border-radius:10px;background:#172026;font-size:13px}
 .arena-profile-weapons>div{margin-top:8px}
 @media(max-width:540px){.arena-report-view-nav{flex-direction:column;align-items:stretch}.arena-report-view-nav button{width:100%}.arena-comparison-expanded{font-size:12px;min-width:0}.arena-comparison-expanded th,.arena-comparison-expanded td{padding:7px 6px!important;overflow-wrap:anywhere;word-break:normal}}
+
+
+/* ASHEN v0.1.58.4 — separate modal, fighter portraits and comparison indicators */
+body.arena-report-modal-open{overflow:hidden}
+.arena-report-overlay{position:fixed;inset:0;z-index:9990;background:rgba(4,8,11,.82);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:16px}
+.arena-report-dialog{display:flex;flex-direction:column;width:min(100%,1010px);max-height:calc(100dvh - 32px);min-height:0;background:linear-gradient(160deg,#232c30,#0f171c);border:1px solid #aa8351;border-radius:16px;box-shadow:0 26px 80px #000d;overflow:hidden}
+.arena-report-dialog-toolbar{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 17px;background:linear-gradient(120deg,#33271a,#141b20);border-bottom:1px solid #806341;color:#f0d5ac;font-weight:750;font-size:12px;letter-spacing:.1em}
+.arena-report-dialog-toolbar button{min-height:38px}
+.arena-report-dialog-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:10px 16px 20px}
+.arena-report-dialog .arena-report{margin-top:0;background:none;box-shadow:none;border:0;padding:0}
+.arena-fighter-portraits{display:grid;grid-template-columns:minmax(0,1fr) 52px minmax(0,1fr);gap:12px;align-items:center;margin:14px 0 12px}
+.arena-fighter-portrait{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;text-align:center}
+.arena-fighter-portrait img,.arena-portrait-unknown{display:block;width:min(100%,200px);height:180px;object-fit:cover;object-position:center 28%;border:1px solid #8a6b44;border-radius:11px;background:#151d20;box-shadow:0 10px 18px #0007}
+.arena-fighter-portrait.is-enemy img{border-color:#966154}
+.arena-fighter-portrait strong{font-size:15px;color:#f2dfbf;overflow-wrap:anywhere}
+.arena-fighter-portrait small{font-size:11px;color:#b7c0c3}
+.arena-fighter-versus{font-weight:900;font-size:18px;color:#dd9f61;text-align:center}
+.arena-portrait-unknown{display:grid;place-items:center;color:#697981;font-size:44px}
+.arena-comparison-expanded td.arena-stat-better,.arena-profile-explainer .arena-stat-better{color:#7ce6a0!important;font-weight:800}
+.arena-comparison-expanded td.arena-stat-worse,.arena-profile-explainer .arena-stat-worse{color:#ff8f87!important;font-weight:800}
+.arena-comparison-expanded td.arena-stat-even,.arena-profile-explainer .arena-stat-even{color:#f6b45d!important;font-weight:800}
+.arena-comparison-expanded td.arena-stat-neutral{color:#d0d5d4!important}
+@media(max-width:540px){.arena-report-overlay{padding:6px}.arena-report-dialog{max-height:calc(100dvh - 12px);border-radius:10px}.arena-report-dialog-scroll{padding:8px 10px 18px}.arena-report-dialog-toolbar{padding:8px 10px;gap:8px}.arena-report-dialog-toolbar button{font-size:12px;padding:8px}.arena-fighter-portraits{grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr);gap:5px}.arena-fighter-portrait img,.arena-portrait-unknown{height:145px;width:min(100%,150px)}.arena-fighter-portrait strong{font-size:12px}.arena-fighter-portrait small{font-size:10px}.arena-fighter-versus{font-size:13px}}

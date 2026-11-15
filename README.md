@@ -1,3 +1,12 @@
+## ASHEN v0.1.58.4 — poprawki raportów Starć
+
+- Raport Starcia otwiera się jako okno modalne nad planszą. Zamknięcie: przycisk, kliknięcie poza oknem lub Esc.
+- Nad statystykami znajdują się portrety obydwu walczących w podobnym kadrze (istniejące portrety klas postaci i przeciwników).
+- Zakres obrażeń bohatera zapisywany jest w chwili walki dla każdego ataku; wartości historyczne bez zapisanych danych pozostają oznaczone jako niedostępne.
+- Statystyki z większą wartością mają kolor zielony, niższą czerwony, a równe pomarańczowy. Przy braku danych kolor neutralny.
+- Wszystkie rundy są domyślnie zwinięte, w tym ostatnia.
+- Zapis rozgrywki, 10-rundowy limit i wyniki pozostają bez zmian.
+
 # ASHEN v0.1.58.2 — raporty walk inspirowane BW
 
 - Przed starciem zapisywany jest stan statystyk obu stron (PŻ, pancerz, unik, celność, ataki), wraz z atrybutami i konfiguracją broni bohatera.
