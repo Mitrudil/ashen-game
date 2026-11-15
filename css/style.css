@@ -1249,3 +1249,16 @@ body.arena-report-modal-open{overflow:hidden}
 .expedition-team-grid.is-enemies .arena-fighter-portrait{border-color:rgba(215,87,87,.28)}
 .expedition-enemy-portrait{width:108px;height:144px;border-radius:16px;overflow:hidden;margin:0 auto 10px;border:1px solid rgba(215,87,87,.28);background:linear-gradient(180deg,#28191b,#171114)}
 @media (max-width: 760px){.expedition-active-art{width:100%;min-width:0;max-width:340px;height:340px}.expedition-active-layout{flex-direction:column}.expedition-boss-grid{grid-template-columns:1fr}.expedition-boss-art{height:340px}}
+
+/* ASHEN 0.3.1 — rekrutacja i zasoby ekspedycji */
+.expedition-admission{border:1px solid rgba(212,170,71,.22);background:rgba(212,170,71,.035);border-radius:14px;padding:14px;margin:14px 0}
+.expedition-admission-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.expedition-admission-heading h4{margin:0}
+.expedition-recruit-list{margin:12px 0;padding:10px;border-radius:12px;background:rgba(0,0,0,.12)}
+.expedition-recruit-list h5{margin:0 0 8px}
+.expedition-recruit-list .clan-member{gap:12px;flex-wrap:wrap}
+.expedition-invite{margin:12px 0}
+.expedition-invite label{display:block;font-size:13px;margin-bottom:8px}
+.expedition-invite select{flex:1 1 210px;max-width:100%;min-width:140px;background:#20272c;color:#e8e0d2;border:1px solid rgba(212,170,71,.35);border-radius:9px;padding:10px}
+.expedition-clan-strip{align-items:center}
+.expedition-boss-meta{flex-wrap:wrap}
