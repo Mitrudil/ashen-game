@@ -1,10 +1,10 @@
-## v0.1.59 — Starcia 21–30: Skażona strefa
+## ASHEN v0.1.59.1 — Tryb testowania Starć
 
-- Rozdział III, 10 nowych przeciwników i 10 osobnych grafik w `assets/enemies/`.
-- Boss etapu 30: Matka Skażenia; za pierwsze zwycięstwo przyznawana jest epicka, zabezpieczona odzież ochronna.
-- Przełączanie rozdziałów I–III; postęp, zasady 10 rund, remisy, porażki, raporty modalne i historia pozostają bez zmian.
-- Dostęp do poziomu 21 wymaga ukończenia poziomu 20. Balans walk wstępny, do późniejszego dopracowania.
-- Zapis zachowuje zgodność ze starszymi wersjami.
+- Przełącznik trybu testowego w zakładce Starcia pozwala wybrać dowolny z 30 etapów, niezależnie od postępu.
+- W teście działa pełny silnik walki i raport modalny; brak nagród, doświadczenia, liczników i zapisów historii.
+- Po wyłączeniu trybu wracają normalne blokady i przyznawanie nagród.
+- Nie zmieniono mechaniki, balansu ani zapisanych postępów.
+- Przełącznik jest sesyjny (po odświeżeniu wyłączony).
 
 ## v0.1.58.5 — Poprawka synergii Ekwipunku
 
