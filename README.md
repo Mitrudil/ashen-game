@@ -262,3 +262,7 @@ Podmiana trzech scen sypialni 1–3; wymuszenie przeładowania obrazów po aktua
 - Postęp: zwycięstwa zielone, porażki czerwone, remisy pomarańczowe. Liczniki porażek i remisów są utrwalane; przy migracji starych zapisów rekonstruowane wyłącznie z zachowanej historii (do 40 raportów).
 - Usunięty zdublowany oryginalny dziennik zdarzeń.
 - Rozszerzona pionowa tabela porównawcza postać/przeciwnik; przeciwnik ma opisowy profil taktyczny wyliczony z realnych parametrów walki, niewpływający dodatkowo na mechanikę.
+
+
+## v0.2.5 — test multiplayera
+Dodano odrębne PvP online rozliczane przez PostgreSQL oraz internetową skrzynkę wiadomości. Instalacja: `multiplayer/URUCHOMIENIE_0.2.5.md`. Offline PvP działa bez zmian.
