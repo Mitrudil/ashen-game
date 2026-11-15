@@ -1262,3 +1262,10 @@ body.arena-report-modal-open{overflow:hidden}
 .expedition-invite select{flex:1 1 210px;max-width:100%;min-width:140px;background:#20272c;color:#e8e0d2;border:1px solid rgba(212,170,71,.35);border-radius:9px;padding:10px}
 .expedition-clan-strip{align-items:center}
 .expedition-boss-meta{flex-wrap:wrap}
+
+/* 0.3.2: widoczna lista członków i czas zbiórki */
+.expedition-invite-checklist{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:10px 0}
+.expedition-invite-choice{display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:10px;cursor:pointer;background:rgba(255,255,255,.03)}
+.expedition-invite-choice input{width:18px;height:18px;accent-color:#d2a653;flex-shrink:0}
+.expedition-invite-choice:hover{border-color:rgba(210,166,83,.55)}
+.expedition-timer{padding:11px;border:1px solid rgba(210,166,83,.45);border-radius:12px;margin:12px 0;background:rgba(210,166,83,.08)}

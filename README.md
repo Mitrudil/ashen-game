@@ -1,30 +1,13 @@
-# ASHEN v0.3.1 — Organizacja ekspedycji klanowych
+# ASHEN v0.3.2 — czasowe ekspedycje i zaproszenia checkboxami
 
-Rozwija v0.3.0.1 bez zmiany grafik, statystyk bossów, postaci ani wcześniej zapisanych raportów.
+Wersja rozwija testowane v0.3.1, zachowuje dwa sloty na klan, zapasy, poziomy, taktyki i raporty.
 
-## Co nowego
+**Nowości:** lista wszystkich członków do zaproszenia w kwadracikach, zbiorcze zaproszenia, czas zbiórki (boss 1: 1h, boss 2: 1h30, boss 3: 2h; architektura do 8h dla przyszłych bossów), automatyczny start serwerowy co minutę oraz wcześniejsze zamknięcie rekrutacji przez organizatora przy co najmniej 2 osobach.
 
-- **Zapasy ekspedycyjne**: nowy zasób na poziomie klanu, maksymalnie 12, początkowo 12, regeneracja +1 co 6 godzin. Koszt utworzenia: boss 1 = 2, boss 2 = 3, boss 3 = 4.
-- **Dwa aktywne sloty na klan**. Jeden lider/oficer może organizować tylko jedną wyprawę na raz.
-- **Kandydatury**: gracz zgłasza się; organizator zatwierdza lub odrzuca.
-- **Imienne zaproszenia**: organizator wysyła zaproszenie członkowi klanu; gracz sam je przyjmuje lub odrzuca.
-- **Limit sumy poziomów drużyny**: boss 1 = 20, boss 2 = 35, boss 3 = 50 (jednocześnie 2–5 graczy).
-- Gracz może być w składzie tylko jednej aktywnej ekspedycji.
-- Nadal **serwer Supabase** zatwierdza zapisy, przyjęcia i rozpoczęcie walki; nie wystarczy manipulacja widocznym HTML.
+**Ważne:** Automatyczne walki wymagają uruchomienia dwóch skryptów SQL w projekcie ASHEN w kolejności: `009_timed_expeditions.sql`, potem `010_enable_expedition_scheduler.sql`. Bez 010 harmonogram nie zadziała, nawet jeśli aplikacja pokazuje czas. Nie wkładaj klucza secret/service_role do przeglądarki.
 
-## Zasady
+Jeśli termin minie bez minimum dwóch zatwierdzonych graczy, serwer anuluje zbiórkę bez walki (zapasy nie są zwracane). Jeśli nastąpi błąd rozliczenia, ekspedycja pozostaje otwarta i serwer spróbuje ponownie; sprawdzaj logi. Dokładność startu: ok. 1 minuta po terminie. Zakończenie zbiórki wcześniej nie oznacza natychmiastowej walki w przeglądarce, tylko prośbę do harmonogramu.
 
-- Koszt jest pobierany od razu przy utworzeniu wyprawy, nawet jeśli klan ją anuluje.
-- Uczestnik przyjęty do składu może z niego wyjść przed startem. Organizator może anulować ekspedycję.
-- Wybrana taktyka i raport walki pozostają dostępne.
-- Nie dodano jeszcze nagród i przedmiotów — to następny etap po testach tej rekrutacji.
-- **Nie uruchamiaj poprzedniego `006` lub `007` ponownie** na zaktualizowanej bazie, ponieważ nadpisałoby to nowe reguły.
+**Migracja:** plik 009 zachowuje raporty i aktywne ekspedycje. Trwające zbiórki dostają termin liczony od chwili ich utworzenia, więc starsze mogą rozegrać się na pierwszym przebiegu harmonogramu. Jeśli wolisz, dokończ stare wyprawy przed aktualizacją. Stare skrypty 006–008 nie mogą być uruchamiane ponownie po tej migracji.
 
-## Instalacja
-
-1. Zrób kopię zapasową plików gry i danych w Supabase.
-2. Wgraj pliki na GitHub, zachowując strukturę.
-3. Otwórz w Supabase **projekt ASHEN**, przejdź do SQL Editor i uruchom **`multiplayer/supabase/008_expedition_recruitment.sql`**. Wcześniejsze 001–007 muszą być już zastosowane.
-4. Odśwież grę `Ctrl+F5`. Testuj na co najmniej dwóch kontach.
-
-Plik z kompletną instrukcją: `multiplayer/URUCHOMIENIE_0.3.1.md`.
+**Limit 2 ekspedycji na klan** pozostaje. Pomysł „co najmniej 1 własna ekspedycja dziennie na gracza” zapisujemy do dalszego projektu wraz z systemem uprawnień organizatora; nie zwiększamy jeszcze limitu.
