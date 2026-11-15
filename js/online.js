@@ -1,10 +1,10 @@
-/* ASHEN v0.2.5 online PvP + inbox (separate from existing local test battles).
+/* ASHEN v0.2.5.1 online PvP + inbox (separate from existing local test battles).
  * No secret keys. Online match is settled in PostgreSQL via authenticated RPC.
  * This is a private testing build; uploaded equipment/stats are not anti-cheat validated.
  */
 (()=>{'use strict';
 const BOUND_KEY='ashen-online-bound-v025';
-let opponents=[],reports=[],mail=[],busy=false,error='',notice='',openedReport=null,openedMail=null,mailFolder='inbox',loaded=false;
+let opponents=[],reports=[],mail=[],busy=false,error='',notice='',openedReport=null,reportContext='pvp',openedMail=null,mailFolder='inbox',loaded=false;
 let timer=null,lastSynced='',syncing=false,dirty=false;
 const cloud=()=>window.ASHEN_CLOUD;
 const auth=()=>!!(cloud()?.getClient()&&cloud()?.getSession());
@@ -55,20 +55,20 @@ function pvpHtml(){
 function mailHtml(){const uid=cloud()?.getSession()?.user?.id;
  const visible=mail.filter(x=>mailFolder==='inbox'?x.recipient_id===uid:x.sender_id===uid),unread=mail.filter(x=>x.recipient_id===uid&&!x.is_read).length;
  const opened=mail.find(x=>String(x.id)===String(openedMail));
- return `<section class="section"><h2>✉ Wiadomości online</h2>${intro()}${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}<div class="actions"><button data-online-mail-folder="inbox" class="${mailFolder==='inbox'?'primary':''}">Odebrane (${unread} nowych)</button><button data-online-mail-folder="sent" class="${mailFolder==='sent'?'primary':''}">Wysłane</button><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież</button></div>${opened?`<div class="panel"><h3>${esc(opened.subject)}</h3><p class="muted small">${esc(opened.from_name)} → ${esc(opened.to_name)} · ${fmt(opened.created_at)}</p><p style="white-space:pre-wrap">${esc(opened.body)}</p>${opened.battle_id?`<button data-online-report="${opened.battle_id}">Pokaż raport walki</button>`:''}<button data-online-mail-back="1">Wróć do listy</button></div>`:`<div class="mail-list">${visible.map(x=>`<button class="mail-row ${x.is_read?'':'unread'}" data-online-mail-open="${x.id}"><strong>${esc(x.subject)}</strong><span>${esc(x.from_name)} → ${esc(x.to_name)}</span><small>${fmt(x.created_at)}</small></button>`).join('')||'<p class="muted">Brak wiadomości online.</p>'}</div>`}<div class="panel"><h3>Wyślij wiadomość online</h3><label for="online-mail-to">Odbiorca</label><select class="input" id="online-mail-to">${opponents.map(p=>`<option value="${esc(p.user_id)}">${esc(p.name)} (poziom ${p.level})</option>`).join('')}</select><label for="online-mail-text">Treść</label><textarea class="input" id="online-mail-text" rows="3" maxlength="1500" placeholder="Napisz wiadomość..."></textarea><div class="actions"><button class="primary" data-online-send="1" ${!bound()||busy||!opponents.length?'disabled':''}>Wyślij wiadomość</button></div></div><p class="small muted">Poniżej pozostawiono dotychczasową skrzynkę lokalnych testerów.</p></section>`;
+ return `<section class="section" data-online-mail-view="1"><h2>✉ Wiadomości online</h2>${intro()}${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}<div class="actions"><button data-online-mail-folder="inbox" class="${mailFolder==='inbox'?'primary':''}">Odebrane (${unread} nowych)</button><button data-online-mail-folder="sent" class="${mailFolder==='sent'?'primary':''}">Wysłane</button><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież</button></div>${opened?`<div class="panel"><h3>${esc(opened.subject)}</h3><p class="muted small">${esc(opened.from_name)} → ${esc(opened.to_name)} · ${fmt(opened.created_at)}</p><p style="white-space:pre-wrap">${esc(opened.body)}</p>${opened.battle_id&&!(openedReport&&reportContext==='mail')?`<button data-online-report="${opened.battle_id}">Pokaż raport walki</button>`:''}${openedReport&&reportContext==='mail'?`<div class="online-mail-battle-report">${renderReport(openedReport)}</div>`:''}<button data-online-mail-back="1">Wróć do listy</button></div>`:`<div class="mail-list">${visible.map(x=>`<button class="mail-row ${x.is_read?'':'unread'}" data-online-mail-open="${x.id}"><strong>${esc(x.subject)}</strong><span>${esc(x.from_name)} → ${esc(x.to_name)}</span><small>${fmt(x.created_at)}</small></button>`).join('')||'<p class="muted">Brak wiadomości online.</p>'}</div>`}<div class="panel"><h3>Wyślij wiadomość online</h3><label for="online-mail-to">Odbiorca</label><select class="input" id="online-mail-to">${opponents.map(p=>`<option value="${esc(p.user_id)}">${esc(p.name)} (poziom ${p.level})</option>`).join('')}</select><label for="online-mail-text">Treść</label><textarea class="input" id="online-mail-text" rows="3" maxlength="1500" placeholder="Napisz wiadomość..."></textarea><div class="actions"><button class="primary" data-online-send="1" ${!bound()||busy||!opponents.length?'disabled':''}>Wyślij wiadomość</button></div></div><p class="small muted">Poniżej pozostawiono dotychczasową skrzynkę lokalnych testerów.</p></section>`;
 }
 document.addEventListener('click',async e=>{
  const b=e.target.closest('button');if(!b)return;
  if(b.hasAttribute('data-online-refresh')){e.preventDefault();await refresh();return}
- if(b.hasAttribute('data-online-close-report')){openedReport=null;draw();return}
- if(b.dataset.onlineReport){const item=reports.find(x=>String(x.id)===b.dataset.onlineReport);if(item){openedReport=item.report;draw();return}}
+ if(b.hasAttribute('data-online-close-report')){openedReport=null;reportContext='pvp';draw();return}
+ if(b.dataset.onlineReport){const item=reports.find(x=>String(x.id)===b.dataset.onlineReport);if(item){openedReport=item.report;reportContext=b.closest('[data-online-mail-view]')?'mail':'pvp';error='';draw();return}error='Nie znaleziono raportu walki na liście pobranych raportów. Kliknij Odśwież i spróbuj ponownie.';draw();return}
  if(b.dataset.onlineAttack){const id=b.dataset.onlineAttack,p=opponents.find(x=>x.user_id===id);if(!p||!bound())return;
   if(!confirm(`Zaatakować gracza ${p.name} (poziom ${p.level})?\nWalka jest rozliczana na serwerze. Limit: 2 dziennie.`))return;
-  await action(async()=>{const r=await rpc('ashen_online_attack',{p_defender:id});openedReport=r;notice='Walka zakończona. Raport trafił do obu kont.'});await refresh();return;
+  await action(async()=>{const r=await rpc('ashen_online_attack',{p_defender:id});openedReport=r;reportContext='pvp';notice='Walka zakończona. Raport trafił do obu kont.'});await refresh();return;
  }
- if(b.dataset.onlineMailFolder){mailFolder=b.dataset.onlineMailFolder;openedMail=null;draw();return}
- if(b.hasAttribute('data-online-mail-back')){openedMail=null;draw();return}
- if(b.dataset.onlineMailOpen){openedMail=b.dataset.onlineMailOpen;const m=mail.find(x=>String(x.id)===openedMail);if(m&&m.recipient_id===cloud()?.getSession()?.user?.id&&!m.is_read){try{await rpc('ashen_online_mark_read',{p_id:m.id});m.is_read=true}catch(e){error=msg(e)}}draw();return}
+ if(b.dataset.onlineMailFolder){mailFolder=b.dataset.onlineMailFolder;openedMail=null;openedReport=null;reportContext='pvp';draw();return}
+ if(b.hasAttribute('data-online-mail-back')){openedMail=null;openedReport=null;reportContext='pvp';draw();return}
+ if(b.dataset.onlineMailOpen){openedReport=null;reportContext='pvp';openedMail=b.dataset.onlineMailOpen;const m=mail.find(x=>String(x.id)===openedMail);if(m&&m.recipient_id===cloud()?.getSession()?.user?.id&&!m.is_read){try{await rpc('ashen_online_mark_read',{p_id:m.id});m.is_read=true}catch(e){error=msg(e)}}draw();return}
  if(b.hasAttribute('data-online-send')){const to=document.getElementById('online-mail-to')?.value,body=document.getElementById('online-mail-text')?.value||'';await action(async()=>{await rpc('ashen_online_send',{p_recipient:to,p_body:body});notice='Wiadomość online została wysłana.'});await refresh();return}
 });
 window.ASHEN_ONLINE={pvpHtml,mailHtml,localChanged,published,authChanged};

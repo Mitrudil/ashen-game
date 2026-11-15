@@ -1,3 +1,10 @@
+# ASHEN v0.2.5.1 — poprawka podglądu raportu online
+
+- Przycisk „Pokaż raport walki” w Wiadomościach online wyświetla teraz pełny raport obrony bezpośrednio pod treścią wiadomości.
+- „Wróć” z raportu wraca do wiadomości, a „Wróć do listy” zamyka wiadomość.
+- Nie trzeba zmieniać SQL ani bazy Supabase. Zmiana dotyczy wyłącznie interfejsu.
+- Dla uniknięcia cache zwiększono wersję zasobów do 0.2.5.1.
+
 # ASHEN v0.2.4 — konta i zapis w chmurze
 
 - Nowy przycisk **☁ Konto online**. Opcjonalne połączenie z prywatnym Supabase Free, rejestracja/logowanie, ręczna kopia zapisu i ręczne pobieranie.
