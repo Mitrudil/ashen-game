@@ -1,3 +1,14 @@
+# ASHEN v0.1.53 — Kryjówka: 15 gotowych scen
+
+- Sypialnia, magazyn i warsztat mają po pięć etapów rozwoju (15 scen).
+- Nowe obrazy są w jednym formacie 1280 × 720 (16:9), równo wykadrowane. Zmieniono wyłącznie kadry: bez przemalowywania wnętrz.
+- W nowych ilustracjach magazynu i warsztatu nie ma już dużych pustych połaci podłogi.
+- Ściany, oświetlenie i wyposażenie widocznie ewoluują z poziomem każdego pomieszczenia.
+- Koszty poziomów 4 i 5 są wstępne, do testów balansu. Bonusy rozbudowy: sypialnia +3% PD na poziom, magazyn +10% odzysku, warsztat −5% kosztu ulepszeń na poziom.
+- Cofanie poziomów nadal działa testowo bez zwrotu materiałów; powrót do wcześniej opłaconego poziomu jest darmowy.
+- Stare zapisy pozostają zachowane.
+- Aktualizacja podmienia pliki gry i 15 obrazów w assets/bunker/rooms/.
+
 # ASHEN v0.1.48 — Anomalie i wydarzenia Rezonansu
 
 - Bliskie wyprawy: 18% szansy na zjawisko, średnie: 32%, dalekie: 50%. Brak anomalii pozostaje możliwy.
