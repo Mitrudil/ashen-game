@@ -1187,3 +1187,16 @@ body.arena-report-modal-open{overflow:hidden}
   background:#151d20;
   padding:3px;
 }
+/* ASHEN 0.2.8: klany online */
+.ashen-clan-page .clan-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.ashen-clan-page .clan-panel{margin:14px 0;padding:20px;min-width:0}
+.ashen-clan-page .clan-panel h3{margin:0 0 14px}
+.ashen-clan-page .clan-member{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-top:1px solid rgba(180,166,142,.18);flex-wrap:wrap}
+.ashen-clan-page .clan-member:first-of-type{border-top:0}
+.ashen-clan-page .clan-member p{margin:5px 0 0}
+.ashen-clan-page .clan-member .actions{margin:0}
+.ashen-clan-page .clan-identity h3{font-size:1.55rem;margin:10px 0}
+.ashen-clan-page .clan-future{padding:18px;border:1px dashed rgba(190,157,95,.5);border-radius:10px;margin:16px 0}
+.ashen-clan-page .input{max-width:100%;min-width:0}
+.ashen-clan-page select.input{flex:1;min-width:190px}
+@media(max-width:600px){.ashen-clan-page .clan-panel{padding:14px}.ashen-clan-page .clan-member .actions{width:100%}}
