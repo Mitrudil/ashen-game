@@ -1,3 +1,10 @@
+# ASHEN v0.2.4 — konta i zapis w chmurze
+
+- Nowy przycisk **☁ Konto online**. Opcjonalne połączenie z prywatnym Supabase Free, rejestracja/logowanie, ręczna kopia zapisu i ręczne pobieranie.
+- Bezpieczne polityki RLS: konto widzi tylko własny zapis.
+- Zapis lokalny pozostaje podstawą prototypu, konta nie działają jeszcze jako sieciowe PvP ani wiadomości.
+- Instrukcja: `multiplayer/URUCHOMIENIE_0.2.4.md`; SQL: `multiplayer/supabase/002_cloud_saves.sql`.
+
 ## ASHEN v0.2.3 — PvP i Wiadomości
 
 - Każdy atakujący może wykonać maksymalnie **2 ataki dziennie na wybranego obrońcę** (limit osobno dla każdej pary); w lokalnym prototypie reset jest o północy według zegara przeglądarki.
