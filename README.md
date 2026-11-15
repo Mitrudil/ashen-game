@@ -1,3 +1,15 @@
+# ASHEN v0.2.7 — stabilizacja multiplayera
+
+- Powiązanie lokalnego profilu ze **ściśle określonym kontem i projektem** Supabase (zamiast tylko numeru slotu).
+- Po aktualizacji **każde konto wymaga jednorazowego ręcznego wysłania swojej postaci**, aby odnowić bezpieczne powiązanie. Stare dane lokalne i rekordy chmurowe pozostają bez zmian.
+- Automatyczny zapis ogranicza zbędne próby, ponawia nieudany zapis po 10 sekundach i ponawia po przywróceniu Internetu.
+- Wyświetla status automatycznej synchronizacji.
+- Po zmianie konta czyści poprzednie listy graczy, raporty i wiadomości, aby nie wyświetlać cudzych danych.
+- Zawiera dodatkowy, **opcjonalny** skrypt SQL `004_message_limits.sql`, ograniczający spam prywatnych wiadomości.
+- Nie usuwa tabel ani zapisów, nie zmienia formuł PvP, klanów jeszcze nie dodaje.
+- **Nie chroni jeszcze przed oszustwami klienta** ani konfliktami przy jednoczesnej grze na kilku urządzeniach.
+- Pracuj wyłącznie w projekcie Supabase ASHEN; ALLADYN musi pozostać osobny.
+
 ## ASHEN v0.2.6.1 — poprawki raportu PvP online
 
 - Pełne sylwetki obu graczy w ramkach bez przycinania.

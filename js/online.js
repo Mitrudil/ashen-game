@@ -3,12 +3,11 @@
  * This is a private testing build; uploaded equipment/stats are not anti-cheat validated.
  */
 (()=>{'use strict';
-const BOUND_KEY='ashen-online-bound-v025';
 let opponents=[],reports=[],mail=[],busy=false,error='',notice='',openedReport=null,openedReportSide='attack',reportContext='pvp',openedMail=null,mailFolder='inbox',loaded=false;
-let timer=null,lastSynced='',syncing=false,dirty=false;
+let timer=null,lastSynced='',syncing=false,dirty=false,observed='',syncMessage='';
 const cloud=()=>window.ASHEN_CLOUD;
 const auth=()=>!!(cloud()?.getClient()&&cloud()?.getSession());
-const bound=()=>auth()&&localStorage.getItem(BOUND_KEY)===cloud().currentSlot();
+const bound=()=>auth()&&cloud()?.getBoundSlot()===cloud()?.currentSlot();
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=v=>new Date(v).toLocaleString('pl-PL',{timeZone:'Europe/Warsaw'});
 const msg=e=>String(e?.message||e||'Błąd połączenia').slice(0,250);
@@ -19,29 +18,42 @@ async function refresh(){if(!auth()){opponents=[];reports=[];mail=[];loaded=fals
   const [a,b,c]=await Promise.all([rpc('ashen_online_list'),rpc('ashen_online_reports'),rpc('ashen_online_messages')]);
   opponents=a||[];reports=b||[];mail=c||[];loaded=true;
  }catch(e){error='Nie można wczytać PvP online: '+msg(e)+'. Sprawdź, czy uruchomiono 003_online_pvp.sql w projekcie ASHEN.';}finally{busy=false;draw()}}
-async function publish(){if(!bound()||syncing)return;
- const key=cloud().currentSlot(),current=localStorage.getItem(key==='main'?'ashen-save-v010':'ashen-dev-slot-v021:'+key);
+function activeRaw(){const slot=cloud()?.currentSlot();if(!slot)return '';return localStorage.getItem(slot==='main'?'ashen-save-v010':'ashen-dev-slot-v021:'+slot)||''}
+async function publish(){
+ if(!bound()||syncing)return;
+ const account=cloud().getSession().user.id,slot=cloud().currentSlot(),project=cloud().getProjectUrl(),current=activeRaw();
  if(!current||current===lastSynced)return;
- syncing=true;
+ syncing=true;syncMessage='Zapisywanie w chmurze…';
  try{
   const save=JSON.parse(current);if(!save?.created)return;
   const snapshot=window.ASHEN_GET_ONLINE_SNAPSHOT?.();if(!snapshot)throw Error('Nie udało się przygotować statystyk postaci.');
-  // Cloud save stays current, and combat state is published separately for other accounts.
-  const c=cloud().getClient(),uid=cloud().getSession().user.id;
-  const {error:e1}=await c.from('ashen_cloud_saves').upsert({user_id:uid,save_data:save,character_name:String(save.name).slice(0,40),character_level:save.level},{onConflict:'user_id'});
+  // Check identity before sending. Never mix a snapshot from one slot with another account.
+  if(!bound()||cloud().currentSlot()!==slot||cloud().getSession()?.user?.id!==account||cloud().getProjectUrl()!==project)return;
+  const c=cloud().getClient();
+  const {error:e1}=await c.from('ashen_cloud_saves').upsert({user_id:account,save_data:save,character_name:String(save.name).slice(0,40),character_level:save.level},{onConflict:'user_id'});
   if(e1)throw e1;
+  // A profile publication may finish after a new local change; we requeue the latest version.
   await rpc('ashen_publish_profile',{p_snapshot:snapshot});
-  lastSynced=current;
-  if(error.startsWith('Automatyczny zapis'))error='';
- }catch(e){error='Automatyczny zapis online: '+msg(e);draw()}
- finally{syncing=false;if(dirty){dirty=false;localChanged()}}}
-function localChanged(){if(!bound())return;dirty=true;if(!timer)timer=setTimeout(()=>{timer=null;dirty=false;void publish()},1800)}
-function published(){lastSynced='';if(bound())localChanged();void refresh()}
-function authChanged(){lastSynced='';void refresh()}
+  if(bound()&&cloud().currentSlot()===slot&&cloud().getSession()?.user?.id===account&&cloud().getProjectUrl()===project){
+   lastSynced=current;syncMessage='Zapis zsynchronizowany';
+   if(error.startsWith('Automatyczny zapis'))error='';
+  }
+ }catch(e){syncMessage='Błąd synchronizacji';error='Automatyczny zapis online: '+msg(e)}
+ finally{
+  syncing=false;
+  const queued=dirty;dirty=false;
+  if(bound()&&activeRaw()!==lastSynced&&(queued||syncMessage==='Błąd synchronizacji'))scheduleSync(syncMessage==='Błąd synchronizacji'?10000:1800);
+  draw();
+ }
+}
+function scheduleSync(delay=1800){if(timer)clearTimeout(timer);timer=setTimeout(()=>{timer=null;void publish()},delay)}
+function localChanged(){if(!bound())return;const raw=activeRaw();if(raw===observed)return;observed=raw;if(raw===lastSynced)return;dirty=true;scheduleSync()}
+function published(){lastSynced='';observed='';syncMessage='Oczekuje na synchronizację';if(bound())localChanged();void refresh()}
+function authChanged(){lastSynced='';observed='';if(timer){clearTimeout(timer);timer=null}dirty=false;syncMessage='';opponents=[];reports=[];mail=[];openedReport=null;openedMail=null;loaded=false;void refresh()}
 async function action(fn){if(busy)return;busy=true;error='';notice='';draw();try{await fn()}catch(e){error=msg(e)}finally{busy=false;draw()}}
 function intro(){if(!auth())return '<p class="muted">Zaloguj się przez ☁ Konto online, aby korzystać z PvP między kontami.</p>';
  if(!bound())return '<p class="muted">W panelu ☁ Konto online wybierz postać, którą chcesz udostępnić innym graczom, i kliknij „Wyślij aktualną postać”. To przypisze ten lokalny profil do konta online. Innych testerów nie synchronizujemy automatycznie.</p>';
- return '<p class="small muted">Aktywna postać jest powiązana z tym kontem. Postępy publikują się automatycznie. Inni gracze mogą zaatakować Cię również podczas nieobecności.</p>';
+ return `<p class="small muted">Aktywna postać jest powiązana z tym kontem. Postępy publikują się automatycznie. Status: ${esc(syncMessage||'oczekuje na zmiany')}. Inni gracze mogą zaatakować Cię również podczas nieobecności.</p>`;
 }
 function portrait(profile){
  const origin=['scout','fighter','tech'].includes(profile?.origin)?profile.origin:'scout';
@@ -120,5 +132,6 @@ document.addEventListener('click',async e=>{
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&openedReport){openedReport=null;reportContext='pvp';draw()}});
 window.ASHEN_ONLINE={pvpHtml,mailHtml,localChanged,published,authChanged};
+window.addEventListener('online',()=>{if(bound())scheduleSync(500);void refresh()});
 if(auth())void refresh();
 })();
