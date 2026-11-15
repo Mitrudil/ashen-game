@@ -1,3 +1,11 @@
+## ASHEN v0.1.60 — Martwy Sektor
+
+- Nowy rozdział Starć IV: poziomy 31–40 i 10 unikalnych przeciwników z osobnymi portretami.
+- Poziom 40: Strażnik Zero, czwarty boss; jednorazowa nagroda epicka, zabezpieczony egzoszkielet.
+- Cztery rozdziały w przełączniku; tryb testowy pozwala walczyć na poziomach 1–40 bez nagród i postępu.
+- Zachowano limit 10 rund, remis, historię raportów, portrety i zapis istniejącego postępu.
+- Statystyki i nagrody wstępne — ostateczny balans po ukończeniu rozdziału V.
+
 ## ASHEN v0.1.59.1 — Tryb testowania Starć
 
 - Przełącznik trybu testowego w zakładce Starcia pozwala wybrać dowolny z 30 etapów, niezależnie od postępu.
