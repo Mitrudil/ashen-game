@@ -1,3 +1,12 @@
+# ASHEN v0.2.0 — Fundament multiplayer (offline)
+
+- Nowy przełącznik niezależnych lokalnych profili testowych (maksymalnie 8).
+- Poprzednia postać i zapis `ashen-save-v010` pozostają zachowane.
+- Przygotowany schemat SQL pod prywatny projekt Supabase: `multiplayer/supabase/001_schema.sql`.
+- Dokument architektury, zaufania serwera i kolejnych kroków: `multiplayer/ARCHITEKTURA.md`.
+- **To jeszcze nie jest działający multiplayer, nie ma logowania ani synchronizacji online.**
+- Do GitHuba wrzuć wyłącznie zawartość ZIP-a ze zmienionymi plikami, zachowując ścieżki.
+
 ## ASHEN v0.1.61 — Rdzeń Otchłani
 
 ## Zmiany w v0.1.61

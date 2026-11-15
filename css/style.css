@@ -1153,3 +1153,15 @@ body.arena-report-modal-open{overflow:hidden}
 .arena-test-controls.is-active{border-color:#cc9550;background:linear-gradient(130deg,#2c2920,#161b1c)}
 .arena-test-controls.is-active strong{color:#ffca81}
 @media(max-width:560px){.arena-test-controls{padding:13px}.arena-test-controls button{width:100%}}
+
+/* ASHEN 0.2.0 — panel lokalnych postaci testowych */
+.dev-profile-header{display:flex;flex-direction:column;align-items:flex-end;gap:7px;text-align:right}
+.dev-profile-header small{color:#a9b5be}
+.dev-profile-header button{max-width:260px}
+.dev-profile-panel{margin:0 16px 16px;padding:16px;border:1px solid #536876;border-radius:12px;background:#17212a;color:#e8eef1}
+.dev-profile-panel-head,.dev-profile-entry{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.dev-profile-panel p{margin:10px 0}
+.dev-profile-list{display:grid;gap:8px;margin:14px 0}
+.dev-profile-entry{border:1px solid #364852;border-radius:8px;padding:8px 12px;background:#202e36}
+.dev-profile-entry>div{display:flex;gap:7px;flex-wrap:wrap}
+@media(max-width:720px){.dev-profile-header{align-items:flex-start;text-align:left}.dev-profile-panel{margin:0 8px 12px;padding:12px}}
