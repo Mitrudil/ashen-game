@@ -1228,3 +1228,24 @@ body.arena-report-modal-open{overflow:hidden}
 @media (max-width:900px){
  .expedition-versus-grid,.expedition-summary-tables,.expedition-round-health{grid-template-columns:1fr}
 }
+
+
+.expedition-boss-art,.expedition-active-art{position:relative;overflow:hidden;border-radius:18px;border:1px solid rgba(212,170,71,.22);background:linear-gradient(180deg,rgba(22,28,34,.95),rgba(12,16,20,.95));box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.expedition-boss-art{aspect-ratio:4/3;margin:10px 0 14px}
+.expedition-active-art{width:220px;min-width:220px;aspect-ratio:3/4}
+.expedition-boss-art img,.expedition-active-art img,.expedition-enemy-portrait img{width:100%;height:100%;display:block;object-fit:cover}
+.expedition-active-layout{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.expedition-active-main{flex:1 1 420px;min-width:0}
+.expedition-tactics{margin:16px 0;padding:14px;border-radius:16px;border:1px solid rgba(212,170,71,.16);background:rgba(212,170,71,.05)}
+.expedition-tactics-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px}
+.expedition-tactics h4{margin:0 0 4px}
+.expedition-tactics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.expedition-tactic-btn{appearance:none;text-align:left;padding:12px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:rgba(17,21,26,.84);color:var(--text);cursor:pointer;display:grid;gap:6px;transition:.15s ease}
+.expedition-tactic-btn strong{font-size:14px}
+.expedition-tactic-btn small{font-size:12px;color:var(--muted);line-height:1.35}
+.expedition-tactic-btn:hover:not(:disabled){border-color:rgba(212,170,71,.38);transform:translateY(-1px)}
+.expedition-tactic-btn.is-active{border-color:rgba(212,170,71,.5);background:rgba(212,170,71,.12);box-shadow:0 0 0 1px rgba(212,170,71,.14) inset}
+.expedition-tactic-btn:disabled{opacity:.7;cursor:not-allowed}
+.expedition-team-grid.is-enemies .arena-fighter-portrait{border-color:rgba(215,87,87,.28)}
+.expedition-enemy-portrait{width:108px;height:144px;border-radius:16px;overflow:hidden;margin:0 auto 10px;border:1px solid rgba(215,87,87,.28);background:linear-gradient(180deg,#28191b,#171114)}
+@media (max-width: 760px){.expedition-active-art{width:100%;min-width:0;max-width:320px}.expedition-active-layout{flex-direction:column}.expedition-boss-art{aspect-ratio:3/4}}

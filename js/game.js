@@ -1,4 +1,4 @@
-const APP_VERSION='0.2.9.1';
+const APP_VERSION='0.3.0';
 
 (()=>{'use strict';const LEGACY_KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 

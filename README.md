@@ -1,59 +1,66 @@
-# ASHEN v0.2.9.1 — poprawki raportów ekspedycji
+# ASHEN v0.3.0 — grafiki bossów i taktyka ekspedycji
 
-- Kolory zdarzeń na podstawie faktycznego składu bohaterów i wrogów w zapisanym raporcie.
-- Wszyscy bohaterowie na zielono, przeciwnicy na czerwono; nieznany nadawca pozostaje neutralny.
-- Nagłówki rund wyraźnie pokazują: Drużyna zadała / Otrzymała.
-- Zmiana wyłącznie wyświetlania — bez zmian w SQL, balansie, danych postaci czy zapisanych walkach.
+Ta wersja rozwija **ekspedycje klanowe** o dwie rzeczy, które były kolejnym krokiem po v0.2.9.1:
 
-# ASHEN v0.2.9 — Ekspedycje klanowe i pierwsi bossowie
-
-Ta wersja rozwija system klanów i dodaje pierwszy działający fundament pod **wspólne walki z bossami online**.
+1. **indywidualne grafiki bossów i przeciwników**,  
+2. **taktykę drużyny wybieraną przed walką**.
 
 ## Co doszło
 
-### Nowa zakładka: **☠ Ekspedycje**
-- osobna karta w menu gry,
-- lista **3 pierwszych bossów**,
-- aktywna wyprawa klanu widoczna dla wszystkich członków,
-- historia ostatnich raportów wypraw.
+### Grafiki bossów
+- każdy z 3 pierwszych bossów ma teraz własną grafikę,
+- **Brat Tarczownik**, **Brat Mechanik** i **Brat Strzelec** mają osobne portrety,
+- grafiki są widoczne:
+  - na kartach bossów,
+  - w aktywnej wyprawie,
+  - w raportach walki.
 
-### System wypraw klanowych
-- **lider lub oficer** może utworzyć wyprawę na wybranego bossa,
-- pozostali członkowie klanu mogą **dołączać** i **opuszczać** skład,
-- skład: **2–5 graczy**,
-- jedna aktywna wyprawa na klan,
-- walka jest rozliczana przez **RPC po stronie serwera**,
-- raport zapisuje się dla całego klanu.
+### Taktyka wyprawy
+Lider lub oficer może ustawić taktykę aktywnej wyprawy przed uruchomieniem walki:
+- **Dobić najsłabszych**
+- **Na największe zagrożenie**
+- **Rozproszyć ogień**
 
-### Pierwsi bossowie
-1. **Rzeźnik ze Złomowiska** — pierwszy prosty test grupy,
-2. **Kanałowy Pożeracz** — mocniejszy pojedynczy mutant,
-3. **Trzej Bracia Rdzy** — grupa elitarnych przeciwników.
+Taktyka wpływa na wybór celu przez drużynę podczas rozliczania walki na serwerze.
 
-## Ważne ograniczenia tej wersji
-- to jeszcze **nie jest pełny endgame**,
-- boss nr 3 to dalej etap testowy, nie finał gry,
-- **brak nagród, łupów i ekonomii bossów**,
-- brak jeszcze pełnej kampanii 15–20 bossów,
-- brak rajdów klanowych / wieloetapowych lokacji.
+## Nadal bez zmian
+W tej wersji nadal **nie ma jeszcze**:
+- nagród za bossów,
+- łupów,
+- pełnej ekonomii ekspedycji,
+- pełnej kampanii 15–20 bossów.
 
-Czyli: to jest **gotowy fundament systemu**, na którym można dalej budować właściwą zawartość.
+To będzie następny etap.
 
 ## Wymagany SQL
-Uruchom w projekcie **ASHEN**:
-- najpierw wcześniejsze pliki, jeśli nie były uruchomione:
-  - `002_cloud_saves.sql`
-  - `003_online_pvp.sql`
-  - `005_clans.sql`
-- następnie nowy plik:
-  - `multiplayer/supabase/006_clan_expeditions.sql`
+
+### Jeśli masz już v0.2.9 / v0.2.9.1
+Uruchom dodatkowo:
+- `multiplayer/supabase/007_expedition_tactics_and_boss_art.sql`
+
+### Jeśli stawiasz wszystko od zera
+Uruchom po kolei:
+- `002_cloud_saves.sql`
+- `003_online_pvp.sql`
+- `005_clans.sql`
+- `006_clan_expeditions.sql`
+- `007_expedition_tactics_and_boss_art.sql`
+
+## Najważniejsze zmienione pliki
+- `index.html`
+- `css/style.css`
+- `js/game.js`
+- `js/expeditions.js`
+- `assets/bosses/*`
+- `multiplayer/supabase/007_expedition_tactics_and_boss_art.sql`
 
 ## Dokument uruchomienia
-Szczegóły: `multiplayer/URUCHOMIENIE_0.2.9.md`
+Szczegóły: `multiplayer/URUCHOMIENIE_0.3.0.md`
 
 ## Bez zmian
 Nie ruszałem:
 - lokalnego PvE,
 - lokalnego PvP testowego,
-- systemu ekwipunku,
+- ekwipunku i rozwoju postaci,
+- systemu klanów poza ekspedycjami,
 - ALLADYN.
