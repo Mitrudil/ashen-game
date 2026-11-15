@@ -1,3 +1,13 @@
+## ASHEN v0.2.3 — PvP i Wiadomości
+
+- Każdy atakujący może wykonać maksymalnie **2 ataki dziennie na wybranego obrońcę** (limit osobno dla każdej pary); w lokalnym prototypie reset jest o północy według zegara przeglądarki.
+- Trzeci atak na tę samą osobę tego dnia jest blokowany, a inne cele mają osobne limity.
+- Obrońca otrzymuje automatyczną wiadomość o ataku i link do szczegółowego raportu PvP.
+- Nowa zakładka **Wiadomości**: Odebrane, Wysłane, odczyt/nieodczyt, odpowiedz, pisanie do innej postaci testowej.
+- Prywatne wiadomości oraz powiadomienia o walkach zapisują się lokalnie w oddzielnych profilach.
+- Bez przejmowania ekwipunku, bez trwałych obrażeń HP, bez potrącania zasobów.
+- To nadal symulator offline. W przyszłym multiplayerze limit i doręczenie wiadomości muszą być egzekwowane przez serwer według wspólnej strefy czasowej (docelowo Europe/Warsaw).
+
 ## ASHEN v0.2.2 — lokalne PvP
 
 - Nowa zakładka PvP, walka między zapisanymi profilami testowymi.
