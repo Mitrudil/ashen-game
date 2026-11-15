@@ -788,3 +788,14 @@ h1, h2, h3, h4, h5, h6, button,
 .ashen-roster-test-buttons button:hover{border-color:#dab072;background:#34444a}
 .ashen-roster-test-buttons button.is-current{background:#79501f;border-color:#edb765;color:#fff2d5;box-shadow:0 0 0 1px rgba(245,178,86,.25)}
 @media(max-width:500px){.ashen-roster-test-buttons button{flex:1;min-width:65px}.ashen-roster-test-banner{align-items:flex-start}}
+
+/* v0.1.54.4: global HUD and clear two-handed equipment state */
+.ashen-global-resources{margin-bottom:16px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.ashen-global-resources .mission-resource{min-width:0;overflow:hidden}
+.ashen-global-resources .lab,.ashen-global-resources .num{overflow-wrap:anywhere}
+.slot-anchor .ashen-mod-badges{display:inline-flex;margin:4px 0 0;justify-content:center;gap:4px}
+.slot-anchor .ashen-mod-tooltip{z-index:200}
+.slot-anchor.blocked-by-twohanded{border-color:#6f5546;background:rgba(117,74,48,.13)}
+.blocked-hand-note{color:#e4aa7e;font-weight:700}
+@media(max-width:900px){.ashen-global-resources{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:440px){.ashen-global-resources{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.ashen-global-resources .mission-resource{padding:5px}.slot-anchor .ashen-mod-badges{flex-wrap:wrap}}
