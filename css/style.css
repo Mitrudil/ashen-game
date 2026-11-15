@@ -761,3 +761,6 @@ h1, h2, h3, h4, h5, h6, button,
 .ashen-premium-shell .premium-active{grid-template-columns:190px minmax(0,1fr) auto}
 .ashen-premium-shell .premium-active-picture img{width:100%;height:100%;padding:0;object-fit:contain!important;object-position:50% 50%!important}
 @media(max-width:750px){.ashen-premium-shell .premium-active{grid-template-columns:1fr!important}.ashen-premium-shell .premium-active-picture{width:100%;height:auto;aspect-ratio:760/460;max-height:230px}.ashen-premium-shell .premium-active-picture img{height:100%;object-fit:contain!important}}
+
+/* v0.1.52 — czytelny panel testowego cofania kryjówki */
+.ashen-room-test-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px}.ashen-room-test-actions button{white-space:normal;max-width:100%}@media(max-width:700px){.ashen-room-test-actions{justify-content:flex-start}}

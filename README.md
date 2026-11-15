@@ -387,3 +387,11 @@ W sypialni zastosowano realistyczne tło `assets/bunker/rooms/bedroom-base.webp`
 - Nowe pliki: `assets/bunker/rooms/storage-level1.webp` i `assets/bunker/rooms/workshop-level1.webp`.
 - Sypialnia, jej personalizacja, mechanika rozbudowy pomieszczeń i istniejące zasoby pozostają bez zmian.
 - Do aktualizacji GitHuba wgraj `index.html`, `js/game.js`, `README.md` i dwa pliki WebP we wskazanym katalogu.
+
+
+## v0.1.52 — Kryjówka: gotowe sceny i cofanie testowe
+- Usunięto interfejs wykonywania i ulepszania mebli z Sypialni, a także nakładki mebli/dekoracji i oświetlenia ze sceny. Sypialnia wyświetla wyłącznie gotowe ilustracje dla poziomów 1–3.
+- Dodano przycisk „Cofnij poziom (test)” dla wszystkich trzech pomieszczeń. Cofanie nie zwraca surowców i obniża aktywne premie.
+- Najwyższy już opłacony poziom pomieszczenia można przywrócić bez ponownego płacenia (zapamiętane w `roomUnlocked`); nowe poziomy nadal wymagają standardowych zasobów.
+- Magazyn i Warsztat mają aktualnie po jednej ilustracji na wszystkie poziomy — różnice wizualne wymagają osobnych gotowych obrazów w kolejnej aktualizacji.
+- Plan docelowy: pięć etapów każdego modułu, rozszerzenie o kuchnię, punkt medyczny, generator i zbrojownię, po ustaleniu mechanik i wykonaniu ilustracji.
