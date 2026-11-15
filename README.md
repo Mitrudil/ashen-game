@@ -1,14 +1,22 @@
-# ASHEN v0.3.6.1 — nielimitowane zapasy podczas testów
+# ASHEN v0.3.6.2 — odznaki wyłącznie dla organizatora i nowe grafiki
 
-Wszystkie ekspedycje są **bezpłatne w zapasach**, bez względu na stan magazynu klanowego. Można wielokrotnie uruchamiać kolejne wyprawy do sprawdzania odznak i łupów.
+## Zasada odznak
+- Odznakę za bossa otrzymuje **tylko organizator zwycięskiej ekspedycji**, raz na bossa i konto.
+- Uczestnicy w dalszym ciągu dostają własne: EXP, kredyty, złom i losowe łupy.
+- Premia +50% za osobiste pierwsze zwycięstwo nadal przysługuje uczestnikom; jest odrębna od odznaki.
+- Na razie NIE ma wymogu ostatecznego ciosu. Rozważymy to po rozbudowie balansu.
+- Nowy SQL naprawia odznaki przyznane wcześniej: usuwa odznaki osobom, które tylko dołączyły, oraz przyznaje organizatorom za wcześniej wygrane wyprawy.
+- Historyczne nagrody i raporty pozostają bez zmian.
 
-**Bez zmian pozostają:** maksymalnie 2 aktywne wyprawy na klan, 1 aktywna wyprawa na organizatora, ograniczenia sumy poziomów i liczby graczy, okres zbiórki, zaproszenia i nagrody. Wyprawy nadal wymagają odpowiedniego składu.
+## Grafika odznak
+Nowe, graficzne odznaki zapisane w `assets/badges/`: Złomowisko, Pożeracz, Trzej Bracia Rdzy. Pojawiają się w profilach graczy i Ekspedycjach.
 
-## Instalacja
+## Aktualizacja
 1. Wgraj zawartość paczki aktualizacyjnej do katalogu głównego repozytorium ASHEN.
-2. W **osobnym projekcie Supabase ASHEN** uruchom **jedynie** `multiplayer/supabase/015_unlimited_test_expeditions.sql` (wymaga wcześniej wdrożonych migracji 001–014).
-3. Odśwież grę klawiszami Ctrl+F5.
+2. W SQL Editor **wyłącznie projektu ASHEN**, uruchom `multiplayer/supabase/016_organizer_badges.sql`.
+3. Odśwież grę przez Ctrl+F5 i sprawdź odznaki na kontach organizatora i uczestnika.
 
-SQL 015 zastępuje tylko funkcję `ashen_expedition_create(integer)` i **nie pobiera zapasów** przy tworzeniu. Zachowuje dane i wcześniejsze raporty. Samo wgranie plików HTML/JS nie wystarczy — serwer nadal pobierałby zapasy bez SQL 015.
+Nie uruchamiaj ponownie SQL 014 ani 015. Wcześniejszy tryb testowy z nieograniczonymi zapasami pozostaje aktywny.
 
-**Tryb testowy, nie do publikacji produkcyjnej.** Przy końcowym balansowaniu gry przywrócimy koszt zapasów.
+## Zakres zmian
+`index.html`, `js/game.js`, `js/players.js`, `js/expeditions.js`, `css/style.css`, `assets/badges/*.webp`, `multiplayer/supabase/016_organizer_badges.sql`, `README.md`.
