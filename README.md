@@ -1,3 +1,11 @@
+# ASHEN v0.1.58 — Starcia 11–20
+
+- Rozdział II: Ziemie bezprawia, poziomy 11–20, dziesięć nowych przeciwników i unikalnych portretów.
+- Boss na poziomie 20: Egzekutor, jednorazowy zabezpieczony epicki łup.
+- Dwa przełączane rozdziały, wspólny i zachowany postęp Starć, osobne raporty.
+- Trudność orientacyjna — bez finalnego balansu.
+- Wgranie aktualizacji nie kasuje dotychczasowego zapisu.
+
 ASHEN v0.1.57 — Starcia Pustkowi (Rozdział I: etapy 1–10).
 
 Dodano: osobna zakładka Starcia z 10 unikalnymi grafikami przeciwników, bossem na etapie 10, niezależnym od poziomu postaci odblokowywaniem kolejnych starć, automatyczną walką opartą na dotychczasowym wyposażeniu, historią prób i raportami obrażeń, nagrodami za pierwsze zwycięstwo oraz mniejszymi nagrodami za powtórki.

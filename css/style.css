@@ -1032,3 +1032,13 @@ h1, h2, h3, h4, h5, h6, button,
 @media(max-width:1100px){.arena-layout{grid-template-columns:1fr}.arena-hero{flex-wrap:wrap}.arena-progress{width:100%}}
 @media(max-width:720px){.arena-level-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.arena-enemy-card{grid-template-columns:1fr}.arena-portrait-wrap{width:min(100%,340px);justify-self:center}.arena-report-list{grid-template-columns:1fr}}
 @media(max-width:480px){.arena-hero{padding:16px}.arena-hero h3{font-size:22px}.arena-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.arena-note,.arena-reports-area{padding:13px}.arena-level-btn{font-size:12px;min-height:46px}.arena-report-header{flex-wrap:wrap}}
+
+/* ASHEN v0.1.58 — chapter navigation for 20 skirmishes */
+.arena-chapter-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.arena-chapter-tab{display:flex;flex-direction:column;gap:5px;align-items:flex-start;text-align:left;padding:14px 18px;border-radius:12px;border:1px solid #584b3b;background:linear-gradient(150deg,#222a2e,#141a1d);color:#e0d7c7;transition:border-color .15s,background .15s}
+.arena-chapter-tab span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#bc9866}
+.arena-chapter-tab strong{font-size:17px;color:#f0dfbf}
+.arena-chapter-tab small{font-size:11px;color:#aeb6b8}
+.arena-chapter-tab.selected{border-color:#d6a361;background:linear-gradient(140deg,#392d1c,#171d20);box-shadow:inset 0 1px #f3d59a32}
+.arena-chapter-tab:hover{border-color:#c09459}
+@media(max-width:540px){.arena-chapter-tabs{grid-template-columns:1fr}.arena-chapter-tab{padding:11px 14px}}
