@@ -1051,3 +1051,51 @@ h1, h2, h3, h4, h5, h6, button,
 .arena-outcome-reason p{margin:7px 0 9px;font-size:13px;line-height:1.6;color:#e1d1bb}
 .arena-outcome-hp{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12px;color:#b8c5c8}
 .arena-outcome-hp strong{color:#f5e4c7}
+
+
+/* ASHEN 0.1.58.2 — rozszerzony raport Starć inspirowany przejrzystością BW */
+.arena-battle-section-title{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px;margin:16px 0 10px}
+.arena-battle-section-title span{font-size:10px;letter-spacing:.11em;font-weight:750;color:#ce9a59}
+.arena-battle-section-title h4{font-size:17px;color:#f0d9b0;margin:0}
+.arena-combat-profile,.arena-round-review,.arena-battle-finale{min-width:0}
+.arena-combat-table-wrap{overflow-x:auto;border:1px solid #5c503e;border-radius:12px}
+.arena-combat-table{width:100%;border-collapse:collapse;min-width:390px;font-size:13px}
+.arena-combat-table thead{background:#302a21}
+.arena-combat-table th,.arena-combat-table td{padding:10px 12px;border-bottom:1px solid #ffffff12;text-align:left;vertical-align:top}
+.arena-combat-table th:first-child{width:32%;font-weight:600;color:#bbc4c7}
+.arena-combat-table th:not(:first-child){color:#f2ddbc}
+.arena-combat-table th small{font-size:11px;color:#c0b6a5;display:block;font-weight:400}
+.arena-combat-table td{color:#f2ebda;font-weight:650}
+.arena-combat-table tr:nth-child(even){background:#e9b97609}
+.arena-battle-profile-extra{border:1px solid #4f4c43;border-radius:10px;padding:10px 12px;margin-top:8px;color:#b9c3c7;font-size:12px}
+.arena-battle-profile-extra summary{color:#e4bc83;cursor:pointer;font-weight:650}
+.arena-profile-attributes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.arena-profile-attributes span{padding:7px 10px;border-radius:8px;background:#192126;border:1px solid #47433c}
+.arena-profile-attributes strong{color:#eee0c9}.arena-profile-weapons{line-height:1.55}
+.arena-rounds-list{display:grid;gap:8px}
+.arena-round-card{border:1px solid #554a3a;border-radius:11px;overflow:hidden;background:linear-gradient(160deg,#202a2d,#11191d)}
+.arena-round-card[open]{border-color:#927047}
+.arena-round-card>summary{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:12px 14px;cursor:pointer;list-style:none}
+.arena-round-card>summary::-webkit-details-marker{display:none}
+.arena-round-number{font-weight:800;letter-spacing:.07em;color:#f4ce94}
+.arena-round-damage{font-size:12px;color:#c4cdd0}.arena-round-expand{font-size:11px;color:#d2a975;margin-left:auto}
+.arena-round-card-body{padding:12px 14px 14px;border-top:1px solid #534532}
+.arena-round-hp-grid,.arena-final-hp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.arena-round-hp-grid>div,.arena-final-hp>div{border:1px solid #504c43;border-radius:9px;padding:11px 12px;background:#121d21;min-width:0}
+.arena-round-hp-grid span,.arena-final-hp span{display:block;color:#aebdc2;font-size:11px;margin-bottom:5px}
+.arena-round-hp-grid strong,.arena-final-hp strong{font-size:18px;color:#f0e5d0;white-space:nowrap}
+.arena-health-track{height:7px;overflow:hidden;border-radius:10px;background:#3d3431;margin-top:9px}
+.arena-health-track>span{height:100%;display:block;border-radius:10px;transition:width .18s}
+.arena-health-track .is-hero{background:linear-gradient(90deg,#497f61,#82b796)}
+.arena-health-track .is-enemy{background:linear-gradient(90deg,#995646,#e3a16a)}
+.arena-round-events{margin-top:10px;max-height:290px;overflow-y:auto}
+.arena-round-events p{margin:0;padding:6px 0;border-bottom:1px solid #ffffff0b;font-size:12px;line-height:1.5}
+.arena-round-events .is-hero{color:#91c9ac}.arena-round-events .is-enemy{color:#e4ac95}
+.arena-final-hp{margin-top:10px}
+.arena-report-legacy{padding:12px 14px;border-radius:10px;border:1px solid #5b5246;background:#1b2226;color:#d5c8b3;margin:12px 0;font-size:13px}
+.arena-report-legacy p{margin:6px 0 0;color:#aab4b7;line-height:1.5}
+@media(max-width:520px){.arena-round-hp-grid,.arena-final-hp,.arena-profile-attributes{grid-template-columns:1fr}.arena-round-card>summary{gap:7px}.arena-round-expand{margin-left:0}.arena-combat-table th,.arena-combat-table td{padding:8px}}
+/* Stabilizacja wąskiego widoku Starć: kafel i panele nie mogą poszerzać ekranu. */
+.arena-screen,.arena-screen>*,.arena-hero,.arena-hero>div,.arena-progress,.arena-report{min-width:0;max-width:100%}
+.arena-hero h3,.arena-hero p{overflow-wrap:anywhere}
+@media(max-width:540px){.arena-hero{display:grid;grid-template-columns:minmax(0,1fr)}.arena-progress{width:100%}.arena-report{padding:12px}}

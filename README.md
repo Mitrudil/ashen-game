@@ -1,3 +1,12 @@
+# ASHEN v0.1.58.2 — raporty walk inspirowane BW
+
+- Przed starciem zapisywany jest stan statystyk obu stron (PŻ, pancerz, unik, celność, ataki), wraz z atrybutami i konfiguracją broni bohatera.
+- Każda runda osobno: zadane/otrzymane obrażenia, PŻ obu stron `aktualne / maksymalne`, pasek zdrowia i możliwość rozwinięcia wydarzeń rundy.
+- Podsumowanie po walce: pozostałe PŻ bohatera i przeciwnika z mianownikiem, powód zwycięstwa/remisu/porażki oraz oryginalna tabela obrażeń.
+- Starsze raporty nie mają historycznych statystyk ani rozpiski PŻ dla rund. Gra jasno informuje o braku tych danych i nadal pokazuje zapisany dziennik, bez zmyślania wartości.
+- Bez zmian limitu 10 rund, balansu walk, nagród, postępu i struktury zapisu.
+- Podmień `index.html`, `js/game.js` i `css/style.css`; `README.md` opcjonalnie.
+
 # ASHEN v0.1.58.1 — Remis po dziesięciu rundach
 
 - Maksymalny czas walki w Starciach nie zmienia się: **10 rund**.

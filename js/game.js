@@ -1,4 +1,4 @@
-const APP_VERSION='0.1.58.1';
+const APP_VERSION='0.1.58.2';
 
 (()=>{'use strict';const KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 const rarities=[{name:'Zwykły',color:'#b8bfc3',weight:58,mult:1},{name:'Ulepszony',color:'#8ac78b',weight:25,mult:1.14},{name:'Rzadki',color:'#77afe5',weight:12,mult:1.32},{name:'Epicki',color:'#c391e4',weight:4,mult:1.58},{name:'Legendarny',color:'#f2bb65',weight:1,mult:1.95}];
@@ -646,7 +646,7 @@ function heroAttacks(){
  if(!attacks.length)attacks.push({weapon:statsOf({id:'knife',rarity:0}),hand:hands[0],power:1});
  return attacks;
 }
-function fight(enemy){
+function fight(enemy,options={}){
  const a=attrs();
  const attacks=heroAttacks();
  const armor=Object.entries(state.equip).filter(([k])=>!['right','left'].includes(k))
@@ -654,6 +654,14 @@ function fight(enemy){
  const setArmor=activeSetBonuses().armorPct;
  const hero={hp:maxHp(),acc:6+a.per*1.3,dodge:3+a.dex*1.1+(companionId()==='boar'?PET_BONUSES.boar[companionStage()]:0),armor:armor+Math.round(armor*setArmor/100)+Math.floor(a.end/4)+(companionId()==='boar'?PET_BONUSES.boar[companionStage()]:0)};
  const foe={...enemy},lines=[];
+ // Rozszerzone raporty zapisujemy tylko dla Starć. Wyprawy pozostają bez zmian.
+ const recordRounds=!!options.recordRounds;
+ const heroMaxHp=hero.hp,foeMaxHp=foe.hp,roundHistory=[];
+ const battleProfile=recordRounds?{
+   hero:{name:state.name,level:state.level,hp:heroMaxHp,armor:hero.armor,dodge:Math.round(hero.dodge),accuracy:Math.round(hero.acc),str:a.str,dex:a.dex,end:a.end,per:a.per,int:a.int,cha:a.cha,attacks:attacks.length,
+     weapons:attacks.map(w=>({name:w.weapon?.name||'Broń',hand:w.hand,power:Math.round(w.power*100)}))},
+   enemy:{name:enemy.name,hp:foeMaxHp,armor:foe.armor,dodge:foe.dodge,accuracy:foe.acc,attackMin:foe.atk[0],attackMax:foe.atk[1]}
+ }:null;
  const damageSummary={hero:{attempts:0,hits:0,misses:0,crits:0,damage:0,best:0},foe:{attempts:0,hits:0,misses:0,crits:0,damage:0,best:0},rounds:0};
  const hitAttack=(attacker,defender,who,r,weapon=null)=>{
    const performance=damageSummary[who==='hero'?'hero':'foe'];performance.attempts++;
@@ -673,6 +681,7 @@ function fight(enemy){
    lines.push(`Runda ${r}: ${who==='hero'?'Zadajesz':'Otrzymujesz'} ${actualDamage} obrażeń${handName}${critical?' (KRYTYCZNE)':''}.`);
  };
  for(let r=1;r<=10&&hero.hp>0&&foe.hp>0;r++){
+   const startLine=lines.length,heroDamageStart=damageSummary.hero.damage,foeDamageStart=damageSummary.foe.damage;
    damageSummary.rounds=r;
    const order=rand(1,20)+a.dex>=rand(1,20)+foe.dodge?['hero','foe']:['foe','hero'];
    for(const who of order){
@@ -681,8 +690,12 @@ function fight(enemy){
        for(const weapon of attacks){if(foe.hp<=0)break;hitAttack(hero,foe,'hero',r,weapon)}
      } else hitAttack(foe,hero,'foe',r);
    }
+   if(recordRounds)roundHistory.push({number:r,heroHp:hero.hp,enemyHp:foe.hp,
+     heroDamage:damageSummary.hero.damage-heroDamageStart,enemyDamage:damageSummary.foe.damage-foeDamageStart,
+     events:lines.slice(startLine)});
  }
- return {won:foe.hp<=0,lines,heroHp:hero.hp,enemyHp:foe.hp,damageSummary};
+ return {won:foe.hp<=0,lines,heroHp:hero.hp,enemyHp:foe.hp,damageSummary,
+  ...(recordRounds?{battleProfile,roundHistory,heroMaxHp,enemyMaxHp:foeMaxHp}:{})};
 }
 
 // ASHEN v0.1.57 — Starcia: niezależny progres, osobne raporty i 10 unikalnych przeciwników.
@@ -747,7 +760,7 @@ function startArenaFight(number){
  const stage=ARENA_STAGES.find(s=>s.level===number),progress=arenaData();
  if(!stage||!state.created||number>Math.min(ARENA_STAGES.length,progress.highest+1))return;
  if(!confirm(`Starcie ${number}/${ARENA_STAGES.length}: ${stage.name}${stage.boss?' (BOSS)':''}\n\nWalka trwa maksymalnie 10 rund. Zwyciężysz, jeśli pokonasz przeciwnika. Jeśli po 10 rundach obie strony nadal żyją, nastąpi REMIS: bez nagród i odblokowania kolejnego etapu.\n\nRozpocząć starcie?`))return;
- const result=fight(arenaEnemy(stage));
+ const result=fight(arenaEnemy(stage),{recordRounds:true});
  const firstWin=result.won&&!(Number(progress.victories[number])>0);
  const multiplier=result.won?(firstWin?1:.25):0;
  const xp=Math.round(stage.reward.xp*multiplier),scrap=Math.round(stage.reward.scrap*multiplier),credits=Math.round(stage.reward.credits*multiplier);
@@ -772,13 +785,46 @@ function startArenaFight(number){
  message=result.won?`Zwycięstwo w Starciu ${number}! ${stage.boss?'Pokonałeś bossa rozdziału.':'Kolejne starcie jest dostępne.'}`:arenaOutcome(entry)==='draw'?`REMIS w Starciu ${number}. Minęło 10 rund i obaj walczący przeżyli. Popraw uzbrojenie, aby pokonać przeciwnika w limicie rund.`:`Porażka w Starciu ${number}. Możesz spróbować ponownie bez utraty wyposażenia.`;
  save();render();
 }
+function arenaHpLabel(value,max){
+ if(!Number.isFinite(value))return '—';
+ return `${Math.max(0,Math.round(value))}${Number.isFinite(max)?' / '+Math.round(max):' / ?'}`;
+}
+function arenaHpBar(value,max,enemy=false){
+ if(!Number.isFinite(value)||!Number.isFinite(max)||max<=0)return '';
+ const pct=Math.max(0,Math.min(100,value/max*100));
+ return `<div class="arena-health-track" role="progressbar" aria-valuemin="0" aria-valuemax="${Math.round(max)}" aria-valuenow="${Math.round(Math.max(0,value))}"><span class="${enemy?'is-enemy':'is-hero'}" style="width:${pct}%"></span></div>`;
+}
+function arenaCombatProfiles(entry){
+ const p=entry?.battleProfile;
+ if(!p?.hero||!p?.enemy)return `<div class="arena-report-legacy"><strong>Parametry przed walką</strong><p>Starszy raport nie zawiera zapisu statystyk z momentu walki. Nie zastępujemy ich bieżącymi statystykami postaci, ponieważ wyposażenie mogło się zmienić.</p></div>`;
+ const hero=p.hero,foe=p.enemy;
+ const rows=[
+  ['PŻ na starcie',hero.hp,foe.hp],
+  ['Pancerz',hero.armor,foe.armor],
+  ['Unik',hero.dodge,foe.dodge],
+  ['Celność',hero.accuracy,foe.accuracy],
+  ['Ataki w rundzie',hero.attacks,1],
+  ['Obrażenia broni', 'Zależne od broni i atrybutów',`${foe.attackMin}–${foe.attackMax}`]
+ ];
+ const attributes=[['Siła',hero.str],['Zręczność',hero.dex],['Wytrzymałość',hero.end],['Percepcja',hero.per],['Inteligencja',hero.int],['Charyzma',hero.cha]];
+ return `<section class="arena-combat-profile"><div class="arena-battle-section-title"><span>01 / PORÓWNANIE</span><h4>Statystyki przed walką</h4></div><div class="arena-combat-table-wrap"><table class="arena-combat-table"><thead><tr><th>Parametr</th><th>${escape(hero.name)} <small>· poziom ${hero.level}</small></th><th>${escape(foe.name)}</th></tr></thead><tbody>${rows.map(([label,h,f])=>`<tr><th scope="row">${label}</th><td>${escape(String(h))}</td><td>${escape(String(f))}</td></tr>`).join('')}</tbody></table></div>
+ <details class="arena-battle-profile-extra"><summary>Atrybuty i używana broń</summary><div class="arena-profile-attributes">${attributes.map(([name,val])=>`<span>${name}: <strong>${val}</strong></span>`).join('')}</div><div class="arena-profile-weapons"><strong>Ataki postaci:</strong> ${hero.weapons.map(w=>`${escape(w.name)} (${w.hand==='right'?'prawa':'lewa'} ręka, ${w.power}%)`).join(' · ')}</div></details></section>`;
+}
+function arenaRoundReview(entry){
+ if(!Array.isArray(entry?.roundHistory)||!entry.roundHistory.length)return `<div class="arena-report-legacy"><strong>Przebieg rund</strong><p>Ten zapis pochodzi ze starszej wersji, dlatego nie zawiera PŻ po każdej rundzie. Dostępny jest oryginalny dziennik zdarzeń poniżej.</p></div>`;
+ return `<section class="arena-round-review"><div class="arena-battle-section-title"><span>02 / RUNDY</span><h4>Przebieg starcia</h4></div><div class="arena-rounds-list">${entry.roundHistory.map((r,i)=>`<details class="arena-round-card" ${i===entry.roundHistory.length-1?'open':''}><summary><span class="arena-round-number">RUNDA ${r.number}</span><span class="arena-round-damage">Zadane ${r.heroDamage} · Otrzymane ${r.enemyDamage}</span><span class="arena-round-expand">Szczegóły</span></summary><div class="arena-round-card-body"><div class="arena-round-hp-grid"><div><span>Twoje PŻ</span><strong>${arenaHpLabel(r.heroHp,entry.heroMaxHp)}</strong>${arenaHpBar(r.heroHp,entry.heroMaxHp)}</div><div><span>PŻ przeciwnika</span><strong>${arenaHpLabel(r.enemyHp,entry.enemyMaxHp)}</strong>${arenaHpBar(r.enemyHp,entry.enemyMaxHp,true)}</div></div><div class="arena-round-events">${(r.events||[]).map(line=>`<p class="${line.includes('Zadajesz')||line.includes('Przeciwnik chybia')?'is-hero':'is-enemy'}">${escape(line)}</p>`).join('')||'<p>W tej rundzie nie zarejestrowano zdarzeń.</p>'}</div></div></details>`).join('')}</div></section>`;
+}
 function arenaBattleReport(entry,index=0){
  const stats=damageReportStats(entry);
+ const maxHero=entry.heroMaxHp??entry.battleProfile?.hero?.hp;
+ const maxEnemy=entry.enemyMaxHp??entry.battleProfile?.enemy?.hp??ARENA_STAGES.find(s=>s.level===entry.stage)?.hp;
  return `<div class="arena-report"><div class="arena-report-header"><div><span class="tag">RAPORT · STARCIE ${entry.stage}</span><h3 class="${arenaOutcomeClass(entry)}">${arenaOutcomeLabel(entry)} — ${escape(entry.name)}</h3><p class="small muted">${escape(entry.at)} · ${entry.boss?'BOSS':'Przeciwnik'} · ${stats.rounds} ${stats.rounds===1?'runda':'rund'}</p></div><button data-arena-report-close="1">✕ Zamknij</button></div>
- <div class="arena-outcome-reason ${arenaOutcome(entry)==='draw'?'is-draw':''}"><strong>${arenaOutcomeLabel(entry)} · Powód zakończenia</strong><p>${arenaOutcomeReason(entry)}</p><div class="arena-outcome-hp"><span>Twoje PŻ po walce: <strong>${Number.isFinite(entry.heroHp)?Math.max(0,entry.heroHp):'—'}</strong></span><span>PŻ przeciwnika: <strong>${Number.isFinite(entry.enemyHp)?Math.max(0,entry.enemyHp):'—'}</strong></span></div></div>
+ ${arenaCombatProfiles(entry)}
+ ${arenaRoundReview(entry)}
+ <section class="arena-battle-finale"><div class="arena-battle-section-title"><span>03 / WYNIK</span><h4>Podsumowanie starcia</h4></div><div class="arena-outcome-reason ${arenaOutcome(entry)==='draw'?'is-draw':''}"><strong>${arenaOutcomeLabel(entry)} · Powód zakończenia</strong><p>${arenaOutcomeReason(entry)}</p><div class="arena-final-hp"><div><span>${escape(entry.battleProfile?.hero?.name||'Postać')} · PŻ po walce</span><strong>${arenaHpLabel(entry.heroHp,maxHero)}</strong>${arenaHpBar(entry.heroHp,maxHero)}</div><div><span>${escape(entry.name)} · PŻ po walce</span><strong>${arenaHpLabel(entry.enemyHp,maxEnemy)}</strong>${arenaHpBar(entry.enemyHp,maxEnemy,true)}</div></div></div></section>
  ${damageReportPanel(entry)}
  <div class="arena-report-reward"><strong>Nagrody:</strong> +${entry.xp} PD · +${entry.scrap} złomu · +${entry.credits} kredytów${entry.levels?' · Awans: '+entry.levels:''}${entry.rewardItem?`<div class="arena-special-loot">★ Łup bossa: <strong>${escape(entry.rewardItem.name)}</strong> (epicki, zabezpieczony) <button data-page="inventory">Otwórz ekwipunek</button></div>`:''}</div>
- <details class="arena-battle-details"><summary>Przebieg walki — ${entry.lines.length} zdarzeń</summary><div class="arena-battle-log">${entry.lines.map(line=>`<div>${escape(line)}</div>`).join('')}</div></details>
+ <details class="arena-battle-details"><summary>Oryginalny dziennik walki — ${entry.lines.length} zdarzeń</summary><div class="arena-battle-log">${entry.lines.map(line=>`<div>${escape(line)}</div>`).join('')}</div></details>
  </div>`;
 }
 function arena(){
