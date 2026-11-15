@@ -1,3 +1,12 @@
+# ASHEN v0.2.0.1 — poprawka niezależności profili
+
+- Każdy profil testowy odczytuje i zapisuje dane pod osobnym kluczem; nie podmieniamy już wspólnego zapisu przy przełączaniu.
+- Klucz `ashen-save-v010` jest zarezerwowany dla głównej postaci. Dodano ostrożną migrację danych z v0.2.0.
+- Każdy Tester ma przycisk **Nowa postać / reset**. Użyj go, jeśli tester utworzony w v0.2.0 ma skopiowany ekwipunek lub historię. Przed resetem zostaje zapisana lokalna kopia Testera.
+- Poprawiono numer wersji skryptu w `index.html`, aby przeglądarka pobierała nowy kod.
+- Przed aktualizacją zalecany eksport zapisu głównej postaci z zakładki Kryjówka.
+- Nie ma jeszcze prawdziwych kont online ani PvP.
+
 # ASHEN v0.2.0 — Fundament multiplayer (offline)
 
 - Nowy przełącznik niezależnych lokalnych profili testowych (maksymalnie 8).
