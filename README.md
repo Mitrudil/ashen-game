@@ -1,3 +1,15 @@
+# ASHEN v0.1.58.1 — Remis po dziesięciu rundach
+
+- Maksymalny czas walki w Starciach nie zmienia się: **10 rund**.
+- Gdy obie strony mają PŻ po dziesiątej rundzie, wynik to **REMIS** w pomarańczowym kolorze.
+- Remis nie przyznaje nagród ani nie odblokowuje następnego etapu; ponowienie starcia jest możliwe.
+- W oknie potwierdzającym oraz w zakładce Starcia wyjaśniono zasady.
+- Raport pokazuje powód zakończenia i pozostałe PŻ obu stron.
+- Wynik jest spójny w dzienniku Starć i zakładce Raporty.
+- Starsze zapisane walki z pozostałymi PŻ obu stron także będą wyświetlane jako remisy, bez zmiany zasobów.
+- Silnik Wypraw i balans przeciwników pozostawiono bez zmian.
+- Wystarczy podmienić `index.html`, `js/game.js`, `css/style.css` (README opcjonalnie).
+
 # ASHEN v0.1.58 — Starcia 11–20
 
 - Rozdział II: Ziemie bezprawia, poziomy 11–20, dziesięć nowych przeciwników i unikalnych portretów.
