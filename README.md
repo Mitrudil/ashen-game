@@ -49,3 +49,11 @@ Nie zmieniano zasad ekspedycji klanowych, nagród za bossów, odznak, PvP, magaz
 - Dotychczasowe 3 etapy rozwoju pojazdów oraz bonus poziomu Garażu pozostają.
 - Migracja aktywnego pojazdu starszej wersji do kolekcji bez utraty jego ulepszeń.
 - Bez zmian SQL / Supabase.
+
+
+## ASHEN v0.3.9.1 — poprawka Garażu
+
+- Testowo odblokowany pojazd można aktywować niezależnie od poziomu postaci; poprzednio warunek poziomu blokował aktywację pomimo posiadania.
+- Usunięto podgląd trzech etapów pojazdu z kart; widoczny jest jedynie naprawdę osiągnięty etap.
+- „TEST · Odblokuj” nadal nie aktywuje pojazdu automatycznie. Aktywacja następuje wyłącznie przez „Aktywuj”.
+- Pojazdy zdobyte wcześniej i ich moduły zachowują się w zapisie. Bez migracji SQL i zmian grafik.
