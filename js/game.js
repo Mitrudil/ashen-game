@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.7.3';
+const APP_VERSION='0.4.7.4';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -768,13 +768,93 @@ function plannerResultHtml(){
  const extras=r.accessories.length?r.accessories.map(v=>`<div class="ashen-set-member"><span>${escape(v.name)} · ${v.count}/3</span><strong>${v.active?escape(accessoryBonusText(v.bonus)):'Brak premii (wymagane 3/3)'}</strong></div>`).join(''):'<div class="small muted">Brak akcesoriów z rodziny setowej.</div>';
  return `<div class="ashen-sets-grid"><article class="ashen-set-card"><strong>Sety ubioru</strong><div class="ashen-set-members">${cloth}</div></article><article class="ashen-set-card"><strong>Sety akcesoriów</strong><div class="ashen-set-members">${extras}</div></article></div><p class="small muted" style="margin:10px 0 0">Jakość: ×${r.avg.toFixed(2).replace('.',',')} · Liczymy dokładnie jak w aktualnym ekwipunku. Indywidualne premie przedmiotów nie są tu uwzględnione.</p>`;
 }
+// ASHEN v0.4.7.4 — analiza premii setowych w prawdziwym lokalnym fight().
+// Nie dotykamy state.equip ani state.inventory: zmieniamy wylacznie testSnapshot.
+const SET_COMPARE_KEY='ashen-set-compare-v0474';
+let setCompareStage=20,setCompareResults=null;
+try{const previous=JSON.parse(localStorage.getItem(SET_COMPARE_KEY)||'null');
+ if(previous&&[10,20].includes(previous.stage)){setCompareStage=previous.stage;
+  if(Array.isArray(previous.rows)&&previous.rows.length===4)setCompareResults=previous;}
+}catch{}
+function plannerBonusProfile(plan){
+ const quality=setQuality({rarity:plan.quality}),group={},attributes={},accGroup={};let armorPct=0;
+ for(const id of plan.clothing){if(SETS[id])group[id]=(group[id]||0)+1;}
+ for(const [id,count] of Object.entries(group)){
+  if(count<3)continue;
+  const cfg=SETS[id],base=cfg.start+(count-3)*cfg.step,amount=Math.round(base*quality);
+  if(cfg.armorPct)armorPct+=amount;
+  else attributes[cfg.attribute]=(attributes[cfg.attribute]||0)+amount;
+ }
+ for(const id of plan.accessories){if(ACCESSORY_SETS[id])accGroup[id]=(accGroup[id]||0)+1;}
+ for(const [id,count] of Object.entries(accGroup)){
+  if(count!==3)continue;
+  for(const [key,val] of Object.entries(ACCESSORY_SETS[id].bonus))attributes[key]=(attributes[key]||0)+Math.max(1,Math.round(val*quality));
+ }
+ return {attributes,armorPct};
+}
+function setCompareScenarios(){
+ const x=setPlanner;
+ return [
+  {name:'6 Wartownika',clothing:Array(6).fill('armor_warden'),accessories:x.accessories.slice(),quality:x.quality},
+  {name:'3 Wartownika + 3 Nomady',clothing:defaultSetPlan().clothing.slice(),accessories:x.accessories.slice(),quality:x.quality},
+  {name:'4 Wartownika + 2 Nomady',clothing:['armor_warden','armor_warden','armor_warden','armor_warden','armor_nomad','armor_nomad'],accessories:x.accessories.slice(),quality:x.quality},
+  {name:'Własny układ z Planera',clothing:x.clothing.slice(),accessories:x.accessories.slice(),quality:x.quality}
+ ];
+}
+function setCompareSeed(seed){let s=seed>>>0;return ()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296;};}
+function setCompareRun(){
+ if(!state.created)return;
+ // Bazowe aktualne statystyki postaci bez AKTYWNYCH premii setow — zachowujemy
+ // indywidualne statystyki zalozonych przedmiotow, Warsztat, towarzysza, Rezonans.
+ const current=attrs(),oldClothing=activeSetBonuses(),oldAccessories=accessorySetBonuses();
+ const neutral={...current};
+ for(const [key,val] of Object.entries(oldClothing.bonus))neutral[key]=(neutral[key]||0)-val;
+ for(const [key,val] of Object.entries(oldAccessories.bonus))neutral[key]=(neutral[key]||0)-val;
+ const currentDefense=heroDefense(),attacks=heroAttacks();
+ const opponent=ARENA_STAGES.find(v=>v.level===setCompareStage)||ARENA_STAGES[19];
+ const rows=setCompareScenarios().map(scenario=>{
+  const extra=plannerBonusProfile(scenario),a={...neutral};
+  for(const [key,val] of Object.entries(extra.attributes))a[key]=(a[key]||0)+val;
+  const raw=currentDefense.rawArmor;
+  const defense={...currentDefense,
+   hp:Math.round((60+a.end*10)*(1+.025*(roomLevel('infirmary')-1))),
+   acc:6+a.per*1.3,
+   dodge:3+a.dex*1.1+currentDefense.pet,
+   armor:raw+Math.round(raw*extra.armorPct/100)+Math.floor(a.end/4)+currentDefense.pet,
+   setArmor:extra.armorPct};
+  const samples=300;let wins=0,rounds=0,totalHp=0,totalPotential=0,totalReceived=0,totalHits=0,totalAttempts=0;
+  for(let i=0;i<samples;i++){
+   const result=fight(opponent,{testSnapshot:{attributes:a,attacks,defense},testRandom:setCompareSeed(7654321+i*9973)});
+   if(result.won){wins++;rounds+=result.damageSummary.rounds;}
+   totalHp+=result.heroHp;
+   totalPotential+=result.damageSummary.hero.potential/Math.max(1,result.damageSummary.rounds);
+   totalReceived+=result.damageSummary.foe.damage;
+   totalHits+=result.damageSummary.hero.hits;
+   totalAttempts+=result.damageSummary.hero.attempts;
+  }
+  return {name:scenario.name,bonus:extra.attributes,armorPct:extra.armorPct,
+   hp:defense.hp,armor:defense.armor,dodge:defense.dodge,
+   wins:100*wins/samples,winRound:wins?rounds/wins:null,
+   hpRemain:totalHp/samples,potential:totalPotential/samples,received:totalReceived/samples,
+   accuracy:totalAttempts?100*totalHits/totalAttempts:0};
+ });
+ setCompareResults={stage:setCompareStage,quality:setPlanner.quality,rows,at:Date.now()};
+ try{localStorage.setItem(SET_COMPARE_KEY,JSON.stringify(setCompareResults))}catch{}
+ updateSetPlannerDisplay();
+}
+function setCompareHtml(){
+ const result=setCompareResults;
+ const formatted=n=>Number(n).toFixed(1).replace('.',',');
+ const table=result?`<div style="overflow-x:auto"><table style="width:100%;font-size:.8rem;white-space:nowrap"><thead><tr><th>Wariant</th><th>Premie</th><th>PŻ max.</th><th>Pancerz</th><th>Potencjał/rundę</th><th>Wygrane</th><th>Śr. runda zwycięstwa</th><th>PŻ po walce</th></tr></thead><tbody>${result.rows.map(r=>`<tr><td>${escape(r.name)}</td><td>${escape(accessoryBonusText(r.bonus)||'—')}${r.armorPct?` · Pancerz +${r.armorPct}%`:''}</td><td>${r.hp}</td><td>${r.armor}</td><td>${formatted(r.potential)}</td><td>${formatted(r.wins)}%</td><td>${r.winRound===null?'—':formatted(r.winRound)}</td><td>${formatted(r.hpRemain)}</td></tr>`).join('')}</tbody></table></div><p class="small muted">Ostatni raport: etap ${result.stage}, jakość ${escape(rarities[result.quality]?.name||'—')}, po 300 walk dla każdego zestawu. Te same losowania we wszystkich wariantach.</p>`:'<p class="small muted">Uruchom porównanie, aby zobaczyć wpływ premii setowych na lokalny silnik Starć.</p>';
+ return `<div class="panel" style="padding:14px;margin-top:16px"><h4>⚔ Porównanie setów w Starciach · ASHEN 0.4.7.4</h4><p class="small muted">Cztery warianty premii setowych, bez zdobywania przedmiotów. Korzystamy z Twojej postaci i aktualnie założonej broni. Indywidualne statystyki i pancerz aktualnie założonych ubrań pozostają takie same w każdym wariancie; zamieniamy WYŁĄCZNIE premie setowe. Akcesoria w każdym wariancie odpowiadają konfiguracji z Planera. Wyniki nie dotyczą Ekspedycji serwerowych.</p><div class="actions" style="align-items:center;flex-wrap:wrap;margin-bottom:10px"><label>Przeciwnik <select id="ashen-set-compare-stage" style="padding:7px;background:var(--panel,#171e27);color:inherit"><option value="10" ${setCompareStage===10?'selected':''}>Boss etap 10</option><option value="20" ${setCompareStage===20?'selected':''}>Boss etap 20</option></select></label><button type="button" data-set-compare="run">Porównaj 4 zestawy · 1200 walk</button><button type="button" data-set-compare="clear">Wyczyść raport</button></div>${table}<p class="small muted">Warianty nie zastępują realnie ubrań, więc nie porównują ich pancerza, indywidualnych prefiksów ani sufiksów. Test obejmuje tylko wpływ skumulowanych premii zestawowych oraz atrybutów na walkę.</p></div>`;
+}
 function setPlannerPanel(){
  const clothingOpts=[['none','— Bez prefiksu setowego —'],...SET_PLANNER_FAMILIES.map(id=>[id,SETS[id].name])];
  const accessoryOpts=[['none','— Bez prefiksu setowego —'],...Object.keys(ACCESSORY_SETS).map(id=>[id,ACCESSORY_SETS[id].name])];
  const field=(type,index,opts)=>`<label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem"><span>${type==='clothing'?slotLabels[['head','shirt','outer','hands','pants','boots'][index]]:`Akcesorium ${index+1}`}</span><select data-set-planner="${type}" data-set-slot="${index}" style="width:100%;min-width:0;padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${opts.map(([id,label])=>`<option value="${id}" ${(setPlanner[type][index]===id)?'selected':''}>${escape(label)}</option>`).join('')}</select></label>`;
- return `<details class="panel section" id="ashen-set-planner" ${setPlannerOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧩 Planer setów — porównaj 6+0 i 3+3 bez zdobywania przedmiotów</summary><p class="small muted">Symulator używa obecnych progów i premii setowych. Nie zmienia ekwipunku, statystyk ani zapisu postaci; zapamiętuje tylko wybór w tej przeglądarce.</p><div class="actions" style="margin:12px 0;flex-wrap:wrap"><button type="button" data-set-preset="full">6 × Wartownika</button><button type="button" data-set-preset="mixed">3 Wartownika + 3 Nomady</button><button type="button" data-set-preset="partial">4 Wartownika + 2 Nomady</button><button type="button" data-set-preset="clear">Wyczyść</button></div><label style="display:flex;align-items:center;gap:8px;margin-bottom:12px">Jakość wszystkich elementów (testowo): <select data-set-planner="quality" style="padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${rarities.map((r,i)=>`<option value="${i}" ${setPlanner.quality===i?'selected':''}>${escape(r.name)} · ×${setQuality({rarity:i}).toFixed(2)}</option>`).join('')}</select></label><h4>Odzież — sześć slotów</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.clothing.map((_,i)=>field('clothing',i,clothingOpts)).join('')}</div><h4>Akcesoria — trzy sloty</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.accessories.map((_,i)=>field('accessories',i,accessoryOpts)).join('')}</div><div id="ashen-set-planner-result" aria-live="polite">${plannerResultHtml()}</div></details>`;
+ return `<details class="panel section" id="ashen-set-planner" ${setPlannerOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧩 Planer setów — porównaj 6+0 i 3+3 bez zdobywania przedmiotów</summary><p class="small muted">Symulator używa obecnych progów i premii setowych. Nie zmienia ekwipunku, statystyk ani zapisu postaci; zapamiętuje tylko wybór w tej przeglądarce.</p><div class="actions" style="margin:12px 0;flex-wrap:wrap"><button type="button" data-set-preset="full">6 × Wartownika</button><button type="button" data-set-preset="mixed">3 Wartownika + 3 Nomady</button><button type="button" data-set-preset="partial">4 Wartownika + 2 Nomady</button><button type="button" data-set-preset="clear">Wyczyść</button></div><label style="display:flex;align-items:center;gap:8px;margin-bottom:12px">Jakość wszystkich elementów (testowo): <select data-set-planner="quality" style="padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${rarities.map((r,i)=>`<option value="${i}" ${setPlanner.quality===i?'selected':''}>${escape(r.name)} · ×${setQuality({rarity:i}).toFixed(2)}</option>`).join('')}</select></label><h4>Odzież — sześć slotów</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.clothing.map((_,i)=>field('clothing',i,clothingOpts)).join('')}</div><h4>Akcesoria — trzy sloty</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.accessories.map((_,i)=>field('accessories',i,accessoryOpts)).join('')}</div><div id="ashen-set-planner-result" aria-live="polite">${plannerResultHtml()}${setCompareHtml()}</div></details>`;
 }
-function updateSetPlannerDisplay(){const target=document.getElementById('ashen-set-planner-result');if(target)target.innerHTML=plannerResultHtml();}
+function updateSetPlannerDisplay(){const target=document.getElementById('ashen-set-planner-result');if(target)target.innerHTML=plannerResultHtml()+setCompareHtml();}
 
 function characterSetsPanel(){
  const results=setResults();
@@ -3237,6 +3317,12 @@ document.addEventListener('change',e=>{
   const idx=Number(t.dataset.setSlot);if(Number.isInteger(idx)&&idx>=0&&idx<setPlanner[typ].length)setPlanner[typ][idx]=t.value;
  }
  saveSetPlan();updateSetPlannerDisplay();
+});
+document.addEventListener('change',e=>{if(e.target?.id==='ashen-set-compare-stage')setCompareStage=Number(e.target.value)===10?10:20;});
+document.addEventListener('click',e=>{
+ const button=e.target.closest?.('[data-set-compare]');if(!button)return;
+ if(button.dataset.setCompare==='run'){setCompareStage=Number(document.getElementById('ashen-set-compare-stage')?.value)===10?10:20;setCompareRun();}
+ else if(button.dataset.setCompare==='clear'){setCompareResults=null;try{localStorage.removeItem(SET_COMPARE_KEY)}catch{}updateSetPlannerDisplay();}
 });
 document.addEventListener('click',e=>{
  const button=e.target.closest?.('[data-set-preset]');if(!button)return;
