@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.7.2';
+const APP_VERSION='0.4.7.3';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -744,7 +744,7 @@ function loadSetPlan(){
  const valid=(values,allowed,count,fallback)=>Array.isArray(values)&&values.length===count?values.map((v,i)=>allowed.includes(v)?v:fallback[i]):fallback;
  return {clothing:valid(stored?.clothing,['none',...SET_PLANNER_FAMILIES],6,d.clothing),accessories:valid(stored?.accessories,['none',...Object.keys(ACCESSORY_SETS)],3,d.accessories),quality:Math.max(0,Math.min(4,Number.isInteger(stored?.quality)?stored.quality:0))};
 }
-let setPlanner=loadSetPlan();let setPlannerOpen=false;
+let setPlanner=null;let setPlannerOpen=false;
 function saveSetPlan(){try{localStorage.setItem(SET_PLANNER_KEY,JSON.stringify(setPlanner))}catch{}}
 function plannerBonuses(){
  const avg=setQuality({rarity:setPlanner.quality});
@@ -814,6 +814,9 @@ const ACCESSORY_SETS=Object.freeze({
  accessory_reflexive:{name:'Nomady',bonus:{dex:3}},
  accessory_versatile:{name:'Ocalałego',bonus:{end:2,per:1}}
 });
+// Planer uruchamiamy dopiero po zdefiniowaniu ACCESSORY_SETS,
+// aby uniknac ReferenceError (temporal dead zone) przy starcie gry.
+setPlanner=loadSetPlan();
 const ACCESSORY_SLOTS=['extra','extra2','extra3'];
 function accessorySetPrefixId(inst){
  const d=def(inst);

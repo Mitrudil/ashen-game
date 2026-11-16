@@ -1,24 +1,15 @@
-# ASHEN 0.4.7.2 — Planer zestawów i jakości
+# ASHEN v0.4.7.3 — naprawa czarnego ekranu
 
-## Co dodano
-- Postać → Planer setów: bez posiadania przedmiotów można składać sześć slotów odzieży i trzy akcesoria, wybierając ich rodziny prefiksów.
-- Gotowe warianty: 6 Wartownika, 3 Wartownika + 3 Nomady, 4 Wartownika + 2 Nomady, wyczyść.
-- Wybór jakości od zwykłej do legendarnej; plan liczy premie tymi samymi stałymi i wzorami co działający ekwipunek (SETS, ACCESSORY_SETS, setQuality).
-- Sety ubioru aktywują się od 3 sztuk (progi 3/4/5/6), można połączyć 3+3. Akcesoria tylko 3/3, brak premii za 1–2 sztuki.
-- Plan jest zapamiętywany w localStorage, ale nie zmienia postaci, wyposażenia ani serwerowych ekspedycji.
+## Przyczyna
+W v0.4.7.2 kod inicjalizował Planer setów wywołaniem `loadSetPlan()` przed deklaracją `ACCESSORY_SETS`. Ponieważ `ACCESSORY_SETS` jest stałą `const`, jej odczyt przed inicjalizacją wywołuje ReferenceError i zatrzymuje uruchomienie aplikacji — czarny ekran.
 
-## Dlaczego jeszcze nie zwiększamy premii?
-Przy jakości legendarnej aktualny mnożnik to ×2,5. Bez pomiaru wpływu na pełne zestawy i ich kombinacje zmiana wielkości premii byłaby ryzykowna. Planer służy do porównania 6+0 z 3+3 na różnych jakościach przed następna kalibracją.
+## Naprawa
+Przeniesiono `setPlanner=loadSetPlan()` za deklarację `ACCESSORY_SETS`. Pozostawiono wszystkie funkcje v0.4.7.2 i dotychczasowy zapis w przeglądarce. Zwiększono wersję do 0.4.7.3 i parametry cache w index.html.
 
 ## Instalacja
-Podmień tylko `index.html` i `js/game.js` w repozytorium GitHub. Pozostałe pliki zostają. Nie wymaga SQL.
+Podmień w repozytorium **oba** pliki: `index.html` oraz `js/game.js`. Nie trzeba usuwać danych ani uruchamiać SQL. Po wdrożeniu wykonaj twarde odświeżenie Ctrl+F5. W nagłówku pojawi się v0.4.7.3.
 
-## Test
-1. Otwórz Postać → Planer setów. Domyślnie wybór 3 Wartownika + 3 Nomady i 3 akcesoria Tropiciela. Powinny aktywować się dwa sety odzieży i jeden akcesoriów.
-2. Kliknij „6 × Wartownika”: jeden bonus odzieży na progu 6/6.
-3. Kliknij „4 Wartownika + 2 Nomady”: aktywny tylko Wartownika 4/6; Nomady nieaktywne.
-4. Zmień jakość na legendarną: premia wzrasta. Sprawdź przełączenie zakładki i powrót; planer powinien pamiętać wybór.
-5. Ustaw akcesoria jako dwa Tropiciela i jedno Technika: żaden set akcesoriów nie powinien dawać premii.
+## Kontrola
+Otwórz grę, przejdź do Postać → Planer setów, przetestuj 6 Wartownika i 3+3. Przejdź na inną zakładkę i wróć.
 
-## Granice
-Aktualizacja nie zmienia wartości premii, prawdziwych Starć ani SQL Ekspedycji. Wcześniejsza v0.4.7.1 jest wymagana jako baza (lub odpowiadająca jej zawartość kodu).
+Jeśli ekran nadal jest czarny, sprawdź w narzędziach deweloperskich F12 → Console pierwszy czerwony błąd i prześlij jego treść.
