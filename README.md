@@ -1,22 +1,19 @@
-# ASHEN v0.4.6.5 — Diagnostyka specjalizacji
+# ASHEN v0.4.6.6 — Laboratorium: równy budżet klas
 
-Aktualizacja **tylko Laboratorium**, bez SQL i bez resetu ekwipunku.
+**Zmiana wyłącznie Laboratorium.** Nie zmienia wyposażenia graczy, rzeczywistych Starć, Ekspedycji ani Supabase. Nie wymaga SQL.
 
-## Co poprawiono
+## Nowość
 
-- Oddzielne liczenie **rzeczywiście odjętych PŻ** od **potencjalnych obrażeń po pancerzu** (przed ograniczeniem wyniku do pozostałego PŻ przeciwnika). Dla przykładu: jeśli przeciwnikowi zostało 10 PŻ, cios za 70 odnotowuje 10 realnych i 70 potencjalnych obrażeń.
-- Nowa kolumna **średnia runda zwycięstwa** (tylko z wygranych walk) pokazuje szybkość zakończenia starcia tam, gdzie odsetek zwycięstw wynosi 100%.
-- Nowa kolumna **średnie pozostałe PŻ gracza**.
-- Ostrzeżenie, jeżeli wszystkie zestawy mają 100% zwycięstw i metryka przestaje je rozróżniać.
-- W raporcie opisane poziomy przeciwników: etap 1, boss 10, boss 20.
-- Osobny klucz zapisu raportów tej wersji; stare raporty pozostają nietknięte.
+Nowy panel pod Laboratorium specjalizacji: **Test kontrolny — wyrównany budżet klas**. W każdym z 3 etapów rozwoju, dla 6 reprezentatywnych zestawów, program oblicza teoretyczny budżet serii: średnie obrażenia przed pancerzem i losowaniem trafienia, przy uwzględnieniu liczby ataków, siły drugiej ręki, atrybutów oraz oczekiwanego mnożnika krytyka. Następnie mnoży jedynie bazowe obrażenia testowych broni, żeby budżety klas były możliwie bliskie wspólnej średniej.
 
-**Silnik walki nie został zmieniony.** Zmieniono tylko licznik informacyjny w raporcie `fight()` i analitykę panelu specjalizacji. Wynik testu, w tym klasyfikacja zwycięstwa/remisu/porażki, jest liczony identycznie jak poprzednio. Ekspedycje Supabase są nietknięte.
+**Nie zmienia liczby ataków, trafienia, krytyków ani penetracji.** Zaokrąglenia sprawiają, że budżety mogą się nieco różnić. Zmiany istnieją wyłącznie w tym teście i nie są automatyczną propozycją nowych statystyk.
+
+Test wykonuje **21 600 walk** (6 zestawów × 3 etapy × 4 poziomy pancerza × 300 prób), używając tego samego lokalnego `fight()` i identycznych seedów dla każdej konfiguracji. Wyniki obejmują potencjał obrażeń na rundę przy pancerzu 0/20/40/60, zwycięstwa, średnią rundę zwycięstwa i współczynnik normalizacji. Raport można skopiować i jest zachowywany lokalnie.
+
+## Interpretacja
+
+Porównaj wyniki oryginalnego testu specjalizacji (nierówny budżet) z nowym testem kontrolnym. Jeśli rozrzut maleje, różnice wynikały głównie z parametrów broni. Jeśli nadal duży — problem może wynikać z mechaniki klasy (szansa trafienia, krytyk, pancerz, liczba ataków). Przeciwnicy pozostają odpowiednio etap 1, 10 i 20; przy łatwych walkach wygrane mogą wynosić 100% i nie rozróżniać zestawów. Potencjał obrażeń jest liczony tylko z faktycznie wykonanych ataków (zakończenie walki może ograniczać liczbę prób).
 
 ## Instalacja
 
-Podmień pliki `index.html` i `js/game.js` w repozytorium (inne pliki pozostają bez zmian). Następnie uruchom Laboratorium specjalizacji i skopiuj raport.
-
-## Ograniczenia
-
-To nadal porównanie **reprezentatywnych, nie wyrównanych budżetowo** modeli (w tym dwóch maczet i dwóch rewolwerów). Nie wolno na jego podstawie określać docelowej przewagi całych klas. Każdy etap wykorzystuje innego przeciwnika, więc porównujemy zestawy **w obrębie etapu**, nie poziomy między sobą. Potencjał obrażeń nie uwzględnia niewykonanych ataków po śmierci celu.
+Podmień w repozytorium **`index.html`** oraz **`js/game.js`**. Pozostałe pliki bez zmian. Odśwież stronę (w razie potrzeby Ctrl+F5). W Starciach otwórz Laboratorium wyposażenia.
