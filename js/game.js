@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.3';
+const APP_VERSION='0.4.3.4';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
