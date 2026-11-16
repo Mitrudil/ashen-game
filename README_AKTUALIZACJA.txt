@@ -1,14 +1,10 @@
-ASHEN v0.3.9.5 — wspólna pula podstawowych przedmiotów na wszystkich wyprawach
+ASHEN v0.4.0 — Frakcje Pustkowi
 
-Wgraj do katalogu głównego repozytorium:
-- index.html
-- js/game.js
+Wgraj do istniejącego repozytorium pięć plików z paczki:
+index.html, js/game.js, js/clans.js, js/expeditions.js, css/style.css.
 
-Zmiana: wszystkie standardowe przedmioty (broń, ubiór, akcesoria) mogą zostać znalezione zarówno w Ruinach osiedla, Starym szpitalu, jak i Posterunku wojskowym. Każdy ma dodatnią wagę w puli, bez ograniczenia lokacji. Zachowano względne wagi z dotychczasowych tabel (wybierając najwyższą istniejącą wartość); dla dotąd pomijanych elementów zastosowano wagę 0.10.
-
-BEZ ZMIAN: rzadkość wypadających przedmiotów jest nadal wyznaczana osobno dla każdej wyprawy (bliska: zwykły/ulepszony; średnia: do epickiego; daleka: do legendarnego), nie zmieniono liczby łupów, działania eksploracji, losowania prefiksów/sufiksów ani ograniczeń zgodności modyfikatorów z typem przedmiotu.
-
-Artefakty zachowują oddzielną pulę i ograniczenia wypraw; unikatowe przedmioty bossów pozostają ich nagrodami; surowce nie trafiają do zwykłej puli wyposażenia.
-
-Wersja adresu skryptu w index.html została zwiększona dla uniknięcia starego cache.
-Bez SQL i bez resetowania zapisów.
+Zmieniono tylko nazwy widoczne dla graczy (Klany -> Frakcje); nazwy RPC Supabase, tabele i identyfikatory pozostają bez zmian. Nie uruchamiaj SQL.
+Nowy widok Frakcji: zwięzły nagłówek, czytelny skład, zaproszenia, zarządzanie zwinięte w details.
+Baza frakcji jest PROJEKTEM UI bez wpłat i bonusów. Wymaga późniejszej implementacji serwerowej.
+Zachowano ekspedycje, członków, role, dotychczasowe zapisy i zasoby.
+Odśwież stronę po publikacji GitHub Pages; parametry wersji plików zmienione na 0.4.0.

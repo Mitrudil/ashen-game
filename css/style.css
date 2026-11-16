@@ -1340,3 +1340,45 @@ body.arena-report-modal-open{overflow:hidden}
 /* ASHEN v0.3.9: modularne ulepszenia garażu */
 .ashen-vehicle-modules{margin:18px 0 26px;padding:18px;border:1px solid rgba(205,157,79,.28);border-radius:12px;background:rgba(15,19,23,.68)}
 .ashen-vehicle-modules h3{margin:0 0 8px}.ashen-vehicle-module-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}.ashen-vehicle-module{padding:14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.1);border-radius:9px;display:flex;flex-direction:column;gap:8px}.ashen-vehicle-module p{margin:0}.ashen-vehicle-module button{font-size:12px;white-space:normal;margin-top:auto}.ashen-vehicle-module .premium-bonus{font-size:13px}@media(max-width:850px){.ashen-vehicle-module-grid{grid-template-columns:1fr}}
+
+/* ASHEN 0.4.0 – Frakcje: czytelny, zwarty widok */
+.ashen-clan-page{max-width:1080px;margin:0 auto;font-size:.94rem;line-height:1.48}
+.ashen-clan-page .clan-header{align-items:center;margin-bottom:10px;gap:12px}
+.ashen-clan-page .clan-header h2{margin:5px 0;font-size:clamp(1.36rem,2.3vw,1.8rem)}
+.ashen-clan-page .clan-header p{margin:5px 0 0}
+.ashen-clan-page .clan-panel{margin:10px 0;padding:14px 16px}
+.ashen-clan-page .clan-panel h3{font-size:1.06rem;margin:0 0 9px}
+.ashen-clan-page .clan-member{padding:9px 0;gap:8px}
+.ashen-clan-page .clan-member .actions{gap:5px}
+.ashen-clan-page .clan-member button{padding:6px 10px;font-size:.86rem}
+.ashen-clan-page .clan-member p{margin:2px 0 0}
+.ashen-clan-page .clan-panel p{line-height:1.45}
+.ashen-clan-page .faction-summary{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.ashen-clan-page .faction-summary h3{font-size:1.32rem;margin:5px 0 2px}
+.ashen-clan-page .faction-summary p{margin:0}
+.ashen-clan-page .faction-stats{display:flex;gap:10px;flex-wrap:wrap}
+.ashen-clan-page .faction-stats span{padding:7px 10px;background:rgba(190,160,100,.07);border:1px solid rgba(190,160,100,.2);border-radius:8px;white-space:nowrap}
+.ashen-clan-page .faction-stats strong{margin-left:5px}
+.ashen-clan-page .faction-columns{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(260px,.85fr);gap:12px;align-items:start}
+.ashen-clan-page .faction-columns>.clan-panel,.ashen-clan-page .faction-side>.clan-panel{margin-top:0}
+.ashen-clan-page .faction-side{min-width:0}
+.ashen-clan-page .faction-building-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.ashen-clan-page .faction-building{padding:12px;border:1px solid rgba(190,160,100,.24);border-radius:10px;display:flex;flex-direction:column;gap:7px;background:rgba(170,130,65,.05)}
+.ashen-clan-page .faction-building strong{font-size:.97rem}
+.ashen-clan-page .faction-building span{color:var(--muted,#aaa);font-size:.85rem;line-height:1.42}
+.ashen-clan-page .faction-base-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ashen-clan-page .faction-base-heading h3{margin:7px 0 2px}
+.ashen-clan-page .faction-create-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:12px}
+.ashen-clan-page .faction-create-grid label{display:block}
+.ashen-clan-page .faction-management summary,.ashen-clan-page .faction-details summary{cursor:pointer;font-weight:600}
+.ashen-clan-page .faction-management[open] summary{margin-bottom:12px}
+.ashen-clan-page .faction-details{margin-top:9px}
+.ashen-clan-page .faction-expedition-shortcut p{margin:6px 0 0}
+@media(max-width:840px){.ashen-clan-page .faction-columns{grid-template-columns:1fr}.ashen-clan-page .faction-building-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.ashen-clan-page{font-size:.94rem}.ashen-clan-page .clan-panel{padding:12px}.ashen-clan-page .faction-building-grid,.ashen-clan-page .faction-create-grid{grid-template-columns:1fr}.ashen-clan-page .clan-member{align-items:flex-start}.ashen-clan-page .faction-stats{width:100%}}
+
+/* Compact spacing for existing expedition system */
+.expedition-page{max-width:1160px;margin-left:auto;margin-right:auto}
+.expedition-page .expedition-header{align-items:center;gap:12px}
+.expedition-page .expedition-panel{margin-top:12px;margin-bottom:12px}
+.expedition-page .expedition-panel h3{margin-bottom:10px}
