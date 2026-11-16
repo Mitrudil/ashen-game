@@ -1,4 +1,6 @@
-const APP_VERSION='0.3.9.2';
+const APP_VERSION='0.3.9.3';
+// Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
+const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
 (()=>{'use strict';const LEGACY_KEY='ashen-save-v010';const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
 
@@ -1103,7 +1105,7 @@ function companionBonus(id=companionId()){
 function companionArt(id,stage=companionStage(id)){
  return COMPANIONS[id]?`<img src="./assets/rosters/companion-${id}-${stage+1}.webp?v=${APP_VERSION}" alt="${COMPANIONS[id].name}, etap ${stage+1}" loading="lazy">`:'<span>🐾</span>';
 }
-function vehicleArt(id,stage=0){return VEHICLES.some(v=>v.id===id)?`<img src="./assets/rosters/vehicle-${id}-${id==='foot'?1:stage+1}.webp?v=${APP_VERSION}" alt="${escape((VEHICLES.find(v=>v.id===id)||{}).name||id)}${id==='foot'?'':`, etap ${stage+1}`}" loading="lazy">`:'<span class="ashen-onfoot">🥾</span>'}
+function vehicleArt(id,stage=0){return VEHICLES.some(v=>v.id===id)?`<img src="./assets/rosters/vehicle-${id}-${id==='foot'?1:stage+1}.webp?v=${APP_VERSION}&load=${VEHICLE_ART_LOAD_TOKEN}" alt="${escape((VEHICLES.find(v=>v.id===id)||{}).name||id)}${id==='foot'?'':`, etap ${stage+1}`}" loading="lazy">`:'<span class="ashen-onfoot">🥾</span>'}
 const VEHICLES=[
  {id:'foot',name:'Pieszo',level:1,credits:0,scrap:0,part:0,factor:1,icon:'🥾'},
  {id:'bike',name:'Rower szabrownika',level:5,credits:180,scrap:65,part:0,factor:.85,icon:'🚲'},
