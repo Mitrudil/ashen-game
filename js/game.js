@@ -613,14 +613,21 @@ function modifierText(m){return [m.luck?`Szczęście +${m.luck}`:null,bonusText(
 function slotName(slot){return slotLabels[slot]||({hand1:'Broń jednoręczna',hand2:'Broń dwuręczna',material:'Surowiec'})[slot]||slot}
 function statDetails(o){return `${weaponSlot(o.slot)?`Obrażenia ${o.min}–${o.max}${o.slot==='hand2'?' · obie ręce':''}`:o.slot==='material'?'Materiał':`Pancerz ${o.armor||0}`}${bonusText(o.bonus)?' · '+bonusText(o.bonus):''}${o.critPp?` · Krytyk +${o.critPp} p.p.`:''}${o.accuracy?` · Celność +${o.accuracy} pkt`:''}${o.extraAttacks?` · Dodatkowy atak +${o.extraAttacks}`:''}`}
 function affixDetails(o){return (o.effects||[]).length?`<div class="small muted" style="margin-top:5px">${o.effects.map(x=>`<div>↳ ${escape(x.name)}: ${escape(x.description)}</div>`).join('')}</div>`:''}
+// Podstawowe wyposażenie może wypaść na KAŻDEJ zwykłej wyprawie.
+// Zachowujemy względne wagi przedmiotów z wcześniejszych pul, bez ograniczeń lokacji.
+// Oddzielne pule bossów, artefaktów i surowców nie są tu mieszane.
+const COMMON_EXPEDITION_DROPS=(()=>{
+ const weights=new Map();
+ for(const loc of locations)for(const [id,w] of loc.drops){
+  if(Number.isFinite(w)&&w>0)weights.set(id,Math.max(weights.get(id)||0,w));
+ }
+ return items.filter(d=>d.slot!=='material'&&!d.artifact&&!d.id.startsWith('boss'))
+  .map(d=>({id:d.id,w:weights.get(d.id)||0.10}));
+})();
 function pickLoot(loc,exploration=null,forcedCount=null){
  // Każda wyprawa: 1 przedmiot pewny; 28% szans na drugi, 7% na trzeci.
  const roll=Math.random(),count=roll<.07?3:roll<.35?2:1;
- const all=loc.drops.map(([id,w])=>({id,w}));
- let additions=loc.id==='ruins'?['wrench','hatchet','baton','tshirt','jeans','sneakers','cap','scarf','workboots','thermal','bandana','fingerless','workgloves','leathergloves']:
- loc.id==='hospital'?['saber','deserteagle','crowbar','cargo','scoutpants','combatboots','scoutshirt','hood','dustglasses','silentboots','techshirt','tacticalgloves','scoutbracers','steelbracers','compass']:
- ['sledge','lmg','harpoon','kevlarpants','radiopants','hazboots','armorshirt','helmet','maskhelm','commanderhelm','goggles','badge','radio','bracelet','kevlarbracers','zerobracers'];
- for(let id of additions)all.push({id,w:0.12});
+ const all=COMMON_EXPEDITION_DROPS.slice();
  // Artefakty są rzadkimi znaleziskami, niezależnymi od zwykłej puli akcesoriów.
  if(loc.id==='hospital')for(const id of ['ash_needle','ash_eye','ash_dust'])all.push({id,w:0.018});
  if(loc.id==='outpost')for(const id of artifactItems.map(x=>x.id))all.push({id,w:0.034});

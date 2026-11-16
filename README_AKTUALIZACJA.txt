@@ -1,12 +1,14 @@
-ASHEN v0.3.9.4 — poprawka broni palnej jednoręcznej w łupach
+ASHEN v0.3.9.5 — wspólna pula podstawowych przedmiotów na wszystkich wyprawach
 
 Wgraj do katalogu głównego repozytorium:
 - index.html
 - js/game.js
 
-Przyczyna: w dotychczasowej puli Posterunku wojskowego nie występowała żadna broń palna jednoręczna.
-Poprawka: dodano Rewolwer Strażnika (waga 0,08), Pistolet maszynowy Viper (0,10) i Pistolet pustynny (0,12) do losowania na dalekiej wyprawie.
+Zmiana: wszystkie standardowe przedmioty (broń, ubiór, akcesoria) mogą zostać znalezione zarówno w Ruinach osiedla, Starym szpitalu, jak i Posterunku wojskowym. Każdy ma dodatnią wagę w puli, bez ograniczenia lokacji. Zachowano względne wagi z dotychczasowych tabel (wybierając najwyższą istniejącą wartość); dla dotąd pomijanych elementów zastosowano wagę 0.10.
 
-Nie zmieniono liczby łupów, systemu rzadkości, ekwipunku ani wymagań poziomowych. Dotychczasowe zapisy i przedmioty pozostają zgodne.
-Numer wersji w index.html jest nowy, by przeglądarka pobrała aktualny skrypt.
-Brak zmian SQL.
+BEZ ZMIAN: rzadkość wypadających przedmiotów jest nadal wyznaczana osobno dla każdej wyprawy (bliska: zwykły/ulepszony; średnia: do epickiego; daleka: do legendarnego), nie zmieniono liczby łupów, działania eksploracji, losowania prefiksów/sufiksów ani ograniczeń zgodności modyfikatorów z typem przedmiotu.
+
+Artefakty zachowują oddzielną pulę i ograniczenia wypraw; unikatowe przedmioty bossów pozostają ich nagrodami; surowce nie trafiają do zwykłej puli wyposażenia.
+
+Wersja adresu skryptu w index.html została zwiększona dla uniknięcia starego cache.
+Bez SQL i bez resetowania zapisów.
