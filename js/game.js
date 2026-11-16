@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.6.9';
+const APP_VERSION='0.4.7.0';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -369,7 +369,7 @@ const rarityForms={f:['','Ulepszona','Rzadka','Epicka','Legendarna'],p:['','Ulep
 function rarityPrefix(inst,d){let n=Number(inst?.rarity)||0;let form=pluralItemIds.has(d.id)?'p':feminineItemIds.has(d.id)?'f':'m';return rarityForms[form][n]||'';}
 
 
-// Prefiksy z dawnych zapisów pozostają czytelne i nie zmieniają swojego ID,
+// Prefiksy ze starych zapisów pozostają czytelne i nie zmieniają swojego ID,
 // ale nigdy nie są losowane po aktualizacji. Nowe modyfikatory mają osobne
 // przestrzenie identyfikatorów dla broni, ubioru i akcesoriów.
 const legacyPrefixDefs=[
@@ -386,15 +386,17 @@ const legacyPrefixDefs=[
  {id:'scrap',name:'Odzyskany',forms:{m:'Odzyskany',f:'Odzyskana',p:'Odzyskane'},bonus:{end:1},on:'any',legacyOnly:true}
 ];
 const newPrefixDefs=[
- // BROŃ
- {id:'weapon_precise',name:'Precyzyjny',forms:{m:'Precyzyjny',f:'Precyzyjna',p:'Precyzyjne'},bonus:{per:2},on:'weapon'},
- {id:'weapon_brutal',name:'Brutalny',forms:{m:'Brutalny',f:'Brutalna',p:'Brutalne'},bonus:{str:2},on:'weapon'},
- {id:'weapon_destructive',name:'Niszczycielski',forms:{m:'Niszczycielski',f:'Niszczycielska',p:'Niszczycielskie'},damagePct:12,on:'weapon'},
- {id:'weapon_lethal',name:'Zabójczy',forms:{m:'Zabójczy',f:'Zabójcza',p:'Zabójcze'},critPp:5,on:'weapon'},
- // Szybki działa wyłącznie na lekkiej broni (jedna dodatkowa próba ataku w rundzie).
+ // ASHEN 0.4.7.0: nowe bronie losuja strategiczne, porownywalne warianty.
+ // Prefiks okresla sposob wykonania ataku; bonusy nie rosna wraz z liczba ciosow.
+ {id:'weapon_precise',name:'Precyzyjny',forms:{m:'Precyzyjny',f:'Precyzyjna',p:'Precyzyjne'},bonus:{per:2},accuracy:3,on:'weapon'},
+ {id:'weapon_brutal',name:'Brutalny',forms:{m:'Brutalny',f:'Brutalna',p:'Brutalne'},bonus:{str:2},damagePct:4,on:'meleeWeapon'},
+ {id:'weapon_destructive',name:'Niszczycielski',forms:{m:'Niszczycielski',f:'Niszczycielska',p:'Niszczycielskie'},damagePct:8,on:'weapon'},
+ {id:'weapon_lethal',name:'Zabójczy',forms:{m:'Zabójczy',f:'Zabójcza',p:'Zabójcze'},critPp:4,on:'weapon'},
+ // Bonusowy cios jest ograniczony do 12% sily sekwencji (por. heroAttacks).
  {id:'weapon_quick',name:'Szybki',forms:{m:'Szybki',f:'Szybka',p:'Szybkie'},extraAttacks:1,on:'lightWeapon'},
- {id:'weapon_stable',name:'Stabilny',forms:{m:'Stabilny',f:'Stabilna',p:'Stabilne'},accuracy:8,on:'weapon'},
- // UBIÓR: tylko te prefiksy mogą budować zestawy w v0.1.39.
+ {id:'weapon_stable',name:'Stabilny',forms:{m:'Stabilny',f:'Stabilna',p:'Stabilne'},accuracy:5,critPp:2,on:'weapon'},
+ {id:'weapon_piercing',name:'Przebijający',forms:{m:'Przebijający',f:'Przebijająca',p:'Przebijające'},armorPen:4,on:'weapon'},
+ // UBIÓR — ich własna pula pozostaje niezależna od broni.
  {id:'armor_reinforced',name:'Wzmocniony',forms:{m:'Wzmocniony',f:'Wzmocniona',p:'Wzmocnione'},bonus:{end:2},on:'clothing',setId:'armor_reinforced'},
  {id:'armor_plated',name:'Pancerny',forms:{m:'Pancerny',f:'Pancerna',p:'Pancerne'},armorPct:15,on:'clothingArmor',setId:'armor_plated'},
  {id:'armor_flexible',name:'Elastyczny',forms:{m:'Elastyczny',f:'Elastyczna',p:'Elastyczne'},bonus:{dex:2},on:'clothing',setId:'armor_flexible'},
@@ -402,7 +404,7 @@ const newPrefixDefs=[
  {id:'armor_resistant',name:'Odporny',forms:{m:'Odporny',f:'Odporna',p:'Odporne'},armorPct:8,bonus:{end:1},on:'clothingArmor',setId:'armor_resistant'},
  {id:'armor_tracker',name:'Tropicielski',forms:{m:'Tropicielski',f:'Tropicielska',p:'Tropicielskie'},bonus:{per:2},on:'clothing',setId:'armor_tracker'},
  {id:'armor_iron',name:'Żelazny',forms:{m:'Żelazny',f:'Żelazna',p:'Żelazne'},bonus:{str:3},on:'clothing',setId:'armor_iron'},
- // AKCESORIA, oddzielne od odzieży i broni
+ // AKCESORIA: bez zmian na tym etapie przebudowy.
  {id:'accessory_technical',name:'Techniczny',forms:{m:'Techniczny',f:'Techniczna',p:'Techniczne'},bonus:{int:2},on:'accessory'},
  {id:'accessory_observant',name:'Spostrzegawczy',forms:{m:'Spostrzegawczy',f:'Spostrzegawcza',p:'Spostrzegawcze'},bonus:{per:2},on:'accessory'},
  {id:'accessory_persuasive',name:'Przekonujący',forms:{m:'Przekonujący',f:'Przekonująca',p:'Przekonujące'},bonus:{cha:2},on:'accessory'},
@@ -423,12 +425,15 @@ const legacySuffixDefs=[
  {id:'mutant',name:'Mutanta',bonus:{str:3},on:'any',legacyOnly:true}
 ];
 const newSuffixDefs=[
- {id:'weapon_hunter',name:'Łowcy',bonus:{per:2},on:'weapon'},
- {id:'weapon_sniper',name:'Snajpera',bonus:{per:3},on:'ranged'},
- {id:'weapon_berserker',name:'Berserkera',damagePct:8,on:'weapon'},
+ // Sufiks okresla specjalizacje w walce — oddzielny wybor od prefiksu.
+ {id:'weapon_hunter',name:'Łowcy',bonus:{per:2},accuracy:2,on:'weapon'},
+ {id:'weapon_sniper',name:'Snajpera',bonus:{per:2},critPp:2,on:'ranged'},
+ {id:'weapon_berserker',name:'Berserkera',damagePct:8,accuracy:-4,on:'weapon'},
  {id:'weapon_executioner',name:'Egzekutora',critPp:4,on:'weapon'},
- {id:'weapon_warrior',name:'Wojownika',bonus:{str:2},on:'weapon'},
- {id:'weapon_destroyer',name:'Niszczyciela',damagePct:6,on:'weapon'},
+ {id:'weapon_warrior',name:'Wojownika',bonus:{str:2},damagePct:3,on:'meleeWeapon'},
+ {id:'weapon_destroyer',name:'Niszczyciela',damagePct:5,armorPen:1,on:'weapon'},
+ {id:'weapon_piercer',name:'Penetratora',armorPen:5,on:'weapon'},
+ {id:'weapon_duelist',name:'Fechmistrza',critPp:3,accuracy:3,on:'oneHandWeapon'},
  {id:'armor_survivor',name:'Ocalonego',bonus:{end:3},on:'clothing'},
  {id:'armor_guard',name:'Strażnika',armorPct:10,on:'clothingArmor'},
  {id:'armor_wanderer',name:'Wędrowca',bonus:{end:1,per:1},on:'clothing'},
@@ -451,6 +456,7 @@ for(const inst of state.inventory){
  inst.artifactAffixesInitialized=true;
 }
 const clothingSlots=new Set(['head','shirt','outer','hands','pants','boots']);
+const meleeWeaponIds=new Set(['knife','pipe','machete','cleaver','wrench','hatchet','baton','saber','hammer','crowbar','sledge']);
 const lightWeaponIds=new Set(['knife','pipe','machete','hatchet','baton','wrench','cleaver','saber','pistol','revolver','smg']);
 function categoryOf(d){return weaponSlot(d.slot)?'weapon':clothingSlots.has(d.slot)?'clothing':d.artifact?'artifact':d.slot==='extra'?'accessory':'other'}
 const prefixChance=[.18,.32,.50,.70,.85],suffixChance=[.06,.15,.29,.55,.78];
@@ -459,6 +465,8 @@ function suitable(mod,d,rar){
  const cat=categoryOf(d);
  if(mod.on==='weapon'&&cat!=='weapon')return false;
  if(mod.on==='ranged'&&(cat!=='weapon'||!rangedIds.has(d.id)))return false;
+ if(mod.on==='meleeWeapon'&&(cat!=='weapon'||!meleeWeaponIds.has(d.id)))return false;
+ if(mod.on==='oneHandWeapon'&&d.slot!=='hand1')return false;
  if(mod.on==='lightWeapon'&&(cat!=='weapon'||!lightWeaponIds.has(d.id)))return false;
  if(mod.on==='clothing'&&cat!=='clothing')return false;
  if(mod.on==='clothingArmor'&&(cat!=='clothing'||!(d.armor>0)))return false;
@@ -491,7 +499,7 @@ function statsOf(inst){
  const d=def(inst);if(!d)return null;
  const m=rarity(inst).mult,mods=modifiersOf(inst);
  const pct=(key)=>mods.reduce((sum,x)=>sum+(x[key]||0),0);
- const dmgPct=pct('damagePct'),armorPct=pct('armorPct'),critPp=pct('critPp'),accuracy=pct('accuracy'),extraAttacks=pct('extraAttacks');
+ const dmgPct=pct('damagePct'),armorPct=pct('armorPct'),critPp=pct('critPp'),accuracy=pct('accuracy'),extraAttacks=pct('extraAttacks'),armorPen=pct('armorPen');
  const pref=findModifier(prefixDefs,inst?.prefix),suf=findModifier(suffixDefs,inst?.suffix);
  const legacy=mods.find(x=>x.legacy);
  const legacyLabel=legacy?.name==='Zwinny'&&d.slot==='extra'?prefixLabel({id:'agile',name:'Zwinny'},d):legacy?.name;
@@ -505,7 +513,7 @@ function statsOf(inst){
   max:weapon?Math.max(1,combatModel?Math.round(combatModel.max*combatModel.scale*m*(1+dmgPct/100)*(1+COMBAT_V2_WORKSHOP[upgrade])):Math.round(d.max*m*(1+dmgPct/100))+UPGRADE_POWER[upgrade]):undefined,
   armor:!weapon&&d.slot!=='material'?Math.max(0,Math.round((d.armor||0)*m*(1+armorPct/100))+((d.armor||0)===0 ? [0,1,2,3,5][Math.min(4,Math.max(0,Number(inst?.rarity)||0))] : 0)+armorUp):undefined,
   bonus:rolledBonus(inst),critPp:critPp+(combatModel?.crit||0),accuracy:accuracy+(combatModel?.accuracy||0),extraAttacks,damagePct:dmgPct,armorPct,
-  combatV2:!!combatModel,baseAttacks:combatModel?.attacks||1,labPen:combatModel?.pen||0,labCritMultiplier:combatModel?.critMultiplier||1.6,
+  combatV2:!!combatModel,baseAttacks:combatModel?.attacks||1,labPen:(combatModel?.pen||0)+armorPen,labCritMultiplier:combatModel?.critMultiplier||1.6,
   prefixName:prefixLabel(pref,d)||null,suffixName:suf?.name||null,
   effects:mods.map(x=>({name:x===pref?prefixLabel(x,d):x.name,description:modifierText(x)}))};
 }
@@ -618,9 +626,9 @@ function rollItem(id,expedition=null,luck=0){
  return {uid:'loot-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),id,rarity:rar,prefix,suffix,artifactAffixesInitialized:!!d?.artifact,locked:rar>=3};
 }
 function bonusText(b){return Object.entries(b||{}).filter(([,v])=>v!==0).map(([k,v])=>`${attrNames[k]} ${v>0?'+':''}${v}`).join(' · ')}
-function modifierText(m){return [m.luck?`Szczęście +${m.luck}`:null,bonusText(m.bonus),m.damagePct?`Obrażenia ${m.damagePct>0?'+':''}${m.damagePct}%`:null,m.armorPct?`Pancerz ${m.armorPct>0?'+':''}${m.armorPct}%`:null,m.critPp?`Szansa trafienia krytycznego +${m.critPp} p.p.`:null,m.accuracy?`Celność +${m.accuracy} pkt`:null,m.extraAttacks?`Ataki na rundę +${m.extraAttacks}`:null].filter(Boolean).join(' · ')}
+function modifierText(m){return [m.luck?`Szczęście +${m.luck}`:null,bonusText(m.bonus),m.damagePct?`Obrażenia ${m.damagePct>0?'+':''}${m.damagePct}%`:null,m.armorPct?`Pancerz ${m.armorPct>0?'+':''}${m.armorPct}%`:null,m.critPp?`Szansa trafienia krytycznego +${m.critPp} p.p.`:null,m.accuracy?`Celność ${m.accuracy>0?'+':''}${m.accuracy} pkt`:null,m.armorPen?`Przebicie pancerza +${m.armorPen} pkt`:null,m.extraAttacks?`Dodatkowy osłabiony atak (około +12% sekwencji)`:null].filter(Boolean).join(' · ')}
 function slotName(slot){return slotLabels[slot]||({hand1:'Broń jednoręczna',hand2:'Broń dwuręczna',material:'Surowiec'})[slot]||slot}
-function statDetails(o){return `${weaponSlot(o.slot)?`Obrażenia ${o.min}–${o.max}${o.slot==='hand2'?' · obie ręce':''}`:o.slot==='material'?'Materiał':`Pancerz ${o.armor||0}`}${bonusText(o.bonus)?' · '+bonusText(o.bonus):''}${o.critPp?` · Krytyk +${o.critPp} p.p.`:''}${o.accuracy?` · Celność +${o.accuracy} pkt`:''}${o.extraAttacks?` · Dodatkowy atak +${o.extraAttacks}`:''}`}
+function statDetails(o){return `${weaponSlot(o.slot)?`Obrażenia ${o.min}–${o.max}${o.slot==='hand2'?' · obie ręce':''}`:o.slot==='material'?'Materiał':`Pancerz ${o.armor||0}`}${bonusText(o.bonus)?' · '+bonusText(o.bonus):''}${o.critPp?` · Krytyk +${o.critPp} p.p.`:''}${o.accuracy?` · Celność +${o.accuracy} pkt`:''}${o.extraAttacks?` · Osłabiony atak +${o.extraAttacks}`:''}${o.labPen?` · Przebicie pancerza ${o.labPen}`:''}`}
 function affixDetails(o){return (o.effects||[]).length?`<div class="small muted" style="margin-top:5px">${o.effects.map(x=>`<div>↳ ${escape(x.name)}: ${escape(x.description)}</div>`).join('')}</div>`:''}
 // Podstawowe wyposażenie może wypaść na KAŻDEJ zwykłej wyprawie.
 // Zachowujemy względne wagi przedmiotów z wcześniejszych pul, bez ograniczeń lokacji.
