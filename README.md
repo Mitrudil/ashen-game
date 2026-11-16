@@ -1,20 +1,24 @@
-# ASHEN v0.4.7.1 — Sety mieszane ubioru i trzy akcesoria
+# ASHEN 0.4.7.2 — Planer zestawów i jakości
 
-## Zmiany
-- Ubiór: dodano prefiksy `Wartownika` oraz `Nomady` do losowania nowych elementów; utrzymano już działający mechanizm 3/4/5/6 części jednej rodziny prefiksu. Można aktywować DWIE różne rodziny jednocześnie przy układzie 3+3. Sufiksy nie przeszkadzają w kompletowaniu.
-- Zwykłe akcesoria: pięć rodzin setów opartych o prefiksy (Technika, Tropiciela, Negocjatora, Nomady, Ocalałego). Premia aktywuje się WYŁĄCZNIE po założeniu 3 zwykłych akcesoriów z tej samej rodziny. Przy 1 lub 2 nie ma żadnej premii zestawowej; pojedyncze bonusy samych przedmiotów nadal działają.
-- Jakość wpływa na siłę setu akcesoriów poprzez średnią mnożników jakości; różne sufiksy i rzadkości nie blokują kompletu.
-- Oddzielny istniejący Rezonans artefaktów pozostaje bez zmian, zwykłe akcesoria nie liczą się do Rezonansu i na odwrót.
-- Wyniki setów są widoczne w Postaci, podsumowaniu Ekwipunku oraz w szczegółach akcesorium.
-- Żadnych nowych slotów, SQL ani resetu ekwipunku. Nowa pula prefiksów akcesoriów już istniała; teraz pięć prefiksów łączy przedmioty w sety.
+## Co dodano
+- Postać → Planer setów: bez posiadania przedmiotów można składać sześć slotów odzieży i trzy akcesoria, wybierając ich rodziny prefiksów.
+- Gotowe warianty: 6 Wartownika, 3 Wartownika + 3 Nomady, 4 Wartownika + 2 Nomady, wyczyść.
+- Wybór jakości od zwykłej do legendarnej; plan liczy premie tymi samymi stałymi i wzorami co działający ekwipunek (SETS, ACCESSORY_SETS, setQuality).
+- Sety ubioru aktywują się od 3 sztuk (progi 3/4/5/6), można połączyć 3+3. Akcesoria tylko 3/3, brak premii za 1–2 sztuki.
+- Plan jest zapamiętywany w localStorage, ale nie zmienia postaci, wyposażenia ani serwerowych ekspedycji.
+
+## Dlaczego jeszcze nie zwiększamy premii?
+Przy jakości legendarnej aktualny mnożnik to ×2,5. Bez pomiaru wpływu na pełne zestawy i ich kombinacje zmiana wielkości premii byłaby ryzykowna. Planer służy do porównania 6+0 z 3+3 na różnych jakościach przed następna kalibracją.
 
 ## Instalacja
-Z paczki podmień dokładnie `index.html` oraz `js/game.js` w repozytorium GitHub. Pozostałe pliki zachowaj bez zmian.
+Podmień tylko `index.html` i `js/game.js` w repozytorium GitHub. Pozostałe pliki zostają. Nie wymaga SQL.
 
-## Test manualny
-1. Załóż 2 zwykłe akcesoria z prefiksem `Techniczny`: bonus setowy 0. Załóż 3.: bonus do Inteligencji; zdejmij dowolny: bonus znika.
-2. Załóż 3 ciuchy `Wzmocniony` i 3 ciuchy `Tropicielski` w sześciu slotach: obydwa sety aktywne. Zdejmij jeden z rodziny: traci bonus tylko ta rodzina.
-3. Zmieniaj sufiksy i jakości; nie powinny zrywać setów. Zwykłe akcesoria i artefakty nie mogą sumować się do jednego zestawu.
+## Test
+1. Otwórz Postać → Planer setów. Domyślnie wybór 3 Wartownika + 3 Nomady i 3 akcesoria Tropiciela. Powinny aktywować się dwa sety odzieży i jeden akcesoriów.
+2. Kliknij „6 × Wartownika”: jeden bonus odzieży na progu 6/6.
+3. Kliknij „4 Wartownika + 2 Nomady”: aktywny tylko Wartownika 4/6; Nomady nieaktywne.
+4. Zmień jakość na legendarną: premia wzrasta. Sprawdź przełączenie zakładki i powrót; planer powinien pamiętać wybór.
+5. Ustaw akcesoria jako dwa Tropiciela i jedno Technika: żaden set akcesoriów nie powinien dawać premii.
 
-## Uwagi
-Nie ma tu zmian matematyki Starć ani serwerowych Ekspedycji. Zwiększenie atrybutów przez nowe sety wpływa na lokalne Starcia. Formuła SQL Ekspedycji wymaga osobnej synchronizacji.
+## Granice
+Aktualizacja nie zmienia wartości premii, prawdziwych Starć ani SQL Ekspedycji. Wcześniejsza v0.4.7.1 jest wymagana jako baza (lub odpowiadająca jej zawartość kodu).

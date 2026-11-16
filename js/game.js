@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.7.1';
+const APP_VERSION='0.4.7.2';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -731,6 +731,51 @@ function setSummaryCard(result){
  const bonus=result.active?`AKTYWNY · ${setBonusDescription(result)}`:`NIEAKTYWNY · za 3/3: ${projectedSetBonus(result.config,result.avg)} · brakuje ${missing} ${missing===1?'elementu':'elementów'}`;
  return `<article class="ashen-set-card ${result.active?'is-active':''}"><div class="ashen-set-top"><strong>Zestaw ${escape(result.name)}</strong><span class="ashen-set-count">${result.count}/6 · ${result.active?'AKTYWNY':'NIEAKTYWNY'}</span></div><div class="ashen-set-track">${Array.from({length:6},(_,i)=>`<i class="${i<result.count?'filled':''}"></i>`).join('')}</div><div class="ashen-set-members">${items}</div><div class="ashen-set-bottom"><span>${escape(bonus)}</span><small>Śr. jakość ×${result.avg.toFixed(2).replace('.',',')}${result.active?' · premia doliczona':''}</small></div></article>`;
 }
+
+// ASHEN 0.4.7.2 — planowanie setów nie wymaga posiadania przedmiotów.
+// Obliczenia korzystają z tych samych SETS, ACCESSORY_SETS i setQuality,
+// które napędzają rzeczywisty ekwipunek. Plan nie zapisuje się w postaci.
+const SET_PLANNER_KEY='ashen-set-planner-v0472';
+const SET_PLANNER_FAMILIES=Object.keys(SETS);
+function defaultSetPlan(){return {clothing:['armor_warden','armor_warden','armor_warden','armor_nomad','armor_nomad','armor_nomad'],accessories:['accessory_observant','accessory_observant','accessory_observant'],quality:0}}
+function loadSetPlan(){
+ let stored;try{stored=JSON.parse(localStorage.getItem(SET_PLANNER_KEY)||'null')}catch{}
+ const d=defaultSetPlan();
+ const valid=(values,allowed,count,fallback)=>Array.isArray(values)&&values.length===count?values.map((v,i)=>allowed.includes(v)?v:fallback[i]):fallback;
+ return {clothing:valid(stored?.clothing,['none',...SET_PLANNER_FAMILIES],6,d.clothing),accessories:valid(stored?.accessories,['none',...Object.keys(ACCESSORY_SETS)],3,d.accessories),quality:Math.max(0,Math.min(4,Number.isInteger(stored?.quality)?stored.quality:0))};
+}
+let setPlanner=loadSetPlan();let setPlannerOpen=false;
+function saveSetPlan(){try{localStorage.setItem(SET_PLANNER_KEY,JSON.stringify(setPlanner))}catch{}}
+function plannerBonuses(){
+ const avg=setQuality({rarity:setPlanner.quality});
+ const groups={};
+ for(const id of setPlanner.clothing){if(SETS[id])groups[id]=(groups[id]||0)+1}
+ const clothes=Object.entries(groups).map(([id,count])=>{
+  const cfg=SETS[id],base=count>=3?cfg.start+(count-3)*cfg.step:0;
+  return {id,count,name:cfg.name,active:count>=3,amount:count>=3?Math.round(base*avg):0,config:cfg};
+ });
+ const extras={};for(const id of setPlanner.accessories){if(ACCESSORY_SETS[id])extras[id]=(extras[id]||0)+1}
+ const accessories=Object.entries(extras).map(([id,count])=>{
+  const cfg=ACCESSORY_SETS[id],active=count===3;
+  const bonus=active?Object.fromEntries(Object.entries(cfg.bonus).map(([key,value])=>[key,Math.max(1,Math.round(value*avg))])):{};
+  return {id,count,name:cfg.name,active,bonus};
+ });
+ return {clothes,accessories,avg};
+}
+function plannerResultHtml(){
+ const r=plannerBonuses();
+ const cloth=r.clothes.length?r.clothes.map(v=>`<div class="ashen-set-member"><span>${escape(v.name)} · ${v.count}/6</span><strong>${v.active?escape(v.config.armorPct?`Pancerz +${v.amount}%`:`${attrNames[v.config.attribute]} +${v.amount}`):'Brak premii (minimum 3)'}</strong></div>`).join(''):'<div class="small muted">Brak odzieży z rodziny setowej.</div>';
+ const extras=r.accessories.length?r.accessories.map(v=>`<div class="ashen-set-member"><span>${escape(v.name)} · ${v.count}/3</span><strong>${v.active?escape(accessoryBonusText(v.bonus)):'Brak premii (wymagane 3/3)'}</strong></div>`).join(''):'<div class="small muted">Brak akcesoriów z rodziny setowej.</div>';
+ return `<div class="ashen-sets-grid"><article class="ashen-set-card"><strong>Sety ubioru</strong><div class="ashen-set-members">${cloth}</div></article><article class="ashen-set-card"><strong>Sety akcesoriów</strong><div class="ashen-set-members">${extras}</div></article></div><p class="small muted" style="margin:10px 0 0">Jakość: ×${r.avg.toFixed(2).replace('.',',')} · Liczymy dokładnie jak w aktualnym ekwipunku. Indywidualne premie przedmiotów nie są tu uwzględnione.</p>`;
+}
+function setPlannerPanel(){
+ const clothingOpts=[['none','— Bez prefiksu setowego —'],...SET_PLANNER_FAMILIES.map(id=>[id,SETS[id].name])];
+ const accessoryOpts=[['none','— Bez prefiksu setowego —'],...Object.keys(ACCESSORY_SETS).map(id=>[id,ACCESSORY_SETS[id].name])];
+ const field=(type,index,opts)=>`<label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem"><span>${type==='clothing'?slotLabels[['head','shirt','outer','hands','pants','boots'][index]]:`Akcesorium ${index+1}`}</span><select data-set-planner="${type}" data-set-slot="${index}" style="width:100%;min-width:0;padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${opts.map(([id,label])=>`<option value="${id}" ${(setPlanner[type][index]===id)?'selected':''}>${escape(label)}</option>`).join('')}</select></label>`;
+ return `<details class="panel section" id="ashen-set-planner" ${setPlannerOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧩 Planer setów — porównaj 6+0 i 3+3 bez zdobywania przedmiotów</summary><p class="small muted">Symulator używa obecnych progów i premii setowych. Nie zmienia ekwipunku, statystyk ani zapisu postaci; zapamiętuje tylko wybór w tej przeglądarce.</p><div class="actions" style="margin:12px 0;flex-wrap:wrap"><button type="button" data-set-preset="full">6 × Wartownika</button><button type="button" data-set-preset="mixed">3 Wartownika + 3 Nomady</button><button type="button" data-set-preset="partial">4 Wartownika + 2 Nomady</button><button type="button" data-set-preset="clear">Wyczyść</button></div><label style="display:flex;align-items:center;gap:8px;margin-bottom:12px">Jakość wszystkich elementów (testowo): <select data-set-planner="quality" style="padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${rarities.map((r,i)=>`<option value="${i}" ${setPlanner.quality===i?'selected':''}>${escape(r.name)} · ×${setQuality({rarity:i}).toFixed(2)}</option>`).join('')}</select></label><h4>Odzież — sześć slotów</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.clothing.map((_,i)=>field('clothing',i,clothingOpts)).join('')}</div><h4>Akcesoria — trzy sloty</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.accessories.map((_,i)=>field('accessories',i,accessoryOpts)).join('')}</div><div id="ashen-set-planner-result" aria-live="polite">${plannerResultHtml()}</div></details>`;
+}
+function updateSetPlannerDisplay(){const target=document.getElementById('ashen-set-planner-result');if(target)target.innerHTML=plannerResultHtml();}
+
 function characterSetsPanel(){
  const results=setResults();
  return `<section class="ashen-sets-section"><div class="ashen-sets-title"><h3>Zestawy ubioru — prefiksy</h3><p>Załóż 3 elementy ubioru z tym samym prefiksem. Każdy następny zwiększa premię, którą wzmacnia średnia jakość wszystkich części. Możesz nosić dwa zestawy naraz (3+3). Liczą się tylko założone przedmioty — nie broń ani akcesoria.</p></div><div class="ashen-sets-grid">${results.length?results.map(setSummaryCard).join(''):'<div class="ashen-sets-empty">Brak założonych elementów z prefiksami zestawowymi. Starszy prefiks „Zwinny” również tworzy zestaw.</div>'}</div></section>`;
@@ -2204,7 +2249,7 @@ function activityConnectionsPanel(){
  <div class="small muted">To podsumowanie aktualnych źródeł premii, nie nowe bonusy. Statystyki do walk online aktualizują się po synchronizacji profilu.</div>
  </div></details>`;
 }
-function character(){let a=attrs();const comp=companionId()?COMPANIONS[companionId()]:null;const vehicle=vehicleDef();const travelBonus=Math.round((1-vehicleTimeFactor())*100);return section('Postać',`<div class="character-screen-modern"><div class="character-top-grid"><div class="character-figure-panel"><div class="character-figure-frame"><img src="${characterFigure(state.origin,state.gender)}" alt="Pełna sylwetka postaci – ${originTitle(state.origin,state.gender)}"></div><div class="character-figure-caption">${originTitle(state.origin,state.gender)}</div></div><div class="character-info-panel"><div class="character-heading"><div><div class="tag">OCALAŁY · POZIOM ${state.level}</div><h3>${escape(state.name)}</h3><p class="small muted">Wybrany wygląd zależy od płci i archetypu postaci. Możesz testować różne warianty na osobnych slotach.</p></div><button data-action="rename">Zmień imię</button></div>${bar('Doświadczenie',state.xp,xpNeed(),'gold')}<div class="character-meta-line"><span><strong>Płeć:</strong> ${genderLabel(state.gender)}</span><span><strong>Ręka dominująca:</strong> ${state.dominantHand==='left'?'lewa':'prawa'}</span><span><strong>Punkty atrybutów:</strong> ${state.points}</span></div><div class="actions"><button data-dominant="right" ${state.dominantHand==='right'?'disabled':''}>Prawa ręka</button><button data-dominant="left" ${state.dominantHand==='left'?'disabled':''}>Lewa ręka</button></div><div class="character-sidecards"><div class="character-sidecard"><div class="character-sidevisual ${comp?'':'placeholder'}">${comp?companionVisual(state.companion):'<div class="character-side-emoji">🐾</div>'}</div><div class="character-sidecontent"><div class="tag">AKTYWNY TOWARZYSZ</div><h4>${comp?comp.name:'Brak towarzysza'}</h4><p class="small muted">${comp?comp.desc:`Towarzysz odblokuje się na poziomie 20. Obecny poziom: ${state.level}.`}</p><p class="good small">${comp?companionBonus():'Jeszcze niedostępny'}</p><button data-page="companion">${comp?'Zmień towarzysza':'Przejdź do towarzyszy'}</button></div></div><div class="character-sidecard"><div class="character-sidevisual transport">${vehicleArt(vehicle.id,vehicleStage())}</div><div class="character-sidecontent"><div class="tag">AKTUALNY TRANSPORT</div><h4>${vehicle.name}</h4><p class="small muted">Przyspieszenie wypraw: <strong>${travelBonus}%</strong>. Usprawnienie: ${vehicleStage()+1}/3.</p><p class="good small">Silnik skraca czas; ładowność zwiększa złom, a pancerz pomaga podczas zwykłych wypraw (nie w Starciach ani PvP).</p><button data-page="transport">Zarządzaj transportem</button></div></div></div></div></div><div class="character-attr-grid">${Object.entries(attrNames).map(([k,n])=>`<div class="character-attr-card"><div class="character-attr-head"><span>${n} <details class="ashen-attr-help"><summary aria-label="Opis atrybutu ${n}" title="Co daje ${n}?">ⓘ</summary><div class="ashen-attr-help-content">${escape(ATTRIBUTE_HELP[k])}</div></details></span><strong>${a[k]}</strong></div><div class="small muted">Baza ${state.attrs[k]}${a[k]!==state.attrs[k]?` · Sprzęt i zestawy ${a[k]-state.attrs[k]>=0?'+':''}${a[k]-state.attrs[k]}`:''}</div><button data-attr="${k}" ${state.points<=0?'disabled':''}>+1</button></div>`).join('')}</div>${combatPanel()}${activityConnectionsPanel()}${characterSetsPanel()}${accessorySetPanel()}${resonancePanel()}</div>`)}
+function character(){let a=attrs();const comp=companionId()?COMPANIONS[companionId()]:null;const vehicle=vehicleDef();const travelBonus=Math.round((1-vehicleTimeFactor())*100);return section('Postać',`<div class="character-screen-modern"><div class="character-top-grid"><div class="character-figure-panel"><div class="character-figure-frame"><img src="${characterFigure(state.origin,state.gender)}" alt="Pełna sylwetka postaci – ${originTitle(state.origin,state.gender)}"></div><div class="character-figure-caption">${originTitle(state.origin,state.gender)}</div></div><div class="character-info-panel"><div class="character-heading"><div><div class="tag">OCALAŁY · POZIOM ${state.level}</div><h3>${escape(state.name)}</h3><p class="small muted">Wybrany wygląd zależy od płci i archetypu postaci. Możesz testować różne warianty na osobnych slotach.</p></div><button data-action="rename">Zmień imię</button></div>${bar('Doświadczenie',state.xp,xpNeed(),'gold')}<div class="character-meta-line"><span><strong>Płeć:</strong> ${genderLabel(state.gender)}</span><span><strong>Ręka dominująca:</strong> ${state.dominantHand==='left'?'lewa':'prawa'}</span><span><strong>Punkty atrybutów:</strong> ${state.points}</span></div><div class="actions"><button data-dominant="right" ${state.dominantHand==='right'?'disabled':''}>Prawa ręka</button><button data-dominant="left" ${state.dominantHand==='left'?'disabled':''}>Lewa ręka</button></div><div class="character-sidecards"><div class="character-sidecard"><div class="character-sidevisual ${comp?'':'placeholder'}">${comp?companionVisual(state.companion):'<div class="character-side-emoji">🐾</div>'}</div><div class="character-sidecontent"><div class="tag">AKTYWNY TOWARZYSZ</div><h4>${comp?comp.name:'Brak towarzysza'}</h4><p class="small muted">${comp?comp.desc:`Towarzysz odblokuje się na poziomie 20. Obecny poziom: ${state.level}.`}</p><p class="good small">${comp?companionBonus():'Jeszcze niedostępny'}</p><button data-page="companion">${comp?'Zmień towarzysza':'Przejdź do towarzyszy'}</button></div></div><div class="character-sidecard"><div class="character-sidevisual transport">${vehicleArt(vehicle.id,vehicleStage())}</div><div class="character-sidecontent"><div class="tag">AKTUALNY TRANSPORT</div><h4>${vehicle.name}</h4><p class="small muted">Przyspieszenie wypraw: <strong>${travelBonus}%</strong>. Usprawnienie: ${vehicleStage()+1}/3.</p><p class="good small">Silnik skraca czas; ładowność zwiększa złom, a pancerz pomaga podczas zwykłych wypraw (nie w Starciach ani PvP).</p><button data-page="transport">Zarządzaj transportem</button></div></div></div></div></div><div class="character-attr-grid">${Object.entries(attrNames).map(([k,n])=>`<div class="character-attr-card"><div class="character-attr-head"><span>${n} <details class="ashen-attr-help"><summary aria-label="Opis atrybutu ${n}" title="Co daje ${n}?">ⓘ</summary><div class="ashen-attr-help-content">${escape(ATTRIBUTE_HELP[k])}</div></details></span><strong>${a[k]}</strong></div><div class="small muted">Baza ${state.attrs[k]}${a[k]!==state.attrs[k]?` · Sprzęt i zestawy ${a[k]-state.attrs[k]>=0?'+':''}${a[k]-state.attrs[k]}`:''}</div><button data-attr="${k}" ${state.points<=0?'disabled':''}>+1</button></div>`).join('')}</div>${combatPanel()}${activityConnectionsPanel()}${characterSetsPanel()}${accessorySetPanel()}${setPlannerPanel()}${resonancePanel()}</div>`)}
 function companion(){
  const selected=companionId(),active=selected?COMPANIONS[selected]:null;
  const owned=state.ownedCompanions||[];
@@ -3180,6 +3225,25 @@ if(b.dataset.equip!==undefined){
  }else state.equip[slot]=inst.uid;
  openItemDetail=null;message='Założono: '+statsOf(inst).name;save();render();return
 }if(b.dataset.action==='rename'){let name=prompt('Imię postaci (2–24 znaki):',state.name);if(name!==null&&name.trim().length>=2&&name.trim().length<=24){state.name=name.trim();save();render()}return}if(b.dataset.action==='heal'){if(state.scrap>=20&&state.hp<maxHp()){state.scrap-=20;message='Zdrowie przywrócone.';save();render()}return}if(b.dataset.action==='import'){$('ashen-import-file')?.click();return}if(b.dataset.action==='restore-backup'){restoreSaveBackup();return}if(b.dataset.action==='reset'){if(confirm('Rozpocząć nową grę? Bieżący postęp zostanie zastąpiony, ale zapiszemy jego kopię w tej przeglądarce.')){try{backupCurrentAndReplace(fresh());location.reload()}catch(err){message=err.message;render()}}return}if(b.dataset.action==='export'){exportSave();return}}
+document.addEventListener('toggle',e=>{if(e.target?.id==='ashen-set-planner')setPlannerOpen=e.target.open},true);
+document.addEventListener('change',e=>{
+ const t=e.target;if(!t?.dataset?.setPlanner)return;
+ const typ=t.dataset.setPlanner;
+ if(typ==='quality')setPlanner.quality=Math.max(0,Math.min(4,Number(t.value)||0));
+ else if(['clothing','accessories'].includes(typ)){
+  const idx=Number(t.dataset.setSlot);if(Number.isInteger(idx)&&idx>=0&&idx<setPlanner[typ].length)setPlanner[typ][idx]=t.value;
+ }
+ saveSetPlan();updateSetPlannerDisplay();
+});
+document.addEventListener('click',e=>{
+ const button=e.target.closest?.('[data-set-preset]');if(!button)return;
+ const preset=button.dataset.setPreset;const d=defaultSetPlan();
+ if(preset==='full')setPlanner.clothing=Array(6).fill('armor_warden');
+ else if(preset==='mixed')setPlanner.clothing=d.clothing.slice();
+ else if(preset==='partial')setPlanner.clothing=['armor_warden','armor_warden','armor_warden','armor_warden','armor_nomad','armor_nomad'];
+ else if(preset==='clear'){setPlanner.clothing=Array(6).fill('none');setPlanner.accessories=Array(3).fill('none')}
+ saveSetPlan();setPlannerOpen=true;render();
+});
 document.addEventListener('change',e=>{if(e.target.closest?.('.weapon-lab-config')){weaponLabReadControls();return}if(e.target.dataset.inventorySort!==undefined){if(INVENTORY_SORTS.some(([id])=>id===e.target.value)){state.inventorySort=e.target.value;save();render()}return}if(e.target.id==='ashen-import-file'){const file=e.target.files?.[0];if(file)importSaveFile(file);return}if(e.target.dataset.bulkUid){const uid=e.target.dataset.bulkUid;const inst=instance(uid);if(e.target.checked&&eligibleForBulk(inst))bulkSelected.add(uid);else bulkSelected.delete(uid);render();return}if(e.target.name==='dominantHand'){state.dominantHand=e.target.value;return}if(e.target.name==='gender'&&['male','female'].includes(e.target.value)){let n=$('hero-name')?.value;state.gender=e.target.value;render();if(n)$('hero-name').value=n;return}if(e.target.name==='origin'&&origins[e.target.value]){let n=$('hero-name')?.value;state.origin=e.target.value;render();if(n)$('hero-name').value=n}});window.ASHEN_FORCE_RENDER=render;
 window.ASHEN_OPEN_PLAYER=id=>{if(!state.created)return;void window.ASHEN_PLAYERS?.open?.(id)};
 window.ASHEN_OPEN_EXPEDITION_REPORT=id=>{if(!state.created)return;setPage('expeditions');render();void window.ASHEN_EXPEDITIONS?.openReport?.(id)};
