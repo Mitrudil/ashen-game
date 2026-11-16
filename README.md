@@ -1,35 +1,40 @@
-# ASHEN v0.3.7 — Rozbudowa Kryjówki (Schron 17)
+# ASHEN v0.3.8 — Towarzysze Pustkowi
 
 ## Nowości
 
-### 3 nowe pomieszczenia
-- **Legowisko towarzyszy** (`sanctuary`) — wzmacnia premię aktywnego zwierzęcia o +2,5%, +5%, +7,5%, +10% na poziomach 2–5 (mnożnik skuteczności bonusu, a nie bezpośrednie +10 punktów procentowych).
-- **Garaż** (`garage`) — skraca czas zwykłych wypraw o dodatkowe 2,5%, 5%, 7,5%, 10% na poziomach 2–5. Nie skraca zbiórki ekspedycji klanowych.
-- **Ambulatorium** (`infirmary`) — zwiększa maksymalne punkty życia postaci o +2,5%, +5%, +7,5%, +10% na poziomach 2–5.
+- **Kolekcja zwierząt:** pies tropiciel, kot cieni, kruk zwiadowca i dzik pustkowi. Można posiadać wszystkie cztery, ale **tylko jeden jest aktywny**. Po zdobyciu zwierzęcia można je aktywować ponownie bez kolejnej opłaty.
+- **Zachowanie poprzednich zapisów:** dotychczas aktywne zwierzę automatycznie trafia do kolekcji, a dotychczasowe etapy szkolenia pozostają zachowane.
+- **Nowe doświadczenie zwierząt:** osobny poziom 1–10 dla każdego zdobytego zwierzęcia. Doświadczenie zdobywa **aktywny** zwierzak podczas zakończonych zwykłych wypraw i zwycięskich Starć (bez trybu testowego). Wyższe poziomy zwiększają efekt jego aktualnego bonusu o 1,5% za poziom ponad pierwszy, maksymalnie o 13,5%. To dodatkowy mnożnik, nie +13,5 punktu procentowego szansy na łup.
+- **Dotychczasowe etapy treningu 1–3 działają oddzielnie**. Rozwój Legowiska także nadal wzmacnia aktywnego zwierzaka.
+- **Tryb testowy:** pozwala odblokować dowolne zwierzę i jego etap bez kosztów. Odblokowane zwierzęta zostają na liście. Nie trzeba czekać na poziom postaci 20, aby wypróbować system.
+- **Wersjonowanie grafik:** adresy nowych grafik kryjówki i grafik zwierząt zawierają numer wersji gry, aby przeglądarka nie wyświetlała starych plików z cache.
+- **Najnowsze grafiki pomieszczeń:** do pełnej gry dołączono zaakceptowane poprawki Legowiska (w tym osobną poprawkę poziomu 3), Garażu i Ambulatorium.
 
-Każde pomieszczenie korzysta z istniejącej rozbudowy: koszt w kredytach, złomie i materiałach, wymagany poziom postaci, zapisany poziom oraz testowy wybór 1–5 bez kosztów.
+## Ważne ograniczenia
 
-### Grafiki i interfejs
-- Przekrój Schronu 17 pokazuje 6 pomieszczeń w dwóch rzędach po 3.
-- Dodano robocze sceny dla Legowiska, Garażu i Ambulatorium z wizualnymi wariantami oświetlenia 1–5. **To nie jest jeszcze pięć odrębnie ilustrowanych etapów przebudowy**: na razie zmienia się głównie natężenie i kolor oświetlenia; szczegółową ewolucję wyposażenia można dopracować później.
-- Naprawiono błąd identycznych plików `fighter-f-full.png` i `scout-f-full.png`; mają teraz osobne grafiki. Naprawiono brak prawidłowej miniatury `scout-f.webp`.
+- Wersja 0.3.8 nie dodaje jeszcze nowych gatunków, umiejętności specjalnych, hodowli ani zdobywania zwierząt losowo z łupów; to osobny etap.
+- Normalne zdobywanie nowego zwierzęcia jest możliwe od poziomu postaci 20. Pierwsze zwierzę jest darmowe, kolejne kosztują 500 kredytów. Wybór wcześniej zdobytego towarzysza jest darmowy.
+- Dane kolekcji i doświadczenia są częścią **zapisu postaci** (lokalnego i opcjonalnego w chmurze). W przypadku zmiany urządzenia zaczekaj na synchronizację lub użyj eksportu.
+- Poziomy 1–10 i tempo doświadczenia są wstępne — balans do sprawdzenia podczas testów.
 
-### Kompatybilność
-- Istniejące postaci otrzymują nowe pomieszczenia na poziomie 1 bez utraty dotychczasowego postępu.
-- Importowane i chmurowe zapisy ze starszych wersji są inicjalizowane również dla trzech nowych modułów.
-- Zmiany są lokalne — **bez nowego SQL**. Nie zmieniają systemu nagród bossów ani odznak.
-- Zasada „wiele posiadanych zwierząt, jedno aktywne” zostanie wdrożona oddzielnie; w tej wersji zachowujemy dotychczasowy sposób wyboru towarzysza.
+## Instalacja
 
-## Aktualizacja GitHub
-Wgraj pliki z mniejszej paczki do **korzenia repozytorium ASHEN**: `index.html`, `css/style.css`, `js/game.js` oraz katalogi `assets/characters` i `assets/bunker/rooms`. Odśwież stronę Ctrl+F5.
+### Aktualizacja z v0.3.7
 
-## Testy
-1. Otwórz **Kryjówka**. W przekroju powinno być 6 pokoi.
-2. Przełącz Legowisko między poziomami 1 i 5, sprawdź bonus psa/kota/kruka/dzika w zakładce Towarzysz.
-3. Przełącz Garaż i porównaj czas zwykłej wyprawy (najbardziej widoczny przy dłuższej wyprawie i wolniejszym pojeździe).
-4. Przełącz Ambulatorium i porównaj maksymalne PŻ w statystykach postaci i walce.
-5. Na profilu testowym utwórz Wojowniczkę i Zwiadowczynię — powinny mieć inne sylwetki.
-6. Sprawdź, czy starsze zapisy Kryjówki i ekspedycji nie zostały zmienione.
+Rozpakuj `ASHEN_v0.3.8_AKTUALIZACJA_GITHUB.zip` i **wgraj zawartość znajdującego się w nim folderu** do katalogu głównego repozytorium na GitHubie. Nie twórz dodatkowego folderu z nazwą archiwum. Podmień `index.html`, `js/game.js`, `css/style.css` oraz grafiki z `assets/bunker/rooms/`.
 
-## Następny etap
-Kolekcja zwierząt i zarządzanie jednym aktywnym towarzyszem oraz dalsze dopracowanie wizualne scen pomieszczeń.
+### Supabase
+
+**Nowy SQL nie jest wymagany.** System wykorzystuje istniejący zapis postaci; nie zmieniono żadnych funkcji RPC. Nie uruchamiaj starych skryptów SQL ponownie.
+
+## Test
+
+1. Wejdź w Towarzysz i wybierz psa (lub użyj testowego wyboru).
+2. Wybierz kota i wróć do psa — oba powinny zostać w kolekcji, a ich etapy rozwoju powinny być zachowane.
+3. Zwycięż w zwykłych Starciach albo ukończ wyprawę i sprawdź EXP aktywnego zwierzęcia.
+4. Przełącz aktywnego zwierzaka i sprawdź, czy XP poprzedniego pozostał bez zmian.
+5. Otwórz Kryjówkę i przełącz poziomy Legowiska, Garażu i Ambulatorium; obrazy powinny się załadować bez konieczności ręcznego odświeżania.
+
+## Bez zmian
+
+Nie zmieniano zasad ekspedycji klanowych, nagród za bossów, odznak, PvP, magazynu ani projektu ALLADYN.
