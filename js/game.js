@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.6.8';
+const APP_VERSION='0.4.6.9';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -480,6 +480,12 @@ function modifiersOf(inst){
  return mods;
 }
 function rolledBonus(inst){const b={};for(const mod of modifiersOf(inst))for(const [k,v] of Object.entries(mod.bonus||{}))b[k]=(b[k]||0)+v;return b}
+// ASHEN v0.4.6.9 — rzeczywisty silnik Starć: katalog 24 broni z potwierdzonej kalibracji.
+// Eksperymentalne współczynniki klas pochodzą z Laboratorium 0.4.6.7–0.4.6.8.
+// Nie zmieniamy SQL serwerowych Ekspedycji w tej wersji.
+const COMBAT_V2_WEAPONS={"baton":{"min":5,"max":8,"attacks":1,"accuracy":2,"crit":0,"pen":0,"category":"Biała 1R","scale":0.72,"critMultiplier":2},"pipe":{"min":6,"max":10,"attacks":1,"accuracy":-2,"crit":0,"pen":1,"category":"Biała 1R","scale":0.72,"critMultiplier":2},"wrench":{"min":7,"max":12,"attacks":1,"accuracy":2,"crit":0,"pen":0,"category":"Biała 1R","scale":0.72,"critMultiplier":2},"knife":{"min":6,"max":10,"attacks":2,"accuracy":4,"crit":3,"pen":0,"category":"Biała 1R","scale":0.72,"critMultiplier":2},"cleaver":{"min":10,"max":16,"attacks":1,"accuracy":-3,"crit":5,"pen":0,"category":"Biała 1R","scale":0.72,"critMultiplier":2},"hatchet":{"min":12,"max":18,"attacks":1,"accuracy":-2,"crit":2,"pen":2,"category":"Biała 1R","scale":0.72,"critMultiplier":2},"saber":{"min":10,"max":15,"attacks":2,"accuracy":1,"crit":2,"pen":0,"category":"Biała 1R","scale":0.72,"critMultiplier":2},"machete":{"min":12,"max":18,"attacks":2,"accuracy":-1,"crit":1,"pen":0,"category":"Biała 1R","scale":0.72,"critMultiplier":2},"pistol":{"min":12,"max":18,"attacks":1,"accuracy":5,"crit":0,"pen":0,"category":"Palna 1R","scale":1.12,"critMultiplier":1.6},"deserteagle":{"min":18,"max":27,"attacks":1,"accuracy":-3,"crit":2,"pen":1,"category":"Palna 1R","scale":1.12,"critMultiplier":1.6},"revolver":{"min":19,"max":28,"attacks":1,"accuracy":0,"crit":5,"pen":1,"category":"Palna 1R","scale":1.12,"critMultiplier":1.6},"smg":{"min":8,"max":13,"attacks":3,"accuracy":-7,"crit":-2,"pen":0,"category":"Palna 1R","scale":1.12,"critMultiplier":1.6},"rifle":{"min":18,"max":27,"attacks":1,"accuracy":2,"crit":0,"pen":1,"category":"Palna 2R","scale":0.93,"critMultiplier":1.8},"carbine":{"min":13,"max":20,"attacks":2,"accuracy":2,"crit":0,"pen":1,"category":"Palna 2R","scale":0.93,"critMultiplier":1.8},"shotgun":{"min":28,"max":42,"attacks":1,"accuracy":-7,"crit":1,"pen":1,"category":"Palna 2R","scale":0.93,"critMultiplier":1.8},"sniper":{"min":36,"max":54,"attacks":1,"accuracy":5,"crit":5,"pen":4,"category":"Palna 2R","scale":0.93,"critMultiplier":1.8},"lmg":{"min":13,"max":20,"attacks":3,"accuracy":-10,"crit":-2,"pen":1,"category":"Palna 2R","scale":0.93,"critMultiplier":1.8},"crossbow":{"min":18,"max":28,"attacks":1,"accuracy":1,"crit":4,"pen":3,"category":"Dystansowa 2R","scale":1.42,"critMultiplier":2.3},"harpoon":{"min":23,"max":36,"attacks":1,"accuracy":-3,"crit":3,"pen":4,"category":"Dystansowa 2R","scale":1.42,"critMultiplier":2.3},"flame":{"min":12,"max":19,"attacks":3,"accuracy":-6,"crit":-3,"pen":2,"category":"Technologiczna 2R","scale":1.22,"critMultiplier":1.8},"crowbar":{"min":15,"max":23,"attacks":1,"accuracy":-2,"crit":0,"pen":3,"category":"Biała 2R","scale":0.91,"critMultiplier":2.8},"hammer":{"min":21,"max":33,"attacks":1,"accuracy":-4,"crit":2,"pen":2,"category":"Biała 2R","scale":0.91,"critMultiplier":2.8},"rail":{"min":31,"max":47,"attacks":1,"accuracy":3,"crit":3,"pen":6,"category":"Technologiczna 2R","scale":1.22,"critMultiplier":1.8},"sledge":{"min":32,"max":50,"attacks":1,"accuracy":-6,"crit":4,"pen":3,"category":"Biała 2R","scale":0.91,"critMultiplier":2.8}};
+const COMBAT_V2_WORKSHOP=[0,.028,.056,.084,.112,.14];
+function combatV2WeaponConfig(id){return COMBAT_V2_WEAPONS[id]||null;}
 const UPGRADE_POWER=[0,1,3,5,10,20];
 function statsOf(inst){
  const d=def(inst);if(!d)return null;
@@ -491,13 +497,15 @@ function statsOf(inst){
  const legacyLabel=legacy?.name==='Zwinny'&&d.slot==='extra'?prefixLabel({id:'agile',name:'Zwinny'},d):legacy?.name;
  const name=[rarityPrefix(inst,d),prefixLabel(pref,d)||legacyLabel,d.name,suf?.name].filter(Boolean).join(' ');
  const weapon=weaponSlot(d.slot),upgrade=Math.min(5,Math.max(0,Number(inst?.upgrade)||0));
+ const combatModel=weapon?combatV2WeaponConfig(d.id):null;
  const upgradedName=upgrade?name+' +'+upgrade:name;
  const armorUp=UPGRADE_POWER[upgrade];
  return {...d,name:upgradedName,upgrade,rarity:rarity(inst).name,
-  min:weapon?Math.max(1,Math.round(d.min*m*(1+dmgPct/100))+UPGRADE_POWER[upgrade]):undefined,
-  max:weapon?Math.max(1,Math.round(d.max*m*(1+dmgPct/100))+UPGRADE_POWER[upgrade]):undefined,
+  min:weapon?Math.max(1,combatModel?Math.round(combatModel.min*combatModel.scale*m*(1+dmgPct/100)*(1+COMBAT_V2_WORKSHOP[upgrade])):Math.round(d.min*m*(1+dmgPct/100))+UPGRADE_POWER[upgrade]):undefined,
+  max:weapon?Math.max(1,combatModel?Math.round(combatModel.max*combatModel.scale*m*(1+dmgPct/100)*(1+COMBAT_V2_WORKSHOP[upgrade])):Math.round(d.max*m*(1+dmgPct/100))+UPGRADE_POWER[upgrade]):undefined,
   armor:!weapon&&d.slot!=='material'?Math.max(0,Math.round((d.armor||0)*m*(1+armorPct/100))+((d.armor||0)===0 ? [0,1,2,3,5][Math.min(4,Math.max(0,Number(inst?.rarity)||0))] : 0)+armorUp):undefined,
-  bonus:rolledBonus(inst),critPp,accuracy,extraAttacks,damagePct:dmgPct,armorPct,
+  bonus:rolledBonus(inst),critPp:critPp+(combatModel?.crit||0),accuracy:accuracy+(combatModel?.accuracy||0),extraAttacks,damagePct:dmgPct,armorPct,
+  combatV2:!!combatModel,baseAttacks:combatModel?.attacks||1,labPen:combatModel?.pen||0,labCritMultiplier:combatModel?.critMultiplier||1.6,
   prefixName:prefixLabel(pref,d)||null,suffixName:suf?.name||null,
   effects:mods.map(x=>({name:x===pref?prefixLabel(x,d):x.name,description:modifierText(x)}))};
 }
@@ -785,10 +793,20 @@ function heroAttacks(){
  const hands=[state.dominantHand,state.dominantHand==='right'?'left':'right'];
  const main=statsOf(instance(state.equip[hands[0]])),off=statsOf(instance(state.equip[hands[1]]));
  const attacks=[];
- if(main){attacks.push({weapon:main,hand:hands[0],power:1});if(main.extraAttacks>0&&main.slot==='hand1')attacks.push({weapon:main,hand:hands[0],power:.65});}
- if(off&&off.slot==='hand2'){attacks.length=0;attacks.push({weapon:off,hand:hands[1],power:1});}
- else if(off&&off.slot==='hand1'){attacks.push({weapon:off,hand:hands[1],power:.8});if(off.extraAttacks>0)attacks.push({weapon:off,hand:hands[1],power:.5});}
- if(!attacks.length)attacks.push({weapon:statsOf({id:'knife',rarity:0}),hand:hands[0],power:1});
+ const addWeapon=(weapon,hand,power)=>{
+  const count=Math.max(1,Math.min(3,Number(weapon?.baseAttacks)||1));
+  for(let i=0;i<count;i++)attacks.push({weapon,hand,power});
+  // Extra strike from Szybki is weak relative to ENTIRE base attack sequence,
+  // not a free full hit from a single-shot high-damage weapon.
+  // 0.12 applies to this weapon's sequence; never more than one bonus strike.
+  if(weapon?.extraAttacks>0&&weapon.slot==='hand1')attacks.push({weapon,hand,power:Math.min(.36,.12*count*power)});
+ };
+ if(main&&main.slot==='hand1')addWeapon(main,hands[0],1);
+ if(off&&off.slot==='hand2'){attacks.length=0;addWeapon(off,hands[1],1);}
+ else if(off&&off.slot==='hand1')addWeapon(off,hands[1],.8);
+ // Also support equipping 2R weapon in primary hand if UI permits it.
+ if(!attacks.length&&main&&main.slot==='hand2')addWeapon(main,hands[0],1);
+ if(!attacks.length)addWeapon(statsOf({id:'knife',rarity:0}),hands[0],1);
  return attacks;
 }
 // ASHEN v0.4.4: shared combat defense computation for exploration, Starcia,
@@ -832,7 +850,7 @@ function fight(enemy,options={}){
    let raw;
    if(weapon){raw=Math.max(1,Math.floor((randomInt(weapon.weapon.min,weapon.weapon.max)+weaponAttributeDamage(a,weapon.weapon))*weapon.power));}
    else raw=randomInt(attacker.atk[0],attacker.atk[1]);
-   const labWeapon=options.testWeaponModel&&who==='hero'&&weapon?weapon.weapon:null;
+   const labWeapon=who==='hero'&&weapon&&(options.testWeaponModel||weapon.weapon.combatV2)?weapon.weapon:null;
    const effectiveArmor=labWeapon?Math.max(0,defender.armor-(labWeapon.labPen||0)):defender.armor;
    if(critical&&!labWeapon)raw=Math.floor(raw*1.6);
    let dmg=Math.max(1,Math.floor(raw*(1-clamp(effectiveArmor/100,0,.6))));
@@ -2317,7 +2335,7 @@ function itemDetailContent(){if(!openItemDetail)return '';
  const o=owned?statsOf(owned):{...defn,rarity:'Zwykły',name:defn.name,bonus:defn.bonus||{}};
  const wornSlot=owned?Object.keys(state.equip).find(slot=>state.equip[slot]===owned.uid):null;
  const equipActions=!owned||defn.slot==='material'?'':wornSlot?`<button class="primary" data-unequip="${wornSlot}">Zdejmij</button>`:defn.slot==='hand1'?`<button class="primary" data-equip="${owned.uid}" data-hand="right">Załóż · prawa ręka</button><button data-equip="${owned.uid}" data-hand="left">Załóż · lewa ręka</button>`:defn.slot==='extra'?`<span class="small muted">Załóż do slotu:</span>${['extra','extra2','extra3'].map((slot,i)=>`<button class="${state.equip[slot]?'':'primary'}" data-equip="${owned.uid}" data-extra-slot="${slot}">${i+1}${state.equip[slot]?' · zamień':''}</button>`).join('')}`:`<button class="primary" data-equip="${owned.uid}">Załóż</button>`;
- return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${1+(Number(o.extraAttacks)||0)}</strong></div>`:''}<div class="detail-affix"><strong>${modifierGlyph('prefix',defn,owned?findModifier(prefixDefs,owned.prefix):null)} Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span></div><div class="detail-affix"><strong>${modifierGlyph('suffix',defn,owned?findModifier(suffixDefs,owned.suffix):null)} Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span></div>${owned?`<div class="small muted">${statDetails(o)}</div>${itemSetPanel(owned)}${artifactDetailPanel(owned)}`:''}</div></div><div class="actions ashen-modal-equip-actions">${equipActions}<button data-item-close>Zamknij</button></div></div></div>`
+ return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${(Number(o.baseAttacks)||1)+(Number(o.extraAttacks)||0)}</strong></div>${o.combatV2?`<div class="detail-stat"><span>Model walki</span><strong>ASHEN 0.5 · test bojowy</strong></div>`:''}`:''}<div class="detail-affix"><strong>${modifierGlyph('prefix',defn,owned?findModifier(prefixDefs,owned.prefix):null)} Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span></div><div class="detail-affix"><strong>${modifierGlyph('suffix',defn,owned?findModifier(suffixDefs,owned.suffix):null)} Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span></div>${owned?`<div class="small muted">${statDetails(o)}</div>${itemSetPanel(owned)}${artifactDetailPanel(owned)}`:''}</div></div><div class="actions ashen-modal-equip-actions">${equipActions}<button data-item-close>Zamknij</button></div></div></div>`
 }
 function slotChip(slot,uid){
  const inst=instance(uid),o=statsOf(inst),empty=!o,label=slotLabels[slot];
