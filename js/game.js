@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.3.5';
+const APP_VERSION='0.4.4';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -791,13 +791,25 @@ function heroAttacks(){
  if(!attacks.length)attacks.push({weapon:statsOf({id:'knife',rarity:0}),hand:hands[0],power:1});
  return attacks;
 }
+// ASHEN v0.4.4: shared combat defense computation for exploration, Starcia,
+// PvP snapshots and the character panel. The expedition flag here is historical:
+// it marks a *solo exploration mission*, not a server-side faction expedition.
+function heroDefense(options={}){
+ const a=attrs();
+ const rawArmor=Object.entries(state.equip).filter(([slot])=>!['right','left'].includes(slot))
+  .reduce((sum,[,uid])=>sum+(statsOf(instance(uid))?.armor||0),0);
+ const setArmor=activeSetBonuses().armorPct;
+ const pet=companionId()==='boar'?petPower('boar'):0;
+ const vehicleArmor=options.expedition?2*activeVehicleModule('armor'):0;
+ return {hp:maxHp(),acc:6+a.per*1.3,dodge:3+a.dex*1.1+pet,
+  armor:rawArmor+Math.round(rawArmor*setArmor/100)+Math.floor(a.end/4)+pet+vehicleArmor,
+  setArmor,pet,vehicleArmor,rawArmor};
+}
 function fight(enemy,options={}){
  const a=attrs();
  const attacks=heroAttacks();
- const armor=Object.entries(state.equip).filter(([k])=>!['right','left'].includes(k))
-   .reduce((sum,[,uid])=>sum+(statsOf(instance(uid))?.armor||0),0);
- const setArmor=activeSetBonuses().armorPct;
- const hero={hp:maxHp(),acc:6+a.per*1.3,dodge:3+a.dex*1.1+(companionId()==='boar'?petPower('boar'):0),armor:armor+Math.round(armor*setArmor/100)+Math.floor(a.end/4)+(companionId()==='boar'?petPower('boar'):0)+(options.expedition?2*activeVehicleModule('armor'):0)};
+ const d=heroDefense(options);
+ const hero={hp:d.hp,acc:d.acc,dodge:d.dodge,armor:d.armor};
  const foe={...enemy},lines=[];
  // Rozszerzone raporty zapisujemy tylko dla Starć. Wyprawy pozostają bez zmian.
  const recordRounds=!!options.recordRounds;
@@ -1370,10 +1382,8 @@ function companionVisual(id){return companionArt(id)}
 
 // Podsumowanie siły bojowej — wartości wyliczane tymi samymi regułami co walka.
 function combatPanel(){
- const a=attrs(),attacks=heroAttacks(),setArmor=activeSetBonuses().armorPct;
- const equipArmor=Object.entries(state.equip).filter(([slot])=>!['right','left'].includes(slot)).reduce((sum,[,uid])=>sum+(statsOf(instance(uid))?.armor||0),0);
- const armor=Math.round(equipArmor*(1+setArmor/100))+Math.floor(a.end/4);
- const dodge=3+a.dex*1.1;
+ const a=attrs(),attacks=heroAttacks(),d=heroDefense();
+ const setArmor=d.setArmor,armor=d.armor,dodge=d.dodge;
  const cr=attacks.map(x=>Math.round(Math.min(.35,.05+a.per*.005+(x.weapon.critPp||0)/100)*1000)/10);
  const attackRows=attacks.map((x,i)=>{
   const w=x.weapon,style=WEAPON_STYLES[weaponStyle(w)],range=weaponDamageRange(a,w,x.power),acc=weaponAccuracy(a,w);
@@ -1396,7 +1406,23 @@ const ATTRIBUTE_HELP={
  int:'Obecnie służy jako atrybut wyposażenia i premii; bez bezpośredniego wpływu na aktualną symulację walki. Rozwój zdolności technicznych jest planowany.',
  cha:'Obecnie służy jako atrybut wyposażenia i premii; bez bezpośredniego wpływu na aktualną symulację walki. Handel i rozmowy są planowane.'
 };
-function character(){let a=attrs();const comp=companionId()?COMPANIONS[companionId()]:null;const vehicle=vehicleDef();const travelBonus=Math.round((1-vehicleTimeFactor())*100);return section('Postać',`<div class="character-screen-modern"><div class="character-top-grid"><div class="character-figure-panel"><div class="character-figure-frame"><img src="${characterFigure(state.origin,state.gender)}" alt="Pełna sylwetka postaci – ${originTitle(state.origin,state.gender)}"></div><div class="character-figure-caption">${originTitle(state.origin,state.gender)}</div></div><div class="character-info-panel"><div class="character-heading"><div><div class="tag">OCALAŁY · POZIOM ${state.level}</div><h3>${escape(state.name)}</h3><p class="small muted">Wybrany wygląd zależy od płci i archetypu postaci. Możesz testować różne warianty na osobnych slotach.</p></div><button data-action="rename">Zmień imię</button></div>${bar('Doświadczenie',state.xp,xpNeed(),'gold')}<div class="character-meta-line"><span><strong>Płeć:</strong> ${genderLabel(state.gender)}</span><span><strong>Ręka dominująca:</strong> ${state.dominantHand==='left'?'lewa':'prawa'}</span><span><strong>Punkty atrybutów:</strong> ${state.points}</span></div><div class="actions"><button data-dominant="right" ${state.dominantHand==='right'?'disabled':''}>Prawa ręka</button><button data-dominant="left" ${state.dominantHand==='left'?'disabled':''}>Lewa ręka</button></div><div class="character-sidecards"><div class="character-sidecard"><div class="character-sidevisual ${comp?'':'placeholder'}">${comp?companionVisual(state.companion):'<div class="character-side-emoji">🐾</div>'}</div><div class="character-sidecontent"><div class="tag">AKTYWNY TOWARZYSZ</div><h4>${comp?comp.name:'Brak towarzysza'}</h4><p class="small muted">${comp?comp.desc:`Towarzysz odblokuje się na poziomie 20. Obecny poziom: ${state.level}.`}</p><p class="good small">${comp?companionBonus():'Jeszcze niedostępny'}</p><button data-page="companion">${comp?'Zmień towarzysza':'Przejdź do towarzyszy'}</button></div></div><div class="character-sidecard"><div class="character-sidevisual transport">${vehicleArt(vehicle.id,vehicleStage())}</div><div class="character-sidecontent"><div class="tag">AKTUALNY TRANSPORT</div><h4>${vehicle.name}</h4><p class="small muted">Przyspieszenie wypraw: <strong>${travelBonus}%</strong>. Usprawnienie: ${vehicleStage()+1}/3.</p><p class="good small">Skraca czas podróży, nie wpływa na walkę ani łupy.</p><button data-page="transport">Zarządzaj transportem</button></div></div></div></div></div><div class="character-attr-grid">${Object.entries(attrNames).map(([k,n])=>`<div class="character-attr-card"><div class="character-attr-head"><span>${n} <details class="ashen-attr-help"><summary aria-label="Opis atrybutu ${n}" title="Co daje ${n}?">ⓘ</summary><div class="ashen-attr-help-content">${escape(ATTRIBUTE_HELP[k])}</div></details></span><strong>${a[k]}</strong></div><div class="small muted">Baza ${state.attrs[k]}${a[k]!==state.attrs[k]?` · Sprzęt i zestawy ${a[k]-state.attrs[k]>=0?'+':''}${a[k]-state.attrs[k]}`:''}</div><button data-attr="${k}" ${state.points<=0?'disabled':''}>+1</button></div>`).join('')}</div>${combatPanel()}${characterSetsPanel()}${resonancePanel()}</div>`)}
+function activityConnectionsPanel(){
+ const pet=companionId(),petInfo=pet?escape(COMPANIONS[pet].name)+' · '+escape(companionBonus(pet)):'Brak aktywnego zwierzęcia';
+ const bedroomXp=3*Math.max(0,roomLevel('bedroom')-1);
+ const vehicleSeconds=Math.round((1-vehicleTimeFactor())*100);
+ const cargo=activeVehicleModule('cargo')*5;
+ const extraArmor=2*activeVehicleModule('armor');
+ const d=heroDefense();
+ return `<details class="ashen-integration-summary" style="margin:12px 0;padding:12px 14px;border:1px solid var(--border,#4a4a4a);border-radius:10px">
+ <summary style="cursor:pointer"><strong>⌁ Skąd pochodzą premie? · Wyprawy / Starcia / Ekspedycje</strong> <span class="small muted">(rozwiń)</span></summary>
+ <div style="margin-top:10px;display:grid;gap:8px;font-size:.92em">
+ <div><strong>Wyprawy:</strong> Sypialnia +${bedroomXp}% XP, transport −${vehicleSeconds}% czasu, ładowność +${cargo}% złomu, pancerz pojazdu +${extraArmor} podczas walki. ${petInfo}.</div>
+ <div><strong>Starcia:</strong> wyposażenie, atrybuty i zestawy; obrona z tej samej funkcji co raport (${d.hp} PŻ, ${Math.round(d.armor*10)/10} pancerza, ${Math.round(d.dodge*10)/10} uniku). Transport nie pomaga.</div>
+ <div><strong>Ekspedycje frakcyjne:</strong> walka rozstrzygana na Supabase na podstawie opublikowanego profilu. Dodatkowo stałe premie bazy i dobrowolne wsparcie organizatora; ich wartości sprawdzisz przy ekspedycji. Moduły pojazdu nie dodają premii bojowych do ekspedycji frakcyjnej.</div>
+ <div class="small muted">To podsumowanie aktualnych źródeł premii, nie nowe bonusy. Statystyki do walk online aktualizują się po synchronizacji profilu.</div>
+ </div></details>`;
+}
+function character(){let a=attrs();const comp=companionId()?COMPANIONS[companionId()]:null;const vehicle=vehicleDef();const travelBonus=Math.round((1-vehicleTimeFactor())*100);return section('Postać',`<div class="character-screen-modern"><div class="character-top-grid"><div class="character-figure-panel"><div class="character-figure-frame"><img src="${characterFigure(state.origin,state.gender)}" alt="Pełna sylwetka postaci – ${originTitle(state.origin,state.gender)}"></div><div class="character-figure-caption">${originTitle(state.origin,state.gender)}</div></div><div class="character-info-panel"><div class="character-heading"><div><div class="tag">OCALAŁY · POZIOM ${state.level}</div><h3>${escape(state.name)}</h3><p class="small muted">Wybrany wygląd zależy od płci i archetypu postaci. Możesz testować różne warianty na osobnych slotach.</p></div><button data-action="rename">Zmień imię</button></div>${bar('Doświadczenie',state.xp,xpNeed(),'gold')}<div class="character-meta-line"><span><strong>Płeć:</strong> ${genderLabel(state.gender)}</span><span><strong>Ręka dominująca:</strong> ${state.dominantHand==='left'?'lewa':'prawa'}</span><span><strong>Punkty atrybutów:</strong> ${state.points}</span></div><div class="actions"><button data-dominant="right" ${state.dominantHand==='right'?'disabled':''}>Prawa ręka</button><button data-dominant="left" ${state.dominantHand==='left'?'disabled':''}>Lewa ręka</button></div><div class="character-sidecards"><div class="character-sidecard"><div class="character-sidevisual ${comp?'':'placeholder'}">${comp?companionVisual(state.companion):'<div class="character-side-emoji">🐾</div>'}</div><div class="character-sidecontent"><div class="tag">AKTYWNY TOWARZYSZ</div><h4>${comp?comp.name:'Brak towarzysza'}</h4><p class="small muted">${comp?comp.desc:`Towarzysz odblokuje się na poziomie 20. Obecny poziom: ${state.level}.`}</p><p class="good small">${comp?companionBonus():'Jeszcze niedostępny'}</p><button data-page="companion">${comp?'Zmień towarzysza':'Przejdź do towarzyszy'}</button></div></div><div class="character-sidecard"><div class="character-sidevisual transport">${vehicleArt(vehicle.id,vehicleStage())}</div><div class="character-sidecontent"><div class="tag">AKTUALNY TRANSPORT</div><h4>${vehicle.name}</h4><p class="small muted">Przyspieszenie wypraw: <strong>${travelBonus}%</strong>. Usprawnienie: ${vehicleStage()+1}/3.</p><p class="good small">Silnik skraca czas; ładowność zwiększa złom, a pancerz pomaga podczas zwykłych wypraw (nie w Starciach ani PvP).</p><button data-page="transport">Zarządzaj transportem</button></div></div></div></div></div><div class="character-attr-grid">${Object.entries(attrNames).map(([k,n])=>`<div class="character-attr-card"><div class="character-attr-head"><span>${n} <details class="ashen-attr-help"><summary aria-label="Opis atrybutu ${n}" title="Co daje ${n}?">ⓘ</summary><div class="ashen-attr-help-content">${escape(ATTRIBUTE_HELP[k])}</div></details></span><strong>${a[k]}</strong></div><div class="small muted">Baza ${state.attrs[k]}${a[k]!==state.attrs[k]?` · Sprzęt i zestawy ${a[k]-state.attrs[k]>=0?'+':''}${a[k]-state.attrs[k]}`:''}</div><button data-attr="${k}" ${state.points<=0?'disabled':''}>+1</button></div>`).join('')}</div>${combatPanel()}${activityConnectionsPanel()}${characterSetsPanel()}${resonancePanel()}</div>`)}
 function companion(){
  const selected=companionId(),active=selected?COMPANIONS[selected]:null;
  const owned=state.ownedCompanions||[];
@@ -2222,11 +2248,9 @@ function pvpSnapshot(profileSave){
  try{
   state=profileSave;
   const a=attrs(), attacks=heroAttacks().map(x=>({hand:x.hand,power:x.power,weapon:{...x.weapon}}));
-  const baseArmor=Object.entries(state.equip||{}).filter(([slot])=>!['right','left'].includes(slot)).reduce((sum,[,uid])=>sum+(statsOf(instance(uid))?.armor||0),0);
-  const pet=companionId()==='boar'?petPower('boar'):0;
+  const d=heroDefense();
   return {name:profileSave.name,origin:normalizeOrigin(profileSave.origin),gender:normalizeGender(profileSave.gender),level:profileSave.level,attrs:{...a},attacks,
-   hp:60+a.end*10,armor:baseArmor+Math.round(baseArmor*activeSetBonuses().armorPct/100)+Math.floor(a.end/4)+pet,
-   dodge:3+a.dex*1.1+pet,acc:6+a.per*1.3};
+   hp:d.hp,armor:d.armor,dodge:d.dodge,acc:d.acc};
  }finally{state=previous}
 }
 // ASHEN 0.3.5: indywidualne nagrody klanowe. Idempotencja w zapisie postaci,
