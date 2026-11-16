@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.7.0';
+const APP_VERSION='0.4.7.1';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -404,12 +404,14 @@ const newPrefixDefs=[
  {id:'armor_resistant',name:'Odporny',forms:{m:'Odporny',f:'Odporna',p:'Odporne'},armorPct:8,bonus:{end:1},on:'clothingArmor',setId:'armor_resistant'},
  {id:'armor_tracker',name:'Tropicielski',forms:{m:'Tropicielski',f:'Tropicielska',p:'Tropicielskie'},bonus:{per:2},on:'clothing',setId:'armor_tracker'},
  {id:'armor_iron',name:'Żelazny',forms:{m:'Żelazny',f:'Żelazna',p:'Żelazne'},bonus:{str:3},on:'clothing',setId:'armor_iron'},
+ {id:'armor_warden',name:'Wartownika',forms:{m:'Wartownika',f:'Wartownika',p:'Wartownika'},bonus:{end:2},on:'clothing',setId:'armor_warden'},
+ {id:'armor_nomad',name:'Nomady',forms:{m:'Nomady',f:'Nomady',p:'Nomady'},bonus:{dex:2},on:'clothing',setId:'armor_nomad'},
  // AKCESORIA: bez zmian na tym etapie przebudowy.
- {id:'accessory_technical',name:'Techniczny',forms:{m:'Techniczny',f:'Techniczna',p:'Techniczne'},bonus:{int:2},on:'accessory'},
- {id:'accessory_observant',name:'Spostrzegawczy',forms:{m:'Spostrzegawczy',f:'Spostrzegawcza',p:'Spostrzegawcze'},bonus:{per:2},on:'accessory'},
- {id:'accessory_persuasive',name:'Przekonujący',forms:{m:'Przekonujący',f:'Przekonująca',p:'Przekonujące'},bonus:{cha:2},on:'accessory'},
- {id:'accessory_reflexive',name:'Refleksyjny',forms:{m:'Refleksyjny',f:'Refleksyjna',p:'Refleksyjne'},bonus:{dex:2},on:'accessory'},
- {id:'accessory_versatile',name:'Wszechstronny',forms:{m:'Wszechstronny',f:'Wszechstronna',p:'Wszechstronne'},bonus:{per:1,int:1},on:'accessory'}
+ {id:'accessory_technical',name:'Techniczny',forms:{m:'Techniczny',f:'Techniczna',p:'Techniczne'},bonus:{int:2},on:'accessory',setId:'accessory_technical'},
+ {id:'accessory_observant',name:'Spostrzegawczy',forms:{m:'Spostrzegawczy',f:'Spostrzegawcza',p:'Spostrzegawcze'},bonus:{per:2},on:'accessory',setId:'accessory_observant'},
+ {id:'accessory_persuasive',name:'Przekonujący',forms:{m:'Przekonujący',f:'Przekonująca',p:'Przekonujące'},bonus:{cha:2},on:'accessory',setId:'accessory_persuasive'},
+ {id:'accessory_reflexive',name:'Refleksyjny',forms:{m:'Refleksyjny',f:'Refleksyjna',p:'Refleksyjne'},bonus:{dex:2},on:'accessory',setId:'accessory_reflexive'},
+ {id:'accessory_versatile',name:'Wszechstronny',forms:{m:'Wszechstronny',f:'Wszechstronna',p:'Wszechstronne'},bonus:{per:1,int:1},on:'accessory',setId:'accessory_versatile'}
 ];
 const prefixDefs=[...legacyPrefixDefs,...newPrefixDefs,...artifactPrefixDefs];
 const legacySuffixDefs=[
@@ -673,7 +675,9 @@ const SETS={
  armor_light:{name:'Lekki',attribute:'per',start:2,step:1},
  armor_resistant:{name:'Odporny',attribute:'end',start:2,step:1},
  armor_tracker:{name:'Tropicielski',attribute:'per',start:2,step:1},
- armor_iron:{name:'Żelazny',attribute:'str',start:2,step:1}
+ armor_iron:{name:'Żelazny',attribute:'str',start:2,step:1},
+ armor_warden:{name:'Wartownika',attribute:'end',start:2,step:1},
+ armor_nomad:{name:'Nomady',attribute:'dex',start:2,step:1}
 };
 function setPrefixId(inst){
  const d=def(inst);if(!d||!clothingSlots.has(d.slot))return null;
@@ -729,7 +733,7 @@ function setSummaryCard(result){
 }
 function characterSetsPanel(){
  const results=setResults();
- return `<section class="ashen-sets-section"><div class="ashen-sets-title"><h3>Zestawy ubioru — prefiksy</h3><p>Załóż 3 elementy ubioru z tym samym prefiksem. Każdy następny zwiększa premię, którą wzmacnia średnia jakość wszystkich części. Liczą się tylko założone przedmioty — nie broń ani akcesoria.</p></div><div class="ashen-sets-grid">${results.length?results.map(setSummaryCard).join(''):'<div class="ashen-sets-empty">Brak założonych elementów z prefiksami zestawowymi. Starszy prefiks „Zwinny” również tworzy zestaw.</div>'}</div></section>`;
+ return `<section class="ashen-sets-section"><div class="ashen-sets-title"><h3>Zestawy ubioru — prefiksy</h3><p>Załóż 3 elementy ubioru z tym samym prefiksem. Każdy następny zwiększa premię, którą wzmacnia średnia jakość wszystkich części. Możesz nosić dwa zestawy naraz (3+3). Liczą się tylko założone przedmioty — nie broń ani akcesoria.</p></div><div class="ashen-sets-grid">${results.length?results.map(setSummaryCard).join(''):'<div class="ashen-sets-empty">Brak założonych elementów z prefiksami zestawowymi. Starszy prefiks „Zwinny” również tworzy zestaw.</div>'}</div></section>`;
 }
 function itemSetPanel(inst){
  const id=setPrefixId(inst);if(!id)return '';
@@ -755,7 +759,57 @@ function itemSetPanel(inst){
  const note=active?'Ta premia jest już doliczana do statystyk postaci.':equipped?'Premia jest nieaktywna — załóż brakujące elementy z tym samym prefiksem.':'Przedmiot nie jest założony. Prognoza uwzględnia zastąpienie wyposażenia w tym samym slocie.';
  return `<div class="ashen-set-item-info ${active?'is-active':'is-pending'}"><strong>${active?'✓ AKTYWNY':equipped?'◌ NIEAKTYWNY':'◇ ELEMENT ZESTAWU'} · Zestaw ${escape(config.name)} (${count}/6 założonych)</strong><div class="ashen-set-detail-main">${text}</div><small>${escape(note)}</small><details class="ashen-set-breakdown"><summary>Skąd bierze się premia? · Założone elementy i jakość</summary><div class="ashen-set-detail-members">${membersHtml||'<div class="muted">Brak założonych elementów tego zestawu.</div>'}</div><div class="ashen-set-detail-equation">${count?`Średnia jakości: (${members.map(m=>setQuality(m.inst).toFixed(2).replace('.',',')).join(' + ')}) / ${count} = ×${currentAvg.toFixed(2).replace('.',',')}`:'Średnia jakości zostanie obliczona z założonych części.'}</div>${result?.active?`<div class="ashen-set-detail-equation">Bonus bazowy: ${result.base} × ${result.avg.toFixed(2).replace('.',',')} → ${escape(setBonusDescription(result))}</div>`:`<div class="ashen-set-detail-equation">Do aktywacji potrzeba minimum 3 części z tym samym prefiksem. Kolejne części wzmacniają premię.</div>`}</details></div>`;
 }
-function attrs(){const a={...state.attrs};Object.values(state.equip).filter(Boolean).forEach(uid=>{for(const [k,v] of Object.entries(statsOf(instance(uid))?.bonus||{}))a[k]+=v});for(const [k,v] of Object.entries(activeSetBonuses().bonus))a[k]=(a[k]||0)+v;for(const [k,v] of Object.entries(resonanceBonuses().bonus))a[k]=(a[k]||0)+v;return a}function maxHp(){return Math.round((60+attrs().end*10)*(1+0.025*(roomLevel('infirmary')-1)))}function xpNeed(){return Math.floor(80*Math.pow(state.level,1.35))}function regen(){let now=Date.now(),ticks=Math.floor((now-state.lastRegen)/45000);if(ticks>0){state.energy=Math.min(100,state.energy+ticks);state.lastRegen+=ticks*45000}}function levelUp(){let n=0;while(state.xp>=xpNeed()){state.xp-=xpNeed();state.level++;state.points+=3;n++}return n}// Jedna klasyfikacja dla obrażeń, celności i opisu w zakładce Postać.
+// ASHEN 0.4.7.1 — sety zwyklych akcesoriow (3/3) oraz wspolistnienie wielu setow ubioru.
+// Prefiks decyduje o rodzinie. Sufiks pozostaje niezalezny; 1/3 i 2/3 nie daja premii.
+// Artefakty maja wlasny, osobny rezonans i nie sa liczone do zwyklych setow akcesoriow.
+const ACCESSORY_SETS=Object.freeze({
+ accessory_technical:{name:'Technika',bonus:{int:3}},
+ accessory_observant:{name:'Tropiciela',bonus:{per:3}},
+ accessory_persuasive:{name:'Negocjatora',bonus:{cha:3}},
+ accessory_reflexive:{name:'Nomady',bonus:{dex:3}},
+ accessory_versatile:{name:'Ocalałego',bonus:{end:2,per:1}}
+});
+const ACCESSORY_SLOTS=['extra','extra2','extra3'];
+function accessorySetPrefixId(inst){
+ const d=def(inst);
+ if(!d||d.artifact||d.slot!=='extra')return null;
+ const p=findModifier(prefixDefs,inst.prefix);
+ return p&&p.setId&&ACCESSORY_SETS[p.setId]?p.setId:null;
+}
+function accessorySetResults(){
+ const groups={};const seen=new Set();
+ for(const slot of ACCESSORY_SLOTS){
+  const inst=instance(state.equip?.[slot]);if(!inst||seen.has(inst.uid))continue;
+  seen.add(inst.uid);
+  const id=accessorySetPrefixId(inst);if(!id)continue;
+  (groups[id]??=[]).push({slot,inst});
+ }
+ return Object.entries(groups).map(([id,members])=>{
+  const count=members.length,avg=members.reduce((a,m)=>a+setQuality(m.inst),0)/count;
+  const active=count===3,config=ACCESSORY_SETS[id],bonus={};
+  if(active)for(const [stat,val] of Object.entries(config.bonus))bonus[stat]=Math.max(1,Math.round(val*avg));
+  return {id,name:config.name,config,members,count,avg,active,bonus};
+ });
+}
+function accessorySetBonuses(){
+ const results=accessorySetResults(),bonus={};
+ for(const result of results)if(result.active)for(const [key,value] of Object.entries(result.bonus))bonus[key]=(bonus[key]||0)+value;
+ return {results,bonus};
+}
+function accessoryBonusText(bonus){return Object.entries(bonus).map(([k,v])=>`${attrNames[k]||k} +${v}`).join(' · ');}
+function accessorySetPanel(){
+ const results=accessorySetResults();
+ const cards=results.map(r=>`<article class="ashen-set-card ${r.active?'is-active':''}"><div class="ashen-set-top"><strong>Zestaw akcesoriów: ${escape(r.name)}</strong><span class="ashen-set-count">${r.count}/3 · ${r.active?'AKTYWNY':'NIEAKTYWNY'}</span></div><div class="ashen-set-track">${Array.from({length:3},(_,i)=>`<i class="${i<r.count?'filled':''}"></i>`).join('')}</div><div class="ashen-set-members">${r.members.map(m=>`<div class="ashen-set-member"><span>${escape(slotLabels[m.slot])}</span><strong>${escape(statsOf(m.inst)?.name||def(m.inst)?.name||'Akcesorium')}</strong></div>`).join('')}</div><div class="ashen-set-bottom"><span>${r.active?`Bonus: ${escape(accessoryBonusText(r.bonus))}`:`Brak premii · potrzebne 3/3 (brakuje ${3-r.count})`}</span><small>Różne sufiksy i jakości są dozwolone</small></div></article>`).join('');
+ return `<section class="ashen-sets-section"><div class="ashen-sets-title"><h3>Zestawy akcesoriów — 3/3</h3><p>Trzy zwykłe akcesoria z tej samej rodziny prefiksu uruchamiają bonus. Jeden lub dwa elementy nie dają żadnej premii setowej. Artefakty zachowują osobny system Rezonansu.</p></div><div class="ashen-sets-grid">${cards||'<div class="ashen-sets-empty">Załóż zwykłe akcesoria z setowymi prefiksami, aby kompletować zestaw.</div>'}</div></section>`;
+}
+function accessorySetItemPanel(inst){
+ const id=accessorySetPrefixId(inst);if(!id)return '';
+ const cfg=ACCESSORY_SETS[id],result=accessorySetResults().find(r=>r.id===id),count=result?.count||0;
+ const equipped=ACCESSORY_SLOTS.some(slot=>state.equip?.[slot]===inst.uid);
+ const active=Boolean(result?.active)&&equipped;
+ return `<div class="ashen-set-item-info ${active?'is-active':'is-pending'}"><strong>${active?'✓ AKTYWNY':equipped?'◌ NIEAKTYWNY':'◇ ELEMENT SETU'} · Akcesoria ${escape(cfg.name)} (${count}/3)</strong><div class="ashen-set-detail-main">${active?`Bonus setowy: ${escape(accessoryBonusText(result.bonus))}`:'Bonus setowy nieaktywny. Aktywacja dopiero przy 3/3.'}</div><small>${equipped?`Liczba brakujących elementów: ${Math.max(0,3-count)}.`:'Załóż to akcesorium w jednym z trzech slotów.'} Rodzina zależy od prefiksu; sufiks może być dowolny.</small></div>`;
+}
+function attrs(){const a={...state.attrs};Object.values(state.equip).filter(Boolean).forEach(uid=>{for(const [k,v] of Object.entries(statsOf(instance(uid))?.bonus||{}))a[k]+=v});for(const [k,v] of Object.entries(activeSetBonuses().bonus))a[k]=(a[k]||0)+v;for(const [k,v] of Object.entries(accessorySetBonuses().bonus))a[k]=(a[k]||0)+v;for(const [k,v] of Object.entries(resonanceBonuses().bonus))a[k]=(a[k]||0)+v;return a}function maxHp(){return Math.round((60+attrs().end*10)*(1+0.025*(roomLevel('infirmary')-1)))}function xpNeed(){return Math.floor(80*Math.pow(state.level,1.35))}function regen(){let now=Date.now(),ticks=Math.floor((now-state.lastRegen)/45000);if(ticks>0){state.energy=Math.min(100,state.energy+ticks);state.lastRegen+=ticks*45000}}function levelUp(){let n=0;while(state.xp>=xpNeed()){state.xp-=xpNeed();state.level++;state.points+=3;n++}return n}// Jedna klasyfikacja dla obrażeń, celności i opisu w zakładce Postać.
 // Typ broni wynika z niezmiennego identyfikatora — nie z jej nazwy ani prefiksu.
 const MELEE_ONE_IDS=new Set(['knife','pipe','machete','cleaver','wrench','hatchet','baton','saber']);
 const MELEE_TWO_IDS=new Set(['hammer','crowbar','sledge']);
@@ -2150,7 +2204,7 @@ function activityConnectionsPanel(){
  <div class="small muted">To podsumowanie aktualnych źródeł premii, nie nowe bonusy. Statystyki do walk online aktualizują się po synchronizacji profilu.</div>
  </div></details>`;
 }
-function character(){let a=attrs();const comp=companionId()?COMPANIONS[companionId()]:null;const vehicle=vehicleDef();const travelBonus=Math.round((1-vehicleTimeFactor())*100);return section('Postać',`<div class="character-screen-modern"><div class="character-top-grid"><div class="character-figure-panel"><div class="character-figure-frame"><img src="${characterFigure(state.origin,state.gender)}" alt="Pełna sylwetka postaci – ${originTitle(state.origin,state.gender)}"></div><div class="character-figure-caption">${originTitle(state.origin,state.gender)}</div></div><div class="character-info-panel"><div class="character-heading"><div><div class="tag">OCALAŁY · POZIOM ${state.level}</div><h3>${escape(state.name)}</h3><p class="small muted">Wybrany wygląd zależy od płci i archetypu postaci. Możesz testować różne warianty na osobnych slotach.</p></div><button data-action="rename">Zmień imię</button></div>${bar('Doświadczenie',state.xp,xpNeed(),'gold')}<div class="character-meta-line"><span><strong>Płeć:</strong> ${genderLabel(state.gender)}</span><span><strong>Ręka dominująca:</strong> ${state.dominantHand==='left'?'lewa':'prawa'}</span><span><strong>Punkty atrybutów:</strong> ${state.points}</span></div><div class="actions"><button data-dominant="right" ${state.dominantHand==='right'?'disabled':''}>Prawa ręka</button><button data-dominant="left" ${state.dominantHand==='left'?'disabled':''}>Lewa ręka</button></div><div class="character-sidecards"><div class="character-sidecard"><div class="character-sidevisual ${comp?'':'placeholder'}">${comp?companionVisual(state.companion):'<div class="character-side-emoji">🐾</div>'}</div><div class="character-sidecontent"><div class="tag">AKTYWNY TOWARZYSZ</div><h4>${comp?comp.name:'Brak towarzysza'}</h4><p class="small muted">${comp?comp.desc:`Towarzysz odblokuje się na poziomie 20. Obecny poziom: ${state.level}.`}</p><p class="good small">${comp?companionBonus():'Jeszcze niedostępny'}</p><button data-page="companion">${comp?'Zmień towarzysza':'Przejdź do towarzyszy'}</button></div></div><div class="character-sidecard"><div class="character-sidevisual transport">${vehicleArt(vehicle.id,vehicleStage())}</div><div class="character-sidecontent"><div class="tag">AKTUALNY TRANSPORT</div><h4>${vehicle.name}</h4><p class="small muted">Przyspieszenie wypraw: <strong>${travelBonus}%</strong>. Usprawnienie: ${vehicleStage()+1}/3.</p><p class="good small">Silnik skraca czas; ładowność zwiększa złom, a pancerz pomaga podczas zwykłych wypraw (nie w Starciach ani PvP).</p><button data-page="transport">Zarządzaj transportem</button></div></div></div></div></div><div class="character-attr-grid">${Object.entries(attrNames).map(([k,n])=>`<div class="character-attr-card"><div class="character-attr-head"><span>${n} <details class="ashen-attr-help"><summary aria-label="Opis atrybutu ${n}" title="Co daje ${n}?">ⓘ</summary><div class="ashen-attr-help-content">${escape(ATTRIBUTE_HELP[k])}</div></details></span><strong>${a[k]}</strong></div><div class="small muted">Baza ${state.attrs[k]}${a[k]!==state.attrs[k]?` · Sprzęt i zestawy ${a[k]-state.attrs[k]>=0?'+':''}${a[k]-state.attrs[k]}`:''}</div><button data-attr="${k}" ${state.points<=0?'disabled':''}>+1</button></div>`).join('')}</div>${combatPanel()}${activityConnectionsPanel()}${characterSetsPanel()}${resonancePanel()}</div>`)}
+function character(){let a=attrs();const comp=companionId()?COMPANIONS[companionId()]:null;const vehicle=vehicleDef();const travelBonus=Math.round((1-vehicleTimeFactor())*100);return section('Postać',`<div class="character-screen-modern"><div class="character-top-grid"><div class="character-figure-panel"><div class="character-figure-frame"><img src="${characterFigure(state.origin,state.gender)}" alt="Pełna sylwetka postaci – ${originTitle(state.origin,state.gender)}"></div><div class="character-figure-caption">${originTitle(state.origin,state.gender)}</div></div><div class="character-info-panel"><div class="character-heading"><div><div class="tag">OCALAŁY · POZIOM ${state.level}</div><h3>${escape(state.name)}</h3><p class="small muted">Wybrany wygląd zależy od płci i archetypu postaci. Możesz testować różne warianty na osobnych slotach.</p></div><button data-action="rename">Zmień imię</button></div>${bar('Doświadczenie',state.xp,xpNeed(),'gold')}<div class="character-meta-line"><span><strong>Płeć:</strong> ${genderLabel(state.gender)}</span><span><strong>Ręka dominująca:</strong> ${state.dominantHand==='left'?'lewa':'prawa'}</span><span><strong>Punkty atrybutów:</strong> ${state.points}</span></div><div class="actions"><button data-dominant="right" ${state.dominantHand==='right'?'disabled':''}>Prawa ręka</button><button data-dominant="left" ${state.dominantHand==='left'?'disabled':''}>Lewa ręka</button></div><div class="character-sidecards"><div class="character-sidecard"><div class="character-sidevisual ${comp?'':'placeholder'}">${comp?companionVisual(state.companion):'<div class="character-side-emoji">🐾</div>'}</div><div class="character-sidecontent"><div class="tag">AKTYWNY TOWARZYSZ</div><h4>${comp?comp.name:'Brak towarzysza'}</h4><p class="small muted">${comp?comp.desc:`Towarzysz odblokuje się na poziomie 20. Obecny poziom: ${state.level}.`}</p><p class="good small">${comp?companionBonus():'Jeszcze niedostępny'}</p><button data-page="companion">${comp?'Zmień towarzysza':'Przejdź do towarzyszy'}</button></div></div><div class="character-sidecard"><div class="character-sidevisual transport">${vehicleArt(vehicle.id,vehicleStage())}</div><div class="character-sidecontent"><div class="tag">AKTUALNY TRANSPORT</div><h4>${vehicle.name}</h4><p class="small muted">Przyspieszenie wypraw: <strong>${travelBonus}%</strong>. Usprawnienie: ${vehicleStage()+1}/3.</p><p class="good small">Silnik skraca czas; ładowność zwiększa złom, a pancerz pomaga podczas zwykłych wypraw (nie w Starciach ani PvP).</p><button data-page="transport">Zarządzaj transportem</button></div></div></div></div></div><div class="character-attr-grid">${Object.entries(attrNames).map(([k,n])=>`<div class="character-attr-card"><div class="character-attr-head"><span>${n} <details class="ashen-attr-help"><summary aria-label="Opis atrybutu ${n}" title="Co daje ${n}?">ⓘ</summary><div class="ashen-attr-help-content">${escape(ATTRIBUTE_HELP[k])}</div></details></span><strong>${a[k]}</strong></div><div class="small muted">Baza ${state.attrs[k]}${a[k]!==state.attrs[k]?` · Sprzęt i zestawy ${a[k]-state.attrs[k]>=0?'+':''}${a[k]-state.attrs[k]}`:''}</div><button data-attr="${k}" ${state.points<=0?'disabled':''}>+1</button></div>`).join('')}</div>${combatPanel()}${activityConnectionsPanel()}${characterSetsPanel()}${accessorySetPanel()}${resonancePanel()}</div>`)}
 function companion(){
  const selected=companionId(),active=selected?COMPANIONS[selected]:null;
  const owned=state.ownedCompanions||[];
@@ -2343,7 +2397,7 @@ function itemDetailContent(){if(!openItemDetail)return '';
  const o=owned?statsOf(owned):{...defn,rarity:'Zwykły',name:defn.name,bonus:defn.bonus||{}};
  const wornSlot=owned?Object.keys(state.equip).find(slot=>state.equip[slot]===owned.uid):null;
  const equipActions=!owned||defn.slot==='material'?'':wornSlot?`<button class="primary" data-unequip="${wornSlot}">Zdejmij</button>`:defn.slot==='hand1'?`<button class="primary" data-equip="${owned.uid}" data-hand="right">Załóż · prawa ręka</button><button data-equip="${owned.uid}" data-hand="left">Załóż · lewa ręka</button>`:defn.slot==='extra'?`<span class="small muted">Załóż do slotu:</span>${['extra','extra2','extra3'].map((slot,i)=>`<button class="${state.equip[slot]?'':'primary'}" data-equip="${owned.uid}" data-extra-slot="${slot}">${i+1}${state.equip[slot]?' · zamień':''}</button>`).join('')}`:`<button class="primary" data-equip="${owned.uid}">Załóż</button>`;
- return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${(Number(o.baseAttacks)||1)+(Number(o.extraAttacks)||0)}</strong></div>${o.combatV2?`<div class="detail-stat"><span>Model walki</span><strong>ASHEN 0.5 · test bojowy</strong></div>`:''}`:''}<div class="detail-affix"><strong>${modifierGlyph('prefix',defn,owned?findModifier(prefixDefs,owned.prefix):null)} Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span></div><div class="detail-affix"><strong>${modifierGlyph('suffix',defn,owned?findModifier(suffixDefs,owned.suffix):null)} Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span></div>${owned?`<div class="small muted">${statDetails(o)}</div>${itemSetPanel(owned)}${artifactDetailPanel(owned)}`:''}</div></div><div class="actions ashen-modal-equip-actions">${equipActions}<button data-item-close>Zamknij</button></div></div></div>`
+ return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${(Number(o.baseAttacks)||1)+(Number(o.extraAttacks)||0)}</strong></div>${o.combatV2?`<div class="detail-stat"><span>Model walki</span><strong>ASHEN 0.5 · test bojowy</strong></div>`:''}`:''}<div class="detail-affix"><strong>${modifierGlyph('prefix',defn,owned?findModifier(prefixDefs,owned.prefix):null)} Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span></div><div class="detail-affix"><strong>${modifierGlyph('suffix',defn,owned?findModifier(suffixDefs,owned.suffix):null)} Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span></div>${owned?`<div class="small muted">${statDetails(o)}</div>${itemSetPanel(owned)}${accessorySetItemPanel(owned)}${artifactDetailPanel(owned)}`:''}</div></div><div class="actions ashen-modal-equip-actions">${equipActions}<button data-item-close>Zamknij</button></div></div></div>`
 }
 function slotChip(slot,uid){
  const inst=instance(uid),o=statsOf(inst),empty=!o,label=slotLabels[slot];
@@ -2532,6 +2586,7 @@ function inventorySummaryPanels(){
  const activeSets=sets.filter(s=>s.active);
  const pendingSets=sets.filter(s=>!s.active&&s.count>0);
  const resonance=resonanceBonuses();
+ const accessorySets=accessorySetBonuses().results;
  const lines=[
   ['PŻ maks.',combat.hp],
   ['Pancerz',combat.armor],
@@ -2543,6 +2598,7 @@ function inventorySummaryPanels(){
  const attrBlock=Object.entries(attrNames).map(([id,label])=>`<div class="inventory-attr"><span>${label}</span><strong>${a[id]||0}</strong></div>`).join('');
  const support=`<div class="inventory-support-line"><span>Towarzysz</span><strong>${companionId()?COMPANIONS[companionId()].name+' · '+companionBonus():'Brak'}</strong></div><div class="inventory-support-line"><span>Transport</span><strong>${vehicleDef().name}${vehicleDef().id!=='foot'?' · etap '+(vehicleStage()+1):''}</strong></div>`;
  const setHtml=activeSets.map(s=>`<div class="inventory-set-card active"><strong>${escape(s.config.name)}</strong><span>${setBonusDescription(s)}</span><small>${s.count}/6 elementów · średnia jakości ×${s.avg.toFixed(2).replace('.',',')}</small></div>`).join('') + pendingSets.map(s=>`<div class="inventory-set-card pending"><strong>${escape(s.config.name)}</strong><span>Postęp ${s.count}/3 · premia za 3/3: ${escape(projectedSetBonus(s.config,s.avg))}</span></div>`).join('');
+ const accessorySetHtml=accessorySets.map(r=>`<div class="inventory-set-card ${r.active?'active':'pending'}"><strong>Akcesoria · ${escape(r.name)}</strong><span>${r.active?escape(accessoryBonusText(r.bonus)):`${r.count}/3 · brak premii (wymagane 3/3)`}</span></div>`).join('');
  const resonanceHtml=(resonance.active||[]).map(r=>`<div class="inventory-set-card active"><strong>${r.kind==='prefix'?'Prefiks':'Sufiks'} · ${escape(r.config.name)}</strong><span>${escape(r.config.description)}</span><small>Bonus: ${Object.keys(r.config.bonus||{}).length?Object.entries(r.config.bonus).map(([k,v])=>`${attrNames[k]} +${v}`).join(' · '):'brak statystyk'}${r.config.luck?` · Szczęście +${r.config.luck}`:''}${r.config.explore?` · Eksploracja +${r.config.explore}%`:''}</small></div>`).join('');
  return `
  <aside class="inventory-summary-stack">
@@ -2557,10 +2613,10 @@ function inventorySummaryPanels(){
       <div class="inventory-support-box">${support}</div>
    </section>
    <section class="inventory-summary-card">
-      <div class="inventory-summary-head"><div><span class="tag">Synergie</span><h3>Zestawy i rezonans</h3></div><div class="inventory-rarity-chip">Aktywne: ${activeSets.length+(resonance.active||[]).length}</div></div>
+      <div class="inventory-summary-head"><div><span class="tag">Synergie</span><h3>Zestawy i rezonans</h3></div><div class="inventory-rarity-chip">Aktywne: ${activeSets.length+accessorySets.filter(r=>r.active).length+(resonance.active||[]).length}</div></div>
       <div class="inventory-bonus-overview"><span>Zestawy pancerza / ubrań</span><strong>${activeSets.length?activeSets.length+' aktywnych':'Brak aktywnych'}</strong></div>
       <div class="inventory-bonus-overview"><span>Rezonans artefaktów</span><strong>${(resonance.active||[]).length?`Szczęście +${resonance.luck}${resonance.explore?` · Eksploracja +${resonance.explore}%`:''}`:'Brak aktywnego'}</strong></div>
-      <div class="inventory-set-stack">${setHtml||'<div class="muted small">Załóż trzy zgodne elementy ubioru, aby aktywować pierwszy zestaw.</div>'}${resonanceHtml||'<div class="muted small">Artefakty z tym samym prefiksem lub sufiksem uruchomią rezonans 3/3.</div>'}</div>
+      <div class="inventory-set-stack">${setHtml||'<div class="muted small">Załóż trzy zgodne elementy ubioru, aby aktywować pierwszy zestaw.</div>'}${accessorySetHtml}${resonanceHtml||'<div class="muted small">Artefakty z tym samym prefiksem lub sufiksem uruchomią rezonans 3/3.</div>'}</div>
    </section>
  </aside>`;
 }
@@ -2580,7 +2636,7 @@ function inventoryItemCard(inst,o){
          ${itemAffixBadges(o,def(inst),inst)}
       </div>
    </div>
-   <details class="inventory-item-expand"><summary>Rozwiń szczegóły i działania</summary><div class="inventory-item-expanded"><p class="small muted">${escape(statDetails(o))}</p>${setStatusText(inst)}<div class="inventory-premium-actions"><button data-item-open="${escape(inst.uid)}">Pełny opis</button><button data-workshop-select="${inst.uid}" data-page="workshop" title="Ulepsz w warsztacie">🔧 Warsztat</button>${buttons}<button data-lock="${inst.uid}" class="${inst.locked?'islocked':''}" title="${inst.locked?'Odblokuj':'Zabezpiecz'} przedmiot">${inst.locked?'🔒 Odblokuj':'🔓 Zabezpiecz'}</button>${o.slot==='material'?'':`<button data-sale="${inst.uid}" ${worn||inst.locked?'disabled':''}>Sprzedaj · ${saleValue(inst)} kr.</button><button data-salvage="${inst.uid}" ${worn||inst.locked?'disabled':''}>Rozłóż</button>`}</div></div></details>
+   <details class="inventory-item-expand"><summary>Rozwiń szczegóły i działania</summary><div class="inventory-item-expanded"><p class="small muted">${escape(statDetails(o))}</p>${setStatusText(inst)}${accessorySetItemPanel(inst)}<div class="inventory-premium-actions"><button data-item-open="${escape(inst.uid)}">Pełny opis</button><button data-workshop-select="${inst.uid}" data-page="workshop" title="Ulepsz w warsztacie">🔧 Warsztat</button>${buttons}<button data-lock="${inst.uid}" class="${inst.locked?'islocked':''}" title="${inst.locked?'Odblokuj':'Zabezpiecz'} przedmiot">${inst.locked?'🔒 Odblokuj':'🔓 Zabezpiecz'}</button>${o.slot==='material'?'':`<button data-sale="${inst.uid}" ${worn||inst.locked?'disabled':''}>Sprzedaj · ${saleValue(inst)} kr.</button><button data-salvage="${inst.uid}" ${worn||inst.locked?'disabled':''}>Rozłóż</button>`}</div></div></details>
  </article>`;
 }
 

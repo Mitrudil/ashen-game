@@ -1,22 +1,20 @@
-# ASHEN 0.4.7.0 — przebudowa prefiksów i sufiksów broni
-
-## Instalacja
-Podmień pliki `index.html` i `js/game.js` w repozytorium. Brak migracji SQL.
+# ASHEN v0.4.7.1 — Sety mieszane ubioru i trzy akcesoria
 
 ## Zmiany
-- Nowa pula prefiksów broni: Precyzyjny, Brutalny (tylko biała), Niszczycielski, Zabójczy, Szybki (tylko lekka), Stabilny, Przebijający.
-- Nowa pula sufiksów broni: Łowcy, Snajpera (dystansowa/palna), Berserkera, Egzekutora, Wojownika (tylko biała), Niszczyciela, Penetratora, Fechmistrza (tylko 1R).
-- Przebicie pancerza z modyfikatorów działa w prawdziwych Starciach (jest dodawane do przebicia modelu broni).
-- Sufiks Berserkera ma teraz koszt w celności, Stabilny oferuje też krytyki.
-- Prefiks Szybki pozostaje ograniczony do lekkiej broni i osłabionego ciosu o wartości około 12% sekwencji.
-- Teksty w kartach broni opisują bonusy w sposób czytelny, także karę celności.
-- Zmienione definicje dotyczą posiadanych przedmiotów z nowymi ID; stare ID dalej można odczytać.
+- Ubiór: dodano prefiksy `Wartownika` oraz `Nomady` do losowania nowych elementów; utrzymano już działający mechanizm 3/4/5/6 części jednej rodziny prefiksu. Można aktywować DWIE różne rodziny jednocześnie przy układzie 3+3. Sufiksy nie przeszkadzają w kompletowaniu.
+- Zwykłe akcesoria: pięć rodzin setów opartych o prefiksy (Technika, Tropiciela, Negocjatora, Nomady, Ocalałego). Premia aktywuje się WYŁĄCZNIE po założeniu 3 zwykłych akcesoriów z tej samej rodziny. Przy 1 lub 2 nie ma żadnej premii zestawowej; pojedyncze bonusy samych przedmiotów nadal działają.
+- Jakość wpływa na siłę setu akcesoriów poprzez średnią mnożników jakości; różne sufiksy i rzadkości nie blokują kompletu.
+- Oddzielny istniejący Rezonans artefaktów pozostaje bez zmian, zwykłe akcesoria nie liczą się do Rezonansu i na odwrót.
+- Wyniki setów są widoczne w Postaci, podsumowaniu Ekwipunku oraz w szczegółach akcesorium.
+- Żadnych nowych slotów, SQL ani resetu ekwipunku. Nowa pula prefiksów akcesoriów już istniała; teraz pięć prefiksów łączy przedmioty w sety.
 
-## Zakres i ograniczenia
-- **Bez zmian SQL**: serwerowe Ekspedycje wciąż nie mają tej samej matematyki i wymagają osobnego wdrożenia.
-- Nie zmieniano statystyk zbroi, akcesoriów, przedmiotów unikatowych ani pul jakości.
-- Laboratorium 0.4.6.8 nadal bada stare scenariusze testowe i nie służy do weryfikacji całej nowej puli.
-- Najpierw sprawdź w prawdziwych Starciach przedmiot z modyfikatorem `Przebijający` lub `Penetratora`, bonus w karcie przedmiotu i raport obrażeń.
+## Instalacja
+Z paczki podmień dokładnie `index.html` oraz `js/game.js` w repozytorium GitHub. Pozostałe pliki zachowaj bez zmian.
 
-## Plan dalej
-Następny etap: automatyczny test wszystkich nowych par prefiks+sufiks, potem ich korekta i synchronizacja z serwerowymi Ekspedycjami.
+## Test manualny
+1. Załóż 2 zwykłe akcesoria z prefiksem `Techniczny`: bonus setowy 0. Załóż 3.: bonus do Inteligencji; zdejmij dowolny: bonus znika.
+2. Załóż 3 ciuchy `Wzmocniony` i 3 ciuchy `Tropicielski` w sześciu slotach: obydwa sety aktywne. Zdejmij jeden z rodziny: traci bonus tylko ta rodzina.
+3. Zmieniaj sufiksy i jakości; nie powinny zrywać setów. Zwykłe akcesoria i artefakty nie mogą sumować się do jednego zestawu.
+
+## Uwagi
+Nie ma tu zmian matematyki Starć ani serwerowych Ekspedycji. Zwiększenie atrybutów przez nowe sety wpływa na lokalne Starcia. Formuła SQL Ekspedycji wymaga osobnej synchronizacji.
