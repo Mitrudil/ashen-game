@@ -6,6 +6,7 @@
 let opponents=[],reports=[],mail=[],expeditionNotices=[],busy=false,error='',notice='',openedReport=null,openedReportSide='attack',reportContext='pvp',openedMail=null,mailFolder='inbox',loaded=false;
 let timer=null,lastSynced='',syncing=false,dirty=false,observed='',syncMessage='',syncPaused=0;
 let mailSelected=new Set(),replyDraft='',replyBusy=false;
+let expeditionMailReport=null,expeditionMailLoading=false,expeditionMailError='';
 const cloud=()=>window.ASHEN_CLOUD;
 const auth=()=>!!(cloud()?.getClient()&&cloud()?.getSession());
 const bound=()=>auth()&&cloud()?.getBoundSlot()===cloud()?.currentSlot();
@@ -18,6 +19,7 @@ async function refresh(){if(!auth()){opponents=[];reports=[];mail=[];expeditionN
  if(busy)return;busy=true;error='';draw();try{
   const [a,b,c,d]=await Promise.all([rpc('ashen_online_list'),rpc('ashen_online_reports'),rpc('ashen_online_messages'),rpc('ashen_expedition_inbox')]);
   opponents=a||[];reports=b||[];mail=c||[];expeditionNotices=d||[];loaded=true;
+  void window.ASHEN_EXPEDITIONS?.autoGrantRewards?.();
  }catch(e){error='Nie można wczytać PvP online: '+msg(e)+'. Sprawdź, czy uruchomiono 003_online_pvp.sql w projekcie ASHEN.';}finally{busy=false;draw()}}
 function activeRaw(){const slot=cloud()?.currentSlot();if(!slot)return '';return localStorage.getItem(slot==='main'?'ashen-save-v010':'ashen-dev-slot-v021:'+slot)||''}
 async function publish(){
@@ -46,6 +48,18 @@ async function publish(){
   if(bound()&&activeRaw()!==lastSynced&&(queued||syncMessage==='Błąd synchronizacji'))scheduleSync(syncMessage==='Błąd synchronizacji'?10000:1800);
   draw();
  }
+}
+async function flushSync(){
+ if(!bound()||syncPaused)return false;
+ const who=cloud().getSession()?.user?.id,slot=cloud().currentSlot();
+ for(let i=0;i<4;i++){
+  for(let j=0;syncing&&j<200;j++)await new Promise(r=>setTimeout(r,50));
+  if(syncing||!bound()||cloud().getSession()?.user?.id!==who||cloud().currentSlot()!==slot)return false;
+  if(activeRaw()===lastSynced)return true;
+  await publish();
+  if(activeRaw()===lastSynced&&bound())return true;
+ }
+ return false;
 }
 function scheduleSync(delay=1800){if(timer)clearTimeout(timer);if(syncPaused)return;timer=setTimeout(()=>{timer=null;void publish()},delay)}
 async function pauseSync(){
@@ -132,7 +146,7 @@ function mailHtml(){const uid=cloud()?.getSession()?.user?.id;
  const selected=visible.filter(x=>mailSelected.has(x.key));
  const selectable=selected.length;
  const who=opened?.refType==='mail'&&opened?.kind==='personal'?(opened.sender_id===uid?opened.recipient_id:opened.sender_id):null;
- return `<section class="section ashen-mail-page" data-online-mail-view="1"><h2>✉ Wiadomości</h2><div class="actions"><button data-online-mail-folder="inbox" class="${mailFolder==='inbox'?'primary':''}">Odebrane (${unread} nowych)</button><button data-online-mail-folder="sent" class="${mailFolder==='sent'?'primary':''}">Wysłane</button><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież</button></div>${error?`<div class="notice">⚠ ${esc(error)}</div>`:''}${notice?`<div class="notice">✓ ${esc(notice)}</div>`:''}${opened?`<div class="panel ashen-mail-detail"><span class="tag">${opened.refType==='expedition'?'RAPORT EKSPEDYCJI':opened.kind==='battle'?'POWIADOMIENIE O ATAKU':'WIADOMOŚĆ ONLINE'}</span><h3>${esc(opened.subject)}</h3><p class="muted small">${esc(opened.from_name)}${opened.to_name?' → '+esc(opened.to_name):''} · ${fmt(opened.created_at)}</p><p style="white-space:pre-wrap">${esc(opened.body)}</p><div class="actions">${opened.refType==='expedition'?`<button data-online-expedition-report="${opened.expedition_id}" class="primary">☠ Otwórz raport ekspedycji</button>`:opened.battle_id?`<button data-online-report="${opened.battle_id}">⚔ Pokaż raport walki</button>`:''}${who?`<button data-online-profile="${esc(who)}">Profil gracza</button>`:''}<button data-online-mail-back="1">Wróć do listy</button></div>${opened.refType==='mail'&&opened.kind==='personal'&&opened.sender_id!==uid?`<form id="ashen-mail-reply-form" class="ashen-mail-reply"><h4>↩ Odpowiedz: ${esc(opened.from_name)}</h4><textarea id="ashen-mail-reply-input" class="input" rows="4" maxlength="1500" placeholder="Treść odpowiedzi…" required>${esc(replyDraft)}</textarea><button type="submit" class="primary" ${replyBusy?'disabled':''}>${replyBusy?'Wysyłanie…':'Wyślij odpowiedź'}</button></form>`:''}</div>`:`<div class="ashen-mail-tools"><label><input type="checkbox" data-online-mail-select-all="1" ${allSelected?'checked':''} ${!visible.length?'disabled':''}> Zaznacz wszystkie</label><span id="ashen-mail-selected-count">Zaznaczono: ${selectable}</span><div class="actions"><button data-online-mail-read-selected="1" ${!selectable||mailFolder!=='inbox'||busy?'disabled':''}>✓ Oznacz jako przeczytane</button><button data-online-mail-delete-selected="1" ${!selectable||busy?'disabled':''}>🗑 Usuń zaznaczone</button></div></div><div class="ashen-mail-list">${visible.map(x=>`<div class="ashen-mail-entry ${x.is_read?'':'unread'}"><label class="ashen-mail-check"><input type="checkbox" data-online-mail-select="${esc(x.key)}" aria-label="Zaznacz wiadomość ${esc(x.subject)}" ${mailSelected.has(x.key)?'checked':''}></label><button type="button" class="mail-row ${x.is_read?'':'unread'}" data-online-mail-open="${esc(x.key)}"><strong>${x.refType==='expedition'?'☠ ':x.kind==='battle'?'⚔ ':''}${esc(x.subject)}</strong><span>${esc(x.from_name)}${x.refType==='mail'&&x.kind==='personal'?' → '+esc(x.to_name):''}</span><small>${fmt(x.created_at)}</small></button></div>`).join('')||'<p class="muted">Brak wiadomości.</p>'}</div>`}</section>${reportDialog()}`;
+ return `<section class="section ashen-mail-page" data-online-mail-view="1"><h2>✉ Wiadomości</h2><div class="actions"><button data-online-mail-folder="inbox" class="${mailFolder==='inbox'?'primary':''}">Odebrane (${unread} nowych)</button><button data-online-mail-folder="sent" class="${mailFolder==='sent'?'primary':''}">Wysłane</button><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież</button></div>${error?`<div class="notice">⚠ ${esc(error)}</div>`:''}${notice?`<div class="notice">✓ ${esc(notice)}</div>`:''}${opened?`<div class="panel ashen-mail-detail"><span class="tag">${opened.refType==='expedition'?'RAPORT EKSPEDYCJI':opened.kind==='battle'?'POWIADOMIENIE O ATAKU':'WIADOMOŚĆ ONLINE'}</span><h3>${esc(opened.subject)}</h3><p class="muted small">${esc(opened.from_name)}${opened.to_name?' → '+esc(opened.to_name):''} · ${fmt(opened.created_at)}</p><p style="white-space:pre-wrap">${esc(opened.body)}</p>${opened.refType==='expedition'?`<div class="ashen-expedition-mail-report">${expeditionMailLoading?'<p class="muted">Wczytywanie pełnego raportu…</p>':expeditionMailError?`<p class="notice">${esc(expeditionMailError)}</p>`:expeditionMailReport?(window.ASHEN_EXPEDITIONS?.reportMarkup?.(expeditionMailReport)||'<p class="muted">Nie udało się przygotować raportu.</p>'):'<p class="muted">Otwórz wiadomość ponownie, aby wczytać raport.</p>'}</div>`:''}<div class="actions">${opened.refType==='expedition'?'':opened.battle_id?`<button data-online-report="${opened.battle_id}">⚔ Pokaż raport walki</button>`:''}${who?`<button data-online-profile="${esc(who)}">Profil gracza</button>`:''}<button data-online-mail-back="1">Wróć do listy</button></div>${opened.refType==='mail'&&opened.kind==='personal'&&opened.sender_id!==uid?`<form id="ashen-mail-reply-form" class="ashen-mail-reply"><h4>↩ Odpowiedz: ${esc(opened.from_name)}</h4><textarea id="ashen-mail-reply-input" class="input" rows="4" maxlength="1500" placeholder="Treść odpowiedzi…" required>${esc(replyDraft)}</textarea><button type="submit" class="primary" ${replyBusy?'disabled':''}>${replyBusy?'Wysyłanie…':'Wyślij odpowiedź'}</button></form>`:''}</div>`:`<div class="ashen-mail-tools"><label><input type="checkbox" data-online-mail-select-all="1" ${allSelected?'checked':''} ${!visible.length?'disabled':''}> Zaznacz wszystkie</label><span id="ashen-mail-selected-count">Zaznaczono: ${selectable}</span><div class="actions"><button data-online-mail-read-selected="1" ${!selectable||mailFolder!=='inbox'||busy?'disabled':''}>✓ Oznacz jako przeczytane</button><button data-online-mail-delete-selected="1" ${!selectable||busy?'disabled':''}>🗑 Usuń zaznaczone</button></div></div><div class="ashen-mail-list">${visible.map(x=>`<div class="ashen-mail-entry ${x.is_read?'':'unread'}"><label class="ashen-mail-check"><input type="checkbox" data-online-mail-select="${esc(x.key)}" aria-label="Zaznacz wiadomość ${esc(x.subject)}" ${mailSelected.has(x.key)?'checked':''}></label><button type="button" class="mail-row ${x.is_read?'':'unread'}" data-online-mail-open="${esc(x.key)}"><strong>${x.refType==='expedition'?'☠ ':x.kind==='battle'?'⚔ ':''}${esc(x.subject)}</strong><span>${esc(x.from_name)}${x.refType==='mail'&&x.kind==='personal'?' → '+esc(x.to_name):''}</span><small>${fmt(x.created_at)}</small></button></div>`).join('')||'<p class="muted">Brak wiadomości.</p>'}</div>`}</section>${reportDialog()}`;
 }
 function updateMailSelectionUi(){
  const visible=mailItemsForFolder(),selected=visible.filter(x=>mailSelected.has(x.key));
@@ -176,20 +190,20 @@ document.addEventListener('click',async e=>{
   if(!confirm(`Zaatakować gracza ${p.name} (poziom ${p.level})?\nWalka jest rozliczana na serwerze. Limit: 2 dziennie.`))return;
   await action(async()=>{const r=await rpc('ashen_online_attack',{p_defender:id});openedReport=r;openedReportSide='attack';reportContext='pvp';notice='Walka zakończona. Raport trafił do obu kont.'});await refresh();return;
  }
- if(b.dataset.onlineMailFolder){mailFolder=b.dataset.onlineMailFolder;mailSelected.clear();openedMail=null;replyDraft='';openedReport=null;reportContext='pvp';draw();return}
- if(b.hasAttribute('data-online-mail-back')){openedMail=null;replyDraft='';openedReport=null;reportContext='pvp';draw();return}
+ if(b.dataset.onlineMailFolder){mailFolder=b.dataset.onlineMailFolder;mailSelected.clear();openedMail=null;replyDraft='';openedReport=null;expeditionMailReport=null;reportContext='pvp';draw();return}
+ if(b.hasAttribute('data-online-mail-back')){openedMail=null;replyDraft='';openedReport=null;expeditionMailReport=null;reportContext='pvp';draw();return}
  if(b.hasAttribute('data-online-mail-read-selected')){void batchMail('read');return}
  if(b.hasAttribute('data-online-mail-delete-selected')){void batchMail('delete');return}
- if(b.dataset.onlineMailOpen){openedReport=null;reportContext='pvp';replyDraft='';openedMail=b.dataset.onlineMailOpen;
+ if(b.dataset.onlineMailOpen){openedReport=null;reportContext='pvp';replyDraft='';openedMail=b.dataset.onlineMailOpen;expeditionMailReport=null;expeditionMailLoading=false;expeditionMailError='';
   const [kind,id]=openedMail.split(':');const m=kind==='expedition'?expeditionNotices.find(x=>String(x.id)===id):mail.find(x=>String(x.id)===id);
+  if(kind==='expedition'&&m){const mailKey=openedMail;expeditionMailLoading=true;void rpc('ashen_expedition_report',{p_id:m.expedition_id}).then(result=>{if(openedMail===mailKey)expeditionMailReport=result}).catch(err=>{if(openedMail===mailKey)expeditionMailError=msg(err)}).finally(()=>{if(openedMail===mailKey){expeditionMailLoading=false;draw()}})}
   if(m&&!m.is_read&&(kind==='expedition'||m.recipient_id===cloud()?.getSession()?.user?.id||m.kind==='battle')){
    try{await rpc(kind==='expedition'?'ashen_expedition_notice_read':'ashen_online_mark_read',{p_id:m.id});m.is_read=true}catch(e){error=msg(e)}
   }draw();return}
  if(b.hasAttribute('data-online-profile')){window.ASHEN_OPEN_PLAYER?.(b.dataset.onlineProfile);return}
- if(b.hasAttribute('data-online-expedition-report')){window.ASHEN_OPEN_EXPEDITION_REPORT?.(Number(b.dataset.onlineExpeditionReport));return}
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&openedReport){openedReport=null;reportContext='pvp';draw()}});
-window.ASHEN_ONLINE={pvpHtml,mailHtml,localChanged,published,authChanged,refresh,unreadCount,pauseSync,resumeSync};
+window.ASHEN_ONLINE={pvpHtml,mailHtml,localChanged,published,authChanged,refresh,unreadCount,pauseSync,resumeSync,flushSync};
 window.addEventListener('online',()=>{if(bound())scheduleSync(500);void refresh()});
 if(auth())void refresh();
 })();
