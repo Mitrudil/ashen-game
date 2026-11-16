@@ -38,3 +38,14 @@ Rozpakuj `ASHEN_v0.3.8_AKTUALIZACJA_GITHUB.zip` i **wgraj zawartość znajdując
 ## Bez zmian
 
 Nie zmieniano zasad ekspedycji klanowych, nagród za bossów, odznak, PvP, magazynu ani projektu ALLADYN.
+
+
+## ASHEN v0.3.9 — Pojazdy Pustkowi
+
+- Naprawa: przyciski etapów towarzyszy służą tylko do podglądu grafik; nie aktywują ani nie trenują zwierzęcia.
+- Garaż: trwała kolekcja pojazdów i aktywacja tylko przyciskiem „Aktywuj”.
+- Podgląd etapów pojazdów bez aktywowania; osobny przycisk testowego odblokowywania.
+- Trzy moduły dla każdego posiadanego pojazdu: silnik (czas), ładowność (złom), pancerz (walka na zwykłych wyprawach).
+- Dotychczasowe 3 etapy rozwoju pojazdów oraz bonus poziomu Garażu pozostają.
+- Migracja aktywnego pojazdu starszej wersji do kolekcji bez utraty jego ulepszeń.
+- Bez zmian SQL / Supabase.

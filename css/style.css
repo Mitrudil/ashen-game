@@ -1336,3 +1336,7 @@ body.arena-report-modal-open{overflow:hidden}
 .ashen-pet-xp{margin-top:12px;font-size:12px;color:var(--muted)}
 .ashen-pet-xp-track{height:9px;border-radius:20px;overflow:hidden;background:rgba(0,0,0,.45);border:1px solid rgba(210,170,95,.24);margin-top:6px}
 .ashen-pet-xp-track span{display:block;height:100%;background:linear-gradient(90deg,#92682e,#e3bd73);border-radius:20px}
+
+/* ASHEN v0.3.9: modularne ulepszenia garażu */
+.ashen-vehicle-modules{margin:18px 0 26px;padding:18px;border:1px solid rgba(205,157,79,.28);border-radius:12px;background:rgba(15,19,23,.68)}
+.ashen-vehicle-modules h3{margin:0 0 8px}.ashen-vehicle-module-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}.ashen-vehicle-module{padding:14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.1);border-radius:9px;display:flex;flex-direction:column;gap:8px}.ashen-vehicle-module p{margin:0}.ashen-vehicle-module button{font-size:12px;white-space:normal;margin-top:auto}.ashen-vehicle-module .premium-bonus{font-size:13px}@media(max-width:850px){.ashen-vehicle-module-grid{grid-template-columns:1fr}}
