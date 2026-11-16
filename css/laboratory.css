@@ -35,3 +35,13 @@
 .weapon-lab-preset-buttons button:hover{border-color:#a6ced4;background:#31484b}
 .weapon-lab-presets small{color:#c4c4bc;line-height:1.45;display:block}
 @media(max-width:650px){.weapon-lab-preset-buttons{grid-template-columns:1fr}}
+
+/* v0.4.6.3 — porównanie równowagi, poziome przewijanie na telefonach */
+.weapon-balance-panel{margin:16px 0 12px;padding:14px;border:1px solid #587275;border-radius:9px;background:rgba(74,108,112,.1)}
+.weapon-balance-panel h4{margin:0 0 8px;color:#b9dce2}
+.weapon-balance-panel>button{margin:8px 0 3px}
+.weapon-balance-summary{margin:12px 0}
+.weapon-balance-table{min-width:700px}
+.weapon-balance-table th small{display:block;opacity:.65;font-size:.72em}
+.weapon-balance-table td{white-space:nowrap}
+.weapon-balance-table tbody tr:hover{background:rgba(153,191,200,.08)}
