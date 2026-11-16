@@ -18,3 +18,11 @@
 
 .combat-lab-vitals{display:flex;flex-wrap:wrap;gap:8px 20px;margin:10px 0;padding:10px 12px;background:rgba(190,166,108,.08);border:1px solid rgba(190,166,108,.2);border-radius:7px;font-size:.88rem}
 .combat-lab-vitals span{flex:1 1 210px}
+
+/* v0.4.6.1 model broni */
+.weapon-lab{border-color:rgba(153,191,200,.5)}
+.weapon-lab>summary{color:#b9dce2}
+.weapon-lab .weapon-lab-dual{flex:1 1 210px;display:flex;flex-direction:row;align-items:center;gap:8px;min-height:40px}
+.weapon-lab .weapon-lab-dual input{width:18px;height:18px}
+.weapon-lab details>summary{padding:11px 2px;cursor:pointer;color:#cfbd97}
+.weapon-lab table td{font-variant-numeric:tabular-nums}
