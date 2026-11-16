@@ -1395,3 +1395,15 @@ body.arena-report-modal-open{overflow:hidden}
 .ashen-clan-page .faction-base-log{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(190,160,100,.14);flex-wrap:wrap}
 .ashen-clan-page .faction-base-log small{color:var(--muted,#aaa)}
 @media(max-width:560px){.ashen-clan-page .faction-contribute-form{grid-template-columns:1fr 1fr}.ashen-clan-page .faction-contribute-form button{grid-column:1/-1}}
+
+/* v0.4.2 — zwarte zestawienie wkładu członków */
+.ashen-clan-page .faction-ranking{margin:14px 0 10px}
+.ashen-clan-page .faction-ranking h3{margin:0 0 3px;font-size:1.02rem}
+.ashen-clan-page .faction-ranking-scroll{max-width:100%;overflow-x:auto;border:1px solid rgba(190,160,100,.23);border-radius:9px}
+.ashen-clan-page .faction-ranking-table{width:100%;border-collapse:collapse;min-width:670px;font-size:.85rem}
+.ashen-clan-page .faction-ranking-table th,.ashen-clan-page .faction-ranking-table td{padding:9px 8px;border-bottom:1px solid rgba(190,160,100,.15);text-align:right;white-space:nowrap}
+.ashen-clan-page .faction-ranking-table th:first-child,.ashen-clan-page .faction-ranking-table td:first-child{text-align:left}
+.ashen-clan-page .faction-ranking-table thead{background:rgba(190,160,100,.09)}
+.ashen-clan-page .faction-ranking-table tbody tr:last-child td{border-bottom:0}
+.ashen-clan-page .faction-stats span{white-space:normal}
+@media(max-width:680px){.ashen-clan-page .faction-ranking-table{font-size:.78rem}.ashen-clan-page .faction-ranking-table th,.ashen-clan-page .faction-ranking-table td{padding:8px 6px}}

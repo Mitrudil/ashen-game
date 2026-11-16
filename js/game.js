@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.1';
+const APP_VERSION='0.4.2';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -254,7 +254,7 @@ function normalizeEquip(){
 
 const affixes=[{name:'Precyzyjny',bonus:{per:2}},{name:'Wzmocniony',bonus:{end:2}},{name:'Zwinny',bonus:{dex:2}},{name:'Brutalny',bonus:{str:2}},{name:'Techniczny',bonus:{int:2}},{name:'Weterana',bonus:{per:1,end:1}},{name:'Łowcy',bonus:{dex:1,per:1}},{name:'Dowódcy',bonus:{cha:2}}];
 const locations=[{id:'ruins',name:'Bliska wyprawa — Ruiny osiedla',level:1,time:5,cost:5,xp:[20,35],scrap:[12,25],enemies:[{name:'Zdziczały szabrownik',hp:45,atk:[5,10],acc:4,dodge:4,armor:1},{name:'Wygłodniały mutant',hp:52,atk:[6,11],acc:4,dodge:3,armor:0}],drops:[['pistol',.18],['jacket',.15],['goggles',.08],['pipe',.15],['coat',.11],['compass',.09],['leather',.08],['revolver',.06]]},{id:'hospital',name:'Średnia wyprawa — Stary szpital',level:4,time:10,cost:12,xp:[45,70],scrap:[25,48],enemies:[{name:'Skażony sanitariusz',hp:105,atk:[11,19],acc:7,dodge:6,armor:3},{name:'Mutant z oddziału B',hp:115,atk:[12,20],acc:6,dodge:5,armor:4}],drops:[['vest',.17],['rifle',.12],['bandana',.12],['machete',.13],['smg',.12],['hazmat',.1],['radio',.08],['crossbow',.08],['dustglasses',.07],['bracelet',.08]]},{id:'outpost',name:'Daleka wyprawa — Posterunek wojskowy',level:8,time:15,cost:25,xp:[90,130],scrap:[50,90],enemies:[{name:'Dezerter z posterunku',hp:180,atk:[19,28],acc:11,dodge:9,armor:9},{name:'Strażnik kompleksu',hp:200,atk:[18,30],acc:12,dodge:7,armor:11}],drops:[['military',.15],['shotgun',.11],['mask',.14],['carbine',.14],['hammer',.12],['sniper',.09],['flame',.06],['rail',.025],['riot',.13],['kevlar',.11],['exosuit',.07],['sentinel',.025],['goggles',.12],['badge',.08],['radio',.07],['cleaver',.08],['revolver',.08],['smg',.10],['deserteagle',.12]]}];
-const fresh=()=>({version:1,created:false,gender:'male',origin:'scout',dominantHand:'right',name:'Wędrowiec',level:1,xp:0,points:5,attrs:{str:5,dex:5,end:5,per:5,int:5,cha:5},hp:110,energy:100,lastRegen:Date.now(),scrap:0,credits:0,cores:0,schematics:0,workshopTestGranted:false,furniture:{bed:0,table:0,nightstand:0},rooms:{bedroom:1,storage:1,workshop:1},materials:{tkanina:0,skora:0,tworzywo:0,elektronika:0,czesci:0},inventory:[{uid:'starter-knife',id:'knife',rarity:0,affix:null},{uid:'starter-jacket',id:'jacket',rarity:0,affix:null}],equip:{right:'starter-knife',left:null,shirt:null,pants:null,boots:null,outer:'starter-jacket',head:null,extra:null},mission:null,reports:[],arena:{highest:0,attempts:{},victories:{},losses:{},draws:{},history:[]},battles:0,wins:0,companion:null,companionLevels:{},ownedCompanions:[],companionExperience:{},vehicle:'foot',vehicleUpgrades:{},vehicleSelectedStages:{},ownedVehicles:[],vehicleModules:{}});let state;try{state=JSON.parse(localStorage.getItem(KEY))||fresh();if(state.version!==1)state=fresh()}catch{state=fresh()}if(state.created===undefined)state.created=true;state.gender=normalizeGender(state.gender);state.origin=normalizeOrigin(state.origin);if(!['left','right'].includes(state.dominantHand))state.dominantHand='right';// Migracja zapisów z v0.1.0–0.1.2; stare wyposażenie zachowuje podstawowe parametry.
+const fresh=()=>({version:1,created:false,gender:'male',origin:'scout',dominantHand:'right',name:'Wędrowiec',level:1,xp:0,points:5,attrs:{str:5,dex:5,end:5,per:5,int:5,cha:5},hp:110,energy:100,lastRegen:Date.now(),scrap:0,credits:0,cores:0,schematics:0,workshopTestGranted:false,furniture:{bed:0,table:0,nightstand:0},rooms:{bedroom:1,storage:1,workshop:1},materials:{tkanina:0,skora:0,tworzywo:0,elektronika:0,czesci:0,food:0,water:0,medical:0},inventory:[{uid:'starter-knife',id:'knife',rarity:0,affix:null},{uid:'starter-jacket',id:'jacket',rarity:0,affix:null}],equip:{right:'starter-knife',left:null,shirt:null,pants:null,boots:null,outer:'starter-jacket',head:null,extra:null},mission:null,reports:[],arena:{highest:0,attempts:{},victories:{},losses:{},draws:{},history:[]},battles:0,wins:0,companion:null,companionLevels:{},ownedCompanions:[],companionExperience:{},vehicle:'foot',vehicleUpgrades:{},vehicleSelectedStages:{},ownedVehicles:[],vehicleModules:{}});let state;try{state=JSON.parse(localStorage.getItem(KEY))||fresh();if(state.version!==1)state=fresh()}catch{state=fresh()}if(state.created===undefined)state.created=true;state.gender=normalizeGender(state.gender);state.origin=normalizeOrigin(state.origin);if(!['left','right'].includes(state.dominantHand))state.dominantHand='right';// Migracja zapisów z v0.1.0–0.1.2; stare wyposażenie zachowuje podstawowe parametry.
 if(!Array.isArray(state.inventory))state.inventory=[];
 if(state.inventory.some(x=>typeof x==='string')){
  let old=state.inventory;state.inventory=old.map((id,i)=>({uid:'legacy-'+i,id,rarity:0,affix:null}));
@@ -341,8 +341,8 @@ function roomUpgradePanel(id){
  return `<div class="room-upgrade-panel"><div><span class="tag">ROZWÓJ MODUŁU · ${lvl}/5</span><h3>Rozbudowa: ${BUNKER_ROOMS[id].name}</h3><p class="small muted">Aktywny bonus: <strong>${roomBonusText(id)}</strong></p>${next!==null?`<p class="small muted">Poziom ${next}: ${nextBonus}</p><p class="small muted">${alreadyOwned?`Etap ${next} został wcześniej opłacony — przywrócenie jest bezpłatne.`:`Wymagany poziom postaci: ${cfg.level}<br>Koszt: ${cost}`}</p>`:'<p class="good small">Pomieszczenie rozbudowane do maksimum.</p>'}<p class="small muted">Tryb testowy: najwyższy odblokowany poziom ${max}/5. Cofanie nie zwraca materiałów.</p></div><div class="ashen-room-level-selector"><div class="small muted"><strong>Podgląd testowy scen 1–5:</strong> dowolny poziom, bez ograniczeń poziomu postaci, kredytów i materiałów. Zmienia też aktywne bonusy.</div><div class="ashen-room-level-buttons">${[1,2,3,4,5].map(n=>`<button type="button" class="${n===lvl?'primary is-current':''}" data-room-test-level="${id}:${n}" aria-pressed="${n===lvl}">Poziom ${n}</button>`).join('')}</div></div><div class="actions ashen-room-test-actions">${lvl>1?`<button data-room-downgrade="${id}" title="Testowe cofnięcie poziomu bez zwrotu surowców">↶ Cofnij poziom (test)</button>`:''}${next!==null?`<button class="${can?'primary':''}" data-room-upgrade="${id}" ${can?'':'disabled'}>${alreadyOwned?'Przywróć poziom '+next:state.level<cfg.level?'Od poziomu '+cfg.level:'Rozbuduj do poziomu '+next}</button>`:'<span class="tag">MAKS. POZIOM</span>'}</div></div>`;
 }
 
-const materialKeys=['scrap','tkanina','skora','tworzywo','elektronika','czesci'];
-const materialLabels={scrap:'Złom',tkanina:'Tkanina',skora:'Skóra',tworzywo:'Chemikalia',elektronika:'Elektronika',czesci:'Części mechaniczne'};
+const materialKeys=['scrap','tkanina','skora','tworzywo','elektronika','czesci','food','water','medical'];
+const materialLabels={scrap:'Złom',tkanina:'Tkanina',skora:'Skóra',tworzywo:'Chemikalia',elektronika:'Elektronika',czesci:'Części mechaniczne',food:'Żywność',water:'Czysta woda',medical:'Zaopatrzenie medyczne'};
 if(!state.materials||typeof state.materials!=='object')state.materials={};
 for(const key of materialKeys.slice(1))if(!Number.isFinite(state.materials[key])||state.materials[key]<0)state.materials[key]=0;
 for(const inst of state.inventory){if(typeof inst.locked!=='boolean')inst.locked=Number(inst.rarity)>=3}
@@ -1324,6 +1324,14 @@ function finish(){
  const drops=rolledLoot.map(x=>({uid:x.uid,id:x.id,prefix:x.prefix||null,suffix:x.suffix||null,name:statsOf(x).name,rarity:statsOf(x).rarity,slot:statsOf(x).slot,details:statDetails(statsOf(x)),effects:statsOf(x).effects}));
  // Rzadkie komponenty są losowane OSOBNO od gwarantowanych 1–3 sztuk ekwipunku.
  // Podczas testów również przegrana walka może przynieść znalezisko.
+ // Przetrwanie: proste znaleziska na każdej wyprawie, bez głodu i opłat pasywnych.
+ // Surowce są prywatne; przekazanie frakcji wymaga osobnej decyzji gracza.
+ const supplies={food:0,water:0,medical:0};
+ const supplyChances={ruins:[.47,.27,.09],hospital:[.43,.41,.32],outpost:[.51,.34,.22]};
+ const chances=supplyChances[loc.id]||supplyChances.ruins;
+ for(const [i,key] of ['food','water','medical'].entries()){
+  if(Math.random()<chances[i]){const qty=rand(1,loc.id==='outpost'?4:3);state.materials[key]=(state.materials[key]||0)+qty;supplies[key]=qty;}
+ }
  const special={cores:0,schematics:0};
  if(loc.id==='outpost'){
   if(Math.random()<.08){state.cores+=1;special.cores=1;}
@@ -1334,7 +1342,7 @@ function finish(){
   state.scrap+=change;scrap+=change;anomaly.scrap=change;
  }
  gainCompanionXp(result.won?({ruins:12,hospital:23,outpost:35}[loc.id]||12):5);
- let levels=levelUp();const story=storyForExpedition(loc.id);state.reports.unshift({story:story.text,storyId:story.id,at:new Date().toLocaleString('pl-PL'),location:loc.name,enemy:enemy.name,...result,xp,scrap,drops,special,exploration,anomaly,drop:drops[0]?.name||null,dropRarity:drops[0]?.rarity||null,levels});
+ let levels=levelUp();const story=storyForExpedition(loc.id);state.reports.unshift({story:story.text,storyId:story.id,at:new Date().toLocaleString('pl-PL'),location:loc.name,enemy:enemy.name,...result,xp,scrap,drops,special,supplies,exploration,anomaly,drop:drops[0]?.name||null,dropRarity:drops[0]?.rarity||null,levels});
  state.reports=state.reports.slice(0,30);state.mission=null;state.missionOutcomePending=true;
  message=''; // Pełny raport wyprawy jest już wyświetlany na ekranie Wypraw.
  save()
@@ -1646,7 +1654,7 @@ function disposeBulk(mode){
  save();render();
 }
 function wallet(){return `<div class="economy-wallet"><div>🪙 Kredyty: <strong>${state.credits.toLocaleString('pl-PL')}</strong></div><div>⚙ Złom: <strong>${state.scrap.toLocaleString('pl-PL')}</strong></div><button data-page="storage">Magazyn surowców →</button><button data-page="workshop">Warsztat →</button></div>`}
-function storage(){return section('Magazyn i gospodarka',`<div class="panel section"><h3 style="color:var(--gold);margin-top:0">Odzyskane surowce</h3><p class="muted">Materiały wykorzystasz już teraz w Warsztacie do ulepszania broni, pancerzy i akcesoriów. Wyższe poziomy wymagają również rdzeni technologicznych. Schematy przedwojenne zbierasz na przyszłe receptury.</p><div class="material-grid"><div class="material-card"><div class="material-name">Rdzenie technologiczne</div><div class="value">${state.cores}</div></div><div class="material-card"><div class="material-name">Schematy przedwojenne</div><div class="value">${state.schematics}</div><div class="small muted">Do przyszłych receptur</div></div>${materialKeys.map(k=>`<div class="material-card"><div class="material-name">${materialLabels[k]}</div><div class="value">${getStock(k).toLocaleString('pl-PL')}</div></div>`).join('')}</div></div><div class="panel"><h3 style="color:var(--gold);margin-top:0">Zasady handlu</h3><p>Sprzedaż przedmiotów przynosi <strong>kredyty</strong>, a rozkładanie — materiały właściwe dla danej kategorii. Rzadkość zwiększa wartość sprzedaży i liczbę odzyskanych surowców.</p><p class="muted small">Wyposażone przedmioty trzeba najpierw zdjąć. Epickie i legendarne znaleziska są automatycznie zabezpieczane kłódką. Każdą operację sprzedaży lub rozłożenia potwierdzasz osobno.</p></div>`)}
+function storage(){return section('Magazyn i gospodarka',`<div class="panel section"><h3 style="color:var(--gold);margin-top:0">Odzyskane surowce</h3><p class="muted">Materiały wykorzystasz już teraz w Warsztacie do ulepszania broni, pancerzy i akcesoriów. Wyższe poziomy wymagają również rdzeni technologicznych. Schematy przedwojenne zbierasz na przyszłe receptury. Żywność, wodę i zaopatrzenie medyczne możesz dobrowolnie przekazać frakcji; nie są zużywane automatycznie.</p><div class="material-grid"><div class="material-card"><div class="material-name">Rdzenie technologiczne</div><div class="value">${state.cores}</div></div><div class="material-card"><div class="material-name">Schematy przedwojenne</div><div class="value">${state.schematics}</div><div class="small muted">Do przyszłych receptur</div></div>${materialKeys.map(k=>`<div class="material-card"><div class="material-name">${materialLabels[k]}</div><div class="value">${getStock(k).toLocaleString('pl-PL')}</div></div>`).join('')}</div></div><div class="panel"><h3 style="color:var(--gold);margin-top:0">Zasady handlu</h3><p>Sprzedaż przedmiotów przynosi <strong>kredyty</strong>, a rozkładanie — materiały właściwe dla danej kategorii. Rzadkość zwiększa wartość sprzedaży i liczbę odzyskanych surowców.</p><p class="muted small">Wyposażone przedmioty trzeba najpierw zdjąć. Epickie i legendarne znaleziska są automatycznie zabezpieczane kłódką. Każdą operację sprzedaży lub rozłożenia potwierdzasz osobno.</p></div>`)}
 
 // Wersja 0.1.13: warsztat bez ryzyka porażki, koszt każdej kolejnej operacji rośnie.
 const WORKSHOP_COST=[
@@ -1702,7 +1710,7 @@ function applyUpgrade(uid){
 function grantWorkshopTest(){
  if(state.workshopTestGranted)return;
  if(!confirm('Odebrać JEDNORAZOWY pakiet testowy? Doda 25 000 kredytów, 500 złomu, po 500 pozostałych surowców i 12 rdzeni technologicznych do bieżącego zapisu.'))return;
- state.credits+=25000;state.scrap+=500;for(const key of materialKeys.slice(1))state.materials[key]+=500;state.cores+=12;state.workshopTestGranted=true;
+ state.credits+=25000;state.scrap+=500;for(const key of ['tkanina','skora','tworzywo','elektronika','czesci'])state.materials[key]+=500;state.cores+=12;state.workshopTestGranted=true;
  message='Dodano pakiet testowy warsztatu.';save();render();
 }
 function compareMetrics(chosen,current){
@@ -1859,7 +1867,10 @@ function inventory(){
  </div>
  <div class="inventory-premium-list">${visible.map(({inst,o})=>inventoryItemCard(inst,o)).join('')||'<div class="panel muted">Brak przedmiotów w wybranej kategorii.</div>'}</div>`)}
 
-function specialLoot(r){const p=r?.special||{};return (p.cores||p.schematics)?`<div class="notice" style="margin-top:10px"><strong>Rzadkie znaleziska:</strong> ${[p.cores?`⚙ Rdzeń technologiczny × ${p.cores}`:'',p.schematics?`📜 Schemat przedwojenny × ${p.schematics}`:''].filter(Boolean).join(' · ')}</div>`:''}
+function specialLoot(r){const p=r?.special||{},s=r?.supplies||{};
+ const rare=(p.cores||p.schematics)?`<div class="notice" style="margin-top:10px"><strong>Rzadkie znaleziska:</strong> ${[p.cores?`⚙ Rdzeń technologiczny × ${p.cores}`:'',p.schematics?`📜 Schemat przedwojenny × ${p.schematics}`:''].filter(Boolean).join(' · ')}</div>`:'';
+ const supplies=[s.food?`🥫 Żywność × ${s.food}`:'',s.water?`💧 Czysta woda × ${s.water}`:'',s.medical?`✚ Zaopatrzenie medyczne × ${s.medical}`:''].filter(Boolean);
+ return rare+(supplies.length?`<div class="notice" style="margin-top:7px"><strong>Zaopatrzenie z wyprawy:</strong> ${supplies.join(' · ')}</div>`:'');}
 function foundLootPreview(r){return `<div class="panel section"><h3 style="color:var(--gold)">Ostatnia ukończona wyprawa: ${escape(r.location)}</h3><p class="small muted">${escape(r.at)}</p><p>Znalazłeś:</p>${(r.drops||[]).map(x=>`<details class="loot-detail"><summary><div class="loot-row">${lootDetailButton(x)}<div>${lootDetailName(x)}${lootAffixBadges(x)}<div class="small muted">Kliknij, aby rozwinąć opis</div></div></div></summary><div class="small muted">${escape(x.details||'Brak zapisanych parametrów')} · ${escape(x.slot?slotName(x.slot):'')}${(x.effects||[]).map(e=>`<div>↳ ${escape(e.name)}: ${escape(e.description)}</div>`).join('')}</div></details>`).join('')||'<p class="muted">Sprawdź starszy raport w zakładce Raporty.</p>'}${specialLoot(r)}<button data-page="inventory">Przejdź do ekwipunku</button></div>`}
 function reports(){const ah=arenaData().history;return section('Raporty walk',`<div class="arena-report-links"><h3>⚔ Raporty Starć (${ah.length})</h3><p class="small muted">Szczegółowy przebieg i podsumowanie obrażeń znajdziesz w zakładce Starcia.</p>${ah.slice(0,5).map(x=>`<div class="arena-report-brief"><span class="${arenaOutcomeClass(x)}">${arenaOutcomeSymbol(x)} ${arenaOutcomeLabel(x)} · Etap ${x.stage} — ${escape(x.name)}</span><span>${escape(x.at)}</span></div>`).join('')||'<p class="muted small">Nie rozegrano jeszcze starcia.</p>'}<button data-page="arena">Przejdź do Starć</button></div>`+(state.reports.length?`<div class="stack">${state.reports.map((r,i)=>`<div class="panel"><div class="row wrap"><strong class="${r.won?'good':'bad'}">${r.won?'ZWYCIĘSTWO':'PORAŻKA'} · ${escape(r.location)}</strong><span class="small muted">${escape(r.at)}</span></div><p>Przeciwnik: ${escape(r.enemy)}</p>${damageReportPanel(r)}${anomalyReportPanel(r)}${explorationReportPanel(r)}<p class="tag">+${r.xp} XP · +${r.scrap} złomu ${r.levels?'· Awans: +'+r.levels+' poziom':''}</p>${specialLoot(r)}<div class="small"><strong>Znalazłeś (${r.drops?.length||Number(!!r.drop)}):</strong><div class="loot-list">${(r.drops|| (r.drop?[{name:r.drop,rarity:r.dropRarity}]:[])).map(x=>`<details class="loot-detail"><summary><div class="loot-row">${lootDetailButton(x)}<div>${lootDetailName(x)}${lootAffixBadges(x)}<div class="small muted">Kliknij, aby rozwinąć opis</div></div></div></summary><div class="small muted">${escape(x.details||((x.uid&&instance(x.uid))?statDetails(statsOf(instance(x.uid))):'Szczegóły nie były zapisywane w tej wersji raportu.'))}<br>Rzadkość: ${escape(x.rarity||'Nieznana')} · ${escape(x.slot?slotName(x.slot):'Przedmiot ze starszego raportu')}${(x.effects||[]).map(e=>`<div>↳ ${escape(e.name)}: ${escape(e.description)}</div>`).join('')}</div></details>`).join('')||'Brak'}</div></div><details ${i===0?'open':''}><summary>Przebieg walki</summary>${r.lines.map(line=>`<div class="report small">${escape(line)}</div>`).join('')}</details></div>`).join('')}</div>`:'<div class="panel muted">Brak raportów. Wykonaj pierwszą wyprawę.</div>'))}
 
@@ -2069,14 +2080,14 @@ function activateImportedSave(data,source){
 // A reload alone can be defeated by in-memory state and periodic sync/save.
 // Wpłata frakcyjna zatwierdzona przez serwer: pomniejsz wyłącznie aktywny,
 // powiązany z kontem profil; nie nadpisuj innych zasobów ani ekwipunku.
-window.ASHEN_FACTION_WALLET=()=>({scrap:Math.floor(Math.max(0,Number(state.scrap)||0)),czesci:Math.floor(Math.max(0,Number(state.materials?.czesci)||0))});
+window.ASHEN_FACTION_WALLET=()=>Object.fromEntries(['scrap','czesci','food','water','medical'].map(k=>[k,Math.floor(Math.max(0,Number(k==='scrap'?state.scrap:state.materials?.[k])||0))]));
 window.ASHEN_FACTION_APPLY_PAYMENT=(kind,amount)=>{
  const n=Number(amount);
- if(!['scrap','czesci'].includes(kind)||!Number.isSafeInteger(n)||n<1)throw Error('Nieprawidłowa wpłata');
+ if(!['scrap','czesci','food','water','medical'].includes(kind)||!Number.isSafeInteger(n)||n<1)throw Error('Nieprawidłowa wpłata');
  const cloud=window.ASHEN_CLOUD;
  if(!cloud?.getSession()?.user?.id||cloud.getBoundSlot()!==cloud.currentSlot())throw Error('Profil nie jest powiązany z kontem online.');
  if(kind==='scrap')state.scrap=Math.max(0,(Number(state.scrap)||0)-n);
- else {state.materials=state.materials||{};state.materials.czesci=Math.max(0,(Number(state.materials.czesci)||0)-n)}
+ else {state.materials=state.materials||{};state.materials[kind]=Math.max(0,(Number(state.materials[kind])||0)-n)}
  save();render();return window.ASHEN_FACTION_WALLET();
 };
 window.ASHEN_APPLY_CLOUD_SAVE=function(raw){
