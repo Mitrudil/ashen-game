@@ -1,19 +1,14 @@
-# ASHEN v0.4.6.1 — Laboratorium wyposażenia (eksperyment)
+# ASHEN v0.4.6.2 — stabilne Laboratorium wyposażenia
 
-## Instalacja GitHub
-Skopiuj **index.html**, **js/game.js**, **css/laboratory.css** do tych samych miejsc w repozytorium, zastępując poprzednie pliki. Nie potrzeba SQL i nie trzeba podmieniać grafik.
+## Instalacja
+Wgraj do głównego katalogu repozytorium ASHEN: `index.html`, `js/game.js`, `css/laboratory.css`. Nie uruchamiaj SQL, nie wymieniaj innych plików.
 
-## Obsługa
-Starcia → rozwiń `Laboratorium wyposażenia · model Necro II / ASHEN (TEST)`. Wybierz broń z 24 modeli, przeciwnika, pancerz, profil atrybutów, jakość, wariant Warsztatu i afiksy. Kliknij „Porównaj stare i nowe”.
+## Zmiany
+- Konfiguracja Laboratorium wyposażenia jest zapisywana w localStorage, osobno od zapisu postaci.
+- Ostatni raport jest zachowany po przejściu na inną zakładkę gry, po przełączeniu okna przeglądarki i po ponownym otwarciu strony.
+- Stan rozwinięcia panelu jest zapamiętywany.
+- Presety A/B/C/D ustawiają wszystkie wartości testu; po wyborze presetu trzeba kliknąć 'Porównaj stare i nowe'.
+- Każdy preset: Boss etap 20, średnia postać (atrybuty 17), 1000 prób, zwykła jakość, Warsztat +0, model A, brak prefiksu, sufiks Egzekutora, jedna broń. A/B pancerz 20, C/D pancerz 60.
+- Symulacje nadal nie zmieniają ekwipunku, XP, surowców ani zapisów online.
 
-Symulacje nie modyfikują gry, postaci, zasobów, łupów ani zapisów. Porównują dwie konfiguracje tego samego silnika lokalnego `fight()` z powtarzalnymi ziarnami RNG. Wariant stary odpowiada bazowej broni 1-atakowej z jednakową jakością i ulepszeniem, nie pełnemu profilowi posiadanej broni z jej rzeczywistymi afiksami i zestawami.
-
-## Znane ograniczenia
-- Nowe krytyki i penetracja są prototypami; redukcja pancerza nadal korzysta ze starego modelu ASHEN (ograniczenie 60%).
-- Wstępne efekty prefiksu „Szybki” i części sufiksów są uproszczone; „Snajpera” nie ma jeszcze premii do pierwszego trafienia.
-- Parametry broni są autorską propozycją ASHEN, nie kopiami parametrów BloodWars.
-- Nie testuje serwerowych Ekspedycji.
-- Na tym etapie nie ma zmian balansu w prawdziwych walkach.
-
-## Sugerowany test
-1000 symulacji: Karabin PK, pancerz 0 oraz 60, profil średni, jakość zwykła, bez modyfikatorów; następnie sprawdź karabin wyborowy przy tych samych ustawieniach.
+Uwaga: zapis w localStorage jest lokalny dla przeglądarki i jej profilu; wyczyszczenie danych witryny go usuwa.

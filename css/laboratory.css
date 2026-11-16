@@ -26,3 +26,12 @@
 .weapon-lab .weapon-lab-dual input{width:18px;height:18px}
 .weapon-lab details>summary{padding:11px 2px;cursor:pointer;color:#cfbd97}
 .weapon-lab table td{font-variant-numeric:tabular-nums}
+
+/* v0.4.6.2: czytelne scenariusze i zapamiętywanie otwartego panelu */
+.weapon-lab-presets{border:1px solid rgba(153,191,200,.24);border-radius:8px;padding:10px;margin:10px 0;background:rgba(153,191,200,.05)}
+.weapon-lab-presets strong{font-size:.87rem;display:block;margin-bottom:9px}
+.weapon-lab-preset-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0}
+.weapon-lab-preset-buttons button{background:#263436;color:#e0edf0;border:1px solid #546e72;border-radius:6px;padding:10px 6px;cursor:pointer;font-size:.85rem}
+.weapon-lab-preset-buttons button:hover{border-color:#a6ced4;background:#31484b}
+.weapon-lab-presets small{color:#c4c4bc;line-height:1.45;display:block}
+@media(max-width:650px){.weapon-lab-preset-buttons{grid-template-columns:1fr}}
