@@ -4,7 +4,7 @@
  */
 (()=>{'use strict';
 let opponents=[],reports=[],mail=[],expeditionNotices=[],busy=false,error='',notice='',openedReport=null,openedReportSide='attack',reportContext='pvp',openedMail=null,mailFolder='inbox',loaded=false;
-let timer=null,lastSynced='',syncing=false,dirty=false,observed='',syncMessage='';
+let timer=null,lastSynced='',syncing=false,dirty=false,observed='',syncMessage='',syncPaused=0;
 let mailSelected=new Set(),replyDraft='',replyBusy=false;
 const cloud=()=>window.ASHEN_CLOUD;
 const auth=()=>!!(cloud()?.getClient()&&cloud()?.getSession());
@@ -21,7 +21,7 @@ async function refresh(){if(!auth()){opponents=[];reports=[];mail=[];expeditionN
  }catch(e){error='Nie można wczytać PvP online: '+msg(e)+'. Sprawdź, czy uruchomiono 003_online_pvp.sql w projekcie ASHEN.';}finally{busy=false;draw()}}
 function activeRaw(){const slot=cloud()?.currentSlot();if(!slot)return '';return localStorage.getItem(slot==='main'?'ashen-save-v010':'ashen-dev-slot-v021:'+slot)||''}
 async function publish(){
- if(!bound()||syncing)return;
+ if(!bound()||syncing||syncPaused)return;
  const account=cloud().getSession().user.id,slot=cloud().currentSlot(),project=cloud().getProjectUrl(),current=activeRaw();
  if(!current||current===lastSynced)return;
  syncing=true;syncMessage='Zapisywanie w chmurze…';
@@ -47,7 +47,14 @@ async function publish(){
   draw();
  }
 }
-function scheduleSync(delay=1800){if(timer)clearTimeout(timer);timer=setTimeout(()=>{timer=null;void publish()},delay)}
+function scheduleSync(delay=1800){if(timer)clearTimeout(timer);if(syncPaused)return;timer=setTimeout(()=>{timer=null;void publish()},delay)}
+async function pauseSync(){
+ syncPaused++;
+ if(timer){clearTimeout(timer);timer=null}
+ // Wait for any in-flight upload before the server reads and debits the save.
+ while(syncing)await new Promise(resolve=>setTimeout(resolve,50));
+}
+function resumeSync(){syncPaused=Math.max(0,syncPaused-1);if(!syncPaused&&bound())scheduleSync(200)}
 function localChanged(){if(!bound())return;const raw=activeRaw();if(raw===observed)return;observed=raw;if(raw===lastSynced)return;dirty=true;scheduleSync()}
 function published(){lastSynced='';observed='';syncMessage='Oczekuje na synchronizację';if(bound())localChanged();void refresh()}
 function authChanged(){lastSynced='';observed='';if(timer){clearTimeout(timer);timer=null}dirty=false;syncMessage='';opponents=[];reports=[];mail=[];expeditionNotices=[];openedReport=null;openedMail=null;mailSelected.clear();replyDraft='';loaded=false;void refresh()}
@@ -182,7 +189,7 @@ document.addEventListener('click',async e=>{
  if(b.hasAttribute('data-online-expedition-report')){window.ASHEN_OPEN_EXPEDITION_REPORT?.(Number(b.dataset.onlineExpeditionReport));return}
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&openedReport){openedReport=null;reportContext='pvp';draw()}});
-window.ASHEN_ONLINE={pvpHtml,mailHtml,localChanged,published,authChanged,refresh,unreadCount};
+window.ASHEN_ONLINE={pvpHtml,mailHtml,localChanged,published,authChanged,refresh,unreadCount,pauseSync,resumeSync};
 window.addEventListener('online',()=>{if(bound())scheduleSync(500);void refresh()});
 if(auth())void refresh();
 })();

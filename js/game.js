@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.0';
+const APP_VERSION='0.4.1';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -2067,6 +2067,18 @@ function activateImportedSave(data,source){
 }
 // v0.2.4.1: cloud downloads must update both localStorage and the LIVE game state.
 // A reload alone can be defeated by in-memory state and periodic sync/save.
+// Wpłata frakcyjna zatwierdzona przez serwer: pomniejsz wyłącznie aktywny,
+// powiązany z kontem profil; nie nadpisuj innych zasobów ani ekwipunku.
+window.ASHEN_FACTION_WALLET=()=>({scrap:Math.floor(Math.max(0,Number(state.scrap)||0)),czesci:Math.floor(Math.max(0,Number(state.materials?.czesci)||0))});
+window.ASHEN_FACTION_APPLY_PAYMENT=(kind,amount)=>{
+ const n=Number(amount);
+ if(!['scrap','czesci'].includes(kind)||!Number.isSafeInteger(n)||n<1)throw Error('Nieprawidłowa wpłata');
+ const cloud=window.ASHEN_CLOUD;
+ if(!cloud?.getSession()?.user?.id||cloud.getBoundSlot()!==cloud.currentSlot())throw Error('Profil nie jest powiązany z kontem online.');
+ if(kind==='scrap')state.scrap=Math.max(0,(Number(state.scrap)||0)-n);
+ else {state.materials=state.materials||{};state.materials.czesci=Math.max(0,(Number(state.materials.czesci)||0)-n)}
+ save();render();return window.ASHEN_FACTION_WALLET();
+};
 window.ASHEN_APPLY_CLOUD_SAVE=function(raw){
  const data=validImport(raw);
  backupCurrentAndReplace(data);

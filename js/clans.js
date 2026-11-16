@@ -2,7 +2,7 @@
  * Role i zaproszenia egzekwuje serwer RPC, nie przeglądarka.
  */
 (()=>{'use strict';
-let state=null,loading=false,busy=false,error='',info='',lastIdentity='',requests=0;
+let state=null,base=null,loading=false,busy=false,baseBusy=false,error='',info='',lastIdentity='',requests=0;
 const cloud=()=>window.ASHEN_CLOUD;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const client=()=>cloud()?.getClient();
@@ -13,11 +13,39 @@ const roleName=r=>({leader:'Lider',officer:'Oficer',member:'Członek'})[r]||r;
 const setError=e=>{error=String(e?.message||e||'Nieznany błąd').slice(0,250);info=''};
 const redraw=()=>window.ASHEN_FORCE_RENDER?.();
 async function rpc(name,args={}){if(!active())throw Error('Zaloguj się w panelu ☁ Konto online.');const {data,error}=await client().rpc(name,args);if(error)throw error;return data}
-async function refresh(){const id=identity(),n=++requests;lastIdentity=id;state=null;error='';loading=true;redraw();try{if(!active())return;const result=await rpc('ashen_clan_state');if(n===requests&&id===identity())state=result}catch(e){if(n===requests)setError(e)}finally{if(n===requests){loading=false;redraw()}}}
-function ensure(){const id=identity();if(id!==lastIdentity){lastIdentity=id;state=null;info='';error='';void refresh()}}
+async function refresh(){const id=identity(),n=++requests;lastIdentity=id;state=null;base=null;error='';loading=true;redraw();try{if(!active())return;const result=await rpc('ashen_clan_state');if(n===requests&&id===identity()){state=result;await loadBase();}}catch(e){if(n===requests)setError(e)}finally{if(n===requests){loading=false;redraw()}}}
+function ensure(){const id=identity();if(id!==lastIdentity){lastIdentity=id;state=null;base=null;info='';error='';void refresh()}}
+const buildingSpecs=[
+ {id:'command',name:'Centrum dowodzenia',icon:'⌁',desc:'Struktura dowodzenia i organizacja wypraw'},
+ {id:'warehouse',name:'Magazyn frakcji',icon:'⚙',desc:'Infrastruktura przechowywania zasobów'},
+ {id:'radio',name:'Stacja łączności',icon:'⌁',desc:'Łączność i koordynacja członków'}
+];
+const costFor=l=>({scrap:150*l*l,czesci:30*l});
+const num=v=>Number.isFinite(Number(v))?Number(v):0;
+const fmt=v=>Math.max(0,num(v)).toLocaleString('pl-PL');
+async function loadBase(){
+ if(!state?.clan){base=null;return}
+ try{base=await rpc('ashen_faction_base_state')}catch(e){base=null;error='Baza frakcji: '+String(e?.message||e).slice(0,185)+' · Sprawdź SQL 017.'}
+}
+async function baseAction(fn){
+ if(baseBusy||busy||loading)return;
+ baseBusy=true;error='';info='';redraw();
+ try{await fn();await loadBase()}catch(e){setError(e)}finally{baseBusy=false;redraw()}
+}
+function baseHtml(role){
+ if(!base)return `<div class="panel clan-panel faction-base"><h3>⌂ Baza frakcji</h3><p class="small muted">Nie pobrano bazy. Uruchom SQL 017 w projekcie Supabase ASHEN i kliknij Odśwież.</p></div>`;
+ const stock=base.stock||{},levels=base.levels||{},wallet=window.ASHEN_FACTION_WALLET?.()||{};
+ const authBound=cloud()?.getBoundSlot()===cloud()?.currentSlot();
+ const blocks=buildingSpecs.map(b=>{
+  const level=Math.max(0,Math.min(5,num(levels[b.id]))),next=level+1,cost=costFor(next),ready=num(stock.scrap)>=cost.scrap&&num(stock.czesci)>=cost.czesci;
+  return `<div class="faction-building"><strong>${b.icon} ${b.name}</strong><span>${b.desc}</span><div class="faction-building-level">Poziom <strong>${level}/5</strong></div><div class="faction-progress"><i style="width:${level*20}%"></i></div>${level>=5?'<span class="good">Ukończono rozbudowę</span>':`<span class="small muted">Następny: ${fmt(cost.scrap)} złomu + ${fmt(cost.czesci)} części</span><button data-base-build="${b.id}" ${baseBusy||!ready||!['leader','officer'].includes(role)?'disabled':''}>Rozbuduj do ${next}</button>`}</div>`;
+ }).join('');
+ const logs=(base.history||[]).slice(0,8).map(h=>`<div class="faction-base-log"><span>${h.action==='build'?'Rozbudowa '+(buildingSpecs.find(x=>x.id===h.building)?.name||'budynku'):'Wpłata '+(h.kind==='scrap'?'złomu':'części')}</span><strong>${h.action==='build'?'poziom '+fmt(h.level):'+'+fmt(h.amount)}</strong><small>${new Date(h.at).toLocaleString('pl-PL')}</small></div>`).join('');
+ return `<div class="panel clan-panel faction-base"><div class="faction-base-heading"><div><span class="tag">WSPÓLNE · SUPABASE</span><h3>⌂ Baza frakcji</h3></div><span class="small muted">Wszyscy członkowie widzą ten sam postęp</span></div><div class="faction-stats"><span>Złom <strong>${fmt(stock.scrap)}</strong></span><span>Części mechaniczne <strong>${fmt(stock.czesci)}</strong></span></div><p class="small muted">Budynki mają poziomy 0–5. Ulepszenie zużywa zasoby z magazynu frakcji. Na razie rozwój jest wspólnym postępem — premie do walk i ekspedycji pojawią się po testach.</p><div class="faction-building-grid">${blocks}</div><details class="faction-contribute" open><summary>⚙ Wpłać materiały do frakcji</summary><p class="small muted">Stan postaci: ${fmt(wallet.scrap)} złomu · ${fmt(wallet.czesci)} części. Wpłata jest nieodwracalna. Wymaga powiązanego i zsynchronizowanego zapisu w chmurze.</p><div class="faction-contribute-form"><select class="input" id="base-kind"><option value="scrap">Złom</option><option value="czesci">Części mechaniczne</option></select><input id="base-amount" class="input" type="number" min="1" max="5000" step="1" value="50" aria-label="Ilość materiałów"><button class="primary" data-base-deposit="1" ${baseBusy||!authBound?'disabled':''}>Wpłać</button></div>${!authBound?'<p class="small muted">Najpierw połącz aktywną postać z kontem w panelu ☁ Konto online.</p>':''}</details><details class="faction-details"><summary>Historia działań</summary><div>${logs||'<p class="small muted">Brak wpłat i rozbudowy.</p>'}</div></details></div>`;
+}
 function clanHtml(){
  ensure();
- const intro='<span class="tag">ASHEN v0.4.0 · FRAKCJE</span><h2>☷ Frakcje Pustkowi</h2><p class="small muted">Twoja społeczność ocalałych. Wspólne walki z bossami znajdziesz w zakładce Ekspedycje.</p>';
+ const intro='<span class="tag">ASHEN v0.4.1 · FRAKCJE</span><h2>☷ Frakcje Pustkowi</h2><p class="small muted">Twoja społeczność ocalałych. Wspólne walki z bossami znajdziesz w zakładce Ekspedycje.</p>';
  if(!active())return `<section class="section ashen-clan-page"><div class="clan-header"><div>${intro}</div></div><div class="notice">Zaloguj się przez ☁ Konto online, aby utworzyć frakcję lub przyjąć zaproszenie. Profile lokalne nie są osobnymi kontami online.</div></section>`;
  const c=state?.clan,role=state?.my_role,members=state?.members||[],invites=state?.invitations||[],pending=state?.pending_sent||[],candidates=state?.candidates||[];
  const header=`<section class="section ashen-clan-page"><div class="clan-header"><div>${intro}</div><button data-clan-refresh="1" ${loading||busy?'disabled':''}>↻ Odśwież</button></div>${error?`<div class="notice">⚠ ${esc(error)}</div>`:''}${info?`<div class="notice">✓ ${esc(info)}</div>`:''}${loading?'<p class="small muted">Pobieranie danych frakcji…</p>':''}`;
@@ -27,12 +55,36 @@ function clanHtml(){
  const memberRows=members.map(m=>`<div class="clan-member"><div><strong>${esc(m.name)}</strong> <span class="tag">${roleName(m.role)}</span><p class="small muted">Poziom ${Number(m.level)||1}${m.user_id===user()?' · Ty':''}</p></div><div class="actions"><button data-clan-profile="${m.user_id}">Profil</button>${role==='leader'&&m.user_id!==user()?`${m.role==='member'?`<button data-clan-manage="promote" data-clan-target="${m.user_id}">Awansuj</button>`:m.role==='officer'?`<button data-clan-manage="demote" data-clan-target="${m.user_id}">Degraduj</button>`:''}<button data-clan-manage="kick" data-clan-target="${m.user_id}">Usuń</button>`:''}</div></div>`).join('');
  const membersPanel=`<div class="panel clan-panel"><h3>👥 Członkowie <span class="muted small">${members.length}/30</span></h3><div class="faction-member-list">${memberRows||'<p class="muted">Brak członków</p>'}</div></div>`;
  const invitePanel=['leader','officer'].includes(role)?`<div class="panel clan-panel"><h3>✉ Zaproś gracza</h3><p class="muted small">Zaproszenia ważne 7 dni · do 10 oczekujących.</p><div class="actions"><select id="clan-target" class="input">${candidates.map(p=>`<option value="${p.user_id}">${esc(p.name)} · poziom ${Number(p.level)||1}</option>`).join('')}</select><button data-clan-invite="1" class="primary" ${!candidates.length||busy?'disabled':''}>Zaproś</button></div>${pending.length?`<details class="faction-details"><summary>Wysłane zaproszenia (${pending.length})</summary>${pending.map(i=>`<p class="small muted">${esc(i.name)} · do ${new Date(i.expires_at).toLocaleString('pl-PL')}</p>`).join('')}</details>`:''}</div>`:'';
- const basePanel=`<div class="panel clan-panel faction-base"><div class="faction-base-heading"><div><span class="tag">PROJEKT · NASTĘPNY ETAP</span><h3>⌂ Baza frakcji</h3></div><span class="small muted">Wspólny rozwój</span></div><p class="small muted">Planowana rozbudowa dla całej frakcji. Budynki poniżej są zapowiedzią — nie pobierają surowców i nie przyznają jeszcze bonusów.</p><div class="faction-building-grid"><div class="faction-building"><strong>⌁ Centrum dowodzenia</strong><span>Koordynacja ekspedycji i dostęp do trudniejszych bossów</span></div><div class="faction-building"><strong>⚙ Magazyn frakcji</strong><span>Wspólne materiały i wkład członków</span></div><div class="faction-building"><strong>⌁ Stacja łączności</strong><span>Organizacja drużyny i przyszłe technologie</span></div></div></div>`;
+ const basePanel=baseHtml(role);
  const managePanel=`<details class="faction-management panel clan-panel"><summary>⚙ Zarządzanie frakcją</summary><p class="small muted">${role==='leader'?'Lider może rozwiązać frakcję dopiero po usunięciu pozostałych członków.':'Opuszczenie frakcji nie usuwa postaci ani wyposażenia.'}</p><button data-clan-leave="1">${role==='leader'?'Rozwiąż pustą frakcję':'Opuść frakcję'}</button></details>`;
  return header+`<div class="panel clan-panel faction-summary"><div><span class="tag">[${esc(c.tag)}]</span><h3>${esc(c.name)}</h3><p class="small muted">${esc(c.description||'Brak opisu frakcji.')}</p></div><div class="faction-stats"><span>Rola <strong>${roleName(role)}</strong></span><span>Skład <strong>${members.length}/30</strong></span></div></div>${invitations}<div class="faction-columns">${membersPanel}<div class="faction-side">${invitePanel}<div class="panel clan-panel faction-expedition-shortcut"><strong>⚔ Ekspedycje frakcyjne</strong><p class="small muted">Bossowie i wspólne wyprawy pozostają w istniejącej zakładce Ekspedycje.</p></div></div></div>${basePanel}${managePanel}</section>`;
 }
-async function change(fn){if(busy||loading)return;busy=true;error='';info='';redraw();try{const text=await fn();info=text||'Zapisano zmiany.';const id=identity(),n=++requests;const data=await rpc('ashen_clan_state');if(n===requests&&id===identity())state=data}catch(e){setError(e)}finally{busy=false;redraw()}}
+async function change(fn){if(busy||loading)return;busy=true;error='';info='';redraw();try{const text=await fn();info=text||'Zapisano zmiany.';const id=identity(),n=++requests;const data=await rpc('ashen_clan_state');if(n===requests&&id===identity()){state=data;await loadBase();}}catch(e){setError(e)}finally{busy=false;redraw()}}
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+ if(b.hasAttribute('data-base-deposit')){
+  const kind=document.getElementById('base-kind')?.value,amount=Number(document.getElementById('base-amount')?.value);
+  if(!['scrap','czesci'].includes(kind)||!Number.isSafeInteger(amount)||amount<1||amount>5000){error='Wpisz liczbę od 1 do 5000.';redraw();return}
+  const local=window.ASHEN_FACTION_WALLET?.()||{};
+  if(num(local[kind])<amount){error='Nie masz tylu materiałów w aktywnej postaci.';redraw();return}
+  if(!confirm(`Wpłacić ${amount} × ${kind==='scrap'?'złom':'części mechaniczne'} do wspólnej bazy? Nie można cofnąć wpłaty.`))return;
+  void baseAction(async()=>{
+   if(cloud()?.getBoundSlot()!==cloud()?.currentSlot())throw Error('Połącz aktywny profil z kontem online.');
+   // Block concurrent automatic publication while server debits the cloud save.
+   await window.ASHEN_ONLINE?.pauseSync?.();
+   try{
+    await rpc('ashen_faction_base_deposit',{p_kind:kind,p_amount:amount});
+    try{window.ASHEN_FACTION_APPLY_PAYMENT?.(kind,amount)}catch(e){
+     error='Wpłata zatwierdzona na serwerze. Zapis lokalny wymaga ręcznej synchronizacji; nie wysyłaj starej postaci do chmury.';throw e;
+    }
+    info=`Wpłacono ${amount} × ${kind==='scrap'?'złom':'części mechaniczne'}.`;
+   }finally{window.ASHEN_ONLINE?.resumeSync?.()}
+  });return;
+ }
+ if(b.dataset.baseBuild){const building=b.dataset.baseBuild;
+  if(!buildingSpecs.some(x=>x.id===building))return;
+  if(!confirm('Rozbudować budynek za zasoby frakcji?'))return;
+  void baseAction(async()=>{await rpc('ashen_faction_base_build',{p_building:building});info='Budynek rozbudowany!'});return;
+ }
  if(b.hasAttribute('data-clan-profile')){window.ASHEN_OPEN_PLAYER?.(b.dataset.clanProfile);return}
  if(b.hasAttribute('data-clan-refresh')){void refresh();return}
  if(b.hasAttribute('data-clan-create')){const p_name=document.getElementById('clan-name')?.value?.trim(),p_tag=document.getElementById('clan-tag')?.value?.trim(),p_description=document.getElementById('clan-description')?.value||'';if(!p_name||!p_tag){error='Podaj nazwę i skrót.';redraw();return}if(!confirm(`Utworzyć frakcję „${p_name}” [${p_tag.toUpperCase()}]?`))return;void change(async()=>{await rpc('ashen_clan_create',{p_name,p_tag,p_description});return 'Frakcja utworzona!'})}
