@@ -1,19 +1,25 @@
-# ASHEN v0.4.6.6 — Laboratorium: równy budżet klas
+# ASHEN v0.4.6.7 — pierwsza stała kalibracja klas
 
-**Zmiana wyłącznie Laboratorium.** Nie zmienia wyposażenia graczy, rzeczywistych Starć, Ekspedycji ani Supabase. Nie wymaga SQL.
+## Co zmieniono
+Dodano nowy panel w **Starcia → Laboratorium wyposażenia**. Po teście v0.4.6.6 stwierdziliśmy, że wyrównanie budżetu przed pancerzem znacznie zmniejszyło rozrzut skuteczności klas. Nowy test próbuje sprawdzić **jedną stałą korektę parametrów bazowych danej broni** w trzech etapach rozwoju — nie przelicza współczynników osobno dla każdego etapu.
 
-## Nowość
+Testowane współczynniki obrażeń bazowych (propozycje eksperymentalne):
+- dwie maczety: ×0,72
+- młot wyburzeniowy: ×0,91
+- dwa rewolwery: ×1,12
+- karabin maszynowy PK: ×0,93
+- wyrzutnia harpunów: ×1,42
+- prototypowa broń szynowa: ×1,22
 
-Nowy panel pod Laboratorium specjalizacji: **Test kontrolny — wyrównany budżet klas**. W każdym z 3 etapów rozwoju, dla 6 reprezentatywnych zestawów, program oblicza teoretyczny budżet serii: średnie obrażenia przed pancerzem i losowaniem trafienia, przy uwzględnieniu liczby ataków, siły drugiej ręki, atrybutów oraz oczekiwanego mnożnika krytyka. Następnie mnoży jedynie bazowe obrażenia testowych broni, żeby budżety klas były możliwie bliskie wspólnej średniej.
+Wszystkie testy porównują tę samą jakość, poziom Warsztatu, pancerz celu i atrybuty postaci oraz używają wspólnych seedów. W tym kroku **skalowane są jedynie testowe zakresy bazowych obrażeń broni**, a nie punkty z atrybutów ani działanie krytyka czy przebicia. Zaokrąglenia oraz bonusy z atrybutów sprawiają, że wynik nie będzie dokładnie identyczny między etapami.
 
-**Nie zmienia liczby ataków, trafienia, krytyków ani penetracji.** Zaokrąglenia sprawiają, że budżety mogą się nieco różnić. Zmiany istnieją wyłącznie w tym teście i nie są automatyczną propozycją nowych statystyk.
+**43 200 testowych walk** (6 zestawów × 3 etapy × 4 poziomy pancerza × 300 symulacji × 2 warianty). W tabeli i raporcie tekstowym wynik przed kalibracją jest zestawiony z wynikiem po kalibracji.
 
-Test wykonuje **21 600 walk** (6 zestawów × 3 etapy × 4 poziomy pancerza × 300 prób), używając tego samego lokalnego `fight()` i identycznych seedów dla każdej konfiguracji. Wyniki obejmują potencjał obrażeń na rundę przy pancerzu 0/20/40/60, zwycięstwa, średnią rundę zwycięstwa i współczynnik normalizacji. Raport można skopiować i jest zachowywany lokalnie.
-
-## Interpretacja
-
-Porównaj wyniki oryginalnego testu specjalizacji (nierówny budżet) z nowym testem kontrolnym. Jeśli rozrzut maleje, różnice wynikały głównie z parametrów broni. Jeśli nadal duży — problem może wynikać z mechaniki klasy (szansa trafienia, krytyk, pancerz, liczba ataków). Przeciwnicy pozostają odpowiednio etap 1, 10 i 20; przy łatwych walkach wygrane mogą wynosić 100% i nie rozróżniać zestawów. Potencjał obrażeń jest liczony tylko z faktycznie wykonanych ataków (zakończenie walki może ograniczać liczbę prób).
+## Ważne ograniczenia
+- To tylko pierwszy kandydat. Nie jest to jeszcze balans wszystkich 24 modeli ani modyfikatorów.
+- Aktualizacja **nie zmienia żadnych przedmiotów, normalnych walk ani serwerowych Ekspedycji**. Nie wymaga SQL.
+- Test nadal zakłada równe wartości wszystkich atrybutów; w następnych etapach trzeba przetestować rozkłady wyspecjalizowane i kombinacje prefiksów/sufiksów.
+- Bardzo łatwe walki mogą mieć 100% wygranych we wszystkich klasach: patrz potencjał obrażeń/rundę i średnia runda wygranej.
 
 ## Instalacja
-
-Podmień w repozytorium **`index.html`** oraz **`js/game.js`**. Pozostałe pliki bez zmian. Odśwież stronę (w razie potrzeby Ctrl+F5). W Starciach otwórz Laboratorium wyposażenia.
+Podmień w repozytorium `index.html` oraz `js/game.js`. Pozostałe pliki niezmienione. Uruchom nowy panel **„Pierwsza stała kalibracja”**, poczekaj na wynik w samej aplikacji i skopiuj raport.
