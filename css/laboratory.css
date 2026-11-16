@@ -1,0 +1,17 @@
+/* ASHEN 0.4.5.1 — zwijane, kompaktowe laboratorium Starć */
+.combat-lab{margin:12px auto 16px;padding:0;border:1px solid rgba(190,166,108,.35);border-radius:10px;max-width:1100px;background:rgba(24,27,28,.7)}
+.combat-lab>summary{padding:13px 16px;cursor:pointer;font-weight:700;color:#dfc99b;font-size:.95rem}
+.combat-lab-content{padding:0 16px 15px;font-size:.89rem}
+.combat-lab-content>p{line-height:1.45}
+.combat-lab-config{display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin:12px 0}
+.combat-lab-config label{display:flex;flex-direction:column;gap:5px;flex:1 1 170px;font-weight:600}
+.combat-lab-config select{width:100%;max-width:100%;padding:9px;border:1px solid #665e4a;border-radius:6px;background:#1b2021;color:#f1eee4}
+.combat-lab-config button{flex:0 1 auto;min-height:38px}
+.combat-lab-outcome{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:12px 0 8px}
+.combat-lab-outcome small{color:#b9b0a0}
+.combat-lab-table-wrap{overflow-x:auto}
+.combat-lab-table-wrap table{width:100%;border-collapse:collapse;text-align:right;font-size:.88rem}
+.combat-lab-table-wrap th,.combat-lab-table-wrap td{padding:9px;border-bottom:1px solid #544f43}
+.combat-lab-table-wrap tr>*:first-child{text-align:left}
+.combat-lab-table-wrap td:nth-child(2){color:#c4dfb5;font-weight:700}
+@media(max-width:650px){.combat-lab-config button{width:100%}.combat-lab-content{padding:0 11px 12px}.combat-lab-table-wrap table{font-size:.8rem}}
