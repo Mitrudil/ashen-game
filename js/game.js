@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.6.4';
+const APP_VERSION='0.4.6.8';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -1618,6 +1618,126 @@ function weaponCandidateHtml(){
  }).join('');
  return `<section class="weapon-balance-panel weapon-kit-panel"><h4>⚖ Pierwsza stała kalibracja · kandydat do ASHEN 0.5</h4><p class="small muted">Z poprzedniej kontroli przyjęliśmy <strong>stały współczynnik obrażeń dla każdego z 6 testowych modeli</strong> (taki sam na wszystkich trzech etapach), zamiast liczyć nowe wyrównanie dla każdej symulacji. Otrzymasz wyniki przed i po kalibracji w identycznych warunkach. <strong>To prototyp: nie zmienia prawdziwych broni, Starć, nagród ani Ekspedycji.</strong></p><button type="button" class="primary" data-wlab-candidate="1" ${weaponCandidateRunning?'disabled':''}>▶ Testuj pierwszą kalibrację (43 200 walk)</button><p class="small muted">6 zestawów × 3 etapy × 4 pancerze × 300 prób × 2 warianty. Mierzymy potencjał obrażeń, nie tylko obrażenia obcięte do PŻ przeciwnika. Przy 100% wygranych liczy się potencjał i szybkość zwycięstwa. Zapis raportu działa lokalnie.</p>${r?`<strong>Ostatni test: ${escape(r.at)}</strong>${content}<button type="button" data-wlab-candidate-copy="1">📋 Kopiuj raport stałej kalibracji</button>`:''}</section>`;
 }
+
+// ASHEN v0.4.6.8 — test odpornosci pierwszej kalibracji na atrybuty i modyfikatory.
+// Nie modyfikuje wyposazenia ani walk; wykorzystuje lokalny fight() i testSnapshot.
+const WEAPON_STRESS_BUILDS=[
+ {id:'balanced',name:'Równe atrybuty'},
+ {id:'focused',name:'Specjalizacja klasy'}
+];
+const WEAPON_STRESS_MODS=[
+ {id:'none',name:'Bez modyfikatorów',prefix:'none',suffix:'none'},
+ {id:'damage',name:'Niszczycielski + Berserkera',prefix:'destructive',suffix:'berserk'},
+ {id:'critical',name:'Zabójczy + Egzekutora',prefix:'killer',suffix:'executioner'},
+ {id:'speed',name:'Szybki + Łowcy (zgodność warunkowa)',prefix:'quick',suffix:'hunter'}
+];
+let weaponStressReport=null,weaponStressRunning=false;
+function weaponStressKey(){return 'ashen-weapon-stress-v0468-'+devActiveId()}
+function weaponStressSave(){try{localStorage.setItem(weaponStressKey(),JSON.stringify(weaponStressReport))}catch{}}
+function weaponStressRestore(){try{const x=JSON.parse(localStorage.getItem(weaponStressKey())||'null');if(x?.version===1&&Array.isArray(x.rows)&&x.rows.length===144)weaponStressReport=x}catch{}}
+weaponStressRestore();
+function weaponStressAttrs(kit,level,focused){
+ const a={str:level,dex:level,end:level,per:level,int:level,cha:level};
+ if(!focused)return a;
+ // Staly budzet sumy atrybutow. Na starcie +/-7, aby uniknac uciecia statystyki do 1.
+ const delta=level<9?7:8;
+ const changes=kit.id.startsWith('melee')?{str:delta,dex:4,per:-delta,int:-4}:
+  kit.id.startsWith('gun')?{per:delta,dex:4,str:-delta,int:-4}:
+  kit.id==='ranged'?{dex:delta,per:4,str:-delta,int:-4}:
+  {int:delta,per:4,str:-delta,dex:-4};
+ for(const [key,change] of Object.entries(changes))a[key]=Math.max(1,a[key]+change);
+ return a;
+}
+function weaponStressAttacks(kit,mod,attrs){
+ const model=WEAPON_LAB_MODELS.find(x=>x.id===kit.weapon);
+ const scale=WEAPON_CANDIDATE_CLASS_SCALE[kit.id];
+ const testModel={...model,newMin:Math.max(1,Math.round(model.newMin*scale)),newMax:Math.max(1,Math.round(model.newMax*scale))};
+ const attacks=weaponKitBuild(testModel,kit);
+ // Ten sam eksperymentalny bonus Szybki co w porownaniu starego i nowego modelu.
+ if(mod.prefix==='quick'&&model.attacks<3&&['Biała 1R','Palna 1R','Palna 2R','Dystansowa 2R'].includes(model.category)){
+  const extra=attacks[0];attacks.push({...extra,weapon:{...extra.weapon},power:.45});
+ }
+ return attacks;
+}
+function weaponStressRun(){
+ if(!state.created||weaponStressRunning)return;
+ weaponLabReadControls();
+ const saved={...weaponLabConfig},rows=[];
+ const n=150,armors=[20,60];
+ weaponStressRunning=true;
+ try{
+  for(const stage of WEAPON_KIT_STAGES){
+   const preset=COMBAT_LAB_FOES[stage.enemy];
+   const baseEnemy=arenaEnemy(ARENA_STAGES.find(x=>x.level===preset.stage));
+   const level=stage.profile==='starter'?8:stage.profile==='average'?17:30;
+   for(const build of WEAPON_STRESS_BUILDS){
+    for(const mod of WEAPON_STRESS_MODS){
+     weaponLabConfig={...saved,rarity:stage.rarity,upgrade:stage.upgrade,workshop:'C',prefix:mod.prefix,suffix:mod.suffix};
+     for(const kit of WEAPON_KIT_PROFILES){
+      const a=weaponStressAttrs(kit,level,build.id==='focused');
+      // Sufiks Łowcy ma bonus percepcji wyłącznie w palnej/dystansowej (jak w głównym teście).
+      if(mod.suffix==='hunter'&&(kit.id.startsWith('gun')||kit.id==='ranged'))a.per+=3;
+      const def={hp:60+a.end*10,acc:6+a.per*1.3,dodge:3+a.dex*1.1,armor:Math.floor(a.end/4)};
+      const attacks=weaponStressAttacks(kit,mod,a);
+      const series=[];
+      for(const armor of armors){
+       const enemy={...baseEnemy,armor};
+       const acc={wins:0,rounds:0,potential:0,hp:0,killRounds:0,hits:0,attempts:0,crits:0};
+       for(let i=0;i<n;i++){
+        const seed=(0x9e3779b9^Math.imul(i+1,2654435761))>>>0;
+        const result=fight(enemy,{testSnapshot:{attributes:a,defense:def,attacks},testRandom:combatLabRandom(seed),testMaxRounds:10,testWeaponModel:true});
+        const d=result.damageSummary;
+        acc.wins+=result.won?1:0;
+        acc.rounds+=d.rounds;acc.potential+=d.hero.potential;acc.hp+=result.heroHp;
+        acc.killRounds+=result.won?d.rounds:0;
+        acc.hits+=d.hero.hits;acc.attempts+=d.hero.attempts;acc.crits+=d.hero.crits;
+       }
+       series.push({armor,dpr:acc.potential/Math.max(1,acc.rounds),wins:100*acc.wins/n,kill:acc.wins?acc.killRounds/acc.wins:null,hp:acc.hp/n,accuracy:acc.attempts?100*acc.hits/acc.attempts:0,crits:acc.hits?100*acc.crits/acc.hits:0});
+      }
+      rows.push({stage:stage.name,build:build.name,mod:mod.name,kit:kit.name,attacks:attacks.length,series});
+     }
+    }
+   }
+  }
+  weaponStressReport={version:1,at:new Date().toLocaleString('pl-PL'),n,rows};
+  weaponStressSave();weaponLabOpen=true;
+ }catch(e){message='Błąd testu odporności balansu: '+(e?.message||String(e))}
+ finally{weaponLabConfig=saved;weaponLabSave();weaponStressRunning=false;render()}
+}
+function weaponStressSummary(){
+ const r=weaponStressReport;if(!r)return [];
+ const groups=[];
+ for(const stage of WEAPON_KIT_STAGES){for(const build of WEAPON_STRESS_BUILDS){for(const mod of WEAPON_STRESS_MODS){
+  const set=r.rows.filter(x=>x.stage===stage.name&&x.build===build.name&&x.mod===mod.name);
+  const low=Math.min(...set.map(x=>x.series[0].dpr)),hi=Math.max(...set.map(x=>x.series[0].dpr));
+  groups.push({stage:stage.name,build:build.name,mod:mod.name,low,hi,gap:hi>0?100*(hi-low)/hi:0});
+ }}}
+ return groups;
+}
+function weaponStressText(){
+ const r=weaponStressReport;if(!r)return '';
+ const fmt=x=>Number(x).toFixed(1).replace('.',',');
+ return [`ASHEN · Odporność balansu klas · ${r.at}`,
+ `${r.n} prób × 6 zestawów × 3 etapy × 2 pancerze × 2 rozkłady atrybutów × 4 zestawy modyfikatorów = 43 200 symulacji`,
+ 'Stałe mnożniki z 0.4.6.7. Rozkład specjalizacji przesuwa atrybuty bez zwiększania ich sumy. Zestaw Szybki+Łowcy działa tylko w zakresie zgodności z modelem.',
+ 'UWAGA: ten test nie wyrównuje budżetów po dodaniu modyfikatorów, sprawdza ich wpływ.',
+ 'Rozrzut przy pancerzu 20 (od min do max względem max):',
+ 'Etap | Atrybuty | Modyfikatory | Minimum | Maksimum | Rozrzut %',
+ ...weaponStressSummary().map(x=>[x.stage,x.build,x.mod,fmt(x.low),fmt(x.hi),fmt(x.gap)].join(' | ')),
+ '', 'Szczegóły:',
+ 'Etap | Atrybuty | Modyfikatory | Zestaw | Ataki | Potencjał p20 | Potencjał p60 | Wygrane p20 | Runda zwycięstwa p20 | Celność p20 | Krytyki p20',
+ ...r.rows.map(x=>[x.stage,x.build,x.mod,x.kit,x.attacks,...x.series.map(y=>fmt(y.dpr)),fmt(x.series[0].wins),x.series[0].kill===null?'—':fmt(x.series[0].kill),fmt(x.series[0].accuracy),fmt(x.series[0].crits)].join(' | '))].join('\n');
+}
+function weaponStressCopy(){const t=weaponStressText();if(!t)return;if(navigator.clipboard?.writeText)navigator.clipboard.writeText(t).then(()=>{message='Skopiowano raport odporności balansu.';render()}).catch(()=>window.prompt('Skopiuj raport:',t));else window.prompt('Skopiuj raport:',t)}
+function weaponStressHtml(){
+ const r=weaponStressReport,fmt=x=>Number(x).toFixed(1).replace('.',',');
+ const groups=weaponStressSummary();
+ const table=r?`<div class="combat-lab-table-wrap"><table class="weapon-balance-table"><thead><tr><th>Etap</th><th>Atrybuty</th><th>Modyfikatory</th><th>Min p20</th><th>Max p20</th><th>Rozrzut</th></tr></thead><tbody>${groups.map(x=>`<tr><td>${escape(x.stage)}</td><td>${escape(x.build)}</td><td>${escape(x.mod)}</td><td>${fmt(x.low)}</td><td>${fmt(x.hi)}</td><td>${fmt(x.gap)}%</td></tr>`).join('')}</tbody></table></div>`:'';
+ return `<section class="weapon-balance-panel weapon-kit-panel"><h4>🧪 Odporność balansu · atrybuty i modyfikatory (0.4.6.8)</h4><p class="small muted">Sprawdzamy stałą kalibrację w <strong>dwóch rozkładach atrybutów</strong> i czterech kombinacjach modyfikatorów. Celem jest wykrycie sytuacji, w których klasa nagle staje się dominująca. Wariant specjalizacji ma taki sam łączny budżet atrybutów jak wariant równy. Zestaw „Szybki + Łowcy” nie zapewnia identycznych efektów wszystkim klasom — jest celowym testem zgodności, nie uczciwym porównaniem uniwersalnych premii.</p>
+ <button type="button" class="primary" data-wlab-stress="1" ${weaponStressRunning?'disabled':''}>▶ Sprawdź atrybuty i modyfikatory (43 200 walk)</button><p class="small muted">6 zestawów × 3 etapy × 2 pancerze × 2 profile × 4 kombinacje × 150 prób. Lokalny silnik Starć, 10 rund. Nie zmienia wyposażenia ani nagród. Pełne wyniki dostępne po skopiowaniu raportu.</p>
+ ${r?`<strong>Ostatni raport: ${escape(r.at)}</strong>${table}<button type="button" data-wlab-stress-copy="1">📋 Kopiuj pełny raport</button>`:''}</section>`;
+}
+
 function weaponLabHtml(){
  const c=weaponLabConfig,r=weaponLabResults;
  const options=(arr,value)=>arr.map(([v,label])=>`<option value="${escape(String(v))}" ${String(v)===String(value)?'selected':''}>${escape(String(label))}</option>`).join('');
@@ -1650,7 +1770,7 @@ function weaponLabHtml(){
  <p class="small muted">Użyto ${r.attacks[0]} / ${r.attacks[1]} ataków na rundę. Limit walki 10 rund. Testowy pancerz jest redukowany według istniejącego wzoru ASHEN z limitem 60%; w nowym modelu stosuje się punkty przebicia przed redukcją. Dla modyfikatorów poza zgodnością z klasą broni użyto wyłącznie wstępnego zestawu efektów. Pierwsza trafiona próba nie ma jeszcze specjalnego bonusu „Snajpera”.</p>`:
  '<p class="small muted">Wybierz broń i parametry, następnie uruchom porównanie. Wyniki nie zmieniają ekwipunku.</p>'}
  ${weaponBalanceHtml()}
- ${weaponKitHtml()}${weaponNormalHtml()}${weaponCandidateHtml()}
+ ${weaponKitHtml()}${weaponNormalHtml()}${weaponCandidateHtml()}${weaponStressHtml()}
  <details><summary>Lista wszystkich 24 modeli i ról</summary><div class="combat-lab-table-wrap"><table><thead><tr><th>Broń</th><th>Stare dmg / ataki</th><th>Nowe dmg / ataki</th><th>Rola</th></tr></thead><tbody>${WEAPON_LAB_MODELS.map(w=>`<tr><td>${escape(w.name)}</td><td>${w.oldMin}–${w.oldMax} / 1</td><td>${w.newMin}–${w.newMax} / ${w.attacks}</td><td>${escape(w.role)}</td></tr>`).join('')}</tbody></table></div></details>
  <p class="small muted">Eksperyment: nie zmienia prawdziwych Wypraw, Starć, Ekspedycji ani zapisów. Osobny serwerowy silnik Ekspedycji nie jest jeszcze porównywany.</p></div></details>`;
 }
@@ -2953,7 +3073,7 @@ function pvp(){
 const origins={scout:{desc:'Szybki i spostrzegawczy. +2 Zręczności, +1 Percepcji.',bonus:{dex:2,per:1}},fighter:{desc:'Wytrzymały wojownik. +2 Siły, +1 Wytrzymałości.',bonus:{str:2,end:1}},tech:{desc:'Specjalista od technologii. +2 Inteligencji, +1 Percepcji.',bonus:{int:2,per:1}}};
 function creation(){return `<div class="hero"><div class="sub">SCHRON 17 · POCZĄTEK HISTORII</div><h1>Stwórz Wędrowca</h1><p class="muted">Najpierw wybierz płeć, a następnie archetyp. Każdy z trzech archetypów ma pełny odpowiednik męski i żeński — różni się wygląd, ale bonusy startowe pozostają takie same.</p></div><div class="panel creation-panel"><label for="hero-name">Imię Wędrowca</label><input class="input" id="hero-name" maxlength="24" value="${escape(state.name)}" placeholder="Wpisz imię" style="margin:9px 0 18px"><h3 style="color:var(--gold)">Płeć postaci</h3><div class="creation-gender-grid"><label class="gender-card ${state.gender==='male'?'selected':''}"><input type="radio" name="gender" value="male" ${state.gender==='male'?'checked':''}><span class="tag">WARIANT A</span><strong>Mężczyzna</strong><small>3 archetypy męskie</small></label><label class="gender-card ${state.gender==='female'?'selected':''}"><input type="radio" name="gender" value="female" ${state.gender==='female'?'checked':''}><span class="tag">WARIANT B</span><strong>Kobieta</strong><small>3 archetypy żeńskie</small></label></div><h3 style="color:var(--gold);margin-top:18px">Archetyp</h3><div class="creation-origin-grid">${Object.entries(origins).map(([id,o])=>`<label class="origin-card ${state.origin===id?'selected':''}"><input type="radio" name="origin" value="${id}" ${state.origin===id?'checked':''}><div class="origin-card-visual"><img src="${characterFigure(id,state.gender)}" alt="Pełna sylwetka: ${originTitle(id,state.gender)}" loading="eager"></div><div class="origin-card-body"><span class="tag">${genderLabel(state.gender)}</span><h3>${originTitle(id,state.gender)}</h3><p class="small muted">${o.desc}</p></div></label>`).join('')}</div><h3 style="color:var(--gold)">Ręka dominująca</h3><p class="small muted">Wybór nie zmienia siły postaci. Dominująca ręka atakuje z mocą 100%, druga z mocą 80%.</p><div class="actions"><label class="tile"><input type="radio" name="dominantHand" value="right" ${state.dominantHand==='right'?'checked':''}> Prawa</label><label class="tile"><input type="radio" name="dominantHand" value="left" ${state.dominantHand==='left'?'checked':''}> Lewa</label></div><p class="small muted">Po rozpoczęciu otrzymasz 5 dodatkowych punktów do rozdania i podstawowy ekwipunek.</p><div class="actions" style="margin-top:10px"><button class="primary" data-action="create">Rozpocznij przygodę →</button><button data-action="import">Wczytaj istniejącą postać (JSON)</button><button data-action="restore-backup">Przywróć kopię zapasową</button></div></div>`}
 function render(){sync();document.body.classList.toggle('arena-report-modal-open',(page==='arena'&&arenaReportOpen!==null)||(page==='expeditions'&&window.ASHEN_EXPEDITIONS?.isReportOpen?.()));let views={character,companion,transport,missions,arena,pvp:()=> (window.ASHEN_ONLINE?.pvpHtml()||'')+pvp(),messages:()=>window.ASHEN_ONLINE?.mailHtml()||'<p>Wczytywanie wiadomości…</p>',clans:()=>window.ASHEN_CLANS?.html()||'<p>Wczytywanie klanów…</p>',players:()=>window.ASHEN_PLAYERS?.html()||'<p>Wczytywanie graczy…</p>',expeditions:()=>window.ASHEN_EXPEDITIONS?.html()||'<p>Wczytywanie ekspedycji…</p>',inventory,workshop,storage,reports,bunker};$('app').innerHTML=`<div class="shell ashen-wide-shell ${page==='missions'?'ashen-missions-shell':''} ${page==='character'?'ashen-character-shell':''} ashen-premium-shell"><header class="header"><div><div class="brand">ASHEN</div><div class="sub">KRONIKI UPADKU · v${APP_VERSION}</div></div><div class="dev-profile-header"><small>TRYB LOKALNY + OPCJONALNY ZAPIS ONLINE</small><div class="ashen-cloud-header-actions"><button type="button" data-cloud-open="1">☁ Konto online</button><button type="button" data-dev-panel="1">☷ Profil: ${escape(devCurrentLabel())}</button></div></div></header>${devPanelOpen?devPanel():''}<div class="layout"><aside class="sidebar"><strong>${escape(state.name)}</strong><p class="muted">Poziom ${state.level} · ${originTitle(state.origin,state.gender)}</p><p class="small good">Energia: ∞ (testy)</p><p class="small muted">🪙 ${state.credits.toLocaleString('pl-PL')} kredytów · ⚙ ${state.scrap} złomu</p><nav class="nav">${state.created?nav():''}</nav></aside><main class="main">${state.created?resourceBar():''}${message&&!(page==='arena'&&arenaReportOpen!==null)&&!(page==='expeditions'&&window.ASHEN_EXPEDITIONS?.isReportOpen?.())?`<div class="notice" style="margin-bottom:12px">${escape(message)}</div>`:''}${state.created?views[page]():creation()}${itemDetailContent()}<div class="footer">ASHEN v${APP_VERSION} · 5 profili lokalnych · Opcjonalna chmura</div><input id="ashen-import-file" type="file" accept=".json,application/json" hidden aria-label="Plik zapisu gry JSON"></main></div></div>${window.ASHEN_PLAYERS?.dialog?.()||''}`;let c=$('countdown');if(c)c.textContent=Math.max(0,Math.ceil((state.mission?.ends-Date.now())/1000))+' s'}
-function act(e){if(e.target?.matches?.('[data-arena-overlay]')){arenaReportOpen=null;render();return}let b=e.target.closest('button');if(!b)return;if(b.dataset.mailFolder){mailFolder=b.dataset.mailFolder;mailOpenedId=null;mailComposeTo=null;render();return}if(b.dataset.mailCompose){mailComposeTo='';mailOpenedId=null;render();return}if(b.dataset.mailCancel){mailComposeTo=null;render();return}if(b.dataset.mailOpen){mailOpen(b.dataset.mailOpen);return}if(b.dataset.mailBack){mailOpenedId=null;render();return}if(b.dataset.mailReply){mailComposeTo=b.dataset.mailReply;mailOpenedId=null;render();return}if(b.dataset.mailSend){try{mailSend($('mail-target')?.value,$('mail-body')?.value)}catch(err){message=err.message;render()}return}if(b.dataset.mailReport){const found=pvpData(state).history.find(x=>x.id===b.dataset.mailReport);if(found){pvpOpenedReport=found.id;setPage('pvp');render()}else{message='Raport został usunięty ze starszej historii PvP.';render()}return}if(b.dataset.pvpFight){try{pvpStart(b.dataset.pvpFight)}catch(err){message=err.message;render()}return}if(b.dataset.pvpReport){pvpOpenedReport=b.dataset.pvpReport;render();return}if(b.dataset.pvpReportClose){pvpOpenedReport=null;render();return}if(b.dataset.devPanel){devPanelOpen=!devPanelOpen;if(!devPanelOpen)devPendingResetId=null;render();return}if(b.dataset.devCreate){try{devCreateProfile()}catch(err){message=err.message;render()}return}if(b.dataset.devSwitch){try{devSwitch(b.dataset.devSwitch)}catch(err){message=err.message;render()}return}if(b.dataset.devDelete){try{devDeleteProfile(b.dataset.devDelete)}catch(err){message=err.message;render()}return}if(b.dataset.devResetCancel){devPendingResetId=null;render();return}if(b.dataset.devResetConfirm){try{devResetTestProfile(b.dataset.devResetConfirm)}catch(err){message=err.message;render()}return}if(b.dataset.devReset){try{devAskResetTestProfile(b.dataset.devReset)}catch(err){message=err.message;render()}return}if(b.hasAttribute('data-item-close')){openItemDetail=null;render();return}if(b.dataset.itemOpen){openItemDetail={kind:'owned',id:b.dataset.itemOpen};render();return}if(b.dataset.itemCatalog){openItemDetail={kind:'catalog',id:b.dataset.itemCatalog};render();return}if(b.dataset.wlabCandidate){weaponCandidateRun();return}if(b.dataset.wlabCandidateCopy){weaponCandidateCopy();return}if(b.dataset.wlabNormal){weaponNormalRun();return}if(b.dataset.wlabNormalCopy){weaponNormalCopy();return}if(b.dataset.wlabKits){weaponKitRun();return}if(b.dataset.wlabKitsCopy){weaponKitCopy();return}if(b.dataset.wlabBalance){weaponBalanceRun();return}if(b.dataset.wlabBalanceCopy){weaponBalanceCopy();return}if(b.dataset.wlabPreset){weaponLabPreset(b.dataset.wlabPreset);return}if(b.dataset.weaponLabRun){weaponLabReadControls();weaponLabRun();return;}if(b.dataset.combatLabRun){const selected=$('combat-lab-enemy')?.value;const count=Number($('combat-lab-count')?.value);const rounds=Number($('combat-lab-rounds')?.value);if([10,15,20].includes(rounds))combatLabRounds=rounds;if(COMBAT_LAB_FOES[selected])combatLabEnemy=selected;if([10,100,1000].includes(count))combatLabCount=count;combatLabRun();return;}if(b.dataset.arenaTestToggle){arenaTestMode=!arenaTestMode;arenaReportOpen=null;arenaTestReport=null;message='';render();return;}if(b.dataset.arenaChapter){arenaChapter=Number(b.dataset.arenaChapter);arenaSelected=(arenaChapter-1)*10+1;message='';render();return;}if(b.dataset.arenaSelect){arenaSelected=Number(b.dataset.arenaSelect);arenaChapter=Math.ceil(arenaSelected/10);message='';render();return;}if(b.dataset.arenaFight){startArenaFight(Number(b.dataset.arenaFight));return;}if(b.dataset.arenaReport){arenaReportOpen=Number(b.dataset.arenaReport);message='';render();return;}if(b.dataset.arenaReportClose!==undefined){arenaReportOpen=null;render();return;}if(b.dataset.missionDetail){const key=b.dataset.missionDetail;if(key==='report'||key==='loot'){missionExpand[key]=!missionExpand[key];render()}return;}if(b.dataset.action==='mission-dismiss-result'){state.missionOutcomePending=false;save();render();return;}if(b.dataset.companionTestStage){const [id,n]=b.dataset.companionTestStage.split(':');companionTestStage(id,n);return}if(b.dataset.companionTestSelect){companionTestSelect(b.dataset.companionTestSelect);return}if(b.dataset.vehicleTestSelect){vehicleTestSelect(b.dataset.vehicleTestSelect);return}if(b.dataset.vehicleTestUnlock){testUnlockVehicle(b.dataset.vehicleTestUnlock);return}if(b.dataset.vehicleStage){const [id,n]=b.dataset.vehicleStage.split(':');selectVehicleStage(id,n);return}if(b.dataset.vehicleModule){upgradeVehicleModule(b.dataset.vehicleModule);return}if(b.dataset.companion){chooseCompanion(b.dataset.companion);return}if(b.hasAttribute('data-companion-upgrade')){upgradeCompanion();return}if(b.dataset.vehicle){acquireVehicle(b.dataset.vehicle);return}if(b.hasAttribute('data-vehicle-upgrade')){upgradeVehicle();return}if(b.dataset.bunkerRoom&&BUNKER_ROOMS[b.dataset.bunkerRoom]){activeBunkerRoom=b.dataset.bunkerRoom;message='';render();return;}if(b.dataset.roomTestLevel){const [id,level]=b.dataset.roomTestLevel.split(':');roomTestSet(id,level);return}if(b.dataset.roomUpgrade){roomUpgrade(b.dataset.roomUpgrade);return}if(b.dataset.roomDowngrade){roomDowngrade(b.dataset.roomDowngrade);return}if(b.dataset.action==='hideout-reset'){if(confirm('Przywrócić początkowe wyposażenie i oświetlenie kryjówki?')){state.hideout=hideoutDefault();message='Przywrócono podstawowy wygląd schronu.';save();render()}return}if(b.dataset.page){if(!state.created)return;arenaReportOpen=null;setPage(b.dataset.page);if(b.dataset.workshopSelect)workshopUid=b.dataset.workshopSelect;message='';render();
+function act(e){if(e.target?.matches?.('[data-arena-overlay]')){arenaReportOpen=null;render();return}let b=e.target.closest('button');if(!b)return;if(b.dataset.mailFolder){mailFolder=b.dataset.mailFolder;mailOpenedId=null;mailComposeTo=null;render();return}if(b.dataset.mailCompose){mailComposeTo='';mailOpenedId=null;render();return}if(b.dataset.mailCancel){mailComposeTo=null;render();return}if(b.dataset.mailOpen){mailOpen(b.dataset.mailOpen);return}if(b.dataset.mailBack){mailOpenedId=null;render();return}if(b.dataset.mailReply){mailComposeTo=b.dataset.mailReply;mailOpenedId=null;render();return}if(b.dataset.mailSend){try{mailSend($('mail-target')?.value,$('mail-body')?.value)}catch(err){message=err.message;render()}return}if(b.dataset.mailReport){const found=pvpData(state).history.find(x=>x.id===b.dataset.mailReport);if(found){pvpOpenedReport=found.id;setPage('pvp');render()}else{message='Raport został usunięty ze starszej historii PvP.';render()}return}if(b.dataset.pvpFight){try{pvpStart(b.dataset.pvpFight)}catch(err){message=err.message;render()}return}if(b.dataset.pvpReport){pvpOpenedReport=b.dataset.pvpReport;render();return}if(b.dataset.pvpReportClose){pvpOpenedReport=null;render();return}if(b.dataset.devPanel){devPanelOpen=!devPanelOpen;if(!devPanelOpen)devPendingResetId=null;render();return}if(b.dataset.devCreate){try{devCreateProfile()}catch(err){message=err.message;render()}return}if(b.dataset.devSwitch){try{devSwitch(b.dataset.devSwitch)}catch(err){message=err.message;render()}return}if(b.dataset.devDelete){try{devDeleteProfile(b.dataset.devDelete)}catch(err){message=err.message;render()}return}if(b.dataset.devResetCancel){devPendingResetId=null;render();return}if(b.dataset.devResetConfirm){try{devResetTestProfile(b.dataset.devResetConfirm)}catch(err){message=err.message;render()}return}if(b.dataset.devReset){try{devAskResetTestProfile(b.dataset.devReset)}catch(err){message=err.message;render()}return}if(b.hasAttribute('data-item-close')){openItemDetail=null;render();return}if(b.dataset.itemOpen){openItemDetail={kind:'owned',id:b.dataset.itemOpen};render();return}if(b.dataset.itemCatalog){openItemDetail={kind:'catalog',id:b.dataset.itemCatalog};render();return}if(b.dataset.wlabStress){weaponStressRun();return}if(b.dataset.wlabStressCopy){weaponStressCopy();return}if(b.dataset.wlabCandidate){weaponCandidateRun();return}if(b.dataset.wlabCandidateCopy){weaponCandidateCopy();return}if(b.dataset.wlabNormal){weaponNormalRun();return}if(b.dataset.wlabNormalCopy){weaponNormalCopy();return}if(b.dataset.wlabKits){weaponKitRun();return}if(b.dataset.wlabKitsCopy){weaponKitCopy();return}if(b.dataset.wlabBalance){weaponBalanceRun();return}if(b.dataset.wlabBalanceCopy){weaponBalanceCopy();return}if(b.dataset.wlabPreset){weaponLabPreset(b.dataset.wlabPreset);return}if(b.dataset.weaponLabRun){weaponLabReadControls();weaponLabRun();return;}if(b.dataset.combatLabRun){const selected=$('combat-lab-enemy')?.value;const count=Number($('combat-lab-count')?.value);const rounds=Number($('combat-lab-rounds')?.value);if([10,15,20].includes(rounds))combatLabRounds=rounds;if(COMBAT_LAB_FOES[selected])combatLabEnemy=selected;if([10,100,1000].includes(count))combatLabCount=count;combatLabRun();return;}if(b.dataset.arenaTestToggle){arenaTestMode=!arenaTestMode;arenaReportOpen=null;arenaTestReport=null;message='';render();return;}if(b.dataset.arenaChapter){arenaChapter=Number(b.dataset.arenaChapter);arenaSelected=(arenaChapter-1)*10+1;message='';render();return;}if(b.dataset.arenaSelect){arenaSelected=Number(b.dataset.arenaSelect);arenaChapter=Math.ceil(arenaSelected/10);message='';render();return;}if(b.dataset.arenaFight){startArenaFight(Number(b.dataset.arenaFight));return;}if(b.dataset.arenaReport){arenaReportOpen=Number(b.dataset.arenaReport);message='';render();return;}if(b.dataset.arenaReportClose!==undefined){arenaReportOpen=null;render();return;}if(b.dataset.missionDetail){const key=b.dataset.missionDetail;if(key==='report'||key==='loot'){missionExpand[key]=!missionExpand[key];render()}return;}if(b.dataset.action==='mission-dismiss-result'){state.missionOutcomePending=false;save();render();return;}if(b.dataset.companionTestStage){const [id,n]=b.dataset.companionTestStage.split(':');companionTestStage(id,n);return}if(b.dataset.companionTestSelect){companionTestSelect(b.dataset.companionTestSelect);return}if(b.dataset.vehicleTestSelect){vehicleTestSelect(b.dataset.vehicleTestSelect);return}if(b.dataset.vehicleTestUnlock){testUnlockVehicle(b.dataset.vehicleTestUnlock);return}if(b.dataset.vehicleStage){const [id,n]=b.dataset.vehicleStage.split(':');selectVehicleStage(id,n);return}if(b.dataset.vehicleModule){upgradeVehicleModule(b.dataset.vehicleModule);return}if(b.dataset.companion){chooseCompanion(b.dataset.companion);return}if(b.hasAttribute('data-companion-upgrade')){upgradeCompanion();return}if(b.dataset.vehicle){acquireVehicle(b.dataset.vehicle);return}if(b.hasAttribute('data-vehicle-upgrade')){upgradeVehicle();return}if(b.dataset.bunkerRoom&&BUNKER_ROOMS[b.dataset.bunkerRoom]){activeBunkerRoom=b.dataset.bunkerRoom;message='';render();return;}if(b.dataset.roomTestLevel){const [id,level]=b.dataset.roomTestLevel.split(':');roomTestSet(id,level);return}if(b.dataset.roomUpgrade){roomUpgrade(b.dataset.roomUpgrade);return}if(b.dataset.roomDowngrade){roomDowngrade(b.dataset.roomDowngrade);return}if(b.dataset.action==='hideout-reset'){if(confirm('Przywrócić początkowe wyposażenie i oświetlenie kryjówki?')){state.hideout=hideoutDefault();message='Przywrócono podstawowy wygląd schronu.';save();render()}return}if(b.dataset.page){if(!state.created)return;arenaReportOpen=null;setPage(b.dataset.page);if(b.dataset.workshopSelect)workshopUid=b.dataset.workshopSelect;message='';render();
  if(page==='expeditions')void window.ASHEN_EXPEDITIONS?.refresh?.();
  if(page==='clans')void window.ASHEN_CLANS?.refresh?.();
  if(page==='messages'||page==='pvp')void window.ASHEN_ONLINE?.refresh?.();
