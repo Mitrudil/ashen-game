@@ -1,13 +1,15 @@
-# ASHEN v0.4.6.3 — Laboratorium równowagi broni
+# ASHEN v0.4.6.4 — Laboratorium specjalizacji
 
-## Instalacja
-Skopiuj `index.html`, `js/game.js` i `css/laboratory.css` do katalogu głównego repozytorium ASHEN, zachowując ścieżki. Nie jest potrzebny SQL ani reset ekwipunku.
+Aktualizacja na bazie v0.4.6.3. Podmień `index.html`, `js/game.js`, `css/laboratory.css` w repozytorium. **Bez SQL**. Zmień również service worker/cache, jeśli projekt używa dodatkowego cache przeglądarki.
 
-## Nowy test
-W Starciach otwórz Laboratorium wyposażenia i kliknij „Przetestuj 24 bronie × 4 poziomy pancerza”. Porównuje 24 modele przy pancerzu 0, 20, 40 i 60, po 100 symulacji dla każdej kombinacji, z tym samym przeciwnikiem i bieżącymi opcjami panelu. Wyniki i ustawienia zostają w lokalnej pamięci przeglądarki. Przycisk „Kopiuj raport do analizy” przygotowuje dane do wklejenia do rozmowy.
+## Nowość
+W zakładce Starcia → Laboratorium wyposażenia pojawia się panel **Laboratorium specjalizacji**. Jeden przycisk uruchamia 21 600 lokalnych symulacji: 6 pełnych zestawów (w tym dwie bronie jednoręczne), trzy etapy rozwoju i 4 poziomy pancerza po 300 prób. Raport zawiera średnie obrażenia/rundę, zwycięstwa, celność i krytyki; można go skopiować. Wyniki zapisują się w localStorage dla wybranego profilu i wracają po ponownym otwarciu panelu.
 
-## Filozofia projektu
-Nie tworzymy obowiązkowych zestawów broni na pojedynczych bossów. Każda klasa ma być grywalna przez całą grę. Style mogą się różnić, a konkretne modele mogą reprezentować różne etapy rozwoju. Wskaźniki zbiorcze są pomocnicze i **nie dowodzą jeszcze zbalansowania klas**.
-
-## Ograniczenia
-To test bieżącego prototypu nowego modelu w lokalnym silniku walk Starć. Nie modyfikuje prawdziwych walk ani silnika serwerowego Ekspedycji. 9600 symulacji może trwać chwilę na wolniejszym urządzeniu.
+## Świadome ograniczenia
+- To **narzędzie diagnostyczne**, NIE nowa matematyka Starć ani zakończony balans. Używa aktualnego lokalnego silnika ASHEN.
+- Porównuje reprezentantów klas, których bazowe wartości nie zostały jeszcze wyrównane.
+- W danej klasie dla 1R zawsze używany jest drugi identyczny egzemplarz ze współczynnikiem 80%.
+- Profile: początek (cechy 8, zwykły +0, przeciwnik 1), rozwój (17, rzadki +0, boss 10), zaawansowany (30, legendarny +5 C, boss 20).
+- Bez prefiksów/sufiksów; stały limit 10 rund, seedy powtarzalne.
+- Zachowane wszystkie dotychczasowe testy v0.4.6.3, nie zmieniono ekwipunku, Wypraw, nagród, prawdziwych Starć ani serwerowych Ekspedycji.
+- Po aktualizacji sprawdź działanie w przeglądarce, ze względu na zależności środowiskowe i cache.

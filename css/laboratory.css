@@ -45,3 +45,9 @@
 .weapon-balance-table th small{display:block;opacity:.65;font-size:.72em}
 .weapon-balance-table td{white-space:nowrap}
 .weapon-balance-table tbody tr:hover{background:rgba(153,191,200,.08)}
+
+/* v0.4.6.4 — test klas i etapów rozwoju */
+.weapon-kit-panel{border-color:rgba(175,159,100,.5)}
+.weapon-kit-stage{margin:14px 0;padding-top:8px;border-top:1px solid #536268}
+.weapon-kit-stage h5{color:#e1d29a;font-size:.95rem;margin:3px 0 9px}
+.weapon-kit-warning{padding:7px 10px;border-left:3px solid #bda25e;background:rgba(189,162,94,.12);font-size:.85rem}
