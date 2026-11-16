@@ -149,11 +149,11 @@ function expeditionBlock(ex,role,members){
  <p class="small good">${esc(passiveInfo)}</p>${preparedText?`<p class="small good">Wsparcie opłacone przez organizatora: ${esc(preparedText)}</p>`:''}
  <p class="small muted"><strong>Limit sumy poziomów:</strong> ${Number(ex.level_sum)||0} / ${Number(ex.max_levels)||20}. Minimum ${minimum} uczestników.</p>
  <div class="expedition-members">${(ex.participants||[]).map(p=>`<div class="clan-member"><div><strong>${esc(p.name)}</strong><p class="small muted">Poziom ${Number(p.level)||1} ${p.user_id===user()?'· Ty':''} ${p.user_id===ex.created_by?'· Organizator':''}</p></div><span class="tag">Przyjęty</span></div>`).join('')}</div>
- ${eventActions(ex,role,members)}${(boss?.enemies?.length||0)>1?tacticsHtml(ex,isOrganizer):'<p class="small muted">Pojedynczy przeciwnik — taktyka wyboru celu nie jest potrzebna.</p>'}<div class="actions">${isOrganizer?`<button class="primary" data-expedition-finish="${ex.id}" ${busy||count<minimum||ex.early_ready?'disabled':''}>⚔ Zakończ zbiórkę wcześniej</button><button data-expedition-cancel="${ex.id}" ${busy?'disabled':''}>Anuluj wyprawę</button>`:''}</div></div></div></div>`;
+ ${eventActions(ex,role,members)}${(boss?.enemies?.length||0)>1?tacticsHtml(ex,isOrganizer):'<p class="small muted">Pojedynczy przeciwnik — taktyka wyboru celu nie jest potrzebna.</p>'}<div class="actions">${isOrganizer?`<button class="primary" data-expedition-finish="${ex.id}" ${busy||count<minimum||ex.early_ready?'disabled':''}>⚔ Zakończ zbiórkę wcześniej</button>`:''}</div></div></div></div>`;
 }
 function html(){ensure();if(!active())return `<section class="section"><h2>☠ Ekspedycje</h2><div class="notice">Zaloguj się w ☁ Konto online, aby brać udział w ekspedycjach.</div></section>`;
  const c=state?.clan,role=state?.my_role,members=state?.members||[],bosses=state?.bosses||DEFAULT_BOSSES,activeExps=state?.active_expeditions||[],reports=state?.reports||[],progress=state?.progress||{highest_unlocked:3,boss_wins:[]},supplies=state?.supplies||{balance:0,max:12};
- const header=`<section class="section expedition-page"><div class="expedition-header"><div><span class="tag">ASHEN v0.4.3.2 · EKSPEDYCJE FRAKCYJNE</span><h2>☠ Bossowie Pustkowi</h2><p class="small muted">Organizuj czasowe wyprawy i wybieraj prywatne przygotowanie, zaznaczaj zapraszanych członków frakcji i zatwierdzaj zgłoszenia.</p></div><button data-expedition-refresh="1" ${loading||busy?'disabled':''}>↻ Odśwież</button></div>${error?`<div class="notice">⚠ ${esc(error)}</div>`:''}${info?`<div class="notice">✓ ${esc(info)}</div>`:''}${loading?'<p class="muted">Wczytywanie ekspedycji…</p>':''}`;
+ const header=`<section class="section expedition-page"><div class="expedition-header"><div><span class="tag">ASHEN v0.4.3.3 · EKSPEDYCJE FRAKCYJNE</span><h2>☠ Bossowie Pustkowi</h2><p class="small muted">Organizuj ekspedycje, wybieraj prywatne wsparcie i zapraszaj uczestników. Założonej ekspedycji nie można anulować.</p></div><button data-expedition-refresh="1" ${loading||busy?'disabled':''}>↻ Odśwież</button></div>${error?`<div class="notice">⚠ ${esc(error)}</div>`:''}${info?`<div class="notice">✓ ${esc(info)}</div>`:''}${loading?'<p class="muted">Wczytywanie ekspedycji…</p>':''}`;
  if(!state)return header+(!loading?'<p class="muted">Brak danych. Spróbuj odświeżyć.</p>':'')+'</section>';
  if(!c)return header+'<div class="notice">Najpierw dołącz do frakcji w zakładce Frakcje.</div></section>'+dialog();
  const openCount=activeExps.length;
@@ -202,7 +202,7 @@ document.addEventListener('click',e=>{if(e.target?.matches?.('[data-expedition-o
   const cost=supportCost(ids),account=identity();
   if(cloud()?.getBoundSlot()!==cloud()?.currentSlot()){setError('Powiąż bieżącą postać z kontem online przed założeniem ekspedycji.');redraw();return;}
   if(!hasFunds(cost)){setError('Za mało prywatnych surowców na wybrane wsparcie. Zmniejsz zakres przygotowania albo zsynchronizuj zapis.');redraw();return;}
-  if(!confirm(`Utworzyć ekspedycję: ${boss?.name||'Boss'}? ${ids.length?`Prywatny koszt organizatora: ${costList(cost)}.`:'Bez dodatkowego wsparcia i bez kosztu.'} Jeśli anulujesz przed walką, otrzymasz zwrot.`))return;
+  if(!confirm(`Utworzyć ekspedycję: ${boss?.name||'Boss'}? ${ids.length?`Prywatny koszt organizatora: ${costList(cost)}.`:'Bez dodatkowego wsparcia i bez kosztu.'} Po utworzeniu ekspedycji nie można jej anulować ani odzyskać kosztu wsparcia.`))return;
   void mutate(async()=>{
    const result=await rpc('ashen_expedition_create_prepared',{p_boss:bossId,p_supports:ids});
    if(account!==identity()||cloud()?.getBoundSlot()!==cloud()?.currentSlot())throw Error('Ekspedycja powstała, ale zmieniło się aktywne konto. Pobierz zapis z chmury przed dalszą grą.');
@@ -214,17 +214,6 @@ document.addEventListener('click',e=>{if(e.target?.matches?.('[data-expedition-o
  if(b.hasAttribute('data-expedition-invite-many')){const exp=Number(b.dataset.expeditionInviteMany);const ids=[...document.querySelectorAll(`[data-expedition-invite-check="${exp}"]:checked`)].map(x=>x.value);if(!ids.length){alert('Zaznacz co najmniej jednego gracza.');return}void mutate(async()=>{const count=await rpc('ashen_expedition_invite_many',{p_expedition:exp,p_users:ids});return `Wysłano ${count} zaproszeń.`});return}
  if(b.hasAttribute('data-expedition-decide')){const exp=Number(b.dataset.expeditionDecide),target=b.dataset.user,action=b.dataset.action;void mutate(async()=>{await rpc('ashen_expedition_decide',{p_expedition:exp,p_user:target,p_action:action});return ({accept:'Przyjęto do składu.',reject:'Odrzucono.',withdraw:'Wycofano zgłoszenie.'})[action]||'Zmieniono status.'});return}
  if(b.hasAttribute('data-expedition-withdraw')){if(!confirm('Opuścić skład tej ekspedycji?'))return;void mutate(async()=>{await rpc('ashen_expedition_withdraw',{p_expedition:Number(b.dataset.expeditionWithdraw)});return 'Opuszczono skład.'});return}
- if(b.hasAttribute('data-expedition-cancel')){const eid=Number(b.dataset.expeditionCancel);if(!confirm('Anulować ekspedycję? Prywatne wsparcie opłacone przez Ciebie zostanie zwrócone.'))return;
-  void mutate(async()=>{
-   const account=identity();const faction=await rpc('ashen_faction_base_state');
-   const rows=(faction.preparations||[]).filter(x=>Number(x.expedition_id)===eid&&x.prepared_by===user()&&x.paid_privately===true);
-   const refund=supportCost(rows.map(x=>x.support));
-   await rpc('ashen_expedition_cancel',{p_expedition:eid});
-   if(account!==identity()||cloud()?.getBoundSlot()!==cloud()?.currentSlot())throw Error('Anulowano na serwerze. Pobierz zapis z chmury, aby zobaczyć zwrot zasobów.');
-   if(rows.length)window.ASHEN_FACTION_SETTLE_EXPEDITION?.(refund,1);
-   return 'Anulowano ekspedycję. Prywatne zasoby zwrócone organizatorowi.';
-  });return;
- }
  if(b.hasAttribute('data-expedition-tactic')){const tactic=b.dataset.value;if(!tactic)return;void mutate(async()=>{await rpc('ashen_expedition_set_tactic',{p_expedition:Number(b.dataset.expeditionTactic),p_tactic:tactic});return `Zmieniono taktykę wyprawy na: ${tacticMeta(tactic).label}.`});return}
  if(b.hasAttribute('data-expedition-finish')){if(!confirm('Zakończyć zbiórkę wcześniej? Serwer rozegra walkę automatycznie w najbliższym przebiegu harmonogramu.'))return;void mutate(async()=>{await rpc('ashen_expedition_finish_recruitment',{p_expedition:Number(b.dataset.expeditionFinish)});return 'Zbiórka skrócona. Walka wystartuje automatycznie na serwerze.'});return}
 });
