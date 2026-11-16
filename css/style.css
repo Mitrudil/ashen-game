@@ -1416,3 +1416,13 @@ body.arena-report-modal-open{overflow:hidden}
 .ashen-clan-page .faction-support select{max-width:100%;margin-top:6px}
 @media(max-width:900px){.ashen-clan-page .faction-support-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:580px){.ashen-clan-page .faction-support-grid{grid-template-columns:1fr}}
+
+/* ASHEN v0.4.3.2 — kompaktowe wsparcie ekspedycji */
+.expedition-personal-support{display:grid;gap:7px;margin:12px 0;padding:11px;border:1px solid rgba(160,155,130,.22);border-radius:10px;background:rgba(12,16,19,.22)}
+.expedition-support-choice{display:flex;align-items:flex-start;gap:9px;font-size:.86rem;line-height:1.3;padding:5px 0;cursor:pointer}
+.expedition-support-choice input{margin-top:3px;accent-color:#bda66b}
+.expedition-support-choice span{display:grid;gap:3px}
+.expedition-support-choice small{font-size:.77rem;opacity:.74}
+.expedition-support-choice:has(input:disabled){opacity:.55;cursor:default}
+.faction-support-note{padding:12px!important;margin:9px 0}
+@media(max-width:600px){.expedition-personal-support{gap:5px;padding:9px}.expedition-support-choice{font-size:.83rem}}

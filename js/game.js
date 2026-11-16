@@ -2105,6 +2105,21 @@ window.ASHEN_FACTION_APPLY_PAYMENT=(kind,amount)=>{
  else {state.materials=state.materials||{};state.materials[kind]=Math.max(0,(Number(state.materials[kind])||0)-n)}
  save();render();return window.ASHEN_FACTION_WALLET();
 };
+// ASHEN v0.4.3.2: mirror only server-confirmed private expedition expenditures/refunds.
+window.ASHEN_FACTION_SETTLE_EXPEDITION=(cost,direction= -1)=>{
+ const cloud=window.ASHEN_CLOUD;
+ if(!cloud?.getSession()?.user?.id||cloud.getBoundSlot()!==cloud.currentSlot())throw Error('Bieżąca postać nie jest przypisana do konta online. Pobierz zapis z chmury.');
+ const keys=['scrap','czesci','food','water','medical'];
+ const change=Object.fromEntries(keys.map(k=>[k,Math.floor(Number(cost?.[k]||0))]));
+ if(keys.some(k=>!Number.isSafeInteger(change[k])||change[k]<0))throw Error('Niepoprawne rozliczenie serwera.');
+ if(direction!==1&&direction!==-1)throw Error('Niepoprawny kierunek rozliczenia.');
+ for(const k of keys){const old=Number(k==='scrap'?state.scrap:state.materials?.[k])||0;
+  if(direction<0&&old<change[k])throw Error('Stan lokalny jest starszy niż serwerowy. Pobierz zapis z chmury, aby zobaczyć aktualne zasoby.');}
+ state.materials=state.materials||{};
+ for(const k of keys){if(k==='scrap')state.scrap=(Number(state.scrap)||0)+direction*change[k];
+  else state.materials[k]=(Number(state.materials[k])||0)+direction*change[k];}
+ save();render();return window.ASHEN_FACTION_WALLET();
+};
 window.ASHEN_APPLY_CLOUD_SAVE=function(raw){
  const data=validImport(raw);
  backupCurrentAndReplace(data);
