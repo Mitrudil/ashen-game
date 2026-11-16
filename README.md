@@ -1,3 +1,25 @@
+# ASHEN v0.3.9.2 — Wybór etapów pojazdów
+
+## Zmiany
+
+- Pojazd zachowuje najwyższy zakupiony etap (1–3) i pozwala swobodnie przełączać się między etapami już odblokowanymi. Przyszłe etapy nie są widoczne jako opcje.
+- Aktywny etap jest zapisywany osobno dla każdego pojazdu, bez kosztów za przełączanie.
+- Wybrany etap kontroluje grafikę Garażu, grafikę i opis w zakładce Postać oraz premię do szybkości wypraw.
+- Ulepszanie pojazdu korzysta z najwyższego kupionego poziomu, a nie z poziomu tymczasowo wybranego, dzięki czemu nie można kupić tego samego etapu ponownie.
+- Zakup nowego etapu automatycznie go aktywuje, ale niższe wciąż pozostają dostępne.
+- Starsze zapisy automatycznie startują z najwyższym zakupionym etapem każdego pojazdu.
+
+## Instalacja
+
+Wgraj `index.html` i `js/game.js` do głównego katalogu repozytorium, zastępując obecne pliki. Grafiki oraz SQL nie wymagają zmian.
+
+## Test
+
+1. Wybierz pojazd z wykupionym etapem 3/3. Kliknij „Etap 2”.
+2. Sprawdź, czy w Transporcie i zakładce Postać widać obraz etapu 2 oraz premię jego szybkości.
+3. Wróć na etap 3 bez wydawania zasobów; przełącz na inny pojazd i z powrotem. Wybrane etapy powinny się zachować.
+4. Nowa postać z etapem 1/3 nie powinna mieć przycisków etapów 2 i 3.
+
 # ASHEN v0.3.8 — Towarzysze Pustkowi
 
 ## Nowości
