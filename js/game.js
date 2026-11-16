@@ -821,7 +821,7 @@ function fight(enemy,options={}){
      weapons:attacks.map(w=>({name:w.weapon?.name||'Broń',hand:w.hand,power:Math.round(w.power*100),...weaponDamageRange(a,w.weapon,w.power)}))},
    enemy:{name:enemy.name,hp:foeMaxHp,armor:foe.armor,dodge:foe.dodge,accuracy:foe.acc,attackMin:foe.atk[0],attackMax:foe.atk[1]}
  }:null;
- const damageSummary={hero:{attempts:0,hits:0,misses:0,crits:0,damage:0,best:0},foe:{attempts:0,hits:0,misses:0,crits:0,damage:0,best:0},rounds:0};
+ const damageSummary={hero:{attempts:0,hits:0,misses:0,crits:0,damage:0,potential:0,best:0},foe:{attempts:0,hits:0,misses:0,crits:0,damage:0,potential:0,best:0},rounds:0};
  const hitAttack=(attacker,defender,who,r,weapon=null)=>{
    const performance=damageSummary[who==='hero'?'hero':'foe'];performance.attempts++;
    const accuracy=who==='hero'&&weapon?weaponAccuracy(a,weapon.weapon):attacker.acc;
@@ -839,7 +839,7 @@ function fight(enemy,options={}){
    if(critical&&labWeapon)dmg=Math.max(1,Math.floor(dmg*(labWeapon.labCritMultiplier||1.6)));
    const actualDamage=Math.min(defender.hp,dmg);
    defender.hp=Math.max(0,defender.hp-dmg);
-   performance.hits++;performance.damage+=actualDamage;performance.best=Math.max(performance.best,actualDamage);if(critical)performance.crits++;
+   performance.hits++;performance.damage+=actualDamage;performance.potential+=dmg;performance.best=Math.max(performance.best,actualDamage);if(critical)performance.crits++;
    lines.push(`Runda ${r}: ${who==='hero'?'Zadajesz':'Otrzymujesz'} ${actualDamage} obrażeń${handName}${critical?' (KRYTYCZNE)':''}.`);
  };
  const maxRounds=options.testSnapshot&&[10,15,20].includes(options.testMaxRounds)?options.testMaxRounds:10;
@@ -1367,7 +1367,7 @@ const WEAPON_KIT_STAGES=[
  {name:'Zaawansowany',profile:'veteran',rarity:4,upgrade:5,enemy:'veteran'}
 ];
 let weaponKitReport=null,weaponKitRunning=false;
-function weaponKitKey(){return 'ashen-weapon-kits-v0464-'+devActiveId()}
+function weaponKitKey(){return 'ashen-weapon-kits-v0465-'+devActiveId()}
 function weaponKitRestore(){try{const data=JSON.parse(localStorage.getItem(weaponKitKey())||'null');if(data?.version===1&&Array.isArray(data.rows)&&data.rows.length===WEAPON_KIT_PROFILES.length*WEAPON_KIT_STAGES.length)weaponKitReport=data}catch{}}
 function weaponKitSave(){try{localStorage.setItem(weaponKitKey(),JSON.stringify(weaponKitReport))}catch{}}
 weaponKitRestore();
@@ -1401,20 +1401,20 @@ function weaponKitRun(){
     const series=[];
     for(const armor of armors){
      const enemy={...baseEnemy,armor};
-     const acc={wins:0,draws:0,losses:0,rounds:0,damage:0,taken:0,attempts:0,hits:0,crits:0};
+     const acc={wins:0,draws:0,losses:0,rounds:0,damage:0,potential:0,taken:0,attempts:0,hits:0,crits:0,killRounds:0,heroHpRemaining:0};
      for(let i=0;i<n;i++){
       const seed=(0x9e3779b9^Math.imul(i+1,2654435761))>>>0;
       const r=fight(enemy,{testSnapshot:{attributes:a,defense:def,attacks},testRandom:combatLabRandom(seed),testMaxRounds:10,testWeaponModel:true});
       const d=r.damageSummary;
       if(r.won)acc.wins++;else if(r.heroHp>0&&r.enemyHp>0)acc.draws++;else acc.losses++;
-      acc.rounds+=d.rounds;acc.damage+=d.hero.damage;acc.taken+=d.foe.damage;acc.attempts+=d.hero.attempts;acc.hits+=d.hero.hits;acc.crits+=d.hero.crits;
+      acc.rounds+=d.rounds;acc.damage+=d.hero.damage;acc.potential+=d.hero.potential;acc.killRounds+=r.won?d.rounds:0;acc.heroHpRemaining+=r.heroHp;acc.taken+=d.foe.damage;acc.attempts+=d.hero.attempts;acc.hits+=d.hero.hits;acc.crits+=d.hero.crits;
      }
-     series.push({armor,dpr:acc.rounds?acc.damage/acc.rounds:0,wins:100*acc.wins/n,draws:100*acc.draws/n,losses:100*acc.losses/n,accuracy:acc.attempts?100*acc.hits/acc.attempts:0,crit:acc.hits?100*acc.crits/acc.hits:0,taken:acc.taken/n});
+     series.push({armor,dpr:acc.rounds?acc.damage/acc.rounds:0,potentialDpr:acc.rounds?acc.potential/acc.rounds:0,averageKillRounds:acc.wins?acc.killRounds/acc.wins:null,averageHeroHp:acc.heroHpRemaining/n,wins:100*acc.wins/n,draws:100*acc.draws/n,losses:100*acc.losses/n,accuracy:acc.attempts?100*acc.hits/acc.attempts:0,crit:acc.hits?100*acc.crits/acc.hits:0,taken:acc.taken/n});
     }
     rows.push({stage:stage.name,kit:kit.name,category:kit.category,attacks:attacks.length,series});
    }
   }
-  weaponKitReport={version:1,at:new Date().toLocaleString('pl-PL'),n,armors,stages:WEAPON_KIT_STAGES.map(x=>x.name),rows,notes:'Reprezentanci klas mają różne wartości bazowe, nie wyrównano budżetu przedmiotów. 10 rund; wspólne losowania; prawdziwy lokalny fight(); bez modyfikatorów. Nie dotyczy serwerowych Ekspedycji.'};
+  weaponKitReport={version:1,at:new Date().toLocaleString('pl-PL'),n,armors,stages:WEAPON_KIT_STAGES.map(x=>x.name),rows,notes:'Reprezentanci klas mają różne wartości bazowe, nie wyrównano budżetu przedmiotów. Przeciwnicy: etap 1 / 10 / 20. Obrażenia rzeczywiste są ograniczone do pozostałego PŻ przeciwnika, a potencjalne liczone po pancerzu, przed ograniczeniem PŻ. Średnie rundy do wygranej tylko z wygranych walk. 10 rund; wspólne losowania; prawdziwy lokalny fight(); bez modyfikatorów. Nie dotyczy serwerowych Ekspedycji.'};
   weaponKitSave();weaponLabOpen=true;
  }catch(err){message='Błąd porównania specjalizacji: '+(err?.message||String(err))}
  finally{weaponLabConfig=saved;weaponLabSave();weaponKitRunning=false;render()}
@@ -1422,7 +1422,7 @@ function weaponKitRun(){
 function weaponKitText(){
  if(!weaponKitReport)return '';
  const r=weaponKitReport,f=v=>Number(v).toFixed(1).replace('.',',');
- return [`ASHEN · Specjalizacje · ${r.at}`,`${r.n} prób na zestaw / poziom / pancerz; brak prefiksu i sufiksu`,r.notes,'Etap | Zestaw | Ataki | Pancerz 0 | 20 | 40 | 60 (obrażenia/rundę) | Wygrane % (pancerz 20) | Celność % (pancerz 20) | Krytyki % (pancerz 20)',...r.rows.map(x=>[x.stage,x.kit,x.attacks,...x.series.map(v=>f(v.dpr)),f(x.series[1].wins),f(x.series[1].accuracy),f(x.series[1].crit)].join(' | '))].join('\n');
+ return [`ASHEN · Specjalizacje · ${r.at}`,`${r.n} prób na zestaw / poziom / pancerz; brak prefiksu i sufiksu`,r.notes,'Etap | Zestaw | Ataki | Pancerz 0 | 20 | 40 | 60 (rzeczywiste obrażenia/rundę) | Potencjał/rundę (pancerz 20) | Wygrane % (pancerz 20) | Średnia runda wygranej (pancerz 20) | PŻ gracza po walce (pancerz 20) | Celność % (pancerz 20) | Krytyki % (pancerz 20)',...r.rows.map(x=>[x.stage,x.kit,x.attacks,...x.series.map(v=>f(v.dpr)),f(x.series[1].potentialDpr),f(x.series[1].wins),x.series[1].averageKillRounds===null?'—':f(x.series[1].averageKillRounds),f(x.series[1].averageHeroHp),f(x.series[1].accuracy),f(x.series[1].crit)].join(' | '))].join('\n');
 }
 function weaponKitCopy(){const output=weaponKitText();if(!output)return;if(navigator.clipboard?.writeText)navigator.clipboard.writeText(output).then(()=>{message='Skopiowano porównanie specjalizacji.';render()}).catch(()=>window.prompt('Skopiuj raport:',output));else window.prompt('Skopiuj raport:',output)}
 function weaponKitHtml(){
@@ -1431,10 +1431,10 @@ function weaponKitHtml(){
   const rows=r.rows.filter(x=>x.stage===stage);
   const measured=rows.map(x=>x.series[1].dpr);const high=Math.max(...measured),low=Math.min(...measured);
   const spread=high?100*(high-low)/high:0;
-  const allZero=rows.every(x=>x.series[1].wins===0);
-  return `<div class="weapon-kit-stage"><h5>${escape(stage)} · pancerz 20 · rozrzut ${f(spread)}%</h5>${allZero?'<p class="weapon-kit-warning">Brak zwycięstw: ten etap nie pozwala ocenić równowagi wygranych. Porównuj na razie obrażenia.</p>':''}<div class="combat-lab-table-wrap"><table class="weapon-balance-table"><thead><tr><th>Zestaw</th><th>Ataki</th><th>Pancerz 0</th><th>20</th><th>40</th><th>60</th><th>Wygrane przy 20</th><th>Celność</th><th>Krytyki</th></tr></thead><tbody>${rows.map(x=>`<tr><th>${escape(x.kit)}</th><td>${x.attacks}</td>${x.series.map(v=>`<td>${f(v.dpr)}</td>`).join('')}<td>${f(x.series[1].wins)}%</td><td>${f(x.series[1].accuracy)}%</td><td>${f(x.series[1].crit)}%</td></tr>`).join('')}</tbody></table></div></div>`
+  const allZero=rows.every(x=>x.series[1].wins===0);const allFull=rows.every(x=>x.series[1].wins===100);
+  return `<div class="weapon-kit-stage"><h5>${escape(stage)} · pancerz 20 · rozrzut ${f(spread)}%</h5>${allZero?'<p class="weapon-kit-warning">Brak zwycięstw: ten etap nie pozwala ocenić równowagi wygranych. Porównuj na razie obrażenia.</p>':''}${allFull?'<p class="weapon-kit-warning">Wszystkie zestawy wygrywają: odsetek zwycięstw nie rozróżnia siły. Porównaj rundę wygranej i potencjał obrażeń.</p>':''}<div class="combat-lab-table-wrap"><table class="weapon-balance-table"><thead><tr><th>Zestaw</th><th>Ataki</th><th>Pancerz 0</th><th>20</th><th>40</th><th>60</th><th>Potencjał/runda 20</th><th>Wygrane przy 20</th><th>Śr. runda wygranej</th><th>PŻ gracza po walce</th><th>Celność</th><th>Krytyki</th></tr></thead><tbody>${rows.map(x=>`<tr><th>${escape(x.kit)}</th><td>${x.attacks}</td>${x.series.map(v=>`<td>${f(v.dpr)}</td>`).join('')}<td>${f(x.series[1].potentialDpr)}</td><td>${f(x.series[1].wins)}%</td><td>${x.series[1].averageKillRounds===null?'—':f(x.series[1].averageKillRounds)}</td><td>${f(x.series[1].averageHeroHp)}</td><td>${f(x.series[1].accuracy)}%</td><td>${f(x.series[1].crit)}%</td></tr>`).join('')}</tbody></table></div></div>`
  }).join(''):'';
- return `<section class="weapon-balance-panel weapon-kit-panel"><h4>🧪 Laboratorium specjalizacji · ASHEN 0.4.6.4</h4><p class="small muted">Sześć reprezentatywnych <strong>pełnych zestawów</strong>, trzy etapy rozwoju, cztery poziomy pancerza. Dwie bronie 1R są liczone z drugim egzemplarzem na 80% mocy. Ten test bada, czy obrana klasa pozostaje grywalna — <strong>nie wymaga dobierania broni do konkretnego bossa</strong>.</p><button type="button" class="primary" data-wlab-kits="1" ${weaponKitRunning?'disabled':''}>▶ Porównaj specjalizacje (21 600 walk)</button><p class="small muted">6 zestawów × 3 poziomy rozwoju × 4 wartości pancerza × 300 prób = 21 600 symulacji. Przeciwnicy: etap 1 / 10 / 20, odpowiednio do rozwoju. Początek: zwykła +0, rozwój: rzadka +0, zaawansowany: legendarna +5 (Warsztat C). Bez prefiksów i sufiksów. Wyniki zostają zapisane lokalnie.</p><p class="small muted"><strong>Ograniczenie:</strong> bazowe modele (np. młot i harpun) mają różne budżety obrażeń, dlatego to audyt odniesienia, a nie końcowy certyfikat balansu. Krytyki, celność i pancerz działają według testowego lokalnego silnika. Ekspedycje serwerowe pozostają bez zmian.</p>${r?`<strong>Ostatni test: ${escape(r.at)}</strong>${sections}<button type="button" data-wlab-kits-copy="1">📋 Kopiuj pełny raport specjalizacji</button>`:'<p class="small muted">Uruchom test. Możesz przełączać zakładki po zakończeniu; raport zostanie zachowany.</p>'}</section>`;
+ return `<section class="weapon-balance-panel weapon-kit-panel"><h4>🧪 Laboratorium specjalizacji · ASHEN 0.4.6.5</h4><p class="small muted">Sześć reprezentatywnych <strong>pełnych zestawów</strong>, trzy etapy rozwoju, cztery poziomy pancerza. Dwie bronie 1R są liczone z drugim egzemplarzem na 80% mocy. Ten test bada, czy obrana klasa pozostaje grywalna — <strong>nie wymaga dobierania broni do konkretnego bossa</strong>.</p><button type="button" class="primary" data-wlab-kits="1" ${weaponKitRunning?'disabled':''}>▶ Porównaj specjalizacje (21 600 walk)</button><p class="small muted">6 zestawów × 3 poziomy rozwoju × 4 wartości pancerza × 300 prób = 21 600 symulacji. Przeciwnicy: etap 1 / 10 / 20, odpowiednio do rozwoju. Początek: zwykła +0, rozwój: rzadka +0, zaawansowany: legendarna +5 (Warsztat C). Bez prefiksów i sufiksów. Wyniki zostają zapisane lokalnie. Dodatkowo raport pokazuje <strong>potencjalne obrażenia po pancerzu bez obcięcia do pozostałego PŻ</strong> oraz <strong>rundę zakończenia zwycięskiej walki</strong>.</p><p class="small muted"><strong>Ograniczenie:</strong> bazowe modele (np. młot i harpun) mają różne budżety obrażeń, dlatego to audyt odniesienia, a nie końcowy certyfikat balansu. Krytyki, celność i pancerz działają według testowego lokalnego silnika. Ekspedycje serwerowe pozostają bez zmian.</p>${r?`<strong>Ostatni test: ${escape(r.at)}</strong>${sections}<button type="button" data-wlab-kits-copy="1">📋 Kopiuj pełny raport specjalizacji</button>`:'<p class="small muted">Uruchom test. Możesz przełączać zakładki po zakończeniu; raport zostanie zachowany.</p>'}</section>`;
 }
 
 function weaponLabHtml(){
@@ -1991,7 +1991,7 @@ function itemAffixBadges(o,d,inst=null){
 // raporty pozbawione statystyk odczytujemy z ich tekstu, bez zgadywania krytyków wroga.
 function damageReportStats(r){
  if(r?.damageSummary?.hero&&r?.damageSummary?.foe)return {...r.damageSummary,legacy:false};
- const summary={hero:{attempts:0,hits:0,misses:0,crits:0,damage:0,best:0},foe:{attempts:0,hits:0,misses:0,crits:0,damage:0,best:0},rounds:0,legacy:true};
+ const summary={hero:{attempts:0,hits:0,misses:0,crits:0,damage:0,potential:0,best:0},foe:{attempts:0,hits:0,misses:0,crits:0,damage:0,potential:0,best:0},rounds:0,legacy:true};
  for(const line of r?.lines||[]){
   const round=String(line).match(/^Runda (\d+):/);if(round)summary.rounds=Math.max(summary.rounds,Number(round[1]));
   const outgoing=String(line).match(/Zadajesz (\d+) obrażeń/);
