@@ -1012,7 +1012,7 @@ function setPlannerPanel(){
  const clothingOpts=[['none','— Bez prefiksu setowego —'],...SET_PLANNER_FAMILIES.map(id=>[id,SETS[id].name])];
  const accessoryOpts=[['none','— Bez prefiksu setowego —'],...Object.keys(ACCESSORY_SETS).map(id=>[id,ACCESSORY_SETS[id].name])];
  const field=(type,index,opts)=>`<label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem"><span>${type==='clothing'?slotLabels[['head','shirt','outer','hands','pants','boots'][index]]:`Akcesorium ${index+1}`}</span><select data-set-planner="${type}" data-set-slot="${index}" style="width:100%;min-width:0;padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${opts.map(([id,label])=>`<option value="${id}" ${(setPlanner[type][index]===id)?'selected':''}>${escape(label)}</option>`).join('')}</select></label>`;
- return `<details class="panel section" id="ashen-set-planner" ${setPlannerOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧩 Planer setów — porównaj 6+0 i 3+3 bez zdobywania przedmiotów</summary><p class="small muted">Symulator używa obecnych progów i premii setowych. Nie zmienia ekwipunku, statystyk ani zapisu postaci; zapamiętuje tylko wybór w tej przeglądarce.</p><div class="actions" style="margin:12px 0;flex-wrap:wrap"><button type="button" data-set-preset="full">6 × Wartownika</button><button type="button" data-set-preset="mixed">3 Wartownika + 3 Nomady</button><button type="button" data-set-preset="partial">4 Wartownika + 2 Nomady</button><button type="button" data-set-preset="clear">Wyczyść</button></div><label style="display:flex;align-items:center;gap:8px;margin-bottom:12px">Jakość wszystkich elementów (testowo): <select data-set-planner="quality" style="padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${rarities.map((r,i)=>`<option value="${i}" ${setPlanner.quality===i?'selected':''}>${escape(r.name)} · ×${setQuality({rarity:i}).toFixed(2)}</option>`).join('')}</select></label><h4>Odzież — sześć slotów</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.clothing.map((_,i)=>field('clothing',i,clothingOpts)).join('')}</div><h4>Akcesoria — trzy sloty</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.accessories.map((_,i)=>field('accessories',i,accessoryOpts)).join('')}</div><div id="ashen-set-planner-result" aria-live="polite">${plannerResultHtml()}${designedSetPreviewHtml()}${setCompareHtml()}${allSetsTestPanel()}</div></details>`;
+ return `<details class="panel section" id="ashen-set-planner" ${setPlannerOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧩 Planer setów — porównaj 6+0 i 3+3 bez zdobywania przedmiotów</summary><p class="small muted">Symulator używa obecnych progów i premii setowych. Nie zmienia ekwipunku, statystyk ani zapisu postaci; zapamiętuje tylko wybór w tej przeglądarce.</p><div class="actions" style="margin:12px 0;flex-wrap:wrap"><button type="button" data-set-preset="full">6 × Wartownika</button><button type="button" data-set-preset="mixed">3 Wartownika + 3 Nomady</button><button type="button" data-set-preset="partial">4 Wartownika + 2 Nomady</button><button type="button" data-set-preset="clear">Wyczyść</button></div><label style="display:flex;align-items:center;gap:8px;margin-bottom:12px">Jakość wszystkich elementów (testowo): <select data-set-planner="quality" style="padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${rarities.map((r,i)=>`<option value="${i}" ${setPlanner.quality===i?'selected':''}>${escape(r.name)} · ×${setQuality({rarity:i}).toFixed(2)}</option>`).join('')}</select></label><h4>Odzież — sześć slotów</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.clothing.map((_,i)=>field('clothing',i,clothingOpts)).join('')}</div><h4>Akcesoria — trzy sloty</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.accessories.map((_,i)=>field('accessories',i,accessoryOpts)).join('')}</div><div id="ashen-set-planner-result" aria-live="polite">${plannerResultHtml()}${designedSetPreviewHtml()}${setCompareHtml()}${allSetsTestPanel()}${evolutionLabPanel()}</div></details>`;
 }
 function updateSetPlannerDisplay(){
  const target=document.getElementById('ashen-set-planner-result');
@@ -1023,8 +1023,126 @@ function updateSetPlannerDisplay(){
  if(preview)setDesignOpen=preview.open;
  if(catalog)setDesignCatalogOpen=catalog.open;
  saveSetDesignOpen();
- target.innerHTML=plannerResultHtml()+designedSetPreviewHtml()+setCompareHtml()+allSetsTestPanel();
+ target.innerHTML=plannerResultHtml()+designedSetPreviewHtml()+setCompareHtml()+allSetsTestPanel()+evolutionLabPanel();
 }
+
+
+// ASHEN v0.4.7.9 — izolowane laboratorium arytmetyki Ewolucji Setów 0.5.
+// To NIE jest silnik walki. Opisy efektów Y/Z pochodzą ze specyfikacji i NIE są wywoływane w fight().
+const EVOLUTION_V05_FAMILIES=[{"kind":"Odzież","name":"Wzmocniony","stat":"PŻ","formula":"PŻ maks. +20 + Q","y":"Osłona startowa: 10 + 2 × Q PŻ","z":"Drugi oddech: odzysk 10% maks. PŻ; raz na walkę"},{"kind":"Odzież","name":"Pancerny","stat":"Pancerz","formula":"Pancerz +3 + Q","y":"Redukcja fizyczna 3%","z":"Niezłomna płyta: 35% redukcji jednego trafienia; raz na walkę"},{"kind":"Odzież","name":"Elastyczny","stat":"Unik (pkt)","formula":"Unik +3 + Q pkt (1 pkt = 0,25 p.p.)","y":"Po uniku następny atak +8 celności","z":"Kontratak: następny atak +8% obrażeń; maks. 1/2 rundy"},{"kind":"Odzież","name":"Zwinny","stat":"Inicjatywa","formula":"Inicjatywa +2 + Q","y":"Pierwsze 2 rundy: +6 celności","z":"Pierwsze trafienie w walce: +12% obrażeń"},{"kind":"Odzież","name":"Lekki","stat":"Celność","formula":"Celność +2 + Q","y":"Po chybieniu: +6 celności dla następnego ataku","z":"Seria: 2. i następne trafienie w rundzie +4% obrażeń; maks. 2 razy/rundę"},{"kind":"Odzież","name":"Odporny","stat":"Ochrona krytyczna (pkt)","formula":"Ochrona krytyczna +2 + Q pkt (1 pkt = 0,5 p.p. redukcji premii krytyka)","y":"Po otrzymaniu krytyka: 3% redukcji obrażeń przez 1 rundę","z":"Raz na walkę: zmniejsz dodatkowe obrażenia jednego krytyka o 40%"},{"kind":"Odzież","name":"Tropicielski","stat":"Precyzja krytyczna (pkt)","formula":"Precyzja krytyczna +2 + Q pkt (1 pkt = 0,25 p.p. szansy na krytyk)","y":"Obrażenia krytyczne +8%","z":"Oznaczenie celu: następny krytyk +10% obrażeń; maks. raz / 3 rundy"},{"kind":"Odzież","name":"Żelazny","stat":"Siła uderzenia (pkt)","formula":"Siła uderzenia +2 + Q pkt (1 pkt = 0,25% obrażeń)","y":"Przebicie pancerza +4","z":"Miażdżący cios: +8% obrażeń przeciw pancerzowi; raz / 3 rundy"},{"kind":"Odzież","name":"Wartownika","stat":"Wytężenie (pkt)","formula":"Wytężenie +2 + Q pkt (1 pkt = 2 PŻ)","y":"Od rundy 5: 4% redukcji otrzymywanych obrażeń","z":"Ostatni bastion: osłona 15% maks. PŻ przy spadku poniżej 25%; raz na walkę"},{"kind":"Odzież","name":"Nomady","stat":"Mobilność (pkt)","formula":"Mobilność +2 + Q pkt (1 pkt = 0,25 p.p. uniku i 0,25 celności)","y":"Po chybieniu: następny atak +6% obrażeń","z":"Instynkt: po utracie 20% maks. PŻ w jednej rundzie następne trafienie +10% obrażeń; raz / 3 rundy"},{"kind":"Akcesoria","name":"Technika","stat":"Analiza (pkt)","formula":"Analiza +2 + Q pkt (1 pkt = 1 przebicia pancerza)","y":"Inteligencja +3","z":"Skan: pierwsze 2 udane trafienia ignorują 8% pancerza"},{"kind":"Akcesoria","name":"Tropiciela","stat":"Tropienie (pkt)","formula":"Tropienie +2 + Q pkt (1 pkt = 1 celności)","y":"Percepcja +3","z":"Oznaczenie: kolejne trafienie +8% obrażeń; maks. 1/rundę"},{"kind":"Akcesoria","name":"Negocjatora","stat":"Wpływy (pkt)","formula":"Wpływy +2 + Q pkt (1 pkt = 1% ceny sprzedaży)","y":"Charyzma +3","z":"Autorytet: +3 celności sojusznikom w Ekspedycji / solo +3 własnej celności"},{"kind":"Akcesoria","name":"Nomady","stat":"Refleks (pkt)","formula":"Refleks +2 + Q pkt (1 pkt = 0,25 p.p. uniku)","y":"Zręczność +3","z":"Po uniku następny trafiony atak +4 przebicia; maks. 1/rundę"},{"kind":"Akcesoria","name":"Ocalałego","stat":"Przetrwanie (pkt)","formula":"Przetrwanie +2 + Q pkt (1 pkt = 2 PŻ)","y":"Wytrzymałość +2","z":"Osłona 10% maks. PŻ po utracie >=25% maks. PŻ w 1 rundzie; raz na walkę"}];
+const EVOLUTION_V05_KEY='ashen-evolution-lab-v0479';
+const EVOLUTION_V05_QUALITY=['Zwykły','Ulepszony','Rzadki','Epicki','Legendarny'];
+const EVOLUTION_V05_CLASSES=['Biała 1R','Biała 2R','Palna 1R','Palna 2R','Dystansowa 2R','Technologiczna 2R'];
+let evolutionLabReport=null,evolutionLabOpen=false,evolutionLabRunning=false,evolutionLabStatus='';
+let evolutionLabClass=EVOLUTION_V05_CLASSES[0],evolutionLabFamily=0,evolutionLabN=3;
+let evolutionLabParts=[2,2,2,2,2,2];
+try{
+ const s=JSON.parse(localStorage.getItem(EVOLUTION_V05_KEY)||'null');
+ if(s?.version===1&&s?.report?.version===1)evolutionLabReport=s.report;
+ if(s?.className&&EVOLUTION_V05_CLASSES.includes(s.className))evolutionLabClass=s.className;
+ if(Number.isInteger(s?.family)&&s.family>=0&&s.family<15)evolutionLabFamily=s.family;
+ if([3,4,5,6].includes(s?.count))evolutionLabN=s.count;
+ if(Array.isArray(s?.parts)&&s.parts.length===6)evolutionLabParts=s.parts.map(q=>Math.max(0,Math.min(4,Number(q)||0)));
+ evolutionLabOpen=s?.open===true;
+}catch{}
+function evolutionLabSave(){try{localStorage.setItem(EVOLUTION_V05_KEY,JSON.stringify({version:1,report:evolutionLabReport,className:evolutionLabClass,family:evolutionLabFamily,count:evolutionLabN,parts:evolutionLabParts,open:evolutionLabOpen}))}catch{}}
+function evolutionThreshold(n){return {y:Math.ceil(7*n/3),z:Math.ceil(10*n/3)};}
+function evolutionEvaluate(n,qualities,base=2,kind='Odzież'){
+ const S=qualities.reduce((x,y)=>x+y,0),t=evolutionThreshold(n);
+ return {n,S,x:base+S+(kind==='Odzież'?2*(n-3):0),y:S>=t.y,z:S>=t.z,thresholdY:t.y,thresholdZ:t.z};
+}
+function evolutionBase(f){return f.name==='Wzmocniony'?20:f.name==='Pancerny'||f.name==='Elastyczny'?3:2;}
+function evolutionLabReportText(){
+ const r=evolutionLabReport;if(!r)return '';
+ const h=['ASHEN v0.4.7.9 — Laboratorium Ewolucji Setów (model matematyczny, NIE walka)',
+ `Data: ${new Date(r.at).toLocaleString('pl-PL')}`,
+ `Kombinacje jakości: ${r.combinations}; jednoetapowe ulepszenia: ${r.upgrades}; błędy: ${r.errors.length}`,
+ 'Progi: 3→7/10, 4→10/14, 5→12/17, 6→14/20.',
+ 'Symulacja 6 klas: tylko weryfikacja neutralności matematyki wobec klasy broni; nie ma wyników DPS/winrate.',
+ 'Efekty Y/Z są katalogiem projektowym, nie istniejącymi jeszcze triggerami w walce.',
+ 'Rodziny | Typ | X | Y | Z'];
+ for(const f of EVOLUTION_V05_FAMILIES)h.push(`${f.name} | ${f.kind} | ${f.formula} | ${f.y} | ${f.z}`);
+ if(r.errors.length)h.push('BŁĘDY',...r.errors.slice(0,60));
+ return h.join('\n');
+}
+function evolutionLabPanel(){
+ const f=EVOLUTION_V05_FAMILIES[evolutionLabFamily],count=f.kind==='Akcesoria'?3:evolutionLabN;
+ const ev=evolutionEvaluate(count,evolutionLabParts.slice(0,count),evolutionBase(f),f.kind);
+ const fields=Array.from({length:count},(_,i)=>`<label style="display:flex;flex-direction:column;gap:4px"><small>Element ${i+1}</small><select data-evolution-part="${i}" style="max-width:100%;padding:7px;background:var(--panel,#171e27);color:inherit">${EVOLUTION_V05_QUALITY.map((name,q)=>`<option value="${q}" ${evolutionLabParts[i]===q?'selected':''}>${name}</option>`).join('')}</select></label>`).join('');
+ const report=evolutionLabReport;
+ return `<details class="panel section" id="ashen-evolution-lab" ${evolutionLabOpen?'open':''} style="margin-top:16px;padding:14px"><summary style="cursor:pointer;font-weight:700">🧬 Laboratorium Ewolucji Setów · ASHEN 0.4.7.9</summary>
+ <p class="small muted"><strong>Tryb projektowy — nie wpływa na postać ani Starcia.</strong> Sprawdza progi, mieszanie jakości, wzrost X i katalog Y/Z. Nie symuluje jeszcze działania Y/Z w walce: potrzebna jest implementacja ich zdarzeń. Sześć specjalizacji służy tu do sprawdzenia wspólnych reguł jakości, <strong>nie do wyznaczania DPS</strong>.</p>
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin:10px 0">
+ <label>Rodzina<select id="ashen-evolution-family" style="width:100%;padding:7px;background:var(--panel,#171e27);color:inherit">${EVOLUTION_V05_FAMILIES.map((r,i)=>`<option value="${i}" ${i===evolutionLabFamily?'selected':''}>${escape(r.name)} (${r.kind==='Odzież'?'ubiór':'akcesoria'})</option>`).join('')}</select></label>
+ <label>Specjalizacja kontrolna<select id="ashen-evolution-class" style="width:100%;padding:7px;background:var(--panel,#171e27);color:inherit">${EVOLUTION_V05_CLASSES.map(n=>`<option ${n===evolutionLabClass?'selected':''}>${escape(n)}</option>`).join('')}</select></label>
+ <label>Części odzieży<select id="ashen-evolution-count" ${f.kind==='Akcesoria'?'disabled':''} style="width:100%;padding:7px;background:var(--panel,#171e27);color:inherit">${[3,4,5,6].map(n=>`<option value="${n}" ${n===evolutionLabN?'selected':''}>${n}/6</option>`).join('')}</select></label></div>
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">${fields}</div>
+ <div style="background:var(--panel,#171e27);padding:12px;margin-top:12px;border:1px solid var(--border,#555);border-radius:9px">
+ <strong>${escape(f.name)} — ${ev.S}/${4*count} punktów jakości · X = ${ev.x}</strong>
+ <p class="small" style="margin:6px 0">X: ${escape(f.stat)} — ${escape(f.formula)}${f.kind==='Odzież'&&count>3?' (dodatkowe +'+(2*(count-3))+' za kompletność)':''}</p>
+ <p class="small" style="margin:6px 0">${ev.y?'✅ Y aktywne':'🔒 Y zablokowane'} · próg ${ev.thresholdY} · ${escape(f.y)}</p>
+ <p class="small" style="margin:6px 0">${ev.z?'✅ Z aktywne':'🔒 Z zablokowane'} · próg ${ev.thresholdZ} · ${escape(f.z)}</p>
+ <p class="small muted" style="margin:6px 0">Zmiana jakości o jeden poziom daje +1 do X; fizyczny wpływ na walkę zależy od przelicznika i limitów. Wybrana specjalizacja: ${escape(evolutionLabClass)} (bez symulacji).</p></div>
+ <div class="actions" style="margin-top:12px;flex-wrap:wrap"><button type="button" data-evolution-action="run" ${evolutionLabRunning?'disabled':''}>${evolutionLabRunning?'Kontrola trwa…':'▶ Sprawdź wszystkie jakości i rodziny'}</button><button type="button" data-evolution-action="copy" ${!report?'disabled':''}>📋 Kopiuj raport</button><button type="button" data-evolution-action="clear">Wyczyść raport</button></div>
+ <p id="ashen-evolution-progress" class="small muted" aria-live="polite">${escape(evolutionLabStatus)}</p>
+ ${report?`<p><strong>Wynik:</strong> ${report.combinations.toLocaleString('pl-PL')} kombinacji · ${report.upgrades.toLocaleString('pl-PL')} ulepszeń · <strong>${report.errors.length} błędów matematycznych</strong>.</p><p class="small muted">Test dla 3–6 części oraz 15 rodzin. Weryfikuje poprawność i monotoniczność, nie balans 45 efektów w walce.</p>`:''}
+ </details>`;
+}
+async function evolutionLabRun(){
+ if(evolutionLabRunning)return;
+ evolutionLabRunning=true;evolutionLabStatus='Sprawdzam konfiguracje jakości…';evolutionLabUpdate();
+ const errors=[],maxErrors=80;let combinations=0,upgrades=0;
+ try{
+  for(const n of [3,4,5,6]){
+   const max=5**n;
+   for(let idx=0;idx<max;idx++){
+    let z=idx;const q=[];for(let j=0;j<n;j++){q.push(z%5);z=Math.floor(z/5)}
+    const e=evolutionEvaluate(n,q);combinations++;
+    if(e.z&&!e.y&&errors.length<maxErrors)errors.push('Z bez Y: '+n+'/'+q.join(','));
+    for(let k=0;k<n;k++){
+     if(q[k]===4)continue;
+     const changed=q.slice();changed[k]++;const next=evolutionEvaluate(n,changed);upgrades++;
+     if((next.x!==e.x+1||Number(next.y)<Number(e.y)||Number(next.z)<Number(e.z))&&errors.length<maxErrors)errors.push('Regresja: '+n+'/'+q.join(',')+'/'+k);
+    }
+   }
+   evolutionLabStatus=`Kontrola ${n}/6 zakończona…`;document.getElementById('ashen-evolution-progress')?.replaceChildren(document.createTextNode(evolutionLabStatus));
+   await new Promise(done=>setTimeout(done,0));
+  }
+  // Każda z 15 rodzin (n=3), 6 specjalizacji. Sprawdzamy tę samą arytmetykę, bez fikcyjnych walk.
+  for(const f of EVOLUTION_V05_FAMILIES)for(const klass of EVOLUTION_V05_CLASSES){
+   const baseline=evolutionEvaluate(3,[2,2,2],evolutionBase(f),f.kind);
+   const improved=evolutionEvaluate(3,[2,2,3],evolutionBase(f),f.kind);
+   if((improved.x-baseline.x)!==1||!improved.y||baseline.y)errors.push('Nieprawidłowa kontrola '+f.name+' '+klass);
+  }
+  evolutionLabReport={version:1,at:Date.now(),combinations,upgrades,errors};
+  evolutionLabStatus=errors.length?'Znaleziono niezgodności.':'Kontrola matematyczna zakończona; testy walk jeszcze przed nami.';
+ }catch(e){evolutionLabStatus='Błąd: '+String(e?.message||e);console.error(e)}
+ finally{evolutionLabRunning=false;evolutionLabSave();evolutionLabUpdate()}
+}
+function evolutionLabUpdate(){
+ const existing=document.getElementById('ashen-evolution-lab');if(!existing)return;
+ evolutionLabOpen=existing.open;
+ const outer=document.createElement('div');outer.innerHTML=evolutionLabPanel();
+ existing.replaceWith(outer.firstElementChild);evolutionLabSave();
+}
+document.addEventListener('toggle',e=>{if(e.target?.id==='ashen-evolution-lab'){evolutionLabOpen=e.target.open;evolutionLabSave()}},true);
+document.addEventListener('change',e=>{
+ const t=e.target;
+ if(t.id==='ashen-evolution-family')evolutionLabFamily=Number(t.value);
+ else if(t.id==='ashen-evolution-class')evolutionLabClass=t.value;
+ else if(t.id==='ashen-evolution-count')evolutionLabN=Number(t.value);
+ else if(t.dataset?.evolutionPart!==undefined)evolutionLabParts[Number(t.dataset.evolutionPart)]=Number(t.value);
+ else return;
+ evolutionLabOpen=true;evolutionLabUpdate();
+});
+document.addEventListener('click',e=>{
+ const b=e.target.closest?.('[data-evolution-action]');if(!b)return;
+ if(b.dataset.evolutionAction==='run')void evolutionLabRun();
+ else if(b.dataset.evolutionAction==='clear'){evolutionLabReport=null;evolutionLabStatus='';evolutionLabUpdate()}
+ else if(b.dataset.evolutionAction==='copy'){
+  const report=evolutionLabReportText();if(navigator.clipboard?.writeText)navigator.clipboard.writeText(report).catch(()=>window.prompt('Kopiuj raport:',report));else window.prompt('Kopiuj raport:',report);
+ }
+});
 
 function characterSetsPanel(){
  const results=setResults();

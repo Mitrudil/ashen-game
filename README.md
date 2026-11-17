@@ -1,13 +1,14 @@
-# ASHEN v0.4.7.8 — silnik premii setowych
+# ASHEN v0.4.7.9 — Laboratorium Ewolucji Setów
 
-Podmień `index.html` i `js/game.js` na GitHubie. Bez SQL.
+## Instalacja
+Podmień `index.html` oraz `js/game.js` w repozytorium GitHub. Nie potrzeba SQL.
 
-- 10 rodzin odzieży: premie 3/4/5/6, niezależne rodziny (np. 3+3).
-- 5 rodzin akcesoriów: premie tylko przy 3/3.
-- Średnia jakości faktycznie założonych elementów; bez podwójnego mnożenia jakości.
-- Nowe premie w lokalnych Starciach: HP, pancerz, unik, celność, krytyk, penetracja, obrażenia, redukcja obrażeń, odporność na krytyk, pierwsze trafienie.
-- Przeciwnicy w lokalnym silniku mogą teraz wykonać krytyczny atak (6% trafień), dzięki czemu odporność na krytyki działa. Jest to zmiana balansu wymagająca weryfikacji.
-- Set Negocjatora daje premię do wartości sprzedaży wyposażenia (zwykłe Wyprawy nie przyznają kredytów). Nie dotyczy serwerowych Ekspedycji ani modułu PvP. Stare zestawienia porównawcze Planera korzystają z poprzedniego modelu i są oznaczone jako historyczne.
+## Funkcje
+- Postać → Planer setów → Laboratorium Ewolucji Setów.
+- Kalkulator 15 rodzin, liczby elementów 3/4/5/6 (dla akcesoriów tylko 3), mieszanej jakości, progów X/Y/Z.
+- Kontrola wszystkich 19 500 kombinacji jakości i pojedynczych ulepszeń (test matematyczny).
+- Kontrola niezależności zasad jakości wobec wszystkich 6 specjalizacji broni, ale **bez symulowania ich walk**.
+- Lokalny zapis raportu, kopiowanie tekstowe, trwały stan panelu.
 
-## Kontrola
-Uruchom stronę, sprawdź Postać → Stan ocalałego → Nowe premie zestawowe i przetestuj walkę w Starciach. Nie czyść zapisów przeglądarki.
+## Istotne ograniczenie
+Wersja nie wdraża jeszcze zdarzeń Y/Z do rzeczywistego `fight()` ani do serwerowych Ekspedycji. Zatem nie podaje DPS, procentu wygranych ani rzekomych wyników walk dla X/Y/Z. Matematyczna walidacja wzoru nie jest dowodem balansu. Obecne Starcia nadal korzystają z działającego silnika z v0.4.7.8.
