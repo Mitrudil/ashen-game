@@ -1,32 +1,26 @@
-# ASHEN v0.4.7.5 — Pełny audyt rodzin setowych
+# ASHEN v0.4.7.6 — Katalog nowych rodzin setowych (etap projektowy)
 
 ## Instalacja
-Wgraj **index.html** i **js/game.js** do repozytorium, nadpisując pliki z v0.4.7.4. Nie wykonuj SQL, nie czyść pamięci przeglądarki ani ekwipunku.
+Wgraj `index.html` i `js/game.js` do repozytorium, podmieniając pliki z v0.4.7.5. **Brak SQL. Nie resetuj postaci.**
 
-## Nowa funkcja
-**Postać → Planer setów → Wszystkie sety — kontrola jakości**.
+## Co dodano
+W `Postać → Planer setów` pojawia się sekcja **„Projekt ASHEN 0.5 — 15 unikalnych rodzin”**. Pokazuje 10 rodzin odzieży i 5 rodzin akcesoriów, ich nową tożsamość, proponowane dwie premie każdej rodziny oraz wartości dla bieżącego układu Planera. 
 
-Jednym przyciskiem porównasz:
-- wszystkie **10** zdefiniowanych rodzin ubioru jako pełne **6/6**;
-- wszystkie **45** niepowtarzalnych par rodzin jako układy **3+3**;
-- wszystkie **5** zdefiniowanych rodzin akcesoriów jako pełne **3/3**;
-- jeden wariant kontrolny bez premii.
+**To wyłącznie podgląd projektowy.** Działające Starcia, drop, premie i wyniki starszych testów NIE zostały zmienione. Nie należy mylić proponowanych wartości z obecnym balansem.
 
-Każdy wariant jest badany w jakości **zwykłej** oraz **legendarnej**, po 80 prób na konfigurację, łącznie **9760 symulacji** w lokalnym silniku `fight()`. Wybierz bossa etapu 10 lub 20. Aby sprawdzić obu bossów, uruchom test osobno dla każdego etapu.
+## Ustalone reguły
+- Odzież aktywuje bonus od 3 części, progresja 3/4/5/6, jednoczesne dwa zestawy 3+3.
+- Akcesoria: trzy aktualne sloty, premia tylko przy 3/3.
+- Set identyfikuje prefiks, sufiks służy personalizacji.
+- Rodziny nie są sztywno przypisane do klasy broni.
+- Jakość: prototypowy mnożnik bonusów `1+0,35×(mnożnik_jakości−1)`, tylko w podglądzie.
+- Bez bonusów za 1 lub 2 elementy.
 
-Wyniki: bonusy, maksymalne PŻ, pancerz, potencjał obrażeń na rundę, odsetek zwycięstw, średnia runda zwycięstwa, PŻ po walce. Raport jest zapamiętywany lokalnie i można go skopiować do schowka. Przebieg jest wykonywany partiami, dzięki czemu interfejs może się odświeżać.
+## Dlaczego etap projektowy?
+W nowym katalogu znalazły się efekty, których silnik jeszcze nie obsługuje (m.in. odporność na krytyki i premiowanie pierwszego ciosu). Dopóki nie będą działać w jednym wspólnym silniku, nie wolno włączać ich do prawdziwej walki.
 
-## Zasady i ograniczenia
-- Test bierze aktualną postać i jej uzbrojenie jako punkt odniesienia, **odejmuje obecne premie setowe** i nakłada tylko testowaną konfigurację.
-- Poszczególne grupy badane są **oddzielnie**: w teście odzieży nie ma bonusu akcesoriów, a w teście akcesoriów nie ma bonusu odzieży. Synergie między obydwoma rodzajami zestawów będą osobnym etapem.
-- Nie symulujemy indywidualnych statystyk fikcyjnej odzieży ani jej bazowego pancerza, prefiksów i sufiksów. Nie zmieniamy ekwipunku.
-- Set odzieży aktywuje premie od **3/6**, kolejne części wzmacniają premię. Testy 3+3 aktywują obie rodziny. Akcesoria aktywują set **tylko przy 3/3**.
-- Porównujemy **dwie skrajne jakości** na tym etapie; jakości pośrednie pozostają w Planerze i będą przedmiotem następnego etapu.
-- Test wykorzystuje **lokalne Starcia**, nie dotyczy serwerowych Ekspedycji.
-- Każdy wariant ma te same losowania; 80 prób nadaje się do wstępnego wykrywania skrajnych różnic, nie do ostatecznego zatwierdzania drobnych zmian balansu.
-
-## Szybka kontrola po wdrożeniu
-1. Otwórz grę, sprawdź zakładkę Postać i Planer setów — brak czarnego ekranu.
-2. Uruchom **Przetestuj wszystkie rodziny (9760 walk)** na bossie etapu 20.
-3. Sprawdź liczbę wierszy: **122** w dwóch jakościach (10 pełnych + 45 mieszanych + 5 akcesoriów + kontrola, każda jakość).
-4. Skopiuj raport i prześlij do analizy. Przełącz zakładkę i sprawdź, czy raport pozostaje zapisany.
+## Kontrola
+1. Uruchom grę; wejdź w Postać → Planer setów.
+2. W podglądzie 3 Wartownika + 3 Nomady sprawdź, że są dwie aktywne rodziny.
+3. Przy 2 elementach rodziny nie ma premii.
+4. Przejście do innych zakładek nie powinno usuwać wyboru Planera.

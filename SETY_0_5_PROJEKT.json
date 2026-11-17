@@ -1,0 +1,251 @@
+{
+  "clothing": {
+    "armor_reinforced": {
+      "name": "Wzmocniony",
+      "role": "PŻ i wytrzymałość",
+      "description": "Zapas PŻ bez specjalizacji broni",
+      "primary": {
+        "stat": "end",
+        "at3": 2,
+        "perTier": 1
+      },
+      "secondary": {
+        "stat": "hpPct",
+        "at3": 2,
+        "perTier": 2
+      },
+      "activeFrom": 3,
+      "maxPieces": 6
+    },
+    "armor_plated": {
+      "name": "Pancerny",
+      "role": "Pancerz i redukcja",
+      "description": "Ochrona przed wieloma trafieniami",
+      "primary": {
+        "stat": "armorPct",
+        "at3": 5,
+        "perTier": 2
+      },
+      "secondary": {
+        "stat": "flatReduction",
+        "at3": 1,
+        "perTier": 1
+      },
+      "activeFrom": 3,
+      "maxPieces": 6
+    },
+    "armor_flexible": {
+      "name": "Elastyczny",
+      "role": "Zręczność i unik",
+      "description": "Szansa uniknięcia trafienia",
+      "primary": {
+        "stat": "dex",
+        "at3": 2,
+        "perTier": 1
+      },
+      "secondary": {
+        "stat": "dodge",
+        "at3": 2,
+        "perTier": 2
+      },
+      "activeFrom": 3,
+      "maxPieces": 6
+    },
+    "armor_agile": {
+      "name": "Zwinny",
+      "role": "Inicjatywa i precyzja",
+      "description": "Przewaga pierwszych ataków",
+      "primary": {
+        "stat": "accuracy",
+        "at3": 2,
+        "perTier": 1
+      },
+      "secondary": {
+        "stat": "firstHit",
+        "at3": 2,
+        "perTier": 2
+      },
+      "activeFrom": 3,
+      "maxPieces": 6
+    },
+    "armor_light": {
+      "name": "Lekki",
+      "role": "Percepcja i celność",
+      "description": "Dokładniejsze ataki",
+      "primary": {
+        "stat": "per",
+        "at3": 1,
+        "perTier": 1
+      },
+      "secondary": {
+        "stat": "accuracy",
+        "at3": 2,
+        "perTier": 2
+      },
+      "activeFrom": 3,
+      "maxPieces": 6
+    },
+    "armor_resistant": {
+      "name": "Odporny",
+      "role": "Wytrzymałość i krytyki",
+      "description": "Ograniczanie ciosów krytycznych",
+      "primary": {
+        "stat": "end",
+        "at3": 1,
+        "perTier": 1
+      },
+      "secondary": {
+        "stat": "critResist",
+        "at3": 2,
+        "perTier": 2
+      },
+      "activeFrom": 3,
+      "maxPieces": 6
+    },
+    "armor_tracker": {
+      "name": "Tropicielski",
+      "role": "Percepcja i krytyki",
+      "description": "Kontrola krytyków niezależnie od broni",
+      "primary": {
+        "stat": "per",
+        "at3": 1,
+        "perTier": 1
+      },
+      "secondary": {
+        "stat": "critChance",
+        "at3": 1,
+        "perTier": 1
+      },
+      "activeFrom": 3,
+      "maxPieces": 6
+    },
+    "armor_iron": {
+      "name": "Żelazny",
+      "role": "Siła i moc trafienia",
+      "description": "Ofensywna specjalizacja także bez broni białej",
+      "primary": {
+        "stat": "str",
+        "at3": 1,
+        "perTier": 1
+      },
+      "secondary": {
+        "stat": "damagePct",
+        "at3": 2,
+        "perTier": 2
+      },
+      "activeFrom": 3,
+      "maxPieces": 6
+    },
+    "armor_warden": {
+      "name": "Wartownika",
+      "role": "Wytrzymałość i stabilność",
+      "description": "Przetrwanie długich pojedynków",
+      "primary": {
+        "stat": "end",
+        "at3": 2,
+        "perTier": 1
+      },
+      "secondary": {
+        "stat": "damageResist",
+        "at3": 1,
+        "perTier": 1
+      },
+      "activeFrom": 3,
+      "maxPieces": 6
+    },
+    "armor_nomad": {
+      "name": "Nomady",
+      "role": "Zręczność i wszechstronność",
+      "description": "Ruchliwość i niewielka premia ofensywna",
+      "primary": {
+        "stat": "dex",
+        "at3": 1,
+        "perTier": 1
+      },
+      "secondary": {
+        "stat": "damagePct",
+        "at3": 1,
+        "perTier": 1
+      },
+      "activeFrom": 3,
+      "maxPieces": 6
+    }
+  },
+  "accessories": {
+    "accessory_technical": {
+      "name": "Technika",
+      "role": "Inteligencja i penetracja",
+      "description": "Przebicie użyteczne dla każdej klasy",
+      "primary": {
+        "stat": "int",
+        "at3": 3
+      },
+      "secondary": {
+        "stat": "armorPen",
+        "at3": 2
+      },
+      "activeFrom": 3,
+      "maxPieces": 3
+    },
+    "accessory_observant": {
+      "name": "Tropiciela",
+      "role": "Percepcja i krytyk",
+      "description": "Precyzja i krytyki",
+      "primary": {
+        "stat": "per",
+        "at3": 2
+      },
+      "secondary": {
+        "stat": "critChance",
+        "at3": 2
+      },
+      "activeFrom": 3,
+      "maxPieces": 3
+    },
+    "accessory_persuasive": {
+      "name": "Negocjatora",
+      "role": "Charyzma i wyprawy",
+      "description": "Premia ekonomiczna; nie wpływa na obrażenia",
+      "primary": {
+        "stat": "cha",
+        "at3": 3
+      },
+      "secondary": {
+        "stat": "expeditionCreditsPct",
+        "at3": 3
+      },
+      "activeFrom": 3,
+      "maxPieces": 3
+    },
+    "accessory_reflexive": {
+      "name": "Nomady",
+      "role": "Zręczność i unik",
+      "description": "Większa przeżywalność",
+      "primary": {
+        "stat": "dex",
+        "at3": 2
+      },
+      "secondary": {
+        "stat": "dodge",
+        "at3": 3
+      },
+      "activeFrom": 3,
+      "maxPieces": 3
+    },
+    "accessory_versatile": {
+      "name": "Ocalałego",
+      "role": "Wytrzymałość i percepcja",
+      "description": "Odporność i uniwersalne atrybuty",
+      "primary": {
+        "stat": "end",
+        "at3": 2
+      },
+      "secondary": {
+        "stat": "per",
+        "at3": 1
+      },
+      "activeFrom": 3,
+      "maxPieces": 3
+    }
+  }
+}
