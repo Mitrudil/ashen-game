@@ -676,7 +676,7 @@ function designedSetPreviewParts(parts,quality=0){
 }
 // ASHEN v0.4.8.0 — X + Y, jakości liczone punktowo i bez strat zaokrągleń.
 // Z pozostaje wyłącznie w Laboratorium; serwerowe Ekspedycje są osobnym silnikiem.
-const SET_ENGINE_VERSION='0.4.8.1';
+const SET_ENGINE_VERSION='0.4.8.3';
 const SET_ATTRIBUTE_KEYS=new Set(['str','dex','end','per','int','cha']);
 const EVOL_X_BASE={armor_reinforced:20,armor_plated:3,armor_flexible:3,armor_agile:2,
  armor_light:2,armor_resistant:2,armor_tracker:2,armor_iron:2,armor_warden:2,armor_nomad:2,
@@ -2823,7 +2823,7 @@ function inventorySummaryPanels(){
  const resonanceHtml=(resonance.active||[]).map(r=>`<div class="inventory-set-card active"><strong>${r.kind==='prefix'?'Prefiks':'Sufiks'} · ${escape(r.config.name)}</strong><span>${escape(r.config.description)}</span><small>Bonus: ${Object.keys(r.config.bonus||{}).length?Object.entries(r.config.bonus).map(([k,v])=>`${attrNames[k]} +${v}`).join(' · '):'brak statystyk'}${r.config.luck?` · Szczęście +${r.config.luck}`:''}${r.config.explore?` · Eksploracja +${r.config.explore}%`:''}</small></div>`).join('');
  return `
  <aside class="inventory-summary-stack">
-   <section class="inventory-summary-card"><div class="inventory-summary-head"><div><span class="tag">ASHEN 0.4.8.2 · X/Y AKTYWNE</span><h3>Nowe premie zestawowe</h3></div></div><div class="inventory-set-grid">${actualSets.active.map(r=>`<div class="inventory-set-card active"><strong>${escape(r.name)} · ${r.count}/${r.category==='clothing'?6:3}</strong><span>${escape(activeSetEffectText(r))}</span><small>Jakość ${r.qualityPoints} pkt · poziom ${r.level===3?'III':r.level===2?'II':'I'} · ${r.level>=2?'X + Y':'X'}${r.level===3?' · Z zaprojektowany, nieaktywny':''}</small></div>`).join('')||'<p class="small muted">Brak aktywnych setów. Ubiór: minimum 3; akcesoria: dokładnie 3.</p>'}</div><p class="small muted">Te efekty są doliczane do Postaci i lokalnych Starć. Stare porównywarki oparte na nieaktualnej matematyce zostały usunięte. PvP i Ekspedycje serwerowe nie są jeszcze zsynchronizowane.</p></section>
+   <section class="inventory-summary-card"><div class="inventory-summary-head"><div><span class="tag">ASHEN 0.4.8.3 · X/Y/Z LOKALNIE AKTYWNE</span><h3>Nowe premie zestawowe</h3></div></div><div class="inventory-set-grid">${actualSets.active.map(r=>`<div class="inventory-set-card active"><strong>${escape(r.name)} · ${r.count}/${r.category==='clothing'?6:3}</strong><span>${escape(activeSetEffectText(r))}</span><small>Jakość ${r.qualityPoints} pkt · poziom ${r.level===3?'III':r.level===2?'II':'I'} · ${r.level>=2?'X + Y':'X'}${r.level===3?' + Z (Starcia lokalne)':''}</small></div>`).join('')||'<p class="small muted">Brak aktywnych setów. Ubiór: minimum 3; akcesoria: dokładnie 3.</p>'}</div><p class="small muted">Efekty X/Y i mistrzostwo Z działają w lokalnych Starciach. Profil online przesyła teraz opis aktywnych setów, ale serwerowe PvP i Ekspedycje nie wykorzystują jeszcze tych zdolności w walce.</p></section>
    <section class="inventory-summary-card inventory-overview-card">
       <div class="inventory-summary-head"><div><span class="tag">PODSUMOWANIE BOJOWE</span><h3>Stan ocalałego</h3></div><div class="inventory-rarity-chip">Broń główna: ${escape(combat.weapon?.name||'Nóż')}</div></div>
       <div class="inventory-metric-grid">${lines}</div>
@@ -3255,8 +3255,16 @@ function pvpSnapshot(profileSave){
   state=profileSave;
   const a=attrs(), attacks=heroAttacks().map(x=>({hand:x.hand,power:x.power,weapon:{...x.weapon}}));
   const d=heroDefense();
+  // Synchronizacja v0.4.8.3: sam opis aktywnych rodzin i efektów X/Y/Z.
+  // Serwer nadal musi osobno implementować logikę rundową Z; nie wolno
+  // traktować przesłanych flag jako zweryfikowanych uprawnień gracza.
+  const currentSets=setEngineEffects();
+  const setEffects={...currentSets.effects};
+  const activeSets=currentSets.active.map(x=>({id:x.id,category:x.category,count:x.count,
+   qualityPoints:x.qualityPoints,level:x.level}));
   return {name:profileSave.name,origin:normalizeOrigin(profileSave.origin),gender:normalizeGender(profileSave.gender),level:profileSave.level,attrs:{...a},attacks,
-   hp:d.hp,armor:d.armor,dodge:d.dodge,acc:d.acc};
+   hp:d.hp,armor:d.armor,dodge:d.dodge,acc:d.acc,
+   setEngineVersion:SET_ENGINE_VERSION,setEffects,activeSets};
  }finally{state=previous}
 }
 // ASHEN 0.3.5: indywidualne nagrody klanowe. Idempotencja w zapisie postaci,
