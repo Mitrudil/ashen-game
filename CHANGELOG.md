@@ -1,3 +1,9 @@
+## v0.4.9.17 — Audyt aktywacji Z z raportów serwera
+- Panel PvP zlicza wyłącznie zdarzenia Mistrzostwa Z z raportów oznaczonych `XY-Z6-v0.4.9.14`.
+- Rozróżnia liczbę aktywacji i liczbę raportów oraz sygnalizuje przekroczenia limitu jednej aktywacji dla Wzmocnionego, Pancernego, Wartowniczego i dwóch dla Technicznego.
+- Brak zdarzeń nie jest oznaczany jako błąd; brak SQL, zmian balansu i operacji na bazie.
+- Dołączono opcjonalną, wyłącznie odczytową diagnostykę SQL 029 dla administratora.
+
 ## v0.4.9.16 — Jedno PvP online i diagnostyka Z w raportach
 - Usunięto z ekranu PvP przestarzałą Arenę offline wraz z fikcyjnym rankingiem, pojedynkami testowych Wędrowców, limitami lokalnymi i raportami `undefined`.
 - Usunięto nieużywany kod rozstrzygania offline PvP oraz lokalną historię wyników z interfejsu. Istniejące zapisane postacie i ich dane nie są modyfikowane.

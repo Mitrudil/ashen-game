@@ -255,9 +255,58 @@ function pvpZLabHtml(){
  ${r?`<div class="notice" role="status"><strong>${r.passed?'✓ Próba lokalna zaliczona':'⚠ Próba lokalna niezaliczona'} — ${esc(r.title)}</strong><p>${esc(r.baseline)}<br>${esc(r.boosted)}<br>${esc(r.difference)}</p><p class="small muted">${esc(r.notes)}</p><details><summary>Przebieg próby</summary>${r.logs.map(line=>`<p class="small">${esc(line)}</p>`).join('')}</details></div>`:''}
  </details>`;
 }
+// Audyt wyłącznie zapisanych wyników RPC ashen_online_reports.
+// Brak zdarzeń Z nie oznacza niepowodzenia testu zdolności.
+const SERVER_Z_FAMILIES=[
+ ['Przekonujący','master_accessory_persuasive'],
+ ['Lekki','master_armor_light'],
+ ['Wartowniczy','master_armor_warden'],
+ ['Wzmocniony','master_armor_reinforced'],
+ ['Pancerny','master_armor_plated'],
+ ['Techniczny','master_accessory_technical']
+];
+function serverZAuditRows(items){
+ const current=items.filter(x=>x&&x.report&&x.report.setCombatMode==='XY-Z6-v0.4.9.14');
+ const counts=new Map(SERVER_Z_FAMILIES.map(([name])=>[name,{events:0,battles:new Set(),limitIssues:0}]));
+ let reportCount=0,observed=0,issues=[];
+ for(const item of current){
+  const r=item.report;
+  const rounds=Array.isArray(r.rounds)?r.rounds:[];
+  const perHero=new Map();
+  reportCount++;
+  for(const rd of rounds){
+   for(const ev of (Array.isArray(rd.events)?rd.events:[])){
+    if(typeof ev!=='string'||!ev.includes('Mistrzostwo Z'))continue;
+    const match=ev.match(/^(.{1,40}?): Mistrzostwo Z\s*[—–-]\s*([^:]+):/);
+    if(!match)continue;
+    const combatant=match[1],family=match[2].trim();
+    const key=family==='Wartownika'?'Wartowniczy':family==='Negocjatora'?'Przekonujący':family==='Technika'?'Techniczny':family;
+    if(!counts.has(key))continue;
+    const obj=counts.get(key);obj.events++;obj.battles.add(item.id);observed++;
+    const grouping=key+'|'+combatant;perHero.set(grouping,(perHero.get(grouping)||0)+1);
+   }
+  }
+  for(const [group,n] of perHero){
+   const [family]=group.split('|');
+   const cap=family==='Techniczny'?2:['Wzmocniony','Pancerny','Wartowniczy'].includes(family)?1:null;
+   if(cap!==null&&n>cap){counts.get(family).limitIssues++;issues.push('Możliwe przekroczenie limitu '+family+' w jednym raporcie');}
+  }
+ }
+ return {reportCount,observed,counts,issues};
+}
+function serverZAuditHtml(){
+ const data=serverZAuditRows(reports);
+ const rows=SERVER_Z_FAMILIES.map(([family])=>{const s=data.counts.get(family);return `<tr><th scope="row">${esc(family)}</th><td>${s.events}</td><td>${s.battles.size}</td><td>${s.limitIssues?'⚠ Sprawdź':'—'}</td></tr>`}).join('');
+ return `<details class="panel section" id="ashen-pvp-server-z-audit" style="margin-top:14px"><summary style="cursor:pointer;font-weight:700">📋 Audyt rzeczywistych aktywacji Z · raporty Supabase</summary>
+ <p class="small muted">Dane tylko z pobranych raportów oznaczonych silnikiem SQL 029 (XY-Z6-v0.4.9.14). Pokazują zaobserwowane zdarzenia, nie stanowią testu pełnej poprawności formuł. Raporty starszego silnika są pomijane. Lista raportów konta może być niepełna lub ograniczona.</p>
+ <p><strong>Raporty SQL 029: ${data.reportCount}</strong> · zdarzenia Z: <strong>${data.observed}</strong></p>
+ <div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Zdolność</th><th>Aktywacje</th><th>Raporty z aktywacją</th><th>Limit</th></tr></thead><tbody>${rows}</tbody></table></div>
+ ${data.issues.length?`<p class="notice">⚠ ${esc(data.issues.join('; '))}. Sprawdź indywidualny raport i przebieg rund.</p>`:'<p class="small muted">Nie wykryto przekroczenia kontrolowanych limitów w znalezionych wpisach. Dla niektórych zdolności nie ma tu limitu liczbowego.</p>'}
+ <p class="small muted">0 aktywacji nie oznacza, że zdolność jest niesprawna — może nie być założonego setu, warunek mógł nie wystąpić albo raportu nie ma na liście.</p></details>`;
+}
 function pvpHtml(){
  const entries=opponents.map(p=>`<article class="pvp-choice"><img src="${p.origin==='tech'?'./assets/characters/tech-'+(p.gender==='female'?'f':'m')+'.webp':p.origin==='fighter'?'./assets/characters/fighter-'+(p.gender==='female'?'f':'m')+'.webp':'./assets/characters/scout-'+(p.gender==='female'?'f':'m')+'.webp'}" onerror="this.style.display='none'" alt=""><div><h4>${esc(p.name)}</h4><p class="small muted">Poziom ${p.level} · ${esc(p.origin)} · ostatni zapis ${fmt(p.updated_at)}</p><p>Ataki dziś: ${p.attacks_today}/2</p><button data-online-profile="${esc(p.user_id)}">Profil</button><button class="primary" data-online-attack="${esc(p.user_id)}" ${!bound()||busy||p.attacks_today>=2?'disabled':''}>⚔ Zaatakuj online</button></div></article>`).join('');
- return `<section class="section"><h2>🌐 PvP online — prawdziwe konta</h2><div class="notice" role="note"><strong>Stan silnika serwerowego:</strong> po wdrożeniu SQL 029 działa 6/15 zdolności Z — Przekonujący, Lekki, Wartowniczy, Wzmocniony, Pancerny, Techniczny; przed wdrożeniem obowiązuje SQL 027 (3/15). Pozostałe 9 działa jedynie lokalnie. SQL 028 kontroluje spójność deklaracji z zapisem chmurowym, lecz nie zapewnia pełnego anty-cheat.</div><p class="small muted">Wyniki rozstrzyga Supabase (X/Y: SQL 025; pierwsze trzy Z: SQL 027; kolejne trzy Z: SQL 029 (po osobnym wdrożeniu)), limit dwóch ataków na każdą postać resetuje się o północy czasu polskiego. Nie trzeba być zalogowanym, aby zostać zaatakowanym. Laboratorium reguł znajduje się w tym panelu i nie wykonuje rzeczywistych ataków.</p>${intro()}${pvpZLabHtml()}${onlineSetDiagnostic()}${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}<div class="actions"><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież graczy i raporty</button></div><h3>Przeciwnicy (${opponents.length})</h3><div class="pvp-choices">${!auth()?'<p>Połącz konto ASHEN.</p>':!loaded?'<p class="muted">Odśwież listę, aby zobaczyć graczy.</p>':entries||'<p class="muted">Brak innych opublikowanych kont. Do testu potrzebne jest drugie konto e-mail z własną postacią.</p>'}</div><h3>Raporty walk online</h3>${reports.length?reports.slice(0,40).map(x=>{const own=x.side==='attack'?'Atak':'Obrona',r=x.report||{};return `<button class="mail-row" data-online-report="${x.id}"><strong>${own}: ${esc(r.attacker?.name)} vs ${esc(r.defender?.name)}</strong><small>${fmt(x.created_at)}</small></button>`}).join(''):'<p class="muted">Nie stoczono jeszcze walk online.</p>'}</section>${reportDialog()}`;
+ return `<section class="section"><h2>🌐 PvP online — prawdziwe konta</h2><div class="notice" role="note"><strong>Stan silnika serwerowego:</strong> po wdrożeniu SQL 029 działa 6/15 zdolności Z — Przekonujący, Lekki, Wartowniczy, Wzmocniony, Pancerny, Techniczny; przed wdrożeniem obowiązuje SQL 027 (3/15). Pozostałe 9 działa jedynie lokalnie. SQL 028 kontroluje spójność deklaracji z zapisem chmurowym, lecz nie zapewnia pełnego anty-cheat.</div><p class="small muted">Wyniki rozstrzyga Supabase (X/Y: SQL 025; pierwsze trzy Z: SQL 027; kolejne trzy Z: SQL 029 (po osobnym wdrożeniu)), limit dwóch ataków na każdą postać resetuje się o północy czasu polskiego. Nie trzeba być zalogowanym, aby zostać zaatakowanym. Laboratorium reguł znajduje się w tym panelu i nie wykonuje rzeczywistych ataków.</p>${intro()}${pvpZLabHtml()}${serverZAuditHtml()}${onlineSetDiagnostic()}${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}<div class="actions"><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież graczy i raporty</button></div><h3>Przeciwnicy (${opponents.length})</h3><div class="pvp-choices">${!auth()?'<p>Połącz konto ASHEN.</p>':!loaded?'<p class="muted">Odśwież listę, aby zobaczyć graczy.</p>':entries||'<p class="muted">Brak innych opublikowanych kont. Do testu potrzebne jest drugie konto e-mail z własną postacią.</p>'}</div><h3>Raporty walk online</h3>${reports.length?reports.slice(0,40).map(x=>{const own=x.side==='attack'?'Atak':'Obrona',r=x.report||{};return `<button class="mail-row" data-online-report="${x.id}"><strong>${own}: ${esc(r.attacker?.name)} vs ${esc(r.defender?.name)}</strong><small>${fmt(x.created_at)}</small></button>`}).join(''):'<p class="muted">Nie stoczono jeszcze walk online.</p>'}</section>${reportDialog()}`;
 }
 function mailItemsForFolder(){
  const uid=cloud()?.getSession()?.user?.id;

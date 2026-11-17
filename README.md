@@ -1,3 +1,7 @@
+# ASHEN v0.4.9.17
+
+Panel **PvP online → Audyt rzeczywistych aktywacji Z** zbiera zdarzenia z dostępnych raportów Supabase. Brak raportu lub aktywacji to brak danych, nie wynik negatywny. Bez nowych migracji SQL. Dodatkowy odczytowy skrypt SQL znajduje się w `sql/030_diagnostyka_raportow_z_readonly.sql` (opcjonalny; nie jest migracją).
+
 # ASHEN v0.4.9.14
 
 Najnowsza aktualizacja dodaje **kandydata SQL 029** dla serwerowego PvP: Wzmocniony, Pancerny i Techniczny (łącznie 6/15 po wdrożeniu). Samo wgranie plików na GitHub **nie aktywuje** nowych zdolności online. Najpierw test w osobnej bazie i kopia funkcji `ashen_online_attack(uuid)`, następnie ostrożne wdrożenie SQL 029. Zachowaj kopię działającej funkcji publikowania postaci z limitem 8 ataków. W pełnej paczce znajduje się poprawiony SQL 028, ale **nie uruchamiaj go ponownie**.
