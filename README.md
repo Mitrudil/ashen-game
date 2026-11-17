@@ -1,8 +1,8 @@
-# ASHEN — Kroniki Upadku · v0.4.9.9
+# ASHEN — Kroniki Upadku · v0.4.9.11
 
 Przeglądarkowa gra postapokaliptyczna: Starcia lokalne, PvP online, Ekspedycje, ekwipunek i sety X/Y/Z.
 
-## Instalacja aktualizacji v0.4.9.9
+## Instalacja aktualizacji v0.4.9.11
 
 Na GitHub podmień `index.html`, `js/game.js`, `README.md`, `CHANGELOG.md`. Nie wykonuj migracji SQL. Nie zmieniaj `js/public-config.js`.
 
@@ -22,3 +22,6 @@ Historię wersji znajdziesz w `CHANGELOG.md`. Archiwum `sql/` nie jest usuwane.
 
 ### v0.4.9.10
 Poprawione porównanie zdolności „Odporny — Stłumienie krytyka” w Laboratorium Z: decyduje pierwsze trafienie krytyczne zamiast sumy PŻ utraconych do śmierci. Bez migracji SQL.
+
+### v0.4.9.11
+Laboratorium Wszechstronnego ocenia pochłonięcie obrażeń w rundzie 2, nie sumę obrażeń po śmierci. Bez SQL.

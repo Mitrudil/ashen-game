@@ -1,3 +1,8 @@
+## v0.4.9.11 — poprawa testu Wszechstronnego
+- Laboratorium mierzy pochłonięte obrażenia w rundzie 2 (przed śmiercią), zamiast sumować utracone PŻ do śmierci.
+- Warunek zaliczenia wymaga jednej aktywacji Z i faktycznego pochłonięcia obrażeń przez osłonę.
+- Bez zmian balansu, zwykłej walki, PvP online i SQL.
+
 ## v0.4.9.10 — poprawa testu Odpornego
 - Laboratorium porównuje pierwsze trafienie krytyczne z Z i bez Z, a nie łączne obrażenia przy śmierci (są obcinane do pozostałych PŻ).
 - W raporcie pokazuje redukcję na pierwszym krytyku oraz informacyjnie sumy obrażeń.
