@@ -1,3 +1,10 @@
+## v0.4.9.13 — Serwerowa kontrola spójności deklaracji setów (testowa)
+
+- Nowa opcjonalna migracja `sql/028_pvp_set_snapshot_consistency.sql` weryfikuje skład, liczebność, sumę jakości, poziom i flagi Mistrzostw Z w migawce z wyposażeniem zapisanym w `ashen_cloud_saves`.
+- Funkcja `ashen_publish_profile` odmawia zapisania migawki przy niespójności; walka SQL 027 pozostaje bez zmian.
+- **Ograniczenie:** zapis chmurowy nadal modyfikowalny po stronie klienta. To kontrola spójności, nie niezależne potwierdzenie pochodzenia przedmiotów.
+- Nie uruchamiano SQL na rzeczywistym Supabase; wymaga osobnych prób zgodności.
+
 ## v0.4.9.12 — audyt X/Y/Z i gotowości PvP online
 - Statyczna kontrola 15 rodzin setów, ich flag Z, lokalnego silnika i `sql/027_online_pvp_z_stage1.sql`.
 - Zestawienie: 15/15 lokalnie zaliczone, tylko 3/15 Z posiada implementację w SQL 027.
