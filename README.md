@@ -18,3 +18,7 @@ Na GitHub podmień `index.html`, `js/game.js`, `README.md`, `CHANGELOG.md`. Nie 
 Zaliczono wcześniej 12/15 testów lokalnych; ostatnie trzy testy wymagają teraz sprawdzenia na Testerze w przeglądarce. To nie jest potwierdzenie PvP online.
 
 Historię wersji znajdziesz w `CHANGELOG.md`. Archiwum `sql/` nie jest usuwane.
+
+
+### v0.4.9.10
+Poprawione porównanie zdolności „Odporny — Stłumienie krytyka” w Laboratorium Z: decyduje pierwsze trafienie krytyczne zamiast sumy PŻ utraconych do śmierci. Bez migracji SQL.

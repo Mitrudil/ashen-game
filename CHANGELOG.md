@@ -1,3 +1,8 @@
+## v0.4.9.10 — poprawa testu Odpornego
+- Laboratorium porównuje pierwsze trafienie krytyczne z Z i bez Z, a nie łączne obrażenia przy śmierci (są obcinane do pozostałych PŻ).
+- W raporcie pokazuje redukcję na pierwszym krytyku oraz informacyjnie sumy obrażeń.
+- Nie zmieniono działania zdolności, balansu, PvP online, SQL ani danych postaci.
+
 # Historia zmian ASHEN
 
 ## v0.4.9.9 — język nazw i finał Laboratorium Setów Z
