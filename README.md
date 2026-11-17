@@ -27,3 +27,7 @@ Po aktualizacji GitHub odśwież Ctrl+F5. Nie trzeba uruchamiać SQL.
 ## Poprawka 0.4.9.23
 - Audyt nie zwija się podczas odświeżania. Przycisk kopiowania jest od razu widoczny.
 - Przy aktualizacji GitHub należy **nadpisać** także `index.html`, `js/game.js` i `js/online.js`. Sprawdź wersję w nagłówku strony oraz wykonaj Ctrl+F5.
+
+
+## ASHEN v0.4.9.25 — tymczasowo bez limitu PvP
+SQL 038 wyłącza blokadę 2 ataków dziennie w funkcji `ashen_online_attack(uuid)`; bez zmian w walce i raportach. Aby przycisk ataku nie był blokowany, potrzebna jest też aktualizacja GitHub. SQL do przywrócenia limitu pozostaje w `sql/`, lecz nie uruchamiać go podczas testów.

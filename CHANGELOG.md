@@ -38,3 +38,7 @@
 - Osobny test transakcyjnej kompilacji z ROLLBACK, kontrola preflight i pliki dzielone.
 - Opisy w Laboratorium dostosowane do stanu 9/15 Z w produkcyjnym PvP.
 - SQL033 **niewdrożony**; wymaga testów obliczeń przed produkcją.
+
+
+## ASHEN v0.4.9.25 — tymczasowo bez limitu PvP
+SQL 038 wyłącza blokadę 2 ataków dziennie w funkcji `ashen_online_attack(uuid)`; bez zmian w walce i raportach. Aby przycisk ataku nie był blokowany, potrzebna jest też aktualizacja GitHub. SQL do przywrócenia limitu pozostaje w `sql/`, lecz nie uruchamiać go podczas testów.
