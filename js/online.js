@@ -7,6 +7,7 @@ let opponents=[],reports=[],mail=[],expeditionNotices=[],busy=false,error='',not
 let timer=null,lastSynced='',syncing=false,dirty=false,observed='',syncMessage='',syncPaused=0;
 let mailSelected=new Set(),replyDraft='',replyBusy=false;
 let expeditionMailReport=null,expeditionMailLoading=false,expeditionMailError='';
+let openedBattleId=null,shareBusy=false,shareFeedback='',shareTokenCache=new Map();
 const cloud=()=>window.ASHEN_CLOUD;
 const auth=()=>!!(cloud()?.getClient()&&cloud()?.getSession());
 const bound=()=>auth()&&cloud()?.getBoundSlot()===cloud()?.currentSlot();
@@ -71,7 +72,7 @@ async function pauseSync(){
 function resumeSync(){syncPaused=Math.max(0,syncPaused-1);if(!syncPaused&&bound())scheduleSync(200)}
 function localChanged(){if(!bound())return;const raw=activeRaw();if(raw===observed)return;observed=raw;if(raw===lastSynced)return;dirty=true;scheduleSync()}
 function published(){lastSynced='';observed='';syncMessage='Oczekuje na synchronizację';if(bound())localChanged();void refresh()}
-function authChanged(){lastSynced='';observed='';if(timer){clearTimeout(timer);timer=null}dirty=false;syncMessage='';opponents=[];reports=[];mail=[];expeditionNotices=[];openedReport=null;openedMail=null;mailSelected.clear();replyDraft='';loaded=false;void refresh()}
+function authChanged(){lastSynced='';observed='';if(timer){clearTimeout(timer);timer=null}dirty=false;syncMessage='';opponents=[];reports=[];mail=[];expeditionNotices=[];openedReport=null;openedBattleId=null;shareFeedback='';openedMail=null;mailSelected.clear();replyDraft='';loaded=false;void refresh()}
 async function action(fn){if(busy)return;busy=true;error='';notice='';draw();try{await fn()}catch(e){error=msg(e)}finally{busy=false;draw()}}
 function intro(){if(!auth())return '<p class="muted">Zaloguj się przez ☁ Konto online, aby korzystać z PvP między kontami.</p>';
  if(!bound())return '<p class="muted">W panelu ☁ Konto online wybierz postać, którą chcesz udostępnić innym graczom, i kliknij „Wyślij aktualną postać”. To przypisze ten lokalny profil do konta online. Innych testerów nie synchronizujemy automatycznie.</p>';
@@ -99,7 +100,7 @@ function health(value,max,enemy=false){
 }
 function hpLabel(value,max){return `${Math.max(0,Math.round(num(value)))} / ${Math.round(num(max))}`}
 function outcome(r){return r?.winner===0?'Zwycięstwo atakującego':r?.winner===1?'Zwycięstwo obrońcy':'Remis'}
-function renderReport(r,side='attack'){
+function renderReport(r,side='attack',isPublic=false){
  if(!r)return '<p>Nie znaleziono raportu.</p>';
  // A report always stores [attacker, defender]; display order depends on the viewer.
  // In defense reports, defender is the player's own character and must be on the left.
@@ -126,16 +127,44 @@ function renderReport(r,side='attack'){
   const dealt=[damageRaw[order[1]],damageRaw[order[0]]];
   return `<details class="arena-round-card"><summary><span class="arena-round-number">RUNDA ${esc(x.number)}</span><span class="arena-round-damage">Zadane: ${esc(names[0])} ${num(dealt[0])} · ${esc(names[1])} ${num(dealt[1])} obr.</span><span class="arena-round-expand">Szczegóły</span></summary><div class="arena-round-card-body"><div class="arena-round-hp-grid"><div><span>${esc(names[0])} · PŻ</span><strong>${hpLabel(roundHp[0],max[0])}</strong>${health(roundHp[0],max[0])}</div><div><span>${esc(names[1])} · PŻ</span><strong>${hpLabel(roundHp[1],max[1])}</strong>${health(roundHp[1],max[1],true)}</div></div><div class="arena-round-events">${(x.events||[]).map(e=>`<p>${esc(e)}</p>`).join('')||'<p>Brak zapisanych zdarzeń.</p>'}</div></div></details>`;
  }).join('');
+ // Older server reports may omit counters. Damage per round is stored as damage TAKEN,
+ // so reverse the side when deriving damage DEALT. Unknown hit counters remain '—'.
+ const roundDamage=order.map(i=>rnd.reduce((sum,row)=>sum+Math.max(0,num(Array.isArray(row.damage)?row.damage[1-i]:0)),0));
+ const recordedDamage=order.map((i,j)=>{
+  const d=tot[j]?.damage;
+  return d===undefined||d===null||(num(d)===0&&roundDamage[j]>0)?roundDamage[j]:Math.max(0,num(d));
+ });
+ const counter=(t,k)=>t&&t[k]!==undefined&&t[k]!==null&&num(t[k])>=0?num(t[k]):null;
+ const countsReliable=(t,i)=>counter(t,'attempts')!==null&&!(counter(t,'attempts')===0&&roundDamage[i]>0);
+ const hitSummary=(t,i)=>countsReliable(t,i)&&counter(t,'hits')!==null?`${counter(t,'hits')} / ${counter(t,'attempts')}`:'—';
+ const criticalSummary=(t,i)=>countsReliable(t,i)&&counter(t,'critical')!==null?counter(t,'critical'):'—';
+ const accuracy=(t,i)=>countsReliable(t,i)&&num(t.attempts)>0&&counter(t,'hits')!==null?`${Math.round(num(t.hits)/num(t.attempts)*100)}%`:'—';
  const percent=t=>num(t?.attempts)?`${Math.round(num(t.hits)/num(t.attempts)*100)}%`:'—';
- const statrows=[['Zadane obrażenia',num(tot[0]?.damage),num(tot[1]?.damage)],['Trafienia / próby',`${num(tot[0]?.hits)} / ${num(tot[0]?.attempts)}`,`${num(tot[1]?.hits)} / ${num(tot[1]?.attempts)}`],['Skuteczność',percent(tot[0]),percent(tot[1])],['Trafienia krytyczne',num(tot[0]?.critical),num(tot[1]?.critical)]].map(([k,l,v])=>`<tr><th scope="row">${esc(k)}</th><td>${esc(l)}</td><td>${esc(v)}</td></tr>`).join('');
+ const statrows=[['Zadane obrażenia',recordedDamage[0],recordedDamage[1]],['Trafienia / próby',hitSummary(tot[0],0),hitSummary(tot[1],1)],['Skuteczność',accuracy(tot[0],0),accuracy(tot[1],1)],['Trafienia krytyczne',criticalSummary(tot[0],0),criticalSummary(tot[1],1)]].map(([k,l,v])=>`<tr><th scope="row">${esc(k)}</th><td>${esc(l)}</td><td>${esc(v)}</td></tr>`).join('');
  return `<div class="arena-report ashen-online-arena-report"><div class="arena-report-header"><div><span class="tag">RAPORT · PvP ONLINE</span><h3>${esc(result)} — ${esc(names[0])} vs ${esc(names[1])}</h3><p class="small muted">${esc(r.at||'')} · ${rnd.length} ${rnd.length===1?'runda':'rund'} · walka rozliczona na serwerze</p></div></div>
- <section class="arena-combat-profile"><div class="arena-battle-section-title"><span>01 / PORÓWNANIE</span><h4>Statystyki przed walką</h4></div><div class="arena-fighter-portraits"><div class="arena-fighter-portrait is-hero">${portrait(fighters[0])}<strong>${esc(names[0])}</strong><small>Twoja postać · ${roles[0]} · Poziom ${esc(fighters[0].level??'—')}</small></div><span class="arena-fighter-versus">VS</span><div class="arena-fighter-portrait is-enemy">${portrait(fighters[1])}<strong>${esc(names[1])}</strong><small>Przeciwnik · ${roles[1]} · Poziom ${esc(fighters[1].level??'—')}</small></div></div><div class="arena-combat-table-wrap"><table class="arena-combat-table arena-comparison-expanded"><thead><tr><th>Parametr</th><th>${esc(names[0])} (Ty)</th><th>${esc(names[1])}</th></tr></thead><tbody>${table}</tbody></table></div><p class="arena-profile-explainer">Kolory pokazują porównanie zapisanych parametrów z chwili walki. Obrażenia PvP nie powodują trwałej utraty PŻ ani wyposażenia.</p><div class="arena-profile-weapons"><strong>Twoje uzbrojenie:</strong> ${arms(fighters[0])}<div><strong>Uzbrojenie przeciwnika:</strong> ${arms(fighters[1])}</div></div></section>
+ <section class="arena-combat-profile"><div class="arena-battle-section-title"><span>01 / PORÓWNANIE</span><h4>Statystyki przed walką</h4></div><div class="arena-fighter-portraits"><div class="arena-fighter-portrait is-hero">${portrait(fighters[0])}<strong>${esc(names[0])}</strong><small>${isPublic?'Atakujący':'Twoja postać'} · ${roles[0]} · Poziom ${esc(fighters[0].level??'—')}</small></div><span class="arena-fighter-versus">VS</span><div class="arena-fighter-portrait is-enemy">${portrait(fighters[1])}<strong>${esc(names[1])}</strong><small>${isPublic?'Obrońca':'Przeciwnik'} · ${roles[1]} · Poziom ${esc(fighters[1].level??'—')}</small></div></div><div class="arena-combat-table-wrap"><table class="arena-combat-table arena-comparison-expanded"><thead><tr><th>Parametr</th><th>${esc(names[0])}${isPublic?' (Atakujący)':' (Ty)'}</th><th>${esc(names[1])}</th></tr></thead><tbody>${table}</tbody></table></div><p class="arena-profile-explainer">Kolory pokazują porównanie zapisanych parametrów z chwili walki. Obrażenia PvP nie powodują trwałej utraty PŻ ani wyposażenia.</p><div class="arena-profile-weapons"><strong>${isPublic?'Uzbrojenie atakującego:':'Twoje uzbrojenie:'}</strong> ${arms(fighters[0])}<div><strong>${isPublic?'Uzbrojenie obrońcy:':'Uzbrojenie przeciwnika:'}</strong> ${arms(fighters[1])}</div></div></section>
  <section class="arena-round-review"><div class="arena-battle-section-title"><span>02 / RUNDY</span><h4>Przebieg starcia</h4></div><div class="arena-rounds-list">${rounds||'<p class="muted">W tym raporcie nie zapisano przebiegu rund.</p>'}</div></section>
  <section class="arena-battle-finale"><div class="arena-battle-section-title"><span>03 / WYNIK</span><h4>Podsumowanie starcia</h4></div><div class="arena-outcome-reason ${r.winner===null?'is-draw':''}"><strong>${esc(result)}</strong><p>${r.winner===null?'Po 10 rundach nie wyłoniono zwycięzcy.':`Wynik rozstrzygnął serwer. ${rnd.length} ${rnd.length===1?'runda':'rund'}.`}</p><div class="arena-final-hp"><div><span>${esc(names[0])} · PŻ po walce</span><strong>${hpLabel(hp[0],max[0])}</strong>${health(hp[0],max[0])}</div><div><span>${esc(names[1])} · PŻ po walce</span><strong>${hpLabel(hp[1],max[1])}</strong>${health(hp[1],max[1],true)}</div></div></div></section>
- <div class="ashen-damage-summary"><div class="ashen-damage-header"><strong>⚔ PODSUMOWANIE WALKI</strong><span>${rnd.length} ${rnd.length===1?'runda':'rund'}</span></div><div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Parametr</th><th>Twoja postać</th><th>Przeciwnik</th></tr></thead><tbody>${statrows}</tbody></table></div></div><div class="arena-report-reward"><strong>PvP online:</strong> bez nagród i bez utraty przedmiotów lub trwałego PŻ. <span class="small muted">Efekty Z nie są jeszcze rozstrzygane przez serwer. Premie X/Y wymagają instalacji migracji SQL 025.</span></div></div>`;
+ <div class="ashen-damage-summary"><div class="ashen-damage-header"><strong>⚔ PODSUMOWANIE WALKI</strong><span>${rnd.length} ${rnd.length===1?'runda':'rund'}</span></div><div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Parametr</th><th>${isPublic?'Atakujący':'Twoja postać'}</th><th>${isPublic?'Obrońca':'Przeciwnik'}</th></tr></thead><tbody>${statrows}</tbody></table></div></div><div class="arena-report-reward"><strong>PvP online:</strong> bez nagród i bez utraty przedmiotów lub trwałego PŻ. <span class="small muted">Efekty Z nie są jeszcze rozstrzygane przez serwer. Premie X/Y zależą od migracji SQL 025 i aktywnych setów zapisanych w chwili walki.</span></div></div>`;
 }
 function reportDialog(){if(!openedReport)return '';
- return `<div class="arena-report-overlay" data-online-report-overlay="1"><div class="arena-report-dialog" role="dialog" aria-modal="true" aria-label="Raport PvP online"><div class="arena-report-dialog-toolbar"><span>⚔ RAPORT STARCIA · PvP ONLINE</span><button type="button" data-online-close-report="1">✕ Wróć</button></div><div class="arena-report-dialog-scroll">${renderReport(openedReport,openedReportSide)}</div></div></div>`;
+ const shareControls=openedBattleId?`<button type="button" data-online-share-report="1" ${shareBusy?'disabled':''}>${shareBusy?'Przygotowywanie…':'🔗 Kopiuj link'}</button><button type="button" data-online-native-share="1" ${shareBusy?'disabled':''}>↗ Udostępnij</button>`:'';
+ return `<div class="arena-report-overlay data-online-report-overlay="1"><div class="arena-report-dialog" role="dialog" aria-modal="true" aria-label="Raport PvP online"><div class="arena-report-dialog-toolbar"><span>⚔ RAPORT STARCIA · PvP ONLINE</span>${shareControls}<button type="button" data-online-close-report="1">✕ Wróć</button></div>${shareFeedback?`<p class="small muted" style="padding:6px 16px" role="status">${esc(shareFeedback)}</p>`:''}<div class="arena-report-dialog-scroll">${renderReport(openedReport,openedReportSide)}</div></div></div>`;
+}
+async function shareCurrentReport(native=false){
+ if(shareBusy||!openedBattleId)return;
+ const bid=Number(openedBattleId);
+ if(!Number.isSafeInteger(bid)||bid<1){shareFeedback='Nie udało się odczytać identyfikatora walki.';draw();return}
+ shareBusy=true;shareFeedback='Tworzenie publicznego linku…';draw();
+ try{
+  let token=shareTokenCache.get(bid);
+  if(!token){token=await rpc('ashen_online_share_report',{p_battle_id:bid});shareTokenCache.set(bid,token)}
+  const url=new URL('report.html',window.location.href);url.search='';url.hash='';url.searchParams.set('report',String(token));
+  if(native&&navigator.share){await navigator.share({title:'ASHEN — raport PvP',url:url.href});shareFeedback='Raport udostępniony.'}
+  else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(url.href);shareFeedback='Skopiowano link do raportu.'}
+  else {shareFeedback='Skopiuj link z okna:';window.prompt('Link do raportu PvP:',url.href)}
+ }catch(e){shareFeedback='Nie udało się udostępnić raportu: '+msg(e)+' (sprawdź SQL 026)'}
+ finally{shareBusy=false;draw()}
 }
 function onlineSetDiagnostic(){
  if(!bound())return '';
@@ -158,7 +187,7 @@ function onlineSetDiagnostic(){
 }
 function pvpHtml(){
  const entries=opponents.map(p=>`<article class="pvp-choice"><img src="${p.origin==='tech'?'./assets/characters/technician-'+p.gender+'.webp':p.origin==='fighter'?'./assets/characters/warrior-'+p.gender+'.webp':'./assets/characters/scout-'+p.gender+'.webp'}" onerror="this.style.display='none'" alt=""><div><h4>${esc(p.name)}</h4><p class="small muted">Poziom ${p.level} · ${esc(p.origin)} · ostatni zapis ${fmt(p.updated_at)}</p><p>Ataki dziś: ${p.attacks_today}/2</p><button data-online-profile="${esc(p.user_id)}">Profil</button><button class="primary" data-online-attack="${esc(p.user_id)}" ${!bound()||busy||p.attacks_today>=2?'disabled':''}>⚔ Zaatakuj online</button></div></article>`).join('');
- return `<section class="section"><h2>🌐 PvP online — prawdziwe konta</h2><p class="small muted">Wyniki rozstrzyga Supabase (X/Y po instalacji SQL 025; bez mistrzostwa Z), limit dwóch ataków na każdą postać resetuje się o północy czasu polskiego. Nie trzeba być zalogowanym, aby zostać zaatakowanym. Lokalny tryb testowy znajduje się niżej.</p>${intro()}${onlineSetDiagnostic()}${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}<div class="actions"><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież graczy i raporty</button></div><h3>Przeciwnicy (${opponents.length})</h3><div class="pvp-choices">${!auth()?'<p>Połącz konto ASHEN.</p>':!loaded?'<p class="muted">Odśwież listę, aby zobaczyć graczy.</p>':entries||'<p class="muted">Brak innych opublikowanych kont. Do testu potrzebne jest drugie konto e-mail z własną postacią.</p>'}</div><h3>Raporty walk online</h3>${reports.length?reports.slice(0,15).map(x=>{const own=x.side==='attack'?'Atak':'Obrona',r=x.report||{};return `<button class="mail-row" data-online-report="${x.id}"><strong>${own}: ${esc(r.attacker?.name)} vs ${esc(r.defender?.name)}</strong><small>${fmt(x.created_at)}</small></button>`}).join(''):'<p class="muted">Nie stoczono jeszcze walk online.</p>'}</section>${reportDialog()}`;
+ return `<section class="section"><h2>🌐 PvP online — prawdziwe konta</h2><p class="small muted">Wyniki rozstrzyga Supabase (X/Y po instalacji SQL 025; bez mistrzostwa Z), limit dwóch ataków na każdą postać resetuje się o północy czasu polskiego. Nie trzeba być zalogowanym, aby zostać zaatakowanym. Lokalny tryb testowy znajduje się niżej.</p>${intro()}${onlineSetDiagnostic()}${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}<div class="actions"><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież graczy i raporty</button></div><h3>Przeciwnicy (${opponents.length})</h3><div class="pvp-choices">${!auth()?'<p>Połącz konto ASHEN.</p>':!loaded?'<p class="muted">Odśwież listę, aby zobaczyć graczy.</p>':entries||'<p class="muted">Brak innych opublikowanych kont. Do testu potrzebne jest drugie konto e-mail z własną postacią.</p>'}</div><h3>Raporty walk online</h3>${reports.length?reports.slice(0,40).map(x=>{const own=x.side==='attack'?'Atak':'Obrona',r=x.report||{};return `<button class="mail-row" data-online-report="${x.id}"><strong>${own}: ${esc(r.attacker?.name)} vs ${esc(r.defender?.name)}</strong><small>${fmt(x.created_at)}</small></button>`}).join(''):'<p class="muted">Nie stoczono jeszcze walk online.</p>'}</section>${reportDialog()}`;
 }
 function mailItemsForFolder(){
  const uid=cloud()?.getSession()?.user?.id;
@@ -213,11 +242,13 @@ document.addEventListener('click',async e=>{
 
  const b=e.target.closest('button');if(!b)return;
  if(b.hasAttribute('data-online-refresh')){e.preventDefault();await refresh();return}
+ if(b.hasAttribute('data-online-share-report')){e.preventDefault();await shareCurrentReport(false);return}
+ if(b.hasAttribute('data-online-native-share')){e.preventDefault();await shareCurrentReport(true);return}
  if(b.hasAttribute('data-online-close-report')){openedReport=null;reportContext='pvp';draw();return}
- if(b.dataset.onlineReport){const item=reports.find(x=>String(x.id)===b.dataset.onlineReport);if(item){openedReport=item.report;openedReportSide=item.side==='defense'?'defense':'attack';reportContext=b.closest('[data-online-mail-view]')?'mail':'pvp';error='';draw();return}error='Nie znaleziono raportu walki na liście pobranych raportów. Kliknij Odśwież i spróbuj ponownie.';draw();return}
+ if(b.dataset.onlineReport){const item=reports.find(x=>String(x.id)===b.dataset.onlineReport);if(item){openedReport=item.report;openedBattleId=Number(item.id)||null;shareFeedback='';openedReportSide=item.side==='defense'?'defense':'attack';reportContext=b.closest('[data-online-mail-view]')?'mail':'pvp';error='';draw();return}error='Nie znaleziono raportu walki na liście pobranych raportów. Kliknij Odśwież i spróbuj ponownie.';draw();return}
  if(b.dataset.onlineAttack){const id=b.dataset.onlineAttack,p=opponents.find(x=>x.user_id===id);if(!p||!bound())return;
   if(!confirm(`Zaatakować gracza ${p.name} (poziom ${p.level})?\nWalka jest rozliczana na serwerze. Limit: 2 dziennie.`))return;
-  await action(async()=>{const r=await rpc('ashen_online_attack',{p_defender:id});openedReport=r;openedReportSide='attack';reportContext='pvp';notice='Walka zakończona. Raport trafił do obu kont.'});await refresh();return;
+  await action(async()=>{const r=await rpc('ashen_online_attack',{p_defender:id});openedReport=r;openedBattleId=Number(String(r?.id||'').replace(/^online-/,''))||null;shareFeedback='';openedReportSide='attack';reportContext='pvp';notice='Walka zakończona. Raport trafił do obu kont.'});await refresh();return;
  }
  if(b.dataset.onlineMailFolder){mailFolder=b.dataset.onlineMailFolder;mailSelected.clear();openedMail=null;replyDraft='';openedReport=null;expeditionMailReport=null;reportContext='pvp';draw();return}
  if(b.hasAttribute('data-online-mail-back')){openedMail=null;replyDraft='';openedReport=null;expeditionMailReport=null;reportContext='pvp';draw();return}
@@ -232,7 +263,7 @@ document.addEventListener('click',async e=>{
  if(b.hasAttribute('data-online-profile')){window.ASHEN_OPEN_PLAYER?.(b.dataset.onlineProfile);return}
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&openedReport){openedReport=null;reportContext='pvp';draw()}});
-window.ASHEN_ONLINE={pvpHtml,mailHtml,localChanged,published,authChanged,refresh,unreadCount,pauseSync,resumeSync,flushSync};
+window.ASHEN_ONLINE={renderPublicReport:(r)=>renderReport(r,'attack',true),pvpHtml,mailHtml,localChanged,published,authChanged,refresh,unreadCount,pauseSync,resumeSync,flushSync};
 window.addEventListener('online',()=>{if(bound())scheduleSync(500);void refresh()});
 if(auth())void refresh();
 })();
