@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.7.7';
+const APP_VERSION='0.4.7.8';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -683,8 +683,8 @@ const SETS={
 // ASHEN v0.4.7.6: rozłączny katalog PROJEKTOWANYCH premii setowych.
 // Nie podłączać bezpośrednio do attrs(), heroDefense() lub fight() — mechaniki
 // pomocnicze (unik, odporność krytyczna, inicjatywa) wymagają jeszcze implementacji i testów.
-const SET_V05_DESIGN = {"clothing":{"armor_reinforced":{"name":"Wzmocniony","role":"PŻ i wytrzymałość","description":"Zapas PŻ bez specjalizacji broni","primary":{"stat":"end","at3":2,"perTier":1},"secondary":{"stat":"hpPct","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_plated":{"name":"Pancerny","role":"Pancerz i redukcja","description":"Ochrona przed wieloma trafieniami","primary":{"stat":"armorPct","at3":5,"perTier":2},"secondary":{"stat":"flatReduction","at3":1,"perTier":1},"activeFrom":3,"maxPieces":6},"armor_flexible":{"name":"Elastyczny","role":"Zręczność i unik","description":"Szansa uniknięcia trafienia","primary":{"stat":"dex","at3":2,"perTier":1},"secondary":{"stat":"dodge","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_agile":{"name":"Zwinny","role":"Inicjatywa i precyzja","description":"Przewaga pierwszych ataków","primary":{"stat":"accuracy","at3":2,"perTier":1},"secondary":{"stat":"firstHit","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_light":{"name":"Lekki","role":"Percepcja i celność","description":"Dokładniejsze ataki","primary":{"stat":"per","at3":1,"perTier":1},"secondary":{"stat":"accuracy","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_resistant":{"name":"Odporny","role":"Wytrzymałość i krytyki","description":"Ograniczanie ciosów krytycznych","primary":{"stat":"end","at3":1,"perTier":1},"secondary":{"stat":"critResist","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_tracker":{"name":"Tropicielski","role":"Percepcja i krytyki","description":"Kontrola krytyków niezależnie od broni","primary":{"stat":"per","at3":1,"perTier":1},"secondary":{"stat":"critChance","at3":1,"perTier":1},"activeFrom":3,"maxPieces":6},"armor_iron":{"name":"Żelazny","role":"Siła i moc trafienia","description":"Ofensywna specjalizacja także bez broni białej","primary":{"stat":"str","at3":1,"perTier":1},"secondary":{"stat":"damagePct","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_warden":{"name":"Wartownika","role":"Wytrzymałość i stabilność","description":"Przetrwanie długich pojedynków","primary":{"stat":"end","at3":2,"perTier":1},"secondary":{"stat":"damageResist","at3":1,"perTier":1},"activeFrom":3,"maxPieces":6},"armor_nomad":{"name":"Nomady","role":"Zręczność i wszechstronność","description":"Ruchliwość i niewielka premia ofensywna","primary":{"stat":"dex","at3":1,"perTier":1},"secondary":{"stat":"damagePct","at3":1,"perTier":1},"activeFrom":3,"maxPieces":6}},"accessories":{"accessory_technical":{"name":"Technika","role":"Inteligencja i penetracja","description":"Przebicie użyteczne dla każdej klasy","primary":{"stat":"int","at3":3},"secondary":{"stat":"armorPen","at3":2},"activeFrom":3,"maxPieces":3},"accessory_observant":{"name":"Tropiciela","role":"Percepcja i krytyk","description":"Precyzja i krytyki","primary":{"stat":"per","at3":2},"secondary":{"stat":"critChance","at3":2},"activeFrom":3,"maxPieces":3},"accessory_persuasive":{"name":"Negocjatora","role":"Charyzma i wyprawy","description":"Premia ekonomiczna; nie wpływa na obrażenia","primary":{"stat":"cha","at3":3},"secondary":{"stat":"expeditionCreditsPct","at3":3},"activeFrom":3,"maxPieces":3},"accessory_reflexive":{"name":"Nomady","role":"Zręczność i unik","description":"Większa przeżywalność","primary":{"stat":"dex","at3":2},"secondary":{"stat":"dodge","at3":3},"activeFrom":3,"maxPieces":3},"accessory_versatile":{"name":"Ocalałego","role":"Wytrzymałość i percepcja","description":"Odporność i uniwersalne atrybuty","primary":{"stat":"end","at3":2},"secondary":{"stat":"per","at3":1},"activeFrom":3,"maxPieces":3}}};
-const SET_V05_LABELS={end:'Wytrzymałość',armorPct:'Pancerz %',dex:'Zręczność',accuracy:'Celność',per:'Percepcja',str:'Siła',int:'Inteligencja',cha:'Charyzma',hpPct:'PŻ %',flatReduction:'Redukcja obrażeń / trafienie',dodge:'Unik (pkt)',firstHit:'Premia pierwszego trafienia %',critResist:'Redukcja obrażeń krytycznych %',critChance:'Szansa krytyka (p.p.)',damagePct:'Obrażenia %',damageResist:'Redukcja obrażeń %',armorPen:'Przebicie pancerza (pkt)',expeditionCreditsPct:'Kredyty z wypraw %'};
+const SET_V05_DESIGN = {"clothing":{"armor_reinforced":{"name":"Wzmocniony","role":"PŻ i wytrzymałość","description":"Zapas PŻ bez specjalizacji broni","primary":{"stat":"end","at3":2,"perTier":1},"secondary":{"stat":"hpPct","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_plated":{"name":"Pancerny","role":"Pancerz i redukcja","description":"Ochrona przed wieloma trafieniami","primary":{"stat":"armorPct","at3":5,"perTier":2},"secondary":{"stat":"flatReduction","at3":1,"perTier":1},"activeFrom":3,"maxPieces":6},"armor_flexible":{"name":"Elastyczny","role":"Zręczność i unik","description":"Szansa uniknięcia trafienia","primary":{"stat":"dex","at3":2,"perTier":1},"secondary":{"stat":"dodge","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_agile":{"name":"Zwinny","role":"Inicjatywa i precyzja","description":"Przewaga pierwszych ataków","primary":{"stat":"accuracy","at3":2,"perTier":1},"secondary":{"stat":"firstHit","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_light":{"name":"Lekki","role":"Percepcja i celność","description":"Dokładniejsze ataki","primary":{"stat":"per","at3":1,"perTier":1},"secondary":{"stat":"accuracy","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_resistant":{"name":"Odporny","role":"Wytrzymałość i krytyki","description":"Ograniczanie ciosów krytycznych","primary":{"stat":"end","at3":1,"perTier":1},"secondary":{"stat":"critResist","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_tracker":{"name":"Tropicielski","role":"Percepcja i krytyki","description":"Kontrola krytyków niezależnie od broni","primary":{"stat":"per","at3":1,"perTier":1},"secondary":{"stat":"critChance","at3":1,"perTier":1},"activeFrom":3,"maxPieces":6},"armor_iron":{"name":"Żelazny","role":"Siła i moc trafienia","description":"Ofensywna specjalizacja także bez broni białej","primary":{"stat":"str","at3":1,"perTier":1},"secondary":{"stat":"damagePct","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_warden":{"name":"Wartownika","role":"Wytrzymałość i stabilność","description":"Przetrwanie długich pojedynków","primary":{"stat":"end","at3":2,"perTier":1},"secondary":{"stat":"damageResist","at3":1,"perTier":1},"activeFrom":3,"maxPieces":6},"armor_nomad":{"name":"Nomady","role":"Zręczność i wszechstronność","description":"Ruchliwość i niewielka premia ofensywna","primary":{"stat":"dex","at3":1,"perTier":1},"secondary":{"stat":"damagePct","at3":1,"perTier":1},"activeFrom":3,"maxPieces":6}},"accessories":{"accessory_technical":{"name":"Technika","role":"Inteligencja i penetracja","description":"Przebicie użyteczne dla każdej klasy","primary":{"stat":"int","at3":3},"secondary":{"stat":"armorPen","at3":2},"activeFrom":3,"maxPieces":3},"accessory_observant":{"name":"Tropiciela","role":"Percepcja i krytyk","description":"Precyzja i krytyki","primary":{"stat":"per","at3":2},"secondary":{"stat":"critChance","at3":2},"activeFrom":3,"maxPieces":3},"accessory_persuasive":{"name":"Negocjatora","role":"Charyzma i handel","description":"Premia do sprzedaży wyposażenia; nie wpływa na obrażenia","primary":{"stat":"cha","at3":3},"secondary":{"stat":"saleCreditsPct","at3":3},"activeFrom":3,"maxPieces":3},"accessory_reflexive":{"name":"Nomady","role":"Zręczność i unik","description":"Większa przeżywalność","primary":{"stat":"dex","at3":2},"secondary":{"stat":"dodge","at3":3},"activeFrom":3,"maxPieces":3},"accessory_versatile":{"name":"Ocalałego","role":"Wytrzymałość i percepcja","description":"Odporność i uniwersalne atrybuty","primary":{"stat":"end","at3":2},"secondary":{"stat":"per","at3":1},"activeFrom":3,"maxPieces":3}}};
+const SET_V05_LABELS={end:'Wytrzymałość',armorPct:'Pancerz %',dex:'Zręczność',accuracy:'Celność',per:'Percepcja',str:'Siła',int:'Inteligencja',cha:'Charyzma',hpPct:'PŻ %',flatReduction:'Redukcja obrażeń / trafienie',dodge:'Unik (pkt)',firstHit:'Premia pierwszego trafienia %',critResist:'Redukcja obrażeń krytycznych %',critChance:'Szansa krytyka (p.p.)',damagePct:'Obrażenia %',damageResist:'Redukcja obrażeń %',armorPen:'Przebicie pancerza (pkt)',saleCreditsPct:'Kredyty ze sprzedaży %'};
 function designedSetPreviewParts(parts,quality=0){
  const groups={};for(const id of parts){if(!id||id==='none')continue;(groups[id]??=[]).push(id)}
  const q=Math.max(0,Math.min(4,Number(quality)||0));const qualityFactor=1+(setQuality({rarity:q})-1)*.35;
@@ -695,7 +695,59 @@ function designedSetPreviewParts(parts,quality=0){
   return {id,name:cfg.name,role:cfg.role,description:cfg.description,count,max:cfg.maxPieces,active,effects};
  }).filter(Boolean);
 }
-// ASHEN v0.4.7.7: stan rozwiniętych paneli projektu jest niezależny od renderowania.
+// ASHEN v0.4.7.8 — wspólny silnik rzeczywistych premii setowych.
+// Każda aktywna rodzina 3..6 (odzież) albo dokładnie 3/3 (akcesoria) jest
+// obliczana osobno; jakość = średnia z KONKRETNIE założonych elementów.
+// Wersja 0.5 ma łagodniejsze skalowanie: 1 + 35% nadwyżki jakości.
+const SET_ENGINE_VERSION='0.4.7.8';
+const SET_ATTRIBUTE_KEYS=new Set(['str','dex','end','per','int','cha']);
+function setEffectQuality(instances){
+ const avg=instances.reduce((sum,inst)=>sum+setQuality(inst),0)/Math.max(1,instances.length);
+ return Math.round((1+(avg-1)*.35)*1000)/1000;
+}
+function setEngineEffects(){
+ const groups={clothing:{},accessories:{}};
+ const seen=new Set();
+ for(const slot of clothingSlots){
+  const inst=instance(state.equip?.[slot]);if(!inst||seen.has(inst.uid))continue;
+  seen.add(inst.uid);const id=setPrefixId(inst);
+  if(id&&SET_V05_DESIGN.clothing[id])(groups.clothing[id]??=[]).push(inst);
+ }
+ for(const slot of ['extra','extra2','extra3']){
+  const inst=instance(state.equip?.[slot]);if(!inst||seen.has(inst.uid))continue;
+  seen.add(inst.uid);const id=accessorySetPrefixId(inst);
+  if(id&&SET_V05_DESIGN.accessories[id])(groups.accessories[id]??=[]).push(inst);
+ }
+ const total={},active=[];
+ for(const category of ['clothing','accessories'])for(const [id,instances] of Object.entries(groups[category])){
+  const cfg=SET_V05_DESIGN[category][id],count=instances.length;
+  // Progi bez wyjątków: odzież 3,4,5,6; akcesoria WYŁĄCZNIE 3/3.
+  if(count<3||(category==='accessories'&&count!==3))continue;
+  const qualityFactor=setEffectQuality(instances),tier=category==='clothing'?Math.min(3,count-3):0;
+  const effects={};
+  for(const def of [cfg.primary,cfg.secondary]){
+   const base=def.at3+tier*(def.perTier||0);
+   const value=Math.round(base*qualityFactor*10)/10;
+   effects[def.stat]=(effects[def.stat]||0)+value;
+   total[def.stat]=(total[def.stat]||0)+value;
+  }
+  active.push({id,name:cfg.name,category,count,qualityFactor,effects});
+ }
+ // Bez nadmiernego stackowania dwóch ofensywnych setów i akcesoriów.
+ total.damagePct=Math.min(24,total.damagePct||0);
+ total.damageResist=Math.min(20,total.damageResist||0);
+ total.critResist=Math.min(35,total.critResist||0);
+ total.dodge=Math.min(18,total.dodge||0);
+ total.critChance=Math.min(10,total.critChance||0);
+ total.hpPct=Math.min(24,total.hpPct||0);
+ total.armorPen=Math.min(18,total.armorPen||0);
+ total.flatReduction=Math.min(12,total.flatReduction||0);
+ return {effects:total,active};
+}
+function activeSetEffectText(effects){
+ return Object.entries(effects||{}).map(([id,n])=>`${SET_V05_LABELS[id]||id} +${String(n).replace('.',',')}`).join(' · ');
+}
+// ASHEN v0.4.7.8: stan rozwiniętych paneli projektu jest niezależny od renderowania.
 // Katalog wewnątrz Planera nie może zamknąć się przy zmianie wyboru, przewijaniu
 // ani gdy odświeża się zawartość sekcji wyników.
 const SET_DESIGN_OPEN_KEY='ashen-set-design-open-v0477';
@@ -707,7 +759,7 @@ function designedSetPreviewHtml(){
  const cloth=designedSetPreviewParts(setPlanner.clothing,setPlanner.quality);
  const acc=designedSetPreviewParts(setPlanner.accessories,setPlanner.quality);
  const fmt=(rows)=>rows.length?rows.map(r=>`<div style="padding:9px 0;border-bottom:1px solid var(--border,#333)"><strong>${escape(r.name)} · ${r.count}/${r.max} ${r.active?'✓':'—'}</strong><small style="display:block;opacity:.85">${escape(r.role)}</small><div style="margin-top:3px">${r.active?r.effects.map(e=>`${escape(SET_V05_LABELS[e.key]||e.key)} +${String(e.amount).replace('.',',')}`).join(' · '):'Brak premii (minimum 3 elementy)'}</div></div>`).join(''):'<p class="small muted">Nie wybrano żadnej rodziny.</p>';
- return `<details class="panel section" id="ashen-set-v05-design" ${setDesignOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧭 Projekt ASHEN 0.5 — 15 unikalnych rodzin (podgląd)</summary><p class="small muted"><strong>TYLKO PROJEKT · nie wpływa na statystyki ani Starcia.</strong> Podgląd pokazuje robocze nowe premie dla aktualnego ustawienia Planera. Współczynniki jakości są testowe (celowo łagodniejsze od obecnego ×2,5). Wartości nie są jeszcze zatwierdzone.</p><h4>Odzież · progi 3/4/5/6</h4>${fmt(cloth)}<h4>Akcesoria · tylko 3/3</h4>${fmt(acc)}<details id="ashen-set-v05-catalog" ${setDesignCatalogOpen?'open':''} style="margin-top:12px"><summary style="cursor:pointer">Pełny katalog 10 + 5 rodzin</summary>${fmt(Object.entries(SET_V05_DESIGN.clothing).map(([id,cfg])=>({id,name:cfg.name,role:cfg.role,description:cfg.description,count:3,max:6,active:true,effects:[cfg.primary,cfg.secondary].map(e=>({key:e.stat,amount:e.at3}))})))}${fmt(Object.entries(SET_V05_DESIGN.accessories).map(([id,cfg])=>({id,name:cfg.name,role:cfg.role,description:cfg.description,count:3,max:3,active:true,effects:[cfg.primary,cfg.secondary].map(e=>({key:e.stat,amount:e.at3}))})))}</details></details>`;
+ return `<details class="panel section" id="ashen-set-v05-design" ${setDesignOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧭 Nowe rodziny ASHEN — podgląd w Planerze</summary><p class="small muted"><strong>NOWY MODEL AKTYWNY w Postaci i lokalnych Starciach.</strong> Ten Planer pokazuje symulację wybranych części, nie zastępuje ekwipunku. Ekspedycje serwerowe i PvP nadal wymagają synchronizacji.</p><h4>Odzież · progi 3/4/5/6</h4>${fmt(cloth)}<h4>Akcesoria · tylko 3/3</h4>${fmt(acc)}<details id="ashen-set-v05-catalog" ${setDesignCatalogOpen?'open':''} style="margin-top:12px"><summary style="cursor:pointer">Pełny katalog 10 + 5 rodzin</summary>${fmt(Object.entries(SET_V05_DESIGN.clothing).map(([id,cfg])=>({id,name:cfg.name,role:cfg.role,description:cfg.description,count:3,max:6,active:true,effects:[cfg.primary,cfg.secondary].map(e=>({key:e.stat,amount:e.at3}))})))}${fmt(Object.entries(SET_V05_DESIGN.accessories).map(([id,cfg])=>({id,name:cfg.name,role:cfg.role,description:cfg.description,count:3,max:3,active:true,effects:[cfg.primary,cfg.secondary].map(e=>({key:e.stat,amount:e.at3}))})))}</details></details>`;
 }
 
 function setPrefixId(inst){
@@ -1055,7 +1107,7 @@ function accessorySetItemPanel(inst){
  const active=Boolean(result?.active)&&equipped;
  return `<div class="ashen-set-item-info ${active?'is-active':'is-pending'}"><strong>${active?'✓ AKTYWNY':equipped?'◌ NIEAKTYWNY':'◇ ELEMENT SETU'} · Akcesoria ${escape(cfg.name)} (${count}/3)</strong><div class="ashen-set-detail-main">${active?`Bonus setowy: ${escape(accessoryBonusText(result.bonus))}`:'Bonus setowy nieaktywny. Aktywacja dopiero przy 3/3.'}</div><small>${equipped?`Liczba brakujących elementów: ${Math.max(0,3-count)}.`:'Załóż to akcesorium w jednym z trzech slotów.'} Rodzina zależy od prefiksu; sufiks może być dowolny.</small></div>`;
 }
-function attrs(){const a={...state.attrs};Object.values(state.equip).filter(Boolean).forEach(uid=>{for(const [k,v] of Object.entries(statsOf(instance(uid))?.bonus||{}))a[k]+=v});for(const [k,v] of Object.entries(activeSetBonuses().bonus))a[k]=(a[k]||0)+v;for(const [k,v] of Object.entries(accessorySetBonuses().bonus))a[k]=(a[k]||0)+v;for(const [k,v] of Object.entries(resonanceBonuses().bonus))a[k]=(a[k]||0)+v;return a}function maxHp(){return Math.round((60+attrs().end*10)*(1+0.025*(roomLevel('infirmary')-1)))}function xpNeed(){return Math.floor(80*Math.pow(state.level,1.35))}function regen(){let now=Date.now(),ticks=Math.floor((now-state.lastRegen)/45000);if(ticks>0){state.energy=Math.min(100,state.energy+ticks);state.lastRegen+=ticks*45000}}function levelUp(){let n=0;while(state.xp>=xpNeed()){state.xp-=xpNeed();state.level++;state.points+=3;n++}return n}// Jedna klasyfikacja dla obrażeń, celności i opisu w zakładce Postać.
+function attrs(){const a={...state.attrs};Object.values(state.equip).filter(Boolean).forEach(uid=>{for(const [k,v] of Object.entries(statsOf(instance(uid))?.bonus||{}))a[k]+=v});for(const [k,v] of Object.entries(setEngineEffects().effects))if(SET_ATTRIBUTE_KEYS.has(k))a[k]=(a[k]||0)+v;for(const [k,v] of Object.entries(resonanceBonuses().bonus))a[k]=(a[k]||0)+v;return a}function maxHp(){return Math.round((60+attrs().end*10)*(1+0.025*(roomLevel('infirmary')-1))*(1+(setEngineEffects().effects.hpPct||0)/100))}function xpNeed(){return Math.floor(80*Math.pow(state.level,1.35))}function regen(){let now=Date.now(),ticks=Math.floor((now-state.lastRegen)/45000);if(ticks>0){state.energy=Math.min(100,state.energy+ticks);state.lastRegen+=ticks*45000}}function levelUp(){let n=0;while(state.xp>=xpNeed()){state.xp-=xpNeed();state.level++;state.points+=3;n++}return n}// Jedna klasyfikacja dla obrażeń, celności i opisu w zakładce Postać.
 // Typ broni wynika z niezmiennego identyfikatora — nie z jej nazwy ani prefiksu.
 const MELEE_ONE_IDS=new Set(['knife','pipe','machete','cleaver','wrench','hatchet','baton','saber']);
 const MELEE_TWO_IDS=new Set(['hammer','crowbar','sledge']);
@@ -1124,10 +1176,11 @@ function heroDefense(options={}){
  const a=attrs();
  const rawArmor=Object.entries(state.equip).filter(([slot])=>!['right','left'].includes(slot))
   .reduce((sum,[,uid])=>sum+(statsOf(instance(uid))?.armor||0),0);
- const setArmor=activeSetBonuses().armorPct;
+ const bonusEffects=setEngineEffects().effects;
+ const setArmor=bonusEffects.armorPct||0;
  const pet=companionId()==='boar'?petPower('boar'):0;
  const vehicleArmor=options.expedition?2*activeVehicleModule('armor'):0;
- return {hp:maxHp(),acc:6+a.per*1.3,dodge:3+a.dex*1.1+pet,
+ return {hp:maxHp(),acc:6+a.per*1.3+(bonusEffects.accuracy||0),dodge:3+a.dex*1.1+pet+(bonusEffects.dodge||0),
   armor:rawArmor+Math.round(rawArmor*setArmor/100)+Math.floor(a.end/4)+pet+vehicleArmor,
   setArmor,pet,vehicleArmor,rawArmor};
 }
@@ -1137,6 +1190,7 @@ function fight(enemy,options={}){
  const d=options.testSnapshot?.defense||heroDefense(options);
  const random=typeof options.testRandom==='function'?options.testRandom:Math.random;
  const randomInt=(lo,hi)=>Math.floor(random()*(hi-lo+1))+lo;
+ const se=options.testSnapshot?(options.testSnapshot.setEffects||{}):setEngineEffects().effects;
  const hero={hp:d.hp,acc:d.acc,dodge:d.dodge,armor:d.armor};
  const foe={...enemy},lines=[];
  // Rozszerzone raporty zapisujemy tylko dla Starć. Wyprawy pozostają bez zmian.
@@ -1150,19 +1204,21 @@ function fight(enemy,options={}){
  const damageSummary={hero:{attempts:0,hits:0,misses:0,crits:0,damage:0,potential:0,best:0},foe:{attempts:0,hits:0,misses:0,crits:0,damage:0,potential:0,best:0},rounds:0};
  const hitAttack=(attacker,defender,who,r,weapon=null)=>{
    const performance=damageSummary[who==='hero'?'hero':'foe'];performance.attempts++;
-   const accuracy=who==='hero'&&weapon?weaponAccuracy(a,weapon.weapon):attacker.acc;
+   const accuracy=who==='hero'&&weapon?weaponAccuracy(a,weapon.weapon)+(se.accuracy||0):attacker.acc;
    const chance=clamp(70+2*(accuracy-defender.dodge)+(who==='hero'?(weapon?.weapon.accuracy||0):0),15,95);
    const handName=weapon?' ('+(weapon.hand==='right'?'prawa':'lewa')+' ręka, '+Math.round(weapon.power*100)+'%)':'';
    if(random()*100>=chance){performance.misses++;lines.push(`Runda ${r}: ${who==='hero'?'Chybiasz':'Przeciwnik chybia'}${handName}.`);return}
-   const critical=who==='hero'&&random()<clamp(.05+a.per*.005+(weapon?.weapon.critPp||0)/100,0,.35);
+   const critical=who==='hero'?random()<clamp(.05+a.per*.005+(weapon?.weapon.critPp||0)/100+(se.critChance||0)/100,0,.35):random()<.06;
    let raw;
    if(weapon){raw=Math.max(1,Math.floor((randomInt(weapon.weapon.min,weapon.weapon.max)+weaponAttributeDamage(a,weapon.weapon))*weapon.power));}
    else raw=randomInt(attacker.atk[0],attacker.atk[1]);
    const labWeapon=who==='hero'&&weapon&&(options.testWeaponModel||weapon.weapon.combatV2)?weapon.weapon:null;
-   const effectiveArmor=labWeapon?Math.max(0,defender.armor-(labWeapon.labPen||0)):defender.armor;
+   const effectiveArmor=who==='hero'?Math.max(0,defender.armor-(labWeapon?.labPen||0)-(se.armorPen||0)):(labWeapon?Math.max(0,defender.armor-(labWeapon.labPen||0)):defender.armor);
+   if(who==='hero'){raw=Math.max(1,Math.floor(raw*(1+(se.damagePct||0)/100)));if(r===1&&performance.hits===0)raw=Math.floor(raw*(1+(se.firstHit||0)/100));}
    if(critical&&!labWeapon)raw=Math.floor(raw*1.6);
    let dmg=Math.max(1,Math.floor(raw*(1-clamp(effectiveArmor/100,0,.6))));
    if(critical&&labWeapon)dmg=Math.max(1,Math.floor(dmg*(labWeapon.labCritMultiplier||1.6)));
+   if(who==='foe'){if(critical)dmg=Math.max(1,Math.floor(dmg*(1-(se.critResist||0)/100)));dmg=Math.max(1,Math.floor(dmg*(1-(se.damageResist||0)/100))-(se.flatReduction||0));}
    const actualDamage=Math.min(defender.hp,dmg);
    defender.hp=Math.max(0,defender.hp-dmg);
    performance.hits++;performance.damage+=actualDamage;performance.potential+=dmg;performance.best=Math.max(performance.best,actualDamage);if(critical)performance.crits++;
@@ -2671,7 +2727,7 @@ function materialFamily(d){
 }
 const SALVAGE_BASE={gun:{scrap:6,czesci:3},melee:{scrap:5,czesci:1},cloth:{tkanina:4},leather:{skora:3,tkanina:1},metalarmor:{scrap:4,tworzywo:2},electronics:{elektronika:3,tworzywo:2},plastic:{tworzywo:3}};
 function salvageValue(inst){const d=def(inst);if(!d||d.slot==='material')return {};const mult=ECONOMY.yieldRarity[Math.min(4,Math.max(0,Number(inst.rarity)||0))];const raw=SALVAGE_BASE[materialFamily(d)]||SALVAGE_BASE.plastic;return Object.fromEntries(Object.entries(raw).map(([k,v])=>[k,Math.max(1,Math.round(v*mult*(1+0.10*(roomLevel('storage')-1))))]))}
-function saleValue(inst){const o=statsOf(inst);if(!o||o.slot==='material')return 0;const b=ECONOMY.saleBase+(o.min||0)+(o.max||0)+3*(o.armor||0);const m=ECONOMY.saleRarity[Math.min(4,Math.max(0,Number(inst.rarity)||0))];return Math.max(1,Math.round(b*m*(inst.prefix?ECONOMY.prefixValue:1)*(inst.suffix?ECONOMY.suffixValue:1)))}
+function saleValue(inst){const o=statsOf(inst);if(!o||o.slot==='material')return 0;const b=ECONOMY.saleBase+(o.min||0)+(o.max||0)+3*(o.armor||0);const m=ECONOMY.saleRarity[Math.min(4,Math.max(0,Number(inst.rarity)||0))];const bonus=Math.min(15,setEngineEffects().effects.saleCreditsPct||0);return Math.max(1,Math.round(b*m*(inst.prefix?ECONOMY.prefixValue:1)*(inst.suffix?ECONOMY.suffixValue:1)*(1+bonus/100)))}
 function salvageLabel(yieldObj){return Object.entries(yieldObj).map(([k,v])=>`${v} × ${materialLabels[k]}`).join(' · ')}
 function disposeItem(uid,mode){
  const inst=instance(uid),o=statsOf(inst);
@@ -2811,7 +2867,7 @@ function inventorySortEntries(rows){
 
 function equippedArmorTotal(){
  const base=Object.entries(state.equip).filter(([slot])=>!['right','left'].includes(slot)).reduce((sum,[,uid])=>sum+(statsOf(instance(uid))?.armor||0),0);
- const setArmor=activeSetBonuses().armorPct||0;
+ const setArmor=setEngineEffects().effects.armorPct||0;
  const a=attrs();
  const boar=companionId()==='boar'?(petPower('boar')||0):0;
  return base+Math.round(base*setArmor/100)+Math.floor((a.end||0)/4)+boar;
@@ -2821,8 +2877,8 @@ function inventoryCombatSummary(){
  const attackRanges=attacks.map(at=>({...weaponDamageRange(a,at.weapon,at.power),weapon:at.weapon,hand:at.hand,power:at.power}));
  const range={low:attackRanges.reduce((sum,v)=>sum+v.low,0),high:attackRanges.reduce((sum,v)=>sum+v.high,0)};
  const accuracy=Math.round(main?weaponAccuracy(a,mainWeapon):6+(a.per||0)*1.3);
- const crit=Math.round(clamp(.05+(a.per||0)*.005+((mainWeapon?.critPp)||0)/100,0,.35)*100);
- const dodge=Math.round(3+(a.dex||0)*1.1+(companionId()==='boar'?(petPower('boar')||0):0));
+ const crit=Math.round(clamp(.05+(a.per||0)*.005+((mainWeapon?.critPp)||0)/100+(setEngineEffects().effects.critChance||0)/100,0,.35)*100);
+ const dodge=Math.round(3+(a.dex||0)*1.1+(companionId()==='boar'?(petPower('boar')||0):0)+(setEngineEffects().effects.dodge||0));
  return {range,attackRanges,accuracy,crit,dodge,armor:equippedArmorTotal(),hp:maxHp(),attacks:attacks.length,weapon:mainWeapon};
 }
 function inventorySummaryPanels(){
@@ -2833,6 +2889,7 @@ function inventorySummaryPanels(){
  const pendingSets=sets.filter(s=>!s.active&&s.count>0);
  const resonance=resonanceBonuses();
  const accessorySets=accessorySetBonuses().results;
+ const actualSets=setEngineEffects();
  const lines=[
   ['PŻ maks.',combat.hp],
   ['Pancerz',combat.armor],
@@ -2843,11 +2900,12 @@ function inventorySummaryPanels(){
  ].map(([label,val])=>`<div class="inventory-metric"><span>${label}</span><strong>${val}</strong></div>`).join('');
  const attrBlock=Object.entries(attrNames).map(([id,label])=>`<div class="inventory-attr"><span>${label}</span><strong>${a[id]||0}</strong></div>`).join('');
  const support=`<div class="inventory-support-line"><span>Towarzysz</span><strong>${companionId()?COMPANIONS[companionId()].name+' · '+companionBonus():'Brak'}</strong></div><div class="inventory-support-line"><span>Transport</span><strong>${vehicleDef().name}${vehicleDef().id!=='foot'?' · etap '+(vehicleStage()+1):''}</strong></div>`;
- const setHtml=activeSets.map(s=>`<div class="inventory-set-card active"><strong>${escape(s.config.name)}</strong><span>${setBonusDescription(s)}</span><small>${s.count}/6 elementów · średnia jakości ×${s.avg.toFixed(2).replace('.',',')}</small></div>`).join('') + pendingSets.map(s=>`<div class="inventory-set-card pending"><strong>${escape(s.config.name)}</strong><span>Postęp ${s.count}/3 · premia za 3/3: ${escape(projectedSetBonus(s.config,s.avg))}</span></div>`).join('');
- const accessorySetHtml=accessorySets.map(r=>`<div class="inventory-set-card ${r.active?'active':'pending'}"><strong>Akcesoria · ${escape(r.name)}</strong><span>${r.active?escape(accessoryBonusText(r.bonus)):`${r.count}/3 · brak premii (wymagane 3/3)`}</span></div>`).join('');
+ const setHtml=actualSets.active.filter(x=>x.category==='clothing').map(s=>`<div class="inventory-set-card active"><strong>${escape(s.name)}</strong><span>${escape(activeSetEffectText(s.effects))}</span><small>${s.count}/6 części · mnożnik jakości ×${s.qualityFactor.toFixed(2).replace('.',',')}</small></div>`).join('') + pendingSets.map(s=>`<div class="inventory-set-card pending"><strong>${escape(s.config.name)}</strong><span>Postęp ${s.count}/3 · premia za 3/3: ${escape(projectedSetBonus(s.config,s.avg))}</span></div>`).join('');
+ const accessorySetHtml=accessorySets.map(r=>{const active=actualSets.active.find(x=>x.category==='accessories'&&x.id===r.id);return `<div class="inventory-set-card ${active?'active':'pending'}"><strong>Akcesoria · ${escape(r.name)}</strong><span>${active?escape(activeSetEffectText(active.effects)):`${r.count}/3 · brak premii (wymagane 3/3)`}</span></div>`}).join('');
  const resonanceHtml=(resonance.active||[]).map(r=>`<div class="inventory-set-card active"><strong>${r.kind==='prefix'?'Prefiks':'Sufiks'} · ${escape(r.config.name)}</strong><span>${escape(r.config.description)}</span><small>Bonus: ${Object.keys(r.config.bonus||{}).length?Object.entries(r.config.bonus).map(([k,v])=>`${attrNames[k]} +${v}`).join(' · '):'brak statystyk'}${r.config.luck?` · Szczęście +${r.config.luck}`:''}${r.config.explore?` · Eksploracja +${r.config.explore}%`:''}</small></div>`).join('');
  return `
  <aside class="inventory-summary-stack">
+   <section class="inventory-summary-card"><div class="inventory-summary-head"><div><span class="tag">ASHEN 0.4.7.8 · AKTYWNE</span><h3>Nowe premie zestawowe</h3></div></div><div class="inventory-set-grid">${actualSets.active.map(r=>`<div class="inventory-set-card active"><strong>${escape(r.name)} · ${r.count}/${r.category==='clothing'?6:3}</strong><span>${escape(activeSetEffectText(r.effects))}</span><small>Średnia jakości ×${r.qualityFactor.toFixed(2).replace('.',',')}</small></div>`).join('')||'<p class="small muted">Brak aktywnych setów. Ubiór: minimum 3; akcesoria: dokładnie 3.</p>'}</div><p class="small muted">Te efekty są doliczane do Postaci i lokalnych Starć. Wcześniejsze raporty w Planerze pokazują historyczny model do porównania. PvP i Ekspedycje serwerowe nie są jeszcze zsynchronizowane.</p></section>
    <section class="inventory-summary-card inventory-overview-card">
       <div class="inventory-summary-head"><div><span class="tag">PODSUMOWANIE BOJOWE</span><h3>Stan ocalałego</h3></div><div class="inventory-rarity-chip">Broń główna: ${escape(combat.weapon?.name||'Nóż')}</div></div>
       <div class="inventory-metric-grid">${lines}</div>

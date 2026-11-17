@@ -1,19 +1,13 @@
-# ASHEN v0.4.7.7 — stabilny Planer i katalog setów
+# ASHEN v0.4.7.8 — silnik premii setowych
 
-## Instalacja
-Podmień w GitHubie `index.html` i `js/game.js`. Pozostałe pliki zachowaj. Brak SQL i zmian danych postaci.
+Podmień `index.html` i `js/game.js` na GitHubie. Bez SQL.
 
-## Poprawki
-- Rozwijany panel „Projekt ASHEN 0.5” pozostaje otwarty przy zmianie ustawień Planera i ponownym rysowaniu wyników.
-- Zagnieżdżona sekcja „Pełny katalog 10 + 5 rodzin” także pamięta stan otwarcia.
-- Panel projektu jest domyślnie rozwinięty; użytkownik może go sam zamknąć.
-- Obsługa `toggle` ignoruje elementy usunięte z dokumentu, aby przebudowa widoku nie przestawiała stanu.
-- Poprawiono wersję i identyfikatory odświeżania plików na 0.4.7.7.
+- 10 rodzin odzieży: premie 3/4/5/6, niezależne rodziny (np. 3+3).
+- 5 rodzin akcesoriów: premie tylko przy 3/3.
+- Średnia jakości faktycznie założonych elementów; bez podwójnego mnożenia jakości.
+- Nowe premie w lokalnych Starciach: HP, pancerz, unik, celność, krytyk, penetracja, obrażenia, redukcja obrażeń, odporność na krytyk, pierwsze trafienie.
+- Przeciwnicy w lokalnym silniku mogą teraz wykonać krytyczny atak (6% trafień), dzięki czemu odporność na krytyki działa. Jest to zmiana balansu wymagająca weryfikacji.
+- Set Negocjatora daje premię do wartości sprzedaży wyposażenia (zwykłe Wyprawy nie przyznają kredytów). Nie dotyczy serwerowych Ekspedycji ani modułu PvP. Stare zestawienia porównawcze Planera korzystają z poprzedniego modelu i są oznaczone jako historyczne.
 
-## Kontrola ręczna
-1. Otwórz Postać → Planer setów → Projekt ASHEN 0.5 → Pełny katalog 10 + 5 rodzin.
-2. Przewiń katalog do dołu i wróć do góry — oba panele pozostają otwarte.
-3. Zmień prefiks i jakość w Planerze — katalog nie może się sam zamknąć.
-4. Zamknij i otwórz panel ręcznie; przejdź do innej zakładki i wróć.
-
-Nie zmienia: właściwych premii setów, Starć, łupów, kont i Ekspedycji.
+## Kontrola
+Uruchom stronę, sprawdź Postać → Stan ocalałego → Nowe premie zestawowe i przetestuj walkę w Starciach. Nie czyść zapisów przeglądarki.
