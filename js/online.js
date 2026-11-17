@@ -84,6 +84,15 @@ function portrait(profile){
  return `<img src="${file}" alt="Portret: ${esc(profile?.name||'Postać')}" loading="eager">`;
 }
 const num=v=>Number.isFinite(Number(v))?Number(v):0;
+// Formatowanie danych raportu dotyczy wylacznie warstwy prezentacji.
+// Unik i celnosc sa wartosciami statystyk, a nie bezposrednio prawdopodobienstwem %.
+const reportNumber=(v,decimals=0)=>{
+ if(v===null||v===undefined||v==='')return '—';
+ const n=Number(v);
+ if(!Number.isFinite(n))return '—';
+ const rounded=Number(n.toFixed(decimals));
+ return rounded.toLocaleString('pl-PL',{useGrouping:false,maximumFractionDigits:decimals});
+};
 function health(value,max,enemy=false){
  const hp=Math.max(0,num(value)),limit=Math.max(1,num(max));
  return `<div class="arena-health-track" role="progressbar" aria-valuemin="0" aria-valuemax="${Math.round(limit)}" aria-valuenow="${Math.round(Math.min(hp,limit))}"><span class="${enemy?'is-enemy':'is-hero'}" style="width:${Math.max(0,Math.min(100,hp/limit*100))}%"></span></div>`;
@@ -106,7 +115,8 @@ function renderReport(r,side='attack'){
  const table=rows.map(([label,v1,v2],i)=>{
   const n1=Number(v1),n2=Number(v2),both=v1!==undefined&&v1!==null&&v2!==undefined&&v2!==null&&Number.isFinite(n1)&&Number.isFinite(n2);
   const cs=both?(n1===n2?['arena-stat-even','arena-stat-even']:n1>n2?['arena-stat-better','arena-stat-worse']:['arena-stat-worse','arena-stat-better']):['arena-stat-neutral','arena-stat-neutral'];
-  return `<tr class="${i>=4?'arena-attribute-row':''} ${i===4?'arena-attribute-start':''}"><th scope="row">${esc(label)}</th><td class="${cs[0]}">${esc(v1??'—')}</td><td class="${cs[1]}">${esc(v2??'—')}</td></tr>`;
+  const decimals=(label==='Unik'||label==='Celność')?1:0;
+  return `<tr class="${i>=4?'arena-attribute-row':''} ${i===4?'arena-attribute-start':''}"><th scope="row">${esc(label)}</th><td class="${cs[0]}">${esc(reportNumber(v1,decimals))}</td><td class="${cs[1]}">${esc(reportNumber(v2,decimals))}</td></tr>`;
  }).join('');
  const arms=profile=>(profile.attacks||[]).map(x=>`${esc(x.weapon?.name||'Broń')} (${x.hand==='left'?'lewa':'prawa'} ręka${x.weapon?.min!==undefined?`, ${esc(x.weapon.min)}–${esc(x.weapon.max)} obr.`:''})`).join(' · ')||'Brak danych o broni';
  const rounds=rnd.map(x=>{
