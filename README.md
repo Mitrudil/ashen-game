@@ -1,11 +1,41 @@
-# ASHEN v0.4.8.2 — Mistrzostwo Z w lokalnych Starciach
+# ASHEN v0.4.8.7 — pełna gra
 
-Podmień `index.html` i `js/game.js` w repozytorium. Bez SQL.
+# ASHEN v0.4.8.7 — udostępnianie raportów PvP
 
-Zdolności Z wszystkich 15 rodzin uruchamiają się po osiągnięciu progu średniej jakości (3/3:10, 4/6:14, 5/6:17, 6/6:20 pkt). X i Y bez zmian.
+**Aktualizacja z v0.4.8.6.** Wymagany SQL: `sql/026_public_pvp_reports.sql`.
 
-Zdarzenia i limity: Wzmocniony (leczenie raz), Pancerny (tłumienie trafienia raz), Elastyczny (kontratak co 2 rundy), Zwinny (pierwsze trafienie), Lekki (maksymalnie 2 premie serii/rundę), Odporny (jedno osłabienie krytyka), Tropicielski (znacznik, co 3 rundy), Żelazny (co 3 rundy), Wartownika (osłona raz przed przekroczeniem progu PŻ), Nomady (wzmocnienie po ciężkiej rundzie, co 3 rundy); Technika (2 pierwsze trafienia), Tropiciela (1 bonus na rundę), Negocjatora (+3 celności solo), Nomady akcesoria (+4 przebicia po uniku, 1/rundę), Ocalałego (osłona raz).
+## Co nowego
+- W oknie raportu PvP: „Kopiuj link” i „Udostępnij”; serwer tworzy losowy token UUID dopiero na żądanie uczestnika walki.
+- Publiczny widok `report.html?report=<token>` dla gości bez konta.
+- Odczyt raportu przez bezpieczne RPC, bez identyfikatorów kont, całych snapshotów ani prywatnych zapisów.
+- Raporty nie są publicznie indeksowane/listowane. Każdy, kto ma link, może go jednak przekazać dalej.
+- Poprawiono wyświetlanie sumy zadanych obrażeń, z rezerwowym przeliczeniem z przebiegu rund; brakujących trafień/krytyków nie fałszujemy jako zero.
+- Usunięto mylący komunikat o konieczności instalacji SQL 025 (zastąpiono informacją warunkową).
+- Historia PvP w przeglądarce pokazuje do 40 pozycji, jeśli tyle zwróci serwer.
 
-Zdolności Z działają wyłącznie w lokalnym `fight()`: Starcia i lokalne Wyprawy; serwerowe Ekspedycje/PvP wymagają osobnego wdrożenia. Stare testy matematyczne nie są testami balansu walki.
+## Wymagana jednorazowa konfiguracja publicznych linków
+Aby link działał u odbiorców, wypełnij `js/public-config.js`: 
+- `url`: publiczny Project URL Supabase (https://...supabase.co)
+- `key`: **tylko** publishable/anon key (NIE secret/service_role).
 
-Zachowano jedną aktualną ścieżkę modyfikatorów po oczyszczeniu v0.4.8.1. Nie przywracano legacy.
+Klucz publishable/anon jest przeznaczony do aplikacji publicznych. Nie wpisuj żadnego klucza tajnego.
+Nie przesyłaj klucza w samym adresie raportu. Po zmianie configu wrzuć plik na GitHub.
+
+## Instalacja
+1. W Supabase SQL Editor uruchom `sql/026_public_pvp_reports.sql`, po wykonaniu kopii zapasowej.
+2. Na GitHub wrzuć `index.html`, `report.html`, `js/game.js`, `js/online.js`, `js/public-report.js`, `js/public-config.js` (z publiczną konfiguracją).
+3. Wyczyść cache Ctrl+F5. Otwórz stary lub nowy raport, kliknij „Kopiuj link” i sprawdź go w oknie incognito.
+4. W razie problemów nie wykonuj ponownie SQL 025; SQL 026 nie zmienia silnika walki.
+
+## Ograniczenia
+- Nie testowano RPC na rzeczywistym serwerze użytkownika. SQL należy uruchomić świadomie w Supabase.
+- Nie ma jeszcze serwerowej walidacji wyposażenia ani mechaniki Z w PvP.
+- Publiczne raporty pozostają dostępne, dopóki istnieje token w bazie; kasowanie tokenu można wykonać administracyjnie w razie potrzeby.
+- Historia zwrócona przez serwer może być ograniczona przez istniejącą funkcję `ashen_online_reports`.
+
+
+## Aktualizacja 0.4.8.8
+Zobacz README_0488.md.
+
+
+Historia aktualizacji: [CHANGELOG.md](CHANGELOG.md). Nowych plików README z numerami wersji już nie tworzymy.
