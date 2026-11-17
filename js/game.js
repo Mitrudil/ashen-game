@@ -432,7 +432,7 @@ for(const inst of state.inventory){
  if(!inst.prefix)inst.prefix=d.artifactSet==='seeker'?'art_fortunate':'art_ward';
  inst.artifactAffixesInitialized=true;
 }
-// ASHEN 0.4.8.1: jednorazowe czyszczenie starych modyfikatorów.
+// ASHEN 0.4.8.2: jednorazowe czyszczenie starych modyfikatorów.
 // Zostawiamy identyfikatory i jakość bazowych przedmiotów, bez nieaktualnych bonusów.
 // Osobno zachowany Rezonans artefaktów (definicje art_*).
 const CURRENT_EQUIPMENT_SCHEMA=481;
@@ -692,6 +692,9 @@ function evolutionSetFromQuality(id,category,qualities){
  const Q=qualities.reduce((x,y)=>x+y,0),x=(EVOL_X_BASE[id]||2)+Q+(category==='clothing'?2*(n-3):0);
  const y=3*Q>=7*n,z=3*Q>=10*n;
  const effects={};const add=(key,value)=>effects[key]=(effects[key]||0)+value;
+ // Z jest odblokowane tylko przy właściwym progu średniej jakości.
+ // Odporności i umiejętności limitujemy w fight(), a nie przez mnożenie ataków.
+ if(z)effects['master_'+id]=1;
  switch(id){
  case 'armor_reinforced':add('hpFlat',20+4*(Q+2*(n-3)));if(y)add('startShield',10+2*Q);break;
  case 'armor_plated':add('armorFlat',x);if(y)add('physicalResist',3);break;
@@ -733,7 +736,7 @@ function setEngineEffects(){
 Object.assign(SET_V05_LABELS,{hpFlat:'PŻ',armorFlat:'Pancerz',initiative:'Inicjatywa',mobility:'Mobilność',startShield:'Osłona początkowa',physicalResist:'Redukcja fizyczna %',afterDodgeAccuracy:'Celność po uniku',earlyAccuracy:'Celność rund 1–2',afterMissAccuracy:'Celność po chybieniu',afterCritResist:'Ochrona po krytyku %',critDamagePct:'Obrażenia krytyczne %',lateResist:'Ochrona od rundy 5 %',afterMissDamage:'Obrażenia po chybieniu %'});
 function activeSetEffectText(set){
  const spec=EVOLUTION_V05_FAMILIES.find(f=>f.name===set.name&&f.kind===(set.category==='clothing'?'Odzież':'Akcesoria'));
- return `X: ${set.x} pkt · ${set.level>=2?'Y: '+(spec?.y||'odblokowany'):'Y: zablokowany'}${set.level===3?' · Z: próg osiągnięty, efekt jeszcze nieaktywny':''}`;
+ return `X: ${set.x} pkt · ${set.level>=2?'Y: '+(spec?.y||'odblokowany'):'Y: zablokowany'} · ${set.level===3?'Z: '+(spec?.z||'Mistrzostwo aktywne'):'Z: zablokowany'}`;
 }
 // ASHEN v0.4.7.8: stan rozwiniętych paneli projektu jest niezależny od renderowania.
 // Katalog wewnątrz Planera nie może zamknąć się przy zmianie wyboru, przewijaniu
@@ -747,7 +750,7 @@ function designedSetPreviewHtml(){
  const cloth=designedSetPreviewParts(setPlanner.clothing,setPlanner.quality);
  const acc=designedSetPreviewParts(setPlanner.accessories,setPlanner.quality);
  const fmt=(rows)=>rows.length?rows.map(r=>`<div style="padding:9px 0;border-bottom:1px solid var(--border,#333)"><strong>${escape(r.name)} · ${r.count}/${r.max} ${r.active?'✓':'—'}</strong><small style="display:block;opacity:.85">${escape(r.role)}</small><div style="margin-top:3px">${r.active?r.effects.map(e=>`${escape(SET_V05_LABELS[e.key]||e.key)} +${String(e.amount).replace('.',',')}`).join(' · '):'Brak premii (minimum 3 elementy)'}</div></div>`).join(''):'<p class="small muted">Nie wybrano żadnej rodziny.</p>';
- return `<details class="panel section" id="ashen-set-v05-design" ${setDesignOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧭 Nowe rodziny ASHEN — podgląd w Planerze</summary><p class="small muted"><strong>NOWY MODEL AKTYWNY w Postaci i lokalnych Starciach.</strong> Ten Planer pokazuje symulację wybranych części, nie zastępuje ekwipunku. Ekspedycje serwerowe i PvP nadal wymagają synchronizacji.</p><h4>Odzież · progi 3/4/5/6</h4>${fmt(cloth)}<h4>Akcesoria · tylko 3/3</h4>${fmt(acc)}<details id="ashen-set-v05-catalog" ${setDesignCatalogOpen?'open':''} style="margin-top:12px"><summary style="cursor:pointer">Pełny katalog 10 + 5 rodzin</summary>${fmt(Object.entries(SET_V05_DESIGN.clothing).map(([id,cfg])=>({id,name:cfg.name,role:cfg.role,description:cfg.description,count:3,max:6,active:true,effects:[cfg.primary,cfg.secondary].map(e=>({key:e.stat,amount:e.at3}))})))}${fmt(Object.entries(SET_V05_DESIGN.accessories).map(([id,cfg])=>({id,name:cfg.name,role:cfg.role,description:cfg.description,count:3,max:3,active:true,effects:[cfg.primary,cfg.secondary].map(e=>({key:e.stat,amount:e.at3}))})))}</details></details>`;
+ return `<details class="panel section" id="ashen-set-v05-design" ${setDesignOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧭 Nowe rodziny ASHEN — podgląd w Planerze</summary><p class="small muted"><strong>MODEL X/Y/Z AKTYWNY w Postaci i lokalnych Starciach.</strong> Ten Planer pokazuje symulację wybranych części, nie zastępuje ekwipunku. Ekspedycje serwerowe i PvP nadal wymagają synchronizacji.</p><h4>Odzież · progi 3/4/5/6</h4>${fmt(cloth)}<h4>Akcesoria · tylko 3/3</h4>${fmt(acc)}<details id="ashen-set-v05-catalog" ${setDesignCatalogOpen?'open':''} style="margin-top:12px"><summary style="cursor:pointer">Pełny katalog 10 + 5 rodzin</summary>${fmt(Object.entries(SET_V05_DESIGN.clothing).map(([id,cfg])=>({id,name:cfg.name,role:cfg.role,description:cfg.description,count:3,max:6,active:true,effects:[cfg.primary,cfg.secondary].map(e=>({key:e.stat,amount:e.at3}))})))}${fmt(Object.entries(SET_V05_DESIGN.accessories).map(([id,cfg])=>({id,name:cfg.name,role:cfg.role,description:cfg.description,count:3,max:3,active:true,effects:[cfg.primary,cfg.secondary].map(e=>({key:e.stat,amount:e.at3}))})))}</details></details>`;
 }
 
 function setPrefixId(inst){
@@ -930,7 +933,7 @@ document.addEventListener('click',e=>{
 });
 
 function characterSetsPanel(){
- const rows=setResults();return `<section class="ashen-sets-section"><h3>Sety odzieży — Ewolucja X/Y</h3><p>Set: od 3 do 6 zgodnych prefiksów. Jakość jest sumą punktów przedmiotów; Y odblokowuje się po przekroczeniu progu.</p><div class="ashen-sets-grid">${rows.map(setSummaryCard).join('')||'<p>Brak założonych ubrań z prefiksem setowym.</p>'}</div></section>`;
+ const rows=setResults();return `<section class="ashen-sets-section"><h3>Sety odzieży — Ewolucja X/Y/Z</h3><p>Set: od 3 do 6 zgodnych prefiksów. Jakość jest sumą punktów przedmiotów; Y odblokowuje się po przekroczeniu progu.</p><div class="ashen-sets-grid">${rows.map(setSummaryCard).join('')||'<p>Brak założonych ubrań z prefiksem setowym.</p>'}</div></section>`;
 }
 function itemSetPanel(inst){const id=setPrefixId(inst);if(!id)return '';
  const r=setResults().find(x=>x.id===id),n=r?.count||0;
@@ -967,7 +970,7 @@ function accessorySetResults(){
  });
 }
 function accessorySetPanel(){const rows=accessorySetResults();
- return `<section class="ashen-sets-section"><h3>Sety akcesoriów — Ewolucja X/Y</h3><div class="ashen-sets-grid">${rows.map(r=>`<article class="ashen-set-card ${r.active?'is-active':''}"><strong>${escape(r.name)} · ${r.count}/3</strong><div>${r.active?`X${r.level>=2?' + Y':''} · ${r.qualityPoints} pkt jakości`:'Nieaktywny · wymagane 3/3'}</div></article>`).join('')||'Brak setów akcesoriów'}</div></section>`;
+ return `<section class="ashen-sets-section"><h3>Sety akcesoriów — Ewolucja X/Y/Z</h3><div class="ashen-sets-grid">${rows.map(r=>`<article class="ashen-set-card ${r.active?'is-active':''}"><strong>${escape(r.name)} · ${r.count}/3</strong><div>${r.active?`X${r.level>=2?' + Y':''} · ${r.qualityPoints} pkt jakości`:'Nieaktywny · wymagane 3/3'}</div></article>`).join('')||'Brak setów akcesoriów'}</div></section>`;
 }
 function accessorySetItemPanel(inst){const id=accessorySetPrefixId(inst);if(!id)return '';
  const r=accessorySetResults().find(x=>x.id===id);
@@ -1059,7 +1062,16 @@ function fight(enemy,options={}){
  const se=options.testSnapshot?(options.testSnapshot.setEffects||{}):setEngineEffects().effects;
  const hero={hp:d.hp,acc:d.acc,dodge:d.dodge,armor:d.armor,shield:Math.max(0,se.startShield||0)};
  const xy={missed:false,dodged:false,critProtectedRound:0};
+ // Zdolności mistrzowskie są rejestrowane na jedną walkę — nigdy w stanie gracza.
+ const zActive=id=>se['master_'+id]===1;
+ const mastery={used:new Set(),lastRound:{},roundHits:0,marked:false,dodgeRound:0,chargedDodge:false,
+  chargeNomad:false,roundLoss:0,observantRound:0,reflexiveRound:0,lightRound:0,technicalHits:0};
+ const zOnce=id=>{if(mastery.used.has(id))return false;mastery.used.add(id);return true};
+ const zCooldown=(id,round,interval)=>{if((mastery.lastRound[id]||-100)+interval>round)return false;mastery.lastRound[id]=round;return true};
+ const zLog=(r,text)=>lines.push(`Runda ${r}: Mistrzostwo Z — ${text}.`);
+ const zShield=(r,amount,text)=>{hero.shield+=Math.max(1,Math.round(amount));zLog(r,`${text} (+${Math.round(amount)} osłony)`)};
  const foe={...enemy},lines=[];
+ if(zActive('accessory_persuasive'))zLog(1,'Negocjatora: autorytet (+3 celności)');
  // Rozszerzone raporty zapisujemy tylko dla Starć. Wyprawy pozostają bez zmian.
  const recordRounds=!!options.recordRounds;
  const heroMaxHp=hero.hp,foeMaxHp=foe.hp,roundHistory=[];
@@ -1070,33 +1082,70 @@ function fight(enemy,options={}){
  }:null;
  const damageSummary={hero:{attempts:0,hits:0,misses:0,crits:0,damage:0,potential:0,best:0},foe:{attempts:0,hits:0,misses:0,crits:0,damage:0,potential:0,best:0},rounds:0};
  const hitAttack=(attacker,defender,who,r,weapon=null)=>{
-   const performance=damageSummary[who==='hero'?'hero':'foe'];performance.attempts++;
-   const accuracy=who==='hero'&&weapon?weaponAccuracy(a,weapon.weapon)+(se.accuracy||0)+(xy.missed?(se.afterMissAccuracy||0):0)+(xy.dodged?(se.afterDodgeAccuracy||0):0)+(r<=2?(se.earlyAccuracy||0):0):attacker.acc;
-   const chance=clamp(70+2*(accuracy-defender.dodge)+(who==='hero'?(weapon?.weapon.accuracy||0):0),15,95);
+   const isHero=who==='hero',performance=damageSummary[isHero?'hero':'foe'];performance.attempts++;
+   const zEarly=isHero&&zActive('accessory_persuasive')?3:0;
+   const accuracy=isHero&&weapon?weaponAccuracy(a,weapon.weapon)+(se.accuracy||0)+(xy.missed?(se.afterMissAccuracy||0):0)+(xy.dodged?(se.afterDodgeAccuracy||0):0)+(r<=2?(se.earlyAccuracy||0):0)+zEarly:attacker.acc;
+   const chance=clamp(70+2*(accuracy-defender.dodge)+(isHero?(weapon?.weapon.accuracy||0):0),15,95);
    const handName=weapon?' ('+(weapon.hand==='right'?'prawa':'lewa')+' ręka, '+Math.round(weapon.power*100)+'%)':'';
-   if(random()*100>=chance){performance.misses++;if(who==='hero')xy.missed=true;else xy.dodged=true;lines.push(`Runda ${r}: ${who==='hero'?'Chybiasz':'Przeciwnik chybia'}${handName}.`);return}
-   const critical=who==='hero'?random()<clamp(.05+a.per*.005+(weapon?.weapon.critPp||0)/100+(se.critChance||0)/100,0,.35):random()<.06;
+   if(random()*100>=chance){performance.misses++;if(isHero)xy.missed=true;else {xy.dodged=true;if(zActive('armor_flexible')||zActive('accessory_reflexive')){mastery.chargedDodge=true;mastery.dodgeRound=r}}lines.push(`Runda ${r}: ${isHero?'Chybiasz':'Przeciwnik chybia'}${handName}.`);return}
+   const critical=isHero?random()<clamp(.05+a.per*.005+(weapon?.weapon.critPp||0)/100+(se.critChance||0)/100,0,.35):random()<.06;
    let raw;
    if(weapon){raw=Math.max(1,Math.floor((randomInt(weapon.weapon.min,weapon.weapon.max)+weaponAttributeDamage(a,weapon.weapon))*weapon.power));}
    else raw=randomInt(attacker.atk[0],attacker.atk[1]);
-   const labWeapon=who==='hero'&&weapon&&(options.testWeaponModel||weapon.weapon.combatV2)?weapon.weapon:null;
-   const effectiveArmor=who==='hero'?Math.max(0,defender.armor-(labWeapon?.labPen||0)-(se.armorPen||0)):(labWeapon?Math.max(0,defender.armor-(labWeapon.labPen||0)):defender.armor);
-   if(who==='hero'){raw=Math.max(1,Math.floor(raw*(1+(se.damagePct||0)/100+(xy.missed?(se.afterMissDamage||0):0)/100)));xy.missed=false;xy.dodged=false;if(r===1&&performance.hits===0)raw=Math.floor(raw*(1+(se.firstHit||0)/100));}
+   const labWeapon=isHero&&weapon&&(options.testWeaponModel||weapon.weapon.combatV2)?weapon.weapon:null;
+   let bonusPen=0;
+   if(isHero&&zActive('accessory_technical')&&mastery.technicalHits<2){bonusPen+=defender.armor*.08;mastery.technicalHits++;zLog(r,'Technika: skan pancerza')}
+   if(isHero&&zActive('accessory_reflexive')&&mastery.chargedDodge&&mastery.dodgeRound<=r&&mastery.reflexiveRound!==r){bonusPen+=4;mastery.reflexiveRound=r;zLog(r,'Nomady (akcesoria): przebicie po uniku')}
+   const effectiveArmor=isHero?Math.max(0,defender.armor-(labWeapon?.labPen||0)-(se.armorPen||0)-bonusPen):defender.armor;
+   if(isHero){
+     raw=Math.max(1,Math.floor(raw*(1+(se.damagePct||0)/100+(xy.missed?(se.afterMissDamage||0):0)/100)));
+     xy.missed=false;xy.dodged=false;
+     if(r===1&&performance.hits===0)raw=Math.floor(raw*(1+(se.firstHit||0)/100));
+     if(zActive('armor_agile')&&performance.hits===0){raw=Math.max(1,Math.floor(raw*1.12));zLog(r,'Zwinny: błyskawiczny start')}
+     if(zActive('armor_flexible')&&mastery.chargedDodge&&zCooldown('armor_flexible',r,2)){raw=Math.max(1,Math.floor(raw*1.08));zLog(r,'Elastyczny: kontratak')}
+     if(zActive('armor_iron')&&defender.armor>0&&zCooldown('armor_iron',r,3)){raw=Math.max(1,Math.floor(raw*1.08));zLog(r,'Żelazny: miażdżący cios')}
+     if(zActive('armor_nomad')&&mastery.chargeNomad&&zCooldown('armor_nomad',r,3)){raw=Math.max(1,Math.floor(raw*1.10));mastery.chargeNomad=false;zLog(r,'Nomady: instynkt')}
+     if(zActive('armor_light')&&mastery.roundHits>=1&&mastery.lightRound<2){raw=Math.max(1,Math.floor(raw*1.04));mastery.lightRound++;zLog(r,'Lekki: seria trafień')}
+     if(zActive('accessory_observant')&&mastery.roundHits>=1&&mastery.observantRound!==r){raw=Math.max(1,Math.floor(raw*1.08));mastery.observantRound=r;zLog(r,'Tropiciela: oznaczenie celu')}
+   }
    if(critical&&!labWeapon)raw=Math.floor(raw*1.6);
    let dmg=Math.max(1,Math.floor(raw*(1-clamp(effectiveArmor/100,0,.6))));
    if(critical&&labWeapon)dmg=Math.max(1,Math.floor(dmg*(labWeapon.labCritMultiplier||1.6)));
-   if(who==='hero'&&critical)dmg=Math.max(1,Math.floor(dmg*(1+(se.critDamagePct||0)/100)));
-   if(who==='foe'){if(critical)dmg=Math.max(1,Math.floor(dmg*(1-(se.critResist||0)/100)));const reduc=(se.damageResist||0)+(se.physicalResist||0)+(r>=5?(se.lateResist||0):0)+(xy.critProtectedRound===r?(se.afterCritResist||0):0);dmg=Math.max(1,Math.floor(dmg*(1-Math.min(40,reduc)/100))-(se.flatReduction||0));if(critical&&se.afterCritResist)xy.critProtectedRound=r+1;
-     if(hero.shield>0){const absorbed=Math.min(hero.shield,dmg);hero.shield-=absorbed;dmg-=absorbed;if(absorbed)lines.push(`Runda ${r}: Osłona pochłania ${absorbed} obrażeń.`)}}
+   if(isHero&&critical){
+     dmg=Math.max(1,Math.floor(dmg*(1+(se.critDamagePct||0)/100)));
+     if(zActive('armor_tracker')&&mastery.marked&&zCooldown('armor_tracker',r,3)){dmg=Math.max(1,Math.floor(dmg*1.10));mastery.marked=false;zLog(r,'Tropicielski: słaby punkt')}
+   }
+   if(isHero&&zActive('armor_tracker')&&!critical)mastery.marked=true;
+   if(!isHero){
+     if(critical){
+       dmg=Math.max(1,Math.floor(dmg*(1-(se.critResist||0)/100)));
+       if(zActive('armor_resistant')&&zOnce('armor_resistant')){const noCrit=Math.max(1,Math.floor(raw/1.6*(1-clamp(effectiveArmor/100,0,.6))));dmg=Math.max(1,dmg-Math.floor(Math.max(0,dmg-noCrit)*.40));zLog(r,'Odporny: stłumienie krytyka')}
+     }
+     const reduc=(se.damageResist||0)+(se.physicalResist||0)+(r>=5?(se.lateResist||0):0)+(xy.critProtectedRound===r?(se.afterCritResist||0):0);
+     dmg=Math.max(1,Math.floor(dmg*(1-Math.min(40,reduc)/100))-(se.flatReduction||0));
+     if(critical&&se.afterCritResist)xy.critProtectedRound=r+1;
+     if(zActive('armor_plated')&&dmg>=heroMaxHp*.12&&zOnce('armor_plated')){dmg=Math.max(1,Math.floor(dmg*.65));zLog(r,'Pancerny: niezłomna płyta')}
+     // Osłona poniżej progu aktywuje się przed ostatecznym trafieniem, również przy ciosie śmiertelnym.
+     if(zActive('armor_warden')&&!mastery.used.has('armor_warden')&&hero.hp-dmg<=heroMaxHp*.25){zOnce('armor_warden');zShield(r,heroMaxHp*.15,'Wartownika: ostatni bastion')}
+     if(hero.shield>0){const absorbed=Math.min(hero.shield,dmg);hero.shield-=absorbed;dmg-=absorbed;if(absorbed)lines.push(`Runda ${r}: Osłona pochłania ${absorbed} obrażeń.`)}
+   }
    const actualDamage=Math.min(defender.hp,dmg);
    defender.hp=Math.max(0,defender.hp-dmg);
    performance.hits++;performance.damage+=actualDamage;performance.potential+=dmg;performance.best=Math.max(performance.best,actualDamage);if(critical)performance.crits++;
-   lines.push(`Runda ${r}: ${who==='hero'?'Zadajesz':'Otrzymujesz'} ${actualDamage} obrażeń${handName}${critical?' (KRYTYCZNE)':''}.`);
+   if(isHero)mastery.roundHits++;
+   else {
+      mastery.roundLoss+=actualDamage;
+      if(zActive('armor_reinforced')&&hero.hp>0&&hero.hp<=heroMaxHp*.30&&zOnce('armor_reinforced')){const heal=Math.max(1,Math.round(heroMaxHp*.10));hero.hp=Math.min(heroMaxHp,hero.hp+heal);zLog(r,`Wzmocniony: drugi oddech (+${heal} PŻ)`)}
+      if(zActive('accessory_versatile')&&mastery.roundLoss>=heroMaxHp*.25&&zOnce('accessory_versatile'))zShield(r,heroMaxHp*.10,'Ocalałego: osłona po ciężkim trafieniu');
+      if(zActive('armor_nomad')&&mastery.roundLoss>=heroMaxHp*.20)mastery.chargeNomad=true;
+   }
+   lines.push(`Runda ${r}: ${isHero?'Zadajesz':'Otrzymujesz'} ${actualDamage} obrażeń${handName}${critical?' (KRYTYCZNE)':''}.`);
  };
  const maxRounds=options.testSnapshot&&[10,15,20].includes(options.testMaxRounds)?options.testMaxRounds:10;
  for(let r=1;r<=maxRounds&&hero.hp>0&&foe.hp>0;r++){
    const startLine=lines.length,heroDamageStart=damageSummary.hero.damage,foeDamageStart=damageSummary.foe.damage;
    damageSummary.rounds=r;
+   mastery.roundHits=0;mastery.lightRound=0;mastery.roundLoss=0;
    const order=randomInt(1,20)+a.dex+(se.initiative||0)>=randomInt(1,20)+foe.dodge?['hero','foe']:['foe','hero'];
    for(const who of order){
      if(hero.hp<=0||foe.hp<=0)break;
@@ -2774,7 +2823,7 @@ function inventorySummaryPanels(){
  const resonanceHtml=(resonance.active||[]).map(r=>`<div class="inventory-set-card active"><strong>${r.kind==='prefix'?'Prefiks':'Sufiks'} · ${escape(r.config.name)}</strong><span>${escape(r.config.description)}</span><small>Bonus: ${Object.keys(r.config.bonus||{}).length?Object.entries(r.config.bonus).map(([k,v])=>`${attrNames[k]} +${v}`).join(' · '):'brak statystyk'}${r.config.luck?` · Szczęście +${r.config.luck}`:''}${r.config.explore?` · Eksploracja +${r.config.explore}%`:''}</small></div>`).join('');
  return `
  <aside class="inventory-summary-stack">
-   <section class="inventory-summary-card"><div class="inventory-summary-head"><div><span class="tag">ASHEN 0.4.8.1 · X/Y AKTYWNE</span><h3>Nowe premie zestawowe</h3></div></div><div class="inventory-set-grid">${actualSets.active.map(r=>`<div class="inventory-set-card active"><strong>${escape(r.name)} · ${r.count}/${r.category==='clothing'?6:3}</strong><span>${escape(activeSetEffectText(r))}</span><small>Jakość ${r.qualityPoints} pkt · poziom ${r.level===3?'III':r.level===2?'II':'I'} · ${r.level>=2?'X + Y':'X'}${r.level===3?' · Z zaprojektowany, nieaktywny':''}</small></div>`).join('')||'<p class="small muted">Brak aktywnych setów. Ubiór: minimum 3; akcesoria: dokładnie 3.</p>'}</div><p class="small muted">Te efekty są doliczane do Postaci i lokalnych Starć. Stare porównywarki oparte na nieaktualnej matematyce zostały usunięte. PvP i Ekspedycje serwerowe nie są jeszcze zsynchronizowane.</p></section>
+   <section class="inventory-summary-card"><div class="inventory-summary-head"><div><span class="tag">ASHEN 0.4.8.2 · X/Y AKTYWNE</span><h3>Nowe premie zestawowe</h3></div></div><div class="inventory-set-grid">${actualSets.active.map(r=>`<div class="inventory-set-card active"><strong>${escape(r.name)} · ${r.count}/${r.category==='clothing'?6:3}</strong><span>${escape(activeSetEffectText(r))}</span><small>Jakość ${r.qualityPoints} pkt · poziom ${r.level===3?'III':r.level===2?'II':'I'} · ${r.level>=2?'X + Y':'X'}${r.level===3?' · Z zaprojektowany, nieaktywny':''}</small></div>`).join('')||'<p class="small muted">Brak aktywnych setów. Ubiór: minimum 3; akcesoria: dokładnie 3.</p>'}</div><p class="small muted">Te efekty są doliczane do Postaci i lokalnych Starć. Stare porównywarki oparte na nieaktualnej matematyce zostały usunięte. PvP i Ekspedycje serwerowe nie są jeszcze zsynchronizowane.</p></section>
    <section class="inventory-summary-card inventory-overview-card">
       <div class="inventory-summary-head"><div><span class="tag">PODSUMOWANIE BOJOWE</span><h3>Stan ocalałego</h3></div><div class="inventory-rarity-chip">Broń główna: ${escape(combat.weapon?.name||'Nóż')}</div></div>
       <div class="inventory-metric-grid">${lines}</div>

@@ -1,12 +1,11 @@
-# ASHEN v0.4.8.1 — czyszczenie wyposażenia i testów
+# ASHEN v0.4.8.2 — Mistrzostwo Z w lokalnych Starciach
 
-Podmień `index.html` i `js/game.js` na GitHubie. Bez SQL.
+Podmień `index.html` i `js/game.js` w repozytorium. Bez SQL.
 
-- Usunięto stare pule prefiksów/sufiksów i liczenie starych `affix`.
-- Jednorazowo czyszczone są przestarzałe modyfikatory zapisanych przedmiotów; bazowe ID, jakość, poziomy ulepszeń, UID, wyposażenie i postęp pozostają.
-- Dodano współczesny prefiks `armor_agile` (Zwinny) do losowania.
-- Planer, podsumowanie ubioru i podgląd przedmiotów pokazują obliczenia z Ewolucji X/Y. Usunięto stare porównywarki walk bazujące na nieaktualnych premiach.
-- Zachowano Rezonans artefaktów i zapis lokalnego profilu; mechaniki serwerowe Ekspedycji nadal wymagają aktualizacji.
-- Aktywne X/Y; Z jeszcze nie działa.
+Zdolności Z wszystkich 15 rodzin uruchamiają się po osiągnięciu progu średniej jakości (3/3:10, 4/6:14, 5/6:17, 6/6:20 pkt). X i Y bez zmian.
 
-Uwaga: przed wdrożeniem warto wyeksportować zapis dla porównania; czyszczenie starych prefiksów i sufiksów jest nieodwracalne bez kopii poprzedniej wersji.
+Zdarzenia i limity: Wzmocniony (leczenie raz), Pancerny (tłumienie trafienia raz), Elastyczny (kontratak co 2 rundy), Zwinny (pierwsze trafienie), Lekki (maksymalnie 2 premie serii/rundę), Odporny (jedno osłabienie krytyka), Tropicielski (znacznik, co 3 rundy), Żelazny (co 3 rundy), Wartownika (osłona raz przed przekroczeniem progu PŻ), Nomady (wzmocnienie po ciężkiej rundzie, co 3 rundy); Technika (2 pierwsze trafienia), Tropiciela (1 bonus na rundę), Negocjatora (+3 celności solo), Nomady akcesoria (+4 przebicia po uniku, 1/rundę), Ocalałego (osłona raz).
+
+Zdolności Z działają wyłącznie w lokalnym `fight()`: Starcia i lokalne Wyprawy; serwerowe Ekspedycje/PvP wymagają osobnego wdrożenia. Stare testy matematyczne nie są testami balansu walki.
+
+Zachowano jedną aktualną ścieżkę modyfikatorów po oczyszczeniu v0.4.8.1. Nie przywracano legacy.
