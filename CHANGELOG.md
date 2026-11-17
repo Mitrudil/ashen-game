@@ -1,3 +1,10 @@
+## v0.4.9.12 — audyt X/Y/Z i gotowości PvP online
+- Statyczna kontrola 15 rodzin setów, ich flag Z, lokalnego silnika i `sql/027_online_pvp_z_stage1.sql`.
+- Zestawienie: 15/15 lokalnie zaliczone, tylko 3/15 Z posiada implementację w SQL 027.
+- Widoczna informacja o testowym charakterze PvP online i braku walidacji migawki po stronie serwera.
+- Dokument `AUDYT_XYZ_PVP_v0.4.9.12.md` z mapą 15 rodzin, ryzykami i planem bezpiecznego wdrożenia.
+- Bez zmian balansu, danych zapisów, tabel SQL lub zasad walki.
+
 ## v0.4.9.11 — poprawa testu Wszechstronnego
 - Laboratorium mierzy pochłonięte obrażenia w rundzie 2 (przed śmiercią), zamiast sumować utracone PŻ do śmierci.
 - Warunek zaliczenia wymaga jednej aktywacji Z i faktycznego pochłonięcia obrażeń przez osłonę.

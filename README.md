@@ -1,27 +1,15 @@
-# ASHEN — Kroniki Upadku · v0.4.9.11
+# ASHEN — Kroniki Upadku · v0.4.9.12
 
-Przeglądarkowa gra postapokaliptyczna: Starcia lokalne, PvP online, Ekspedycje, ekwipunek i sety X/Y/Z.
+Przeglądarkowa gra postapokaliptyczna — Starcia, PvP online, ekwipunek, sety X/Y/Z, Ekspedycje i klany.
 
-## Instalacja aktualizacji v0.4.9.11
+## Aktualizacja GitHub
 
-Na GitHub podmień `index.html`, `js/game.js`, `README.md`, `CHANGELOG.md`. Nie wykonuj migracji SQL. Nie zmieniaj `js/public-config.js`.
+Wgraj `index.html`, `report.html`, `js/game.js`, `js/online.js`, `README.md`, `CHANGELOG.md` i `AUDYT_XYZ_PVP_v0.4.9.12.md`. Nie wymaga migracji SQL. Zachowaj `js/public-config.js`.
 
-## Zmiany
+## Stan Mistrzostw Z
 
-- Zmieniono **wyłącznie wyświetlane** nazwy prefiksów, tak aby pasowały rodzajem do nazw przedmiotów, np. „Legendarna Nomadyczna Koszulka termiczna” oraz „Legendarny Wartowniczy Płaszcz”.
-- Ujednolicono nazwy pięciu setów akcesoriów z ich prefiksami: Techniczny, Spostrzegawczy, Przekonujący, Refleksyjny i Wszechstronny. To **nie** zmienia sufiksów typu „Tropiciela” ani wartości bonusów.
-- Laboratorium ma próby wszystkich 15 Mistrzostw Z, dodano: Odporny (krytyk), Tropicielski (kolejny krytyk) i Wszechstronny (osłona).
-- Zachowano istniejące ID rodzin, przedmiotów, zapisy, punktację setów i mechanikę walk.
+- **15/15** kontrolowanych lokalnych testów Laboratorium Z zostało zaliczonych.
+- **3/15** efektów Z ma kod serwerowy po wykonaniu SQL 027: Przekonujący, Lekki, Wartowniczy.
+- PvP online nadal jest trybem testowym bez niezależnej weryfikacji wyposażenia na serwerze.
 
-## Testowanie
-
-Zaliczono wcześniej 12/15 testów lokalnych; ostatnie trzy testy wymagają teraz sprawdzenia na Testerze w przeglądarce. To nie jest potwierdzenie PvP online.
-
-Historię wersji znajdziesz w `CHANGELOG.md`. Archiwum `sql/` nie jest usuwane.
-
-
-### v0.4.9.10
-Poprawione porównanie zdolności „Odporny — Stłumienie krytyka” w Laboratorium Z: decyduje pierwsze trafienie krytyczne zamiast sumy PŻ utraconych do śmierci. Bez migracji SQL.
-
-### v0.4.9.11
-Laboratorium Wszechstronnego ocenia pochłonięcie obrażeń w rundzie 2, nie sumę obrażeń po śmierci. Bez SQL.
+Przeczytaj [audyt](AUDYT_XYZ_PVP_v0.4.9.12.md) przed planowaniem kolejnej migracji. Szczegółowa historia znajduje się w `CHANGELOG.md`.
