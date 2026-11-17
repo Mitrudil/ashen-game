@@ -1,3 +1,11 @@
+# Historia zmian ASHEN
+
+## v0.4.9.9 — język nazw i finał Laboratorium Setów Z
+- Odmiana nazw prefiksów „Nomadyczny” i „Wartowniczy”; pozostałe przymiotniki nadal odmieniają się zgodnie z rodzajem przedmiotu.
+- Ujednolicenie rodzin akcesoriów z ich prefiksami; `accessory_reflexive` to Refleksyjny, nie Nomady. Identyfikatory i bonusy bez zmian.
+- Trzy nowe kontrolowane próby Z: Odporny, Tropicielski, Wszechstronny. Przed zatwierdzeniem wymagana weryfikacja w działającej grze.
+- SQL nie jest potrzebny.
+
 ## 0.4.9.8 — Laboratorium Z i nazewnictwo
 - Testy: Elastyczny — Kontratak; Refleksyjny — Przebicie po uniku; Nomady — Instynkt.
 - Rodzina `accessory_observant` nazywa się Spostrzegawczy (żeńska forma Spostrzegawcza), zgodnie z prefiksem. Sufiks Tropiciela pozostaje osobny.

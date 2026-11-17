@@ -1,25 +1,20 @@
-# ASHEN — Kroniki Upadku · v0.4.9.8
+# ASHEN — Kroniki Upadku · v0.4.9.9
 
-Przeglądarkowa gra postapokaliptyczna. Obecna wersja zawiera m.in. walki lokalne, PvP online, Ekspedycje, ekwipunek, sety X/Y/Z i laboratorium testowe.
+Przeglądarkowa gra postapokaliptyczna: Starcia lokalne, PvP online, Ekspedycje, ekwipunek i sety X/Y/Z.
 
-## Instalacja aktualizacji 0.4.9.8
+## Instalacja aktualizacji v0.4.9.9
 
-Wgraj na GitHub pliki `index.html`, `js/game.js`, `README.md` i `CHANGELOG.md` z paczki aktualizacyjnej. Nie wykonuj SQL dla tej wersji i nie nadpisuj istniejącego `js/public-config.js` (zawiera publiczne ustawienia raportów).
+Na GitHub podmień `index.html`, `js/game.js`, `README.md`, `CHANGELOG.md`. Nie wykonuj migracji SQL. Nie zmieniaj `js/public-config.js`.
 
-## Nowości
+## Zmiany
 
-- Laboratorium dodaje trzy kontrolowane próby Mistrzostwa Z: **Elastyczny — Kontratak**, **Refleksyjny — Przebicie po uniku**, **Nomady — Instynkt**.
-- Set akcesoriów `accessory_observant` został nazwany zgodnie z prefiksem **Spostrzegawczy** (w nazwach przedmiotów może występować forma **Spostrzegawcza**); **Tropiciela** to oddzielny sufiks akcesoriów. Identyfikatory i działanie mechaniki pozostają bez zmian.
-- Nadal nie publikujemy przedmiotów wygenerowanych w Laboratorium do zwykłego PvP online.
+- Zmieniono **wyłącznie wyświetlane** nazwy prefiksów, tak aby pasowały rodzajem do nazw przedmiotów, np. „Legendarna Nomadyczna Koszulka termiczna” oraz „Legendarny Wartowniczy Płaszcz”.
+- Ujednolicono nazwy pięciu setów akcesoriów z ich prefiksami: Techniczny, Spostrzegawczy, Przekonujący, Refleksyjny i Wszechstronny. To **nie** zmienia sufiksów typu „Tropiciela” ani wartości bonusów.
+- Laboratorium ma próby wszystkich 15 Mistrzostw Z, dodano: Odporny (krytyk), Tropicielski (kolejny krytyk) i Wszechstronny (osłona).
+- Zachowano istniejące ID rodzin, przedmiotów, zapisy, punktację setów i mechanikę walk.
 
-## Historia i migracje
+## Testowanie
 
-Szczegółowa historia jest w `CHANGELOG.md`. Folder `sql/` zawiera historyczne migracje i nie powinien być czyszczony. Wersja 0.4.9.8 nie wymaga SQL.
+Zaliczono wcześniej 12/15 testów lokalnych; ostatnie trzy testy wymagają teraz sprawdzenia na Testerze w przeglądarce. To nie jest potwierdzenie PvP online.
 
-## Raporty publiczne
-
-Własna instalacja wymaga adresu projektu Supabase i wyłącznie klucza publishable/anon w `js/public-config.js`. Nigdy nie umieszczaj tam klucza secret/service_role. Istniejąca konfiguracja zostaje zachowana przy tej aktualizacji.
-
-## Testy i ograniczenia
-
-Wprowadzono testy laboratoryjne offline, ale nowe scenariusze wymagają potwierdzenia w przeglądarce. Obecna synchronizacja statystyk do serwera wymaga przed publicznym uruchomieniem dodatkowej walidacji po stronie Supabase. Lokalne próby Z nie potwierdzają działania efektów w PvP online.
+Historię wersji znajdziesz w `CHANGELOG.md`. Archiwum `sql/` nie jest usuwane.
