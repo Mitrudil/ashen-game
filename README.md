@@ -1,17 +1,12 @@
-# ASHEN v0.4.8.0 — Ewolucja setów X/Y (Starcia lokalne)
+# ASHEN v0.4.8.1 — czyszczenie wyposażenia i testów
 
-## Aktualizacja GitHub
-Podmień `index.html` i `js/game.js`. Nie potrzeba SQL.
+Podmień `index.html` i `js/game.js` na GitHubie. Bez SQL.
 
-## Zmiany
-- Wspólny kalkulator 15 rodzin: rzeczywista suma punktów jakości, progi X/Y/Z (Z nieaktywne), pełne jednostki X.
-- X działa na PŻ, pancerz, celność, inicjatywę, uniki, krytyki, przebicie, obrażenia i handel.
-- Y reaguje na chybienie, unik, otrzymany krytyk, pierwsze rundy, późne rundy, osłonę i obrażenia krytyczne.
-- 3+3 rodzin odzieży oraz 3/3 akcesoriów działają niezależnie.
-- Wzmocniony zyskuje 4 PŻ na punkt jakości, by wzrost miał znaczenie.
+- Usunięto stare pule prefiksów/sufiksów i liczenie starych `affix`.
+- Jednorazowo czyszczone są przestarzałe modyfikatory zapisanych przedmiotów; bazowe ID, jakość, poziomy ulepszeń, UID, wyposażenie i postęp pozostają.
+- Dodano współczesny prefiks `armor_agile` (Zwinny) do losowania.
+- Planer, podsumowanie ubioru i podgląd przedmiotów pokazują obliczenia z Ewolucji X/Y. Usunięto stare porównywarki walk bazujące na nieaktualnych premiach.
+- Zachowano Rezonans artefaktów i zapis lokalnego profilu; mechaniki serwerowe Ekspedycji nadal wymagają aktualizacji.
+- Aktywne X/Y; Z jeszcze nie działa.
 
-## Ograniczenia
-Z nadal nie działa w prawdziwej walce. Serwerowe Ekspedycje i PvP używają własnej matematyki. Stary raport pełnych setów nie jest testem balansu nowych X/Y.
-
-## Kontrola
-Składnia JS i test jednostkowy kalkulatora; zachowanie wizualne i zbalansowanie wszystkich walk wymagają sprawdzenia w przeglądarce.
+Uwaga: przed wdrożeniem warto wyeksportować zapis dla porównania; czyszczenie starych prefiksów i sufiksów jest nieodwracalne bez kopii poprzedniej wersji.

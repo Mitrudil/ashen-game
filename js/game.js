@@ -252,12 +252,11 @@ function normalizeEquip(){
  state.equip=eq;
 }
 
-const affixes=[{name:'Precyzyjny',bonus:{per:2}},{name:'Wzmocniony',bonus:{end:2}},{name:'Zwinny',bonus:{dex:2}},{name:'Brutalny',bonus:{str:2}},{name:'Techniczny',bonus:{int:2}},{name:'Weterana',bonus:{per:1,end:1}},{name:'Łowcy',bonus:{dex:1,per:1}},{name:'Dowódcy',bonus:{cha:2}}];
 const locations=[{id:'ruins',name:'Bliska wyprawa — Ruiny osiedla',level:1,time:5,cost:5,xp:[20,35],scrap:[12,25],enemies:[{name:'Zdziczały szabrownik',hp:45,atk:[5,10],acc:4,dodge:4,armor:1},{name:'Wygłodniały mutant',hp:52,atk:[6,11],acc:4,dodge:3,armor:0}],drops:[['pistol',.18],['jacket',.15],['goggles',.08],['pipe',.15],['coat',.11],['compass',.09],['leather',.08],['revolver',.06]]},{id:'hospital',name:'Średnia wyprawa — Stary szpital',level:4,time:10,cost:12,xp:[45,70],scrap:[25,48],enemies:[{name:'Skażony sanitariusz',hp:105,atk:[11,19],acc:7,dodge:6,armor:3},{name:'Mutant z oddziału B',hp:115,atk:[12,20],acc:6,dodge:5,armor:4}],drops:[['vest',.17],['rifle',.12],['bandana',.12],['machete',.13],['smg',.12],['hazmat',.1],['radio',.08],['crossbow',.08],['dustglasses',.07],['bracelet',.08]]},{id:'outpost',name:'Daleka wyprawa — Posterunek wojskowy',level:8,time:15,cost:25,xp:[90,130],scrap:[50,90],enemies:[{name:'Dezerter z posterunku',hp:180,atk:[19,28],acc:11,dodge:9,armor:9},{name:'Strażnik kompleksu',hp:200,atk:[18,30],acc:12,dodge:7,armor:11}],drops:[['military',.15],['shotgun',.11],['mask',.14],['carbine',.14],['hammer',.12],['sniper',.09],['flame',.06],['rail',.025],['riot',.13],['kevlar',.11],['exosuit',.07],['sentinel',.025],['goggles',.12],['badge',.08],['radio',.07],['cleaver',.08],['revolver',.08],['smg',.10],['deserteagle',.12]]}];
-const fresh=()=>({version:1,created:false,gender:'male',origin:'scout',dominantHand:'right',name:'Wędrowiec',level:1,xp:0,points:5,attrs:{str:5,dex:5,end:5,per:5,int:5,cha:5},hp:110,energy:100,lastRegen:Date.now(),scrap:0,credits:0,cores:0,schematics:0,workshopTestGranted:false,factionTestPackGranted:false,furniture:{bed:0,table:0,nightstand:0},rooms:{bedroom:1,storage:1,workshop:1},materials:{tkanina:0,skora:0,tworzywo:0,elektronika:0,czesci:0,food:0,water:0,medical:0},inventory:[{uid:'starter-knife',id:'knife',rarity:0,affix:null},{uid:'starter-jacket',id:'jacket',rarity:0,affix:null}],equip:{right:'starter-knife',left:null,shirt:null,pants:null,boots:null,outer:'starter-jacket',head:null,extra:null},mission:null,reports:[],arena:{highest:0,attempts:{},victories:{},losses:{},draws:{},history:[]},battles:0,wins:0,companion:null,companionLevels:{},ownedCompanions:[],companionExperience:{},vehicle:'foot',vehicleUpgrades:{},vehicleSelectedStages:{},ownedVehicles:[],vehicleModules:{}});let state;try{state=JSON.parse(localStorage.getItem(KEY))||fresh();if(state.version!==1)state=fresh()}catch{state=fresh()}if(state.created===undefined)state.created=true;state.gender=normalizeGender(state.gender);state.origin=normalizeOrigin(state.origin);if(!['left','right'].includes(state.dominantHand))state.dominantHand='right';// Migracja zapisów z v0.1.0–0.1.2; stare wyposażenie zachowuje podstawowe parametry.
+const fresh=()=>({version:1,created:false,gender:'male',origin:'scout',dominantHand:'right',name:'Wędrowiec',level:1,xp:0,points:5,attrs:{str:5,dex:5,end:5,per:5,int:5,cha:5},hp:110,energy:100,lastRegen:Date.now(),scrap:0,credits:0,cores:0,schematics:0,workshopTestGranted:false,factionTestPackGranted:false,furniture:{bed:0,table:0,nightstand:0},rooms:{bedroom:1,storage:1,workshop:1},materials:{tkanina:0,skora:0,tworzywo:0,elektronika:0,czesci:0,food:0,water:0,medical:0},inventory:[{uid:'starter-knife',id:'knife',rarity:0},{uid:'starter-jacket',id:'jacket',rarity:0}],equip:{right:'starter-knife',left:null,shirt:null,pants:null,boots:null,outer:'starter-jacket',head:null,extra:null},mission:null,reports:[],arena:{highest:0,attempts:{},victories:{},losses:{},draws:{},history:[]},battles:0,wins:0,companion:null,companionLevels:{},ownedCompanions:[],companionExperience:{},vehicle:'foot',vehicleUpgrades:{},vehicleSelectedStages:{},ownedVehicles:[],vehicleModules:{}});let state;try{state=JSON.parse(localStorage.getItem(KEY))||fresh();if(state.version!==1)state=fresh()}catch{state=fresh()}if(state.created===undefined)state.created=true;state.gender=normalizeGender(state.gender);state.origin=normalizeOrigin(state.origin);if(!['left','right'].includes(state.dominantHand))state.dominantHand='right';// Migracja zapisów z v0.1.0–0.1.2; stare wyposażenie zachowuje podstawowe parametry.
 if(!Array.isArray(state.inventory))state.inventory=[];
 if(state.inventory.some(x=>typeof x==='string')){
- let old=state.inventory;state.inventory=old.map((id,i)=>({uid:'legacy-'+i,id,rarity:0,affix:null}));
+ let old=state.inventory;state.inventory=old.map((id,i)=>({uid:'legacy-'+i,id,rarity:0}));
  // stare sloty przełożymy na nowe po zdefiniowaniu funkcji instance/def
  let previous=state.equip||{};let used=new Set();let eq={};
  for(const [slot,id] of Object.entries(previous)){
@@ -372,19 +371,6 @@ function rarityPrefix(inst,d){let n=Number(inst?.rarity)||0;let form=pluralItemI
 // Prefiksy ze starych zapisów pozostają czytelne i nie zmieniają swojego ID,
 // ale nigdy nie są losowane po aktualizacji. Nowe modyfikatory mają osobne
 // przestrzenie identyfikatorów dla broni, ubioru i akcesoriów.
-const legacyPrefixDefs=[
- {id:'precise',name:'Precyzyjny',bonus:{per:2},on:'weapon',legacyOnly:true},
- {id:'brutal',name:'Brutalny',bonus:{str:2},on:'weapon',legacyOnly:true},
- {id:'agile',name:'Zwinny',bonus:{dex:2},on:'any',legacyOnly:true,setId:'armor_agile'},
- {id:'reinforced',name:'Wzmocniony',bonus:{end:2},on:'clothing',legacyOnly:true,setId:'armor_reinforced'},
- {id:'technical',name:'Techniczny',bonus:{int:2},on:'any',legacyOnly:true},
- {id:'light',name:'Lekki',bonus:{dex:1,per:1},on:'clothing',legacyOnly:true,setId:'armor_light'},
- {id:'armored',name:'Pancerny',armorPct:15,on:'clothing',legacyOnly:true,setId:'armor_plated'},
- {id:'destructive',name:'Niszczycielski',damagePct:12,on:'weapon',legacyOnly:true},
- {id:'lethal',name:'Zabójczy',critPp:5,on:'weapon',legacyOnly:true},
- // Dawny ujemny prefiks nie wypada już w łupach i nie osłabia zdobytego wyposażenia.
- {id:'scrap',name:'Odzyskany',forms:{m:'Odzyskany',f:'Odzyskana',p:'Odzyskane'},bonus:{end:1},on:'any',legacyOnly:true}
-];
 const newPrefixDefs=[
  // ASHEN 0.4.7.0: nowe bronie losuja strategiczne, porownywalne warianty.
  // Prefiks okresla sposob wykonania ataku; bonusy nie rosna wraz z liczba ciosow.
@@ -399,6 +385,7 @@ const newPrefixDefs=[
  // UBIÓR — ich własna pula pozostaje niezależna od broni.
  {id:'armor_reinforced',name:'Wzmocniony',forms:{m:'Wzmocniony',f:'Wzmocniona',p:'Wzmocnione'},bonus:{end:2},on:'clothing',setId:'armor_reinforced'},
  {id:'armor_plated',name:'Pancerny',forms:{m:'Pancerny',f:'Pancerna',p:'Pancerne'},armorPct:15,on:'clothingArmor',setId:'armor_plated'},
+ {id:'armor_agile',name:'Zwinny',forms:{m:'Zwinny',f:'Zwinna',p:'Zwinne'},bonus:{dex:2},on:'clothing',setId:'armor_agile'},
  {id:'armor_flexible',name:'Elastyczny',forms:{m:'Elastyczny',f:'Elastyczna',p:'Elastyczne'},bonus:{dex:2},on:'clothing',setId:'armor_flexible'},
  {id:'armor_light',name:'Lekki',forms:{m:'Lekki',f:'Lekka',p:'Lekkie'},bonus:{dex:1,per:1},on:'clothing',setId:'armor_light'},
  {id:'armor_resistant',name:'Odporny',forms:{m:'Odporny',f:'Odporna',p:'Odporne'},armorPct:8,bonus:{end:1},on:'clothingArmor',setId:'armor_resistant'},
@@ -413,19 +400,7 @@ const newPrefixDefs=[
  {id:'accessory_reflexive',name:'Refleksyjny',forms:{m:'Refleksyjny',f:'Refleksyjna',p:'Refleksyjne'},bonus:{dex:2},on:'accessory',setId:'accessory_reflexive'},
  {id:'accessory_versatile',name:'Wszechstronny',forms:{m:'Wszechstronny',f:'Wszechstronna',p:'Wszechstronne'},bonus:{per:1,int:1},on:'accessory',setId:'accessory_versatile'}
 ];
-const prefixDefs=[...legacyPrefixDefs,...newPrefixDefs,...artifactPrefixDefs];
-const legacySuffixDefs=[
- {id:'hunter',name:'Łowcy',bonus:{per:2},on:'any',legacyOnly:true},
- {id:'strong',name:'Siłacza',bonus:{str:2},on:'any',legacyOnly:true},
- {id:'shadow',name:'Cienia',bonus:{dex:2},on:'any',legacyOnly:true},
- {id:'veteran',name:'Weterana',bonus:{str:1,end:1},on:'any',legacyOnly:true},
- {id:'technician',name:'Technika',bonus:{int:2},on:'any',legacyOnly:true},
- {id:'sniper',name:'Snajpera',bonus:{per:3},on:'ranged',legacyOnly:true},
- {id:'berserker',name:'Berserkera',damagePct:8,on:'weapon',legacyOnly:true},
- {id:'survivor',name:'Ocalonego',bonus:{end:3},on:'clothing',legacyOnly:true},
- {id:'commander',name:'Dowódcy',bonus:{cha:2},on:'any',legacyOnly:true},
- {id:'mutant',name:'Mutanta',bonus:{str:3},on:'any',legacyOnly:true}
-];
+const prefixDefs=[...newPrefixDefs,...artifactPrefixDefs];
 const newSuffixDefs=[
  // Sufiks okresla specjalizacje w walce — oddzielny wybor od prefiksu.
  {id:'weapon_hunter',name:'Łowcy',bonus:{per:2},accuracy:2,on:'weapon'},
@@ -449,13 +424,30 @@ const newSuffixDefs=[
  {id:'accessory_explorer',name:'Odkrywcy',bonus:{int:1,per:1},on:'accessory'},
  {id:'accessory_survivor',name:'Ocalałego',bonus:{end:2},on:'accessory'}
 ];
-const suffixDefs=[...legacySuffixDefs,...newSuffixDefs,...artifactSuffixDefs];
+const suffixDefs=[...newSuffixDefs,...artifactSuffixDefs];
 // Jednorazowa, bezstratna migracja artefaktów z 0.1.46–0.1.47:
 // stare kolekcje otrzymują odpowiedniki prefiksów; oryginalne UID i rzadkość zostają.
 for(const inst of state.inventory){
  const d=def(inst);if(!d?.artifact||inst.artifactAffixesInitialized)continue;
  if(!inst.prefix)inst.prefix=d.artifactSet==='seeker'?'art_fortunate':'art_ward';
  inst.artifactAffixesInitialized=true;
+}
+// ASHEN 0.4.8.1: jednorazowe czyszczenie starych modyfikatorów.
+// Zostawiamy identyfikatory i jakość bazowych przedmiotów, bez nieaktualnych bonusów.
+// Osobno zachowany Rezonans artefaktów (definicje art_*).
+const CURRENT_EQUIPMENT_SCHEMA=481;
+let equipmentCleaned=false;
+if((Number(state.equipmentSchema)||0)<CURRENT_EQUIPMENT_SCHEMA){
+ const allowedPrefixes=new Set(prefixDefs.map(x=>x.id));
+ const allowedSuffixes=new Set(suffixDefs.map(x=>x.id));
+ for(const inst of state.inventory){
+  if(!inst||typeof inst!=='object')continue;
+  if(inst.affix!==undefined){delete inst.affix;equipmentCleaned=true;}
+  if(inst.prefix&&!allowedPrefixes.has(inst.prefix)){delete inst.prefix;equipmentCleaned=true;}
+  if(inst.suffix&&!allowedSuffixes.has(inst.suffix)){delete inst.suffix;equipmentCleaned=true;}
+ }
+ state.equipmentSchema=CURRENT_EQUIPMENT_SCHEMA;
+ equipmentCleaned=true;
 }
 const clothingSlots=new Set(['head','shirt','outer','hands','pants','boots']);
 const meleeWeaponIds=new Set(['knife','pipe','machete','cleaver','wrench','hatchet','baton','saber','hammer','crowbar','sledge']);
@@ -483,10 +475,7 @@ function modifiersOf(inst){
  const mods=[];
  if(inst?.prefix) {const p=findModifier(prefixDefs,inst.prefix);if(p)mods.push(p)}
  if(inst?.suffix) {const p=findModifier(suffixDefs,inst.suffix);if(p)mods.push(p)}
- // Starsze łupy z wersji 0.1.3–0.1.5: zachowanie nazwy oraz przyznanego bonusu.
- if(mods.length===0&&inst?.affix!==undefined&&inst?.affix!==null){
-  const old=affixes[inst.affix];if(old)mods.push({...old,legacy:true})
- }
+
  return mods;
 }
 function rolledBonus(inst){const b={};for(const mod of modifiersOf(inst))for(const [k,v] of Object.entries(mod.bonus||{}))b[k]=(b[k]||0)+v;return b}
@@ -503,9 +492,7 @@ function statsOf(inst){
  const pct=(key)=>mods.reduce((sum,x)=>sum+(x[key]||0),0);
  const dmgPct=pct('damagePct'),armorPct=pct('armorPct'),critPp=pct('critPp'),accuracy=pct('accuracy'),extraAttacks=pct('extraAttacks'),armorPen=pct('armorPen');
  const pref=findModifier(prefixDefs,inst?.prefix),suf=findModifier(suffixDefs,inst?.suffix);
- const legacy=mods.find(x=>x.legacy);
- const legacyLabel=legacy?.name==='Zwinny'&&d.slot==='extra'?prefixLabel({id:'agile',name:'Zwinny'},d):legacy?.name;
- const name=[rarityPrefix(inst,d),prefixLabel(pref,d)||legacyLabel,d.name,suf?.name].filter(Boolean).join(' ');
+ const name=[rarityPrefix(inst,d),prefixLabel(pref,d),d.name,suf?.name].filter(Boolean).join(' ');
  const weapon=weaponSlot(d.slot),upgrade=Math.min(5,Math.max(0,Number(inst?.upgrade)||0));
  const combatModel=weapon?combatV2WeaponConfig(d.id):null;
  const upgradedName=upgrade?name+' +'+upgrade:name;
@@ -665,39 +652,31 @@ const PAGE_IDS=new Set(['character','companion','transport','missions','arena','
 let page='character',message='',invFilter='all',invGroup='all',selectedUid=null,workshopUid=null;
 try{const previousPage=localStorage.getItem(PAGE_KEY);if(PAGE_IDS.has(previousPage))page=previousPage}catch{}
 function setPage(next){page=PAGE_IDS.has(next)?next:'character';try{localStorage.setItem(PAGE_KEY,page)}catch{}}let bulkSelected=new Set();const $=id=>document.getElementById(id),item=id=>items.find(x=>x.id===id),rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,clamp=(v,a,b)=>Math.min(b,Math.max(a,v));const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function save(){try{const data=JSON.stringify(state);localStorage.setItem(KEY,data);if(devActiveId()==='main')localStorage.setItem(devProfileSaveKey('main'),data);window.ASHEN_ONLINE?.localChanged()}catch{message='Nie można zapisać postępu w tej przeglądarce.'}}// ASHEN v0.1.39 — zestawy ubioru rozpoznawane po prefiksie, a nie nazwie przedmiotu.
+function save(){try{const data=JSON.stringify(state);localStorage.setItem(KEY,data);if(devActiveId()==='main')localStorage.setItem(devProfileSaveKey('main'),data);window.ASHEN_ONLINE?.localChanged()}catch{message='Nie można zapisać postępu w tej przeglądarce.'}}if(equipmentCleaned){
+ for(const oldKey of ['ashen-set-compare-v0474','ashen-all-sets-v0475'])try{localStorage.removeItem(oldKey)}catch{}
+ save();
+}
+// ASHEN v0.1.39 — zestawy ubioru rozpoznawane po prefiksie, a nie nazwie przedmiotu.
 // Stare identyfikatory prefiksów są mapowane na ich współczesne odpowiedniki.
-const SETS={
- armor_reinforced:{name:'Wzmocniony',attribute:'end',start:2,step:1},
- armor_plated:{name:'Pancerny',armorPct:true,start:6,step:3},
- armor_flexible:{name:'Elastyczny',attribute:'dex',start:2,step:1},
- armor_agile:{name:'Zwinny',attribute:'dex',start:2,step:1},
- armor_light:{name:'Lekki',attribute:'per',start:2,step:1},
- armor_resistant:{name:'Odporny',attribute:'end',start:2,step:1},
- armor_tracker:{name:'Tropicielski',attribute:'per',start:2,step:1},
- armor_iron:{name:'Żelazny',attribute:'str',start:2,step:1},
- armor_warden:{name:'Wartownika',attribute:'end',start:2,step:1},
- armor_nomad:{name:'Nomady',attribute:'dex',start:2,step:1}
-};
-
 // ASHEN v0.4.7.6: rozłączny katalog PROJEKTOWANYCH premii setowych.
 // Nie podłączać bezpośrednio do attrs(), heroDefense() lub fight() — mechaniki
 // pomocnicze (unik, odporność krytyczna, inicjatywa) wymagają jeszcze implementacji i testów.
 const SET_V05_DESIGN = {"clothing":{"armor_reinforced":{"name":"Wzmocniony","role":"PŻ i wytrzymałość","description":"Zapas PŻ bez specjalizacji broni","primary":{"stat":"end","at3":2,"perTier":1},"secondary":{"stat":"hpPct","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_plated":{"name":"Pancerny","role":"Pancerz i redukcja","description":"Ochrona przed wieloma trafieniami","primary":{"stat":"armorPct","at3":5,"perTier":2},"secondary":{"stat":"flatReduction","at3":1,"perTier":1},"activeFrom":3,"maxPieces":6},"armor_flexible":{"name":"Elastyczny","role":"Zręczność i unik","description":"Szansa uniknięcia trafienia","primary":{"stat":"dex","at3":2,"perTier":1},"secondary":{"stat":"dodge","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_agile":{"name":"Zwinny","role":"Inicjatywa i precyzja","description":"Przewaga pierwszych ataków","primary":{"stat":"accuracy","at3":2,"perTier":1},"secondary":{"stat":"firstHit","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_light":{"name":"Lekki","role":"Percepcja i celność","description":"Dokładniejsze ataki","primary":{"stat":"per","at3":1,"perTier":1},"secondary":{"stat":"accuracy","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_resistant":{"name":"Odporny","role":"Wytrzymałość i krytyki","description":"Ograniczanie ciosów krytycznych","primary":{"stat":"end","at3":1,"perTier":1},"secondary":{"stat":"critResist","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_tracker":{"name":"Tropicielski","role":"Percepcja i krytyki","description":"Kontrola krytyków niezależnie od broni","primary":{"stat":"per","at3":1,"perTier":1},"secondary":{"stat":"critChance","at3":1,"perTier":1},"activeFrom":3,"maxPieces":6},"armor_iron":{"name":"Żelazny","role":"Siła i moc trafienia","description":"Ofensywna specjalizacja także bez broni białej","primary":{"stat":"str","at3":1,"perTier":1},"secondary":{"stat":"damagePct","at3":2,"perTier":2},"activeFrom":3,"maxPieces":6},"armor_warden":{"name":"Wartownika","role":"Wytrzymałość i stabilność","description":"Przetrwanie długich pojedynków","primary":{"stat":"end","at3":2,"perTier":1},"secondary":{"stat":"damageResist","at3":1,"perTier":1},"activeFrom":3,"maxPieces":6},"armor_nomad":{"name":"Nomady","role":"Zręczność i wszechstronność","description":"Ruchliwość i niewielka premia ofensywna","primary":{"stat":"dex","at3":1,"perTier":1},"secondary":{"stat":"damagePct","at3":1,"perTier":1},"activeFrom":3,"maxPieces":6}},"accessories":{"accessory_technical":{"name":"Technika","role":"Inteligencja i penetracja","description":"Przebicie użyteczne dla każdej klasy","primary":{"stat":"int","at3":3},"secondary":{"stat":"armorPen","at3":2},"activeFrom":3,"maxPieces":3},"accessory_observant":{"name":"Tropiciela","role":"Percepcja i krytyk","description":"Precyzja i krytyki","primary":{"stat":"per","at3":2},"secondary":{"stat":"critChance","at3":2},"activeFrom":3,"maxPieces":3},"accessory_persuasive":{"name":"Negocjatora","role":"Charyzma i handel","description":"Premia do sprzedaży wyposażenia; nie wpływa na obrażenia","primary":{"stat":"cha","at3":3},"secondary":{"stat":"saleCreditsPct","at3":3},"activeFrom":3,"maxPieces":3},"accessory_reflexive":{"name":"Nomady","role":"Zręczność i unik","description":"Większa przeżywalność","primary":{"stat":"dex","at3":2},"secondary":{"stat":"dodge","at3":3},"activeFrom":3,"maxPieces":3},"accessory_versatile":{"name":"Ocalałego","role":"Wytrzymałość i percepcja","description":"Odporność i uniwersalne atrybuty","primary":{"stat":"end","at3":2},"secondary":{"stat":"per","at3":1},"activeFrom":3,"maxPieces":3}}};
+const SETS=Object.fromEntries(Object.entries(SET_V05_DESIGN.clothing).map(([id,cfg])=>[id,{name:cfg.name}]));
 const SET_V05_LABELS={end:'Wytrzymałość',armorPct:'Pancerz %',dex:'Zręczność',accuracy:'Celność',per:'Percepcja',str:'Siła',int:'Inteligencja',cha:'Charyzma',hpPct:'PŻ %',flatReduction:'Redukcja obrażeń / trafienie',dodge:'Unik (pkt)',firstHit:'Premia pierwszego trafienia %',critResist:'Redukcja obrażeń krytycznych %',critChance:'Szansa krytyka (p.p.)',damagePct:'Obrażenia %',damageResist:'Redukcja obrażeń %',armorPen:'Przebicie pancerza (pkt)',saleCreditsPct:'Kredyty ze sprzedaży %'};
 function designedSetPreviewParts(parts,quality=0){
- const groups={};for(const id of parts){if(!id||id==='none')continue;(groups[id]??=[]).push(id)}
- const q=Math.max(0,Math.min(4,Number(quality)||0));const qualityFactor=1+(setQuality({rarity:q})-1)*.35;
- return Object.entries(groups).map(([id,members])=>{
-  const cfg=SET_V05_DESIGN.clothing[id]||SET_V05_DESIGN.accessories[id];if(!cfg)return null;
-  const count=members.length,active=count>=cfg.activeFrom,tier=active?count-3:0;
-  const effects=active?[cfg.primary,cfg.secondary].map(e=>({key:e.stat,amount:Math.round((e.at3+tier*(e.perTier||0))*qualityFactor*10)/10})):[];
-  return {id,name:cfg.name,role:cfg.role,description:cfg.description,count,max:cfg.maxPieces,active,effects};
+ const category=parts.length===6?'clothing':'accessories',groups={};
+ for(const id of parts)if(id&&id!=='none')(groups[id]??=[]).push(id);
+ return Object.entries(groups).map(([id,items])=>{
+  const cfg=SET_V05_DESIGN[category][id];if(!cfg)return null;
+  const r=evolutionSetFromQuality(id,category,Array(items.length).fill(Math.max(0,Math.min(4,Number(quality)||0))));
+  return {id,name:cfg.name,role:cfg.role,description:cfg.description,count:items.length,max:cfg.maxPieces,active:!!r,
+   effects:r?Object.entries(r.effects).map(([key,amount])=>({key,amount})):[]};
  }).filter(Boolean);
 }
 // ASHEN v0.4.8.0 — X + Y, jakości liczone punktowo i bez strat zaokrągleń.
 // Z pozostaje wyłącznie w Laboratorium; serwerowe Ekspedycje są osobnym silnikiem.
-const SET_ENGINE_VERSION='0.4.8.0';
+const SET_ENGINE_VERSION='0.4.8.1';
 const SET_ATTRIBUTE_KEYS=new Set(['str','dex','end','per','int','cha']);
 const EVOL_X_BASE={armor_reinforced:20,armor_plated:3,armor_flexible:3,armor_agile:2,
  armor_light:2,armor_resistant:2,armor_tracker:2,armor_iron:2,armor_warden:2,armor_nomad:2,
@@ -776,54 +755,23 @@ function setPrefixId(inst){
  const p=findModifier(prefixDefs,inst?.prefix);
  return p&&p.setId&&SETS[p.setId]?p.setId:null;
 }
-function setQuality(inst){const i=Math.max(0,Math.min(4,Number(inst?.rarity)||0));return [1,1.2,1.5,2,2.5][i]}
 function setResults(){
  const groups={};
- for(const slot of clothingSlots){
-  const inst=instance(state.equip?.[slot]);if(!inst)continue;
-  const id=setPrefixId(inst);if(!id)continue;
-  (groups[id]??=[]).push({slot,inst});
- }
+ for(const slot of clothingSlots){const inst=instance(state.equip?.[slot]);if(!inst)continue;
+  const id=setPrefixId(inst);if(id)(groups[id]??=[]).push({slot,inst});}
  return Object.entries(groups).map(([id,members])=>{
-  const config=SETS[id],count=members.length;
-  const avg=members.reduce((sum,m)=>sum+setQuality(m.inst),0)/count;
-  const base=count>=3?config.start+Math.max(0,count-3)*config.step:0;
-  const amount=count>=3?Math.round(base*avg):0;
-  return {id,name:config.name,config,members,count,avg,base,amount,active:count>=3};
+  const r=evolutionSetFromQuality(id,'clothing',members.map(m=>evolutionQualityPoint(m.inst)));
+  return {id,name:SETS[id].name,config:SETS[id],members,count:members.length,active:!!r,
+   qualityPoints:members.reduce((t,m)=>t+evolutionQualityPoint(m.inst),0),level:r?(r.z?3:r.y?2:1):0,effects:r?.effects||{}};
  });
 }
-function activeSetBonuses(){
- const bonus={},results=setResults();let armorPct=0;
- for(const s of results){if(!s.active)continue;
-  if(s.config.armorPct)armorPct+=s.amount;
-  else bonus[s.config.attribute]=(bonus[s.config.attribute]||0)+s.amount;
- }
- return {bonus,armorPct,results};
+function setStatusText(inst){const id=setPrefixId(inst);if(!id)return '';
+ const r=setResults().find(x=>x.id===id),equipped=Object.values(state.equip||{}).includes(inst.uid),n=r?.count||0;
+ return `<div class="ashen-set-inline ${n>=3&&equipped?'is-active':'is-pending'}"><strong>Set ${escape(SETS[id].name)} · ${n}/6</strong><span>${n>=3&&equipped?`Aktywny: X${r.level>=2?' + Y':''}. Jakość: ${r.qualityPoints} pkt`:`Brakuje ${Math.max(0,3-n)} części do X`}</span></div>`;
 }
-function setBonusDescription(result){
- if(!result)return '';
- return result.config.armorPct?`Pancerz +${result.amount}%`:`${attrNames[result.config.attribute]} +${result.amount}`;
+function setSummaryCard(r){const detail=r.active?`Poziom ${r.level===3?'III':r.level===2?'II':'I'} · X${r.level>=2?' + Y':''} · ${r.qualityPoints} pkt jakości`:`Do aktywacji brakuje ${3-r.count} części`;
+ return `<article class="ashen-set-card ${r.active?'is-active':''}"><strong>${escape(r.name)}</strong><div>${r.count}/6 · ${escape(detail)}</div></article>`;
 }
-// Prognoza liczona z obecnej średniej jakości części; dla przedmiotu spoza ekwipunku
-// pokazuje orientacyjną premię za 3/3 z jego rzadkością.
-function projectedSetBonus(config,average){
- const amount=Math.max(1,Math.round(config.start*(average||1)));
- return config.armorPct?`Pancerz +${amount}%`:`${attrNames[config.attribute]} +${amount}`;
-}
-function setStatusText(inst){
- const id=setPrefixId(inst);if(!id)return '';
- const cfg=SETS[id],result=setResults().find(s=>s.id===id);
- const count=result?.count||0,equipped=Object.values(state.equip||{}).includes(inst.uid),active=count>=3&&equipped;
- const avg=result?.avg||setQuality(inst);
- return `<div class="ashen-set-inline ${active?'is-active':'is-pending'}" aria-label="Zestaw ${escape(cfg.name)}"><strong>${active?'✓ AKTYWNY':equipped?'◌ NIEAKTYWNY':'◇ ELEMENT ZESTAWU'} · Zestaw ${escape(cfg.name)} (${count}/6)</strong><span>${active?`Premia zestawu: ${escape(setBonusDescription(result))}`:`Premia za 3 elementy: ${escape(projectedSetBonus(cfg,avg))} · ${equipped?`brakuje ${Math.max(0,3-count)}`:'załóż przedmiot, by go zaliczyć'}`}</span></div>`;
-}
-function setSummaryCard(result){
- const missing=Math.max(0,3-result.count);
- const items=result.members.map(m=>`<div class="ashen-set-member"><span>${escape(slotLabels[m.slot])}</span><strong>${escape(statsOf(m.inst)?.name||def(m.inst)?.name||'Przedmiot')}</strong><span class="ashen-set-quality">${escape(rarities[Math.max(0,Math.min(4,Number(m.inst.rarity)||0))].name)}</span></div>`).join('');
- const bonus=result.active?`AKTYWNY · ${setBonusDescription(result)}`:`NIEAKTYWNY · za 3/3: ${projectedSetBonus(result.config,result.avg)} · brakuje ${missing} ${missing===1?'elementu':'elementów'}`;
- return `<article class="ashen-set-card ${result.active?'is-active':''}"><div class="ashen-set-top"><strong>Zestaw ${escape(result.name)}</strong><span class="ashen-set-count">${result.count}/6 · ${result.active?'AKTYWNY':'NIEAKTYWNY'}</span></div><div class="ashen-set-track">${Array.from({length:6},(_,i)=>`<i class="${i<result.count?'filled':''}"></i>`).join('')}</div><div class="ashen-set-members">${items}</div><div class="ashen-set-bottom"><span>${escape(bonus)}</span><small>Śr. jakość ×${result.avg.toFixed(2).replace('.',',')}${result.active?' · premia doliczona':''}</small></div></article>`;
-}
-
 // ASHEN 0.4.7.2 — planowanie setów nie wymaga posiadania przedmiotów.
 // Obliczenia korzystają z tych samych SETS, ACCESSORY_SETS i setQuality,
 // które napędzają rzeczywisty ekwipunek. Plan nie zapisuje się w postaci.
@@ -838,190 +786,18 @@ function loadSetPlan(){
 }
 let setPlanner=null;let setPlannerOpen=false;
 function saveSetPlan(){try{localStorage.setItem(SET_PLANNER_KEY,JSON.stringify(setPlanner))}catch{}}
-function plannerBonuses(){
- const avg=setQuality({rarity:setPlanner.quality});
- const groups={};
- for(const id of setPlanner.clothing){if(SETS[id])groups[id]=(groups[id]||0)+1}
- const clothes=Object.entries(groups).map(([id,count])=>{
-  const cfg=SETS[id],base=count>=3?cfg.start+(count-3)*cfg.step:0;
-  return {id,count,name:cfg.name,active:count>=3,amount:count>=3?Math.round(base*avg):0,config:cfg};
- });
- const extras={};for(const id of setPlanner.accessories){if(ACCESSORY_SETS[id])extras[id]=(extras[id]||0)+1}
- const accessories=Object.entries(extras).map(([id,count])=>{
-  const cfg=ACCESSORY_SETS[id],active=count===3;
-  const bonus=active?Object.fromEntries(Object.entries(cfg.bonus).map(([key,value])=>[key,Math.max(1,Math.round(value*avg))])):{};
-  return {id,count,name:cfg.name,active,bonus};
- });
- return {clothes,accessories,avg};
-}
 function plannerResultHtml(){
- const r=plannerBonuses();
- const cloth=r.clothes.length?r.clothes.map(v=>`<div class="ashen-set-member"><span>${escape(v.name)} · ${v.count}/6</span><strong>${v.active?escape(v.config.armorPct?`Pancerz +${v.amount}%`:`${attrNames[v.config.attribute]} +${v.amount}`):'Brak premii (minimum 3)'}</strong></div>`).join(''):'<div class="small muted">Brak odzieży z rodziny setowej.</div>';
- const extras=r.accessories.length?r.accessories.map(v=>`<div class="ashen-set-member"><span>${escape(v.name)} · ${v.count}/3</span><strong>${v.active?escape(accessoryBonusText(v.bonus)):'Brak premii (wymagane 3/3)'}</strong></div>`).join(''):'<div class="small muted">Brak akcesoriów z rodziny setowej.</div>';
- return `<div class="ashen-sets-grid"><article class="ashen-set-card"><strong>Sety ubioru</strong><div class="ashen-set-members">${cloth}</div></article><article class="ashen-set-card"><strong>Sety akcesoriów</strong><div class="ashen-set-members">${extras}</div></article></div><p class="small muted" style="margin:10px 0 0">Jakość: ×${r.avg.toFixed(2).replace('.',',')} · Liczymy dokładnie jak w aktualnym ekwipunku. Indywidualne premie przedmiotów nie są tu uwzględnione.</p>`;
-}
-// ASHEN v0.4.7.5 — analiza premii setowych w prawdziwym lokalnym fight().
-// Nie dotykamy state.equip ani state.inventory: zmieniamy wylacznie testSnapshot.
-const SET_COMPARE_KEY='ashen-set-compare-v0474';
-let setCompareStage=20,setCompareResults=null;
-try{const previous=JSON.parse(localStorage.getItem(SET_COMPARE_KEY)||'null');
- if(previous&&[10,20].includes(previous.stage)){setCompareStage=previous.stage;
-  if(Array.isArray(previous.rows)&&previous.rows.length===4)setCompareResults=previous;}
-}catch{}
-function plannerBonusProfile(plan){
- const quality=setQuality({rarity:plan.quality}),group={},attributes={},accGroup={};let armorPct=0;
- for(const id of plan.clothing){if(SETS[id])group[id]=(group[id]||0)+1;}
- for(const [id,count] of Object.entries(group)){
-  if(count<3)continue;
-  const cfg=SETS[id],base=cfg.start+(count-3)*cfg.step,amount=Math.round(base*quality);
-  if(cfg.armorPct)armorPct+=amount;
-  else attributes[cfg.attribute]=(attributes[cfg.attribute]||0)+amount;
- }
- for(const id of plan.accessories){if(ACCESSORY_SETS[id])accGroup[id]=(accGroup[id]||0)+1;}
- for(const [id,count] of Object.entries(accGroup)){
-  if(count!==3)continue;
-  for(const [key,val] of Object.entries(ACCESSORY_SETS[id].bonus))attributes[key]=(attributes[key]||0)+Math.max(1,Math.round(val*quality));
- }
- return {attributes,armorPct};
-}
-function setCompareScenarios(){
- const x=setPlanner;
- return [
-  {name:'6 Wartownika',clothing:Array(6).fill('armor_warden'),accessories:x.accessories.slice(),quality:x.quality},
-  {name:'3 Wartownika + 3 Nomady',clothing:defaultSetPlan().clothing.slice(),accessories:x.accessories.slice(),quality:x.quality},
-  {name:'4 Wartownika + 2 Nomady',clothing:['armor_warden','armor_warden','armor_warden','armor_warden','armor_nomad','armor_nomad'],accessories:x.accessories.slice(),quality:x.quality},
-  {name:'Własny układ z Planera',clothing:x.clothing.slice(),accessories:x.accessories.slice(),quality:x.quality}
- ];
-}
-function setCompareSeed(seed){let s=seed>>>0;return ()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296;};}
-function setCompareRun(){
- if(!state.created)return;
- // Bazowe aktualne statystyki postaci bez AKTYWNYCH premii setow — zachowujemy
- // indywidualne statystyki zalozonych przedmiotow, Warsztat, towarzysza, Rezonans.
- const current=attrs(),oldClothing=activeSetBonuses(),oldAccessories=accessorySetBonuses();
- const neutral={...current};
- for(const [key,val] of Object.entries(oldClothing.bonus))neutral[key]=(neutral[key]||0)-val;
- for(const [key,val] of Object.entries(oldAccessories.bonus))neutral[key]=(neutral[key]||0)-val;
- const currentDefense=heroDefense(),attacks=heroAttacks();
- const opponent=ARENA_STAGES.find(v=>v.level===setCompareStage)||ARENA_STAGES[19];
- const rows=setCompareScenarios().map(scenario=>{
-  const extra=plannerBonusProfile(scenario),a={...neutral};
-  for(const [key,val] of Object.entries(extra.attributes))a[key]=(a[key]||0)+val;
-  const raw=currentDefense.rawArmor;
-  const defense={...currentDefense,
-   hp:Math.round((60+a.end*10)*(1+.025*(roomLevel('infirmary')-1))),
-   acc:6+a.per*1.3,
-   dodge:3+a.dex*1.1+currentDefense.pet,
-   armor:raw+Math.round(raw*extra.armorPct/100)+Math.floor(a.end/4)+currentDefense.pet,
-   setArmor:extra.armorPct};
-  const samples=300;let wins=0,rounds=0,totalHp=0,totalPotential=0,totalReceived=0,totalHits=0,totalAttempts=0;
-  for(let i=0;i<samples;i++){
-   const result=fight(opponent,{testSnapshot:{attributes:a,attacks,defense},testRandom:setCompareSeed(7654321+i*9973)});
-   if(result.won){wins++;rounds+=result.damageSummary.rounds;}
-   totalHp+=result.heroHp;
-   totalPotential+=result.damageSummary.hero.potential/Math.max(1,result.damageSummary.rounds);
-   totalReceived+=result.damageSummary.foe.damage;
-   totalHits+=result.damageSummary.hero.hits;
-   totalAttempts+=result.damageSummary.hero.attempts;
-  }
-  return {name:scenario.name,bonus:extra.attributes,armorPct:extra.armorPct,
-   hp:defense.hp,armor:defense.armor,dodge:defense.dodge,
-   wins:100*wins/samples,winRound:wins?rounds/wins:null,
-   hpRemain:totalHp/samples,potential:totalPotential/samples,received:totalReceived/samples,
-   accuracy:totalAttempts?100*totalHits/totalAttempts:0};
- });
- setCompareResults={stage:setCompareStage,quality:setPlanner.quality,rows,at:Date.now()};
- try{localStorage.setItem(SET_COMPARE_KEY,JSON.stringify(setCompareResults))}catch{}
- updateSetPlannerDisplay();
-}
-function setCompareHtml(){
- const result=setCompareResults;
- const formatted=n=>Number(n).toFixed(1).replace('.',',');
- const table=result?`<div style="overflow-x:auto"><table style="width:100%;font-size:.8rem;white-space:nowrap"><thead><tr><th>Wariant</th><th>Premie</th><th>PŻ max.</th><th>Pancerz</th><th>Potencjał/rundę</th><th>Wygrane</th><th>Śr. runda zwycięstwa</th><th>PŻ po walce</th></tr></thead><tbody>${result.rows.map(r=>`<tr><td>${escape(r.name)}</td><td>${escape(accessoryBonusText(r.bonus)||'—')}${r.armorPct?` · Pancerz +${r.armorPct}%`:''}</td><td>${r.hp}</td><td>${r.armor}</td><td>${formatted(r.potential)}</td><td>${formatted(r.wins)}%</td><td>${r.winRound===null?'—':formatted(r.winRound)}</td><td>${formatted(r.hpRemain)}</td></tr>`).join('')}</tbody></table></div><p class="small muted">Ostatni raport: etap ${result.stage}, jakość ${escape(rarities[result.quality]?.name||'—')}, po 300 walk dla każdego zestawu. Te same losowania we wszystkich wariantach.</p>`:'<p class="small muted">Uruchom porównanie, aby zobaczyć wpływ premii setowych na lokalny silnik Starć.</p>';
- return `<div class="panel" style="padding:14px;margin-top:16px"><h4>⚔ Porównanie setów w Starciach · ASHEN 0.4.7.4</h4><p class="small muted">Cztery warianty premii setowych, bez zdobywania przedmiotów. Korzystamy z Twojej postaci i aktualnie założonej broni. Indywidualne statystyki i pancerz aktualnie założonych ubrań pozostają takie same w każdym wariancie; zamieniamy WYŁĄCZNIE premie setowe. Akcesoria w każdym wariancie odpowiadają konfiguracji z Planera. Wyniki nie dotyczą Ekspedycji serwerowych.</p><div class="actions" style="align-items:center;flex-wrap:wrap;margin-bottom:10px"><label>Przeciwnik <select id="ashen-set-compare-stage" style="padding:7px;background:var(--panel,#171e27);color:inherit"><option value="10" ${setCompareStage===10?'selected':''}>Boss etap 10</option><option value="20" ${setCompareStage===20?'selected':''}>Boss etap 20</option></select></label><button type="button" data-set-compare="run">Porównaj 4 zestawy · 1200 walk</button><button type="button" data-set-compare="clear">Wyczyść raport</button></div>${table}<p class="small muted">Warianty nie zastępują realnie ubrań, więc nie porównują ich pancerza, indywidualnych prefiksów ani sufiksów. Test obejmuje tylko wpływ skumulowanych premii zestawowych oraz atrybutów na walkę.</p></div>`;
-}
-// ASHEN v0.4.7.5 — pelna macierz rodzin setowych (10 odziezowych, 5 akcesoriow).
-// Tylko premie zestawowe; porownanie ze wspolnymi seedami, bez zmian ekwipunku.
-const ALL_SETS_TEST_KEY='ashen-all-sets-v0475';
-let allSetsTestReport=null,allSetsTestRunning=false,allSetsTestStatus='',allSetsTestStage=20;
-try{const saved=JSON.parse(localStorage.getItem(ALL_SETS_TEST_KEY)||'null');if(saved?.version===1&&Array.isArray(saved.rows)){allSetsTestReport=saved;allSetsTestStage=saved.stage===10?10:20;}}catch{}
-function allSetsScenarios(){
- const ids=Object.keys(SETS),accessoryIds=Object.keys(ACCESSORY_SETS);
- const result=[{type:'kontrola',name:'Bez premii setowych',clothing:[],accessories:[]}];
- for(const id of ids)result.push({type:'6/6',name:`6× ${SETS[id].name}`,clothing:Array(6).fill(id),accessories:[]});
- for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++)result.push({type:'3+3',name:`3× ${SETS[ids[i]].name} + 3× ${SETS[ids[j]].name}`,clothing:[...Array(3).fill(ids[i]),...Array(3).fill(ids[j])],accessories:[]});
- for(const id of accessoryIds)result.push({type:'akcesoria 3/3',name:`3× ${ACCESSORY_SETS[id].name}`,clothing:[],accessories:Array(3).fill(id)});
- return result;
-}
-function allSetsTestProfile(scenario,quality){
- return plannerBonusProfile({clothing:scenario.clothing,accessories:scenario.accessories,quality});
-}
-function allSetsDefense(neutral,currentDefense,profile){
- const a={...neutral};for(const [key,val] of Object.entries(profile.attributes))a[key]=(a[key]||0)+val;
- const raw=currentDefense.rawArmor;
- const defense={...currentDefense,hp:Math.round((60+a.end*10)*(1+.025*(roomLevel('infirmary')-1))),acc:6+a.per*1.3,dodge:3+a.dex*1.1+currentDefense.pet,armor:raw+Math.round(raw*profile.armorPct/100)+Math.floor(a.end/4)+currentDefense.pet,setArmor:profile.armorPct};
- return {a,defense};
-}
-function allSetsTestTable(rows,heading){
- const f=n=>Number(n).toFixed(1).replace('.',',');
- return `<h5 style="margin:14px 0 7px">${heading}</h5><div style="overflow-x:auto"><table style="width:100%;font-size:.78rem;white-space:nowrap"><thead><tr><th>Rodzina / połączenie</th><th>Premie</th><th>PŻ</th><th>Pancerz</th><th>Obrażenia/r.</th><th>Wygrane</th><th>Runda wygranej</th><th>PŻ po walce</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${escape(r.name)}</td><td>${escape(r.bonusText)}</td><td>${r.hp}</td><td>${r.armor}</td><td>${f(r.potential)}</td><td>${f(r.wins)}%</td><td>${r.winRound===null?'—':f(r.winRound)}</td><td>${f(r.hpRemain)}</td></tr>`).join('')}</tbody></table></div>`;
-}
-function allSetsTestSummary(){
- if(!allSetsTestReport)return '<p class="small muted">Uruchom zbiorczy test, aby porównać wszystkie rodziny.</p>';
- const r=allSetsTestReport,groups=[['6/6','Pełne sety odzieży'],['3+3','Mieszane sety odzieży'],['akcesoria 3/3','Pełne sety akcesoriów']];
- const qualityTitle=q=>escape(rarities[q]?.name||String(q));
- return `<div class="small muted" style="margin:10px 0">Boss etap ${r.stage} · ${r.samples} prób na konfigurację · wspólne losowania · ${r.rows.length} wierszy · ${r.totalFights.toLocaleString('pl-PL')} walk. Testowane jakości: zwykła i legendarna.</div>${[0,4].map(q=>`<h4 style="margin-top:18px">Jakość ${qualityTitle(q)}</h4>${groups.map(([type,title])=>allSetsTestTable(r.rows.filter(x=>x.quality===q&&x.type===type),title)).join('')}`).join('')}`;
-}
-function allSetsTestPanel(){
- const n=allSetsScenarios().length;
- return `<div class="panel" style="padding:14px;margin-top:16px" id="ashen-all-sets-panel"><h4>🧪 Wszystkie sety — kontrola jakości · ASHEN 0.4.7.5</h4><p class="small muted">Test obejmuje wszystkie ${Object.keys(SETS).length} rodzin odzieży (pełne 6/6), wszystkie ${Object.keys(SETS).length*(Object.keys(SETS).length-1)/2} pary 3+3 i wszystkie ${Object.keys(ACCESSORY_SETS).length} rodziny akcesoriów 3/3. W każdym wariancie porównuje zwykłą i legendarną jakość. Osobno bada sety odzieży i akcesoria; nie zakłada fikcyjnych przedmiotów.</p><div class="actions" style="align-items:center;flex-wrap:wrap"><label>Boss <select id="ashen-all-sets-stage" style="padding:7px;background:var(--panel,#171e27);color:inherit"><option value="10" ${allSetsTestStage===10?'selected':''}>Etap 10</option><option value="20" ${allSetsTestStage!==10?'selected':''}>Etap 20</option></select></label><button data-all-sets="run" ${allSetsTestRunning?'disabled':''}>${allSetsTestRunning?'Test trwa…':`Przetestuj wszystkie rodziny (${n*2*80} walk)`}</button><button data-all-sets="copy" ${!allSetsTestReport?'disabled':''}>Kopiuj raport</button><button data-all-sets="clear" ${allSetsTestRunning?'disabled':''}>Wyczyść</button></div><p id="ashen-all-sets-progress" class="small muted" aria-live="polite">${escape(allSetsTestStatus)}</p><div id="ashen-all-sets-report">${allSetsTestSummary()}</div><p class="small muted">Uwaga: porównujemy same bonusy setowe, nie statystyki indywidualnych przedmiotów, ich pancerz i sufiksy. Nie testuje synergii ubioru z akcesoriami; to osobny etap. Test korzysta z lokalnego fight(), nie serwerowych Ekspedycji.</p></div>`;
-}
-function allSetsTestText(){
- const r=allSetsTestReport;if(!r)return '';
- return [`ASHEN · Wszystkie sety · v0.4.7.5`,`${r.totalFights} walk; ${r.samples} prób na wariant; boss etap ${r.stage}`,`Tylko premie setowe, bez indywidualnych statystyk hipotetycznych przedmiotów`,`Jakość | Typ | Zestaw | Premie | PŻ | Pancerz | Potencjał/rundę | Wygrane % | Runda zwycięstwa | PŻ po walce`,...r.rows.map(x=>`${rarities[x.quality]?.name||x.quality} | ${x.type} | ${x.name} | ${x.bonusText} | ${x.hp} | ${x.armor} | ${x.potential.toFixed(1)} | ${x.wins.toFixed(1)} | ${x.winRound===null?'—':x.winRound.toFixed(1)} | ${x.hpRemain.toFixed(1)}`)].join('\n');
-}
-async function allSetsTestRun(){
- if(!state.created||allSetsTestRunning)return;
- const stage=allSetsTestStage;
- allSetsTestRunning=true;allSetsTestStatus='Przygotowanie porównania…';updateSetPlannerDisplay();
- const samples=80,scenarios=allSetsScenarios(),rows=[],qualities=[0,4];
- try{
-  const current=attrs(),oldClothing=activeSetBonuses(),oldAccessories=accessorySetBonuses();
-  const neutral={...current};
-  for(const [key,val] of Object.entries(oldClothing.bonus))neutral[key]=(neutral[key]||0)-val;
-  for(const [key,val] of Object.entries(oldAccessories.bonus))neutral[key]=(neutral[key]||0)-val;
-  const currentDefense=heroDefense(),attacks=heroAttacks();
-  const opponent=ARENA_STAGES.find(v=>v.level===stage)||ARENA_STAGES[19];
-  for(const q of qualities){
-   for(let idx=0;idx<scenarios.length;idx++){
-    const scenario=scenarios[idx],profile=allSetsTestProfile(scenario,q),{a,defense}=allSetsDefense(neutral,currentDefense,profile);
-    let wins=0,rounds=0,hpTotal=0,potential=0;
-    for(let i=0;i<samples;i++){
-     const f=fight(opponent,{testSnapshot:{attributes:a,attacks,defense},testRandom:setCompareSeed(7654321+i*9973)});
-     if(f.won){wins++;rounds+=f.damageSummary.rounds}
-     hpTotal+=f.heroHp;potential+=f.damageSummary.hero.potential/Math.max(1,f.damageSummary.rounds);
-    }
-    const bonusText=[accessoryBonusText(profile.attributes),profile.armorPct?`Pancerz +${profile.armorPct}%`:''].filter(Boolean).join(' · ')||'Brak';
-    rows.push({type:scenario.type,name:scenario.name,quality:q,bonusText,hp:defense.hp,armor:defense.armor,potential:potential/samples,wins:100*wins/samples,winRound:wins?rounds/wins:null,hpRemain:hpTotal/samples});
-    if(idx%4===3||idx===scenarios.length-1){
-     allSetsTestStatus=`Test: ${rows.length}/${scenarios.length*qualities.length} wariantów (${rows.length*samples} walk)`;
-     const progress=document.getElementById('ashen-all-sets-progress');if(progress)progress.textContent=allSetsTestStatus;
-     // Przerywamy prace na chwile, by przegladarka mogla odmalowac interfejs.
-     await new Promise(resolve=>setTimeout(resolve,0));
-    }
-   }
-  }
-  allSetsTestReport={version:1,stage,samples,totalFights:rows.length*samples,rows,at:Date.now()};
-  try{localStorage.setItem(ALL_SETS_TEST_KEY,JSON.stringify(allSetsTestReport))}catch{}
-  allSetsTestStatus='Test zakończony — raport zapisany lokalnie.';
- }catch(error){allSetsTestStatus='Błąd testu: '+String(error?.message||error);console.error('ASHEN all sets test',error)}
- finally{allSetsTestRunning=false;updateSetPlannerDisplay();}
+ const groups=[['clothing',setPlanner.clothing],['accessories',setPlanner.accessories]];
+ return `<div class="ashen-sets-grid">${groups.map(([category,parts])=>{
+ const rows=designedSetPreviewParts(parts,setPlanner.quality);
+ return `<article class="ashen-set-card"><strong>${category==='clothing'?'Odzież':'Akcesoria'} · aktualny system X/Y</strong><div class="ashen-set-members">${rows.map(r=>`<div class="ashen-set-member"><span>${escape(r.name)} · ${r.count}/${r.max}</span><strong>${r.active?`X${r.effects.length>1?' + Y':''} · ${r.effects.map(e=>`${escape(SET_V05_LABELS[e.key]||e.key)} +${Math.round(e.amount)}`).join(' · ')}`:'Brak bonusu (minimum 3 części)'}</strong></div>`).join('')||'Brak wybranych rodzin'}</div></article>`;
+ }).join('')}</div>`;
 }
 function setPlannerPanel(){
  const clothingOpts=[['none','— Bez prefiksu setowego —'],...SET_PLANNER_FAMILIES.map(id=>[id,SETS[id].name])];
  const accessoryOpts=[['none','— Bez prefiksu setowego —'],...Object.keys(ACCESSORY_SETS).map(id=>[id,ACCESSORY_SETS[id].name])];
  const field=(type,index,opts)=>`<label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem"><span>${type==='clothing'?slotLabels[['head','shirt','outer','hands','pants','boots'][index]]:`Akcesorium ${index+1}`}</span><select data-set-planner="${type}" data-set-slot="${index}" style="width:100%;min-width:0;padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${opts.map(([id,label])=>`<option value="${id}" ${(setPlanner[type][index]===id)?'selected':''}>${escape(label)}</option>`).join('')}</select></label>`;
- return `<details class="panel section" id="ashen-set-planner" ${setPlannerOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧩 Planer setów — porównaj 6+0 i 3+3 bez zdobywania przedmiotów</summary><p class="small muted">Symulator używa obecnych progów i premii setowych. Nie zmienia ekwipunku, statystyk ani zapisu postaci; zapamiętuje tylko wybór w tej przeglądarce.</p><div class="actions" style="margin:12px 0;flex-wrap:wrap"><button type="button" data-set-preset="full">6 × Wartownika</button><button type="button" data-set-preset="mixed">3 Wartownika + 3 Nomady</button><button type="button" data-set-preset="partial">4 Wartownika + 2 Nomady</button><button type="button" data-set-preset="clear">Wyczyść</button></div><label style="display:flex;align-items:center;gap:8px;margin-bottom:12px">Jakość wszystkich elementów (testowo): <select data-set-planner="quality" style="padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${rarities.map((r,i)=>`<option value="${i}" ${setPlanner.quality===i?'selected':''}>${escape(r.name)} · ×${setQuality({rarity:i}).toFixed(2)}</option>`).join('')}</select></label><h4>Odzież — sześć slotów</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.clothing.map((_,i)=>field('clothing',i,clothingOpts)).join('')}</div><h4>Akcesoria — trzy sloty</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.accessories.map((_,i)=>field('accessories',i,accessoryOpts)).join('')}</div><div id="ashen-set-planner-result" aria-live="polite">${plannerResultHtml()}${designedSetPreviewHtml()}${setCompareHtml()}${allSetsTestPanel()}${evolutionLabPanel()}</div></details>`;
+ return `<details class="panel section" id="ashen-set-planner" ${setPlannerOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧩 Planer setów — porównaj 6+0 i 3+3 bez zdobywania przedmiotów</summary><p class="small muted">Symulator używa wyłącznie aktualnego systemu Ewolucji X/Y. Nie zmienia ekwipunku, statystyk ani zapisu postaci; zapamiętuje tylko wybór w tej przeglądarce.</p><div class="actions" style="margin:12px 0;flex-wrap:wrap"><button type="button" data-set-preset="full">6 × Wartownika</button><button type="button" data-set-preset="mixed">3 Wartownika + 3 Nomady</button><button type="button" data-set-preset="partial">4 Wartownika + 2 Nomady</button><button type="button" data-set-preset="clear">Wyczyść</button></div><label style="display:flex;align-items:center;gap:8px;margin-bottom:12px">Jakość wszystkich elementów (testowo): <select data-set-planner="quality" style="padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${rarities.map((r,i)=>`<option value="${i}" ${setPlanner.quality===i?'selected':''}>${escape(r.name)} · ${i} pkt jakości</option>`).join('')}</select></label><h4>Odzież — sześć slotów</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.clothing.map((_,i)=>field('clothing',i,clothingOpts)).join('')}</div><h4>Akcesoria — trzy sloty</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.accessories.map((_,i)=>field('accessories',i,accessoryOpts)).join('')}</div><div id="ashen-set-planner-result" aria-live="polite">${plannerResultHtml()}${designedSetPreviewHtml()}${evolutionLabPanel()}</div></details>`;
 }
 function updateSetPlannerDisplay(){
  const target=document.getElementById('ashen-set-planner-result');
@@ -1032,7 +808,7 @@ function updateSetPlannerDisplay(){
  if(preview)setDesignOpen=preview.open;
  if(catalog)setDesignCatalogOpen=catalog.open;
  saveSetDesignOpen();
- target.innerHTML=plannerResultHtml()+designedSetPreviewHtml()+setCompareHtml()+allSetsTestPanel()+evolutionLabPanel();
+ target.innerHTML=plannerResultHtml()+designedSetPreviewHtml()+evolutionLabPanel();
 }
 
 
@@ -1154,32 +930,11 @@ document.addEventListener('click',e=>{
 });
 
 function characterSetsPanel(){
- const results=setResults();
- return `<section class="ashen-sets-section"><div class="ashen-sets-title"><h3>Zestawy ubioru — prefiksy</h3><p>Załóż 3 elementy ubioru z tym samym prefiksem. Każdy następny zwiększa premię, którą wzmacnia średnia jakość wszystkich części. Możesz nosić dwa zestawy naraz (3+3). Liczą się tylko założone przedmioty — nie broń ani akcesoria.</p></div><div class="ashen-sets-grid">${results.length?results.map(setSummaryCard).join(''):'<div class="ashen-sets-empty">Brak założonych elementów z prefiksami zestawowymi. Starszy prefiks „Zwinny” również tworzy zestaw.</div>'}</div></section>`;
+ const rows=setResults();return `<section class="ashen-sets-section"><h3>Sety odzieży — Ewolucja X/Y</h3><p>Set: od 3 do 6 zgodnych prefiksów. Jakość jest sumą punktów przedmiotów; Y odblokowuje się po przekroczeniu progu.</p><div class="ashen-sets-grid">${rows.map(setSummaryCard).join('')||'<p>Brak założonych ubrań z prefiksem setowym.</p>'}</div></section>`;
 }
-function itemSetPanel(inst){
- const id=setPrefixId(inst);if(!id)return '';
- const config=SETS[id],result=setResults().find(s=>s.id===id);
- const equipped=Object.values(state.equip||{}).includes(inst.uid);
- const count=result?.count||0, active=Boolean(result?.active)&&equipped;
- const ownQuality=setQuality(inst), currentAvg=result?.avg||0;
- // For a non-equipped item estimate the bonus from the proposed set of worn pieces.
- // If the slot is occupied by another piece, replace rather than double-count that slot.
- const slot=def(inst)?.slot;
- const prospectiveMembers=equipped?(result?.members||[]):(result?.members||[]).filter(m=>m.slot!==slot).concat([{slot,inst}]);
- const prospectiveCount=prospectiveMembers.length;
- const prospectiveAvg=prospectiveMembers.reduce((total,m)=>total+setQuality(m.inst),0)/Math.max(1,prospectiveCount);
- const projectedCount=Math.max(3,prospectiveCount),projectedBase=config.start+Math.max(0,projectedCount-3)*config.step;
- const projectedAmount=Math.round(projectedBase*prospectiveAvg);
- const description=config.armorPct?`Pancerz +${projectedAmount}%`:`${attrNames[config.attribute]} +${projectedAmount}`;
- const members=result?.members||[];
- const membersHtml=members.map(m=>{const rarityIndex=Math.max(0,Math.min(4,Number(m.inst.rarity)||0));return `<div class="ashen-set-detail-member"><span>${escape(slotLabels[m.slot])}: <strong>${escape(statsOf(m.inst)?.name||def(m.inst)?.name||'Przedmiot')}</strong></span><span>${escape(rarities[rarityIndex].name)} · ×${setQuality(m.inst).toFixed(2).replace('.',',')}</span></div>`}).join('');
- const owningInSet=equipped&&count>0;
- const text=active?`Premia zestawu: ${escape(setBonusDescription(result))}`:
-  owningInSet?`Premia za 3 elementy: ${escape(description)} · brakuje ${Math.max(0,3-count)}`:
-  `Po założeniu tego przedmiotu: ${prospectiveCount}/6 · ${prospectiveCount>=3?`możliwy bonus: ${escape(description)}`:`premia za 3 elementy: ${escape(description)}`}`;
- const note=active?'Ta premia jest już doliczana do statystyk postaci.':equipped?'Premia jest nieaktywna — załóż brakujące elementy z tym samym prefiksem.':'Przedmiot nie jest założony. Prognoza uwzględnia zastąpienie wyposażenia w tym samym slocie.';
- return `<div class="ashen-set-item-info ${active?'is-active':'is-pending'}"><strong>${active?'✓ AKTYWNY':equipped?'◌ NIEAKTYWNY':'◇ ELEMENT ZESTAWU'} · Zestaw ${escape(config.name)} (${count}/6 założonych)</strong><div class="ashen-set-detail-main">${text}</div><small>${escape(note)}</small><details class="ashen-set-breakdown"><summary>Skąd bierze się premia? · Założone elementy i jakość</summary><div class="ashen-set-detail-members">${membersHtml||'<div class="muted">Brak założonych elementów tego zestawu.</div>'}</div><div class="ashen-set-detail-equation">${count?`Średnia jakości: (${members.map(m=>setQuality(m.inst).toFixed(2).replace('.',',')).join(' + ')}) / ${count} = ×${currentAvg.toFixed(2).replace('.',',')}`:'Średnia jakości zostanie obliczona z założonych części.'}</div>${result?.active?`<div class="ashen-set-detail-equation">Bonus bazowy: ${result.base} × ${result.avg.toFixed(2).replace('.',',')} → ${escape(setBonusDescription(result))}</div>`:`<div class="ashen-set-detail-equation">Do aktywacji potrzeba minimum 3 części z tym samym prefiksem. Kolejne części wzmacniają premię.</div>`}</details></div>`;
+function itemSetPanel(inst){const id=setPrefixId(inst);if(!id)return '';
+ const r=setResults().find(x=>x.id===id),n=r?.count||0;
+ return `<div class="ashen-set-item-info"><strong>${escape(SETS[id].name)} · ${n}/6</strong><div>${r?.active?`Bonus X${r.level>=2?' + Y':''} · jakość ${r.qualityPoints} pkt`:`Brakuje ${Math.max(0,3-n)} części do aktywacji`}</div></div>`;
 }
 // ASHEN 0.4.7.1 — sety zwyklych akcesoriow (3/3) oraz wspolistnienie wielu setow ubioru.
 // Prefiks decyduje o rodzinie. Sufiks pozostaje niezalezny; 1/3 i 2/3 nie daja premii.
@@ -1203,36 +958,20 @@ function accessorySetPrefixId(inst){
 }
 function accessorySetResults(){
  const groups={};const seen=new Set();
- for(const slot of ACCESSORY_SLOTS){
-  const inst=instance(state.equip?.[slot]);if(!inst||seen.has(inst.uid))continue;
-  seen.add(inst.uid);
-  const id=accessorySetPrefixId(inst);if(!id)continue;
-  (groups[id]??=[]).push({slot,inst});
- }
+ for(const slot of ACCESSORY_SLOTS){const inst=instance(state.equip?.[slot]);if(!inst||seen.has(inst.uid))continue;
+  seen.add(inst.uid);const id=accessorySetPrefixId(inst);if(id)(groups[id]??=[]).push({slot,inst});}
  return Object.entries(groups).map(([id,members])=>{
-  const count=members.length,avg=members.reduce((a,m)=>a+setQuality(m.inst),0)/count;
-  const active=count===3,config=ACCESSORY_SETS[id],bonus={};
-  if(active)for(const [stat,val] of Object.entries(config.bonus))bonus[stat]=Math.max(1,Math.round(val*avg));
-  return {id,name:config.name,config,members,count,avg,active,bonus};
+  const r=evolutionSetFromQuality(id,'accessories',members.map(m=>evolutionQualityPoint(m.inst)));
+  return {id,name:ACCESSORY_SETS[id].name,members,count:members.length,active:!!r,
+   qualityPoints:members.reduce((t,m)=>t+evolutionQualityPoint(m.inst),0),level:r?(r.z?3:r.y?2:1):0};
  });
 }
-function accessorySetBonuses(){
- const results=accessorySetResults(),bonus={};
- for(const result of results)if(result.active)for(const [key,value] of Object.entries(result.bonus))bonus[key]=(bonus[key]||0)+value;
- return {results,bonus};
+function accessorySetPanel(){const rows=accessorySetResults();
+ return `<section class="ashen-sets-section"><h3>Sety akcesoriów — Ewolucja X/Y</h3><div class="ashen-sets-grid">${rows.map(r=>`<article class="ashen-set-card ${r.active?'is-active':''}"><strong>${escape(r.name)} · ${r.count}/3</strong><div>${r.active?`X${r.level>=2?' + Y':''} · ${r.qualityPoints} pkt jakości`:'Nieaktywny · wymagane 3/3'}</div></article>`).join('')||'Brak setów akcesoriów'}</div></section>`;
 }
-function accessoryBonusText(bonus){return Object.entries(bonus).map(([k,v])=>`${attrNames[k]||k} +${v}`).join(' · ');}
-function accessorySetPanel(){
- const results=accessorySetResults();
- const cards=results.map(r=>`<article class="ashen-set-card ${r.active?'is-active':''}"><div class="ashen-set-top"><strong>Zestaw akcesoriów: ${escape(r.name)}</strong><span class="ashen-set-count">${r.count}/3 · ${r.active?'AKTYWNY':'NIEAKTYWNY'}</span></div><div class="ashen-set-track">${Array.from({length:3},(_,i)=>`<i class="${i<r.count?'filled':''}"></i>`).join('')}</div><div class="ashen-set-members">${r.members.map(m=>`<div class="ashen-set-member"><span>${escape(slotLabels[m.slot])}</span><strong>${escape(statsOf(m.inst)?.name||def(m.inst)?.name||'Akcesorium')}</strong></div>`).join('')}</div><div class="ashen-set-bottom"><span>${r.active?`Bonus: ${escape(accessoryBonusText(r.bonus))}`:`Brak premii · potrzebne 3/3 (brakuje ${3-r.count})`}</span><small>Różne sufiksy i jakości są dozwolone</small></div></article>`).join('');
- return `<section class="ashen-sets-section"><div class="ashen-sets-title"><h3>Zestawy akcesoriów — 3/3</h3><p>Trzy zwykłe akcesoria z tej samej rodziny prefiksu uruchamiają bonus. Jeden lub dwa elementy nie dają żadnej premii setowej. Artefakty zachowują osobny system Rezonansu.</p></div><div class="ashen-sets-grid">${cards||'<div class="ashen-sets-empty">Załóż zwykłe akcesoria z setowymi prefiksami, aby kompletować zestaw.</div>'}</div></section>`;
-}
-function accessorySetItemPanel(inst){
- const id=accessorySetPrefixId(inst);if(!id)return '';
- const cfg=ACCESSORY_SETS[id],result=accessorySetResults().find(r=>r.id===id),count=result?.count||0;
- const equipped=ACCESSORY_SLOTS.some(slot=>state.equip?.[slot]===inst.uid);
- const active=Boolean(result?.active)&&equipped;
- return `<div class="ashen-set-item-info ${active?'is-active':'is-pending'}"><strong>${active?'✓ AKTYWNY':equipped?'◌ NIEAKTYWNY':'◇ ELEMENT SETU'} · Akcesoria ${escape(cfg.name)} (${count}/3)</strong><div class="ashen-set-detail-main">${active?`Bonus setowy: ${escape(accessoryBonusText(result.bonus))}`:'Bonus setowy nieaktywny. Aktywacja dopiero przy 3/3.'}</div><small>${equipped?`Liczba brakujących elementów: ${Math.max(0,3-count)}.`:'Załóż to akcesorium w jednym z trzech slotów.'} Rodzina zależy od prefiksu; sufiks może być dowolny.</small></div>`;
+function accessorySetItemPanel(inst){const id=accessorySetPrefixId(inst);if(!id)return '';
+ const r=accessorySetResults().find(x=>x.id===id);
+ return `<div class="ashen-set-item-info"><strong>Akcesoria ${escape(ACCESSORY_SETS[id].name)} · ${r?.count||0}/3</strong><div>${r?.active?`X${r.level>=2?' + Y':''} · ${r.qualityPoints} pkt jakości`:'Brak premii — wymagane 3/3'}</div></div>`;
 }
 function attrs(){const a={...state.attrs};Object.values(state.equip).filter(Boolean).forEach(uid=>{for(const [k,v] of Object.entries(statsOf(instance(uid))?.bonus||{}))a[k]+=v});for(const [k,v] of Object.entries(setEngineEffects().effects))if(SET_ATTRIBUTE_KEYS.has(k))a[k]=(a[k]||0)+v;for(const [k,v] of Object.entries(resonanceBonuses().bonus))a[k]=(a[k]||0)+v;return a}function maxHp(){return Math.round((60+attrs().end*10)*(1+0.025*(roomLevel('infirmary')-1))*(1+(setEngineEffects().effects.hpPct||0)/100)+(setEngineEffects().effects.hpFlat||0))}function xpNeed(){return Math.floor(80*Math.pow(state.level,1.35))}function regen(){let now=Date.now(),ticks=Math.floor((now-state.lastRegen)/45000);if(ticks>0){state.energy=Math.min(100,state.energy+ticks);state.lastRegen+=ticks*45000}}function levelUp(){let n=0;while(state.xp>=xpNeed()){state.xp-=xpNeed();state.level++;state.points+=3;n++}return n}// Jedna klasyfikacja dla obrażeń, celności i opisu w zakładce Postać.
 // Typ broni wynika z niezmiennego identyfikatora — nie z jej nazwy ani prefiksu.
@@ -3014,11 +2753,11 @@ function inventoryCombatSummary(){
 function inventorySummaryPanels(){
  const combat=inventoryCombatSummary();
  const a=attrs();
- const sets=activeSetBonuses().results||[];
+ const sets=setResults();
  const activeSets=sets.filter(s=>s.active);
  const pendingSets=sets.filter(s=>!s.active&&s.count>0);
  const resonance=resonanceBonuses();
- const accessorySets=accessorySetBonuses().results;
+ const accessorySets=accessorySetResults();
  const actualSets=setEngineEffects();
  const lines=[
   ['PŻ maks.',combat.hp],
@@ -3030,12 +2769,12 @@ function inventorySummaryPanels(){
  ].map(([label,val])=>`<div class="inventory-metric"><span>${label}</span><strong>${val}</strong></div>`).join('');
  const attrBlock=Object.entries(attrNames).map(([id,label])=>`<div class="inventory-attr"><span>${label}</span><strong>${a[id]||0}</strong></div>`).join('');
  const support=`<div class="inventory-support-line"><span>Towarzysz</span><strong>${companionId()?COMPANIONS[companionId()].name+' · '+companionBonus():'Brak'}</strong></div><div class="inventory-support-line"><span>Transport</span><strong>${vehicleDef().name}${vehicleDef().id!=='foot'?' · etap '+(vehicleStage()+1):''}</strong></div>`;
- const setHtml=actualSets.active.filter(x=>x.category==='clothing').map(s=>`<div class="inventory-set-card active"><strong>${escape(s.name)}</strong><span>${escape(activeSetEffectText(s))}</span><small>${s.count}/6 części · jakość ${s.qualityPoints} pkt · poziom ${s.level===3?'III':s.level===2?'II':'I'} · ${s.level>=2?'X + Y':'X'}</small></div>`).join('') + pendingSets.map(s=>`<div class="inventory-set-card pending"><strong>${escape(s.config.name)}</strong><span>Postęp ${s.count}/3 · premia za 3/3: ${escape(projectedSetBonus(s.config,s.avg))}</span></div>`).join('');
+ const setHtml=actualSets.active.filter(x=>x.category==='clothing').map(s=>`<div class="inventory-set-card active"><strong>${escape(s.name)}</strong><span>${escape(activeSetEffectText(s))}</span><small>${s.count}/6 części · jakość ${s.qualityPoints} pkt · poziom ${s.level===3?'III':s.level===2?'II':'I'} · ${s.level>=2?'X + Y':'X'}</small></div>`).join('') + pendingSets.map(s=>`<div class="inventory-set-card pending"><strong>${escape(s.config.name)}</strong><span>Postęp ${s.count}/3 · premia od 3 zgodnych elementów</span></div>`).join('');
  const accessorySetHtml=accessorySets.map(r=>{const active=actualSets.active.find(x=>x.category==='accessories'&&x.id===r.id);return `<div class="inventory-set-card ${active?'active':'pending'}"><strong>Akcesoria · ${escape(r.name)}</strong><span>${active?escape(activeSetEffectText(active)):`${r.count}/3 · brak premii (wymagane 3/3)`}</span></div>`}).join('');
  const resonanceHtml=(resonance.active||[]).map(r=>`<div class="inventory-set-card active"><strong>${r.kind==='prefix'?'Prefiks':'Sufiks'} · ${escape(r.config.name)}</strong><span>${escape(r.config.description)}</span><small>Bonus: ${Object.keys(r.config.bonus||{}).length?Object.entries(r.config.bonus).map(([k,v])=>`${attrNames[k]} +${v}`).join(' · '):'brak statystyk'}${r.config.luck?` · Szczęście +${r.config.luck}`:''}${r.config.explore?` · Eksploracja +${r.config.explore}%`:''}</small></div>`).join('');
  return `
  <aside class="inventory-summary-stack">
-   <section class="inventory-summary-card"><div class="inventory-summary-head"><div><span class="tag">ASHEN 0.4.8.0 · X/Y AKTYWNE</span><h3>Nowe premie zestawowe</h3></div></div><div class="inventory-set-grid">${actualSets.active.map(r=>`<div class="inventory-set-card active"><strong>${escape(r.name)} · ${r.count}/${r.category==='clothing'?6:3}</strong><span>${escape(activeSetEffectText(r))}</span><small>Jakość ${r.qualityPoints} pkt · poziom ${r.level===3?'III':r.level===2?'II':'I'} · ${r.level>=2?'X + Y':'X'}${r.level===3?' · Z zaprojektowany, nieaktywny':''}</small></div>`).join('')||'<p class="small muted">Brak aktywnych setów. Ubiór: minimum 3; akcesoria: dokładnie 3.</p>'}</div><p class="small muted">Te efekty są doliczane do Postaci i lokalnych Starć. Wcześniejsze raporty w Planerze pokazują historyczny model do porównania. PvP i Ekspedycje serwerowe nie są jeszcze zsynchronizowane.</p></section>
+   <section class="inventory-summary-card"><div class="inventory-summary-head"><div><span class="tag">ASHEN 0.4.8.1 · X/Y AKTYWNE</span><h3>Nowe premie zestawowe</h3></div></div><div class="inventory-set-grid">${actualSets.active.map(r=>`<div class="inventory-set-card active"><strong>${escape(r.name)} · ${r.count}/${r.category==='clothing'?6:3}</strong><span>${escape(activeSetEffectText(r))}</span><small>Jakość ${r.qualityPoints} pkt · poziom ${r.level===3?'III':r.level===2?'II':'I'} · ${r.level>=2?'X + Y':'X'}${r.level===3?' · Z zaprojektowany, nieaktywny':''}</small></div>`).join('')||'<p class="small muted">Brak aktywnych setów. Ubiór: minimum 3; akcesoria: dokładnie 3.</p>'}</div><p class="small muted">Te efekty są doliczane do Postaci i lokalnych Starć. Stare porównywarki oparte na nieaktualnej matematyce zostały usunięte. PvP i Ekspedycje serwerowe nie są jeszcze zsynchronizowane.</p></section>
    <section class="inventory-summary-card inventory-overview-card">
       <div class="inventory-summary-head"><div><span class="tag">PODSUMOWANIE BOJOWE</span><h3>Stan ocalałego</h3></div><div class="inventory-rarity-chip">Broń główna: ${escape(combat.weapon?.name||'Nóż')}</div></div>
       <div class="inventory-metric-grid">${lines}</div>
@@ -3317,7 +3056,7 @@ if(typeof state.factionTestPackGranted!=='boolean')state.factionTestPackGranted=
  if(state.inventory.some(x=>typeof x==='string')){
   const legacy=state.inventory;
   const previous=state.equip||{};
-  state.inventory=legacy.map((id,i)=>({uid:'legacy-'+i,id,rarity:0,affix:null}));
+  state.inventory=legacy.map((id,i)=>({uid:'legacy-'+i,id,rarity:0}));
   const used=new Set(),eq={};
   for(const [slot,id] of Object.entries(previous)){
    const found=state.inventory.find(x=>x.id===id&&!used.has(x.uid));
@@ -3630,22 +3369,6 @@ document.addEventListener('change',e=>{
   const idx=Number(t.dataset.setSlot);if(Number.isInteger(idx)&&idx>=0&&idx<setPlanner[typ].length)setPlanner[typ][idx]=t.value;
  }
  saveSetPlan();updateSetPlannerDisplay();
-});
-document.addEventListener('change',e=>{if(e.target?.id==='ashen-set-compare-stage')setCompareStage=Number(e.target.value)===10?10:20;});
-document.addEventListener('click',e=>{
- const button=e.target.closest?.('[data-set-compare]');if(!button)return;
- if(button.dataset.setCompare==='run'){setCompareStage=Number(document.getElementById('ashen-set-compare-stage')?.value)===10?10:20;setCompareRun();}
- else if(button.dataset.setCompare==='clear'){setCompareResults=null;try{localStorage.removeItem(SET_COMPARE_KEY)}catch{}updateSetPlannerDisplay();}
-});
-document.addEventListener('change',e=>{if(e.target?.id==='ashen-all-sets-stage')allSetsTestStage=Number(e.target.value)===10?10:20;});
-document.addEventListener('click',e=>{
- const b=e.target.closest?.('[data-all-sets]');if(!b)return;
- if(b.dataset.allSets==='run'){void allSetsTestRun();}
- else if(b.dataset.allSets==='clear'){allSetsTestReport=null;allSetsTestStatus='';try{localStorage.removeItem(ALL_SETS_TEST_KEY)}catch{}updateSetPlannerDisplay();}
- else if(b.dataset.allSets==='copy'&&allSetsTestReport){
-  const content=allSetsTestText();if(navigator.clipboard?.writeText){navigator.clipboard.writeText(content).catch(()=>window.prompt('Skopiuj raport:',content));}
-  else window.prompt('Skopiuj raport:',content);
- }
 });
 document.addEventListener('click',e=>{
  const button=e.target.closest?.('[data-set-preset]');if(!button)return;
