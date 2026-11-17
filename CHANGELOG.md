@@ -1,3 +1,10 @@
+## v0.4.9.24 — audyt historycznych raportów PvP
+- Starsze raporty bez totals nie są błędnie oznaczane jako uszkodzone.
+- W audycie osobno pokazano liczbę raportów z SQL 034 i starszych wersji.
+- Spójność liczników i PŻ jest weryfikowana tylko dla SQL 034.
+- Gdy brak raportów SQL 034, panel wskazuje brak danych do walidacji rzeczywistej walki.
+- Bez zmian w silniku walki i SQL.
+
 # ASHEN — CHANGELOG
 
 ## v0.4.9.23 — poprawka aktualizacji interfejsu i audytu

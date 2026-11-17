@@ -272,24 +272,29 @@ const SERVER_ENGINE_LABELS={
 function serverZAuditRows(items){
  const counts=new Map(SERVER_Z_FAMILIES.map(name=>[name,{events:0,battles:new Set()}]));
  const engines=new Map(),flags=[],ids=new Set();
- let reportsCount=0,observed=0,unsupported=0;
+ let reportsCount=0,observed=0,unsupported=0,currentCount=0,legacyCount=0,legacyMissingTotals=0;
  for(const item of (Array.isArray(items)?items:[])){
   if(!item?.report||typeof item.report!=='object')continue;
   const r=item.report,id=String(item.id??'brak-id'),engine=String(r.setCombatMode||'nieoznaczony');
   reportsCount++;engines.set(engine,(engines.get(engine)||0)+1);
+  const isCurrent=engine==='XY-Z15-v0.4.9.21';
+  if(isCurrent)currentCount++;else legacyCount++;
   if(!SERVER_ENGINE_LABELS[engine])unsupported++;
   if(ids.has(id))flags.push(`Powielony identyfikator raportu ${id}`);ids.add(id);
   const rounds=Array.isArray(r.rounds)?r.rounds:[];
-  if(rounds.length>10)flags.push(`Raport ${id}: ponad 10 rund`);
-  if(!Array.isArray(r.maxHp)||r.maxHp.length!==2||r.maxHp.some(x=>!Number.isFinite(Number(x))||Number(x)<=0)){
+  if(isCurrent&&rounds.length>10)flags.push(`Raport ${id}: ponad 10 rund`);
+  if(isCurrent&&(!Array.isArray(r.maxHp)||r.maxHp.length!==2||r.maxHp.some(x=>!Number.isFinite(Number(x))||Number(x)<=0))){
    flags.push(`Raport ${id}: nieprawidłowe maksymalne PŻ`);
   }
-  if(!Array.isArray(r.hp)||r.hp.length!==2||r.hp.some((x,i)=>!Number.isFinite(Number(x))||Number(x)<0||(Number(r.maxHp?.[i])>0&&Number(x)>Number(r.maxHp[i])))){
+  if(isCurrent&&(!Array.isArray(r.hp)||r.hp.length!==2||r.hp.some((x,i)=>!Number.isFinite(Number(x))||Number(x)<0||(Number(r.maxHp?.[i])>0&&Number(x)>Number(r.maxHp[i]))))){
    flags.push(`Raport ${id}: końcowe PŻ poza zakresem`);
   }
   const totals=Array.isArray(r.totals)?r.totals:[];
-  if(totals.length!==2)flags.push(`Raport ${id}: brak statystyk obu stron`);
-  for(const t of totals){
+  if(totals.length!==2){
+   if(isCurrent)flags.push(`Raport ${id}: brak statystyk obu stron w raporcie SQL 034`);
+   else legacyMissingTotals++;
+  }
+  for(const t of (isCurrent?totals:[])){
    if(!t||typeof t!=='object')continue;
    const attempts=Number(t.attempts),hits=Number(t.hits),misses=Number(t.misses),critical=Number(t.critical),damage=Number(t.damage);
    if([attempts,hits,misses,critical,damage].some(x=>!Number.isFinite(x)||x<0)||hits>attempts||critical>hits||misses>attempts){
@@ -298,9 +303,9 @@ function serverZAuditRows(items){
   }
   const activations=new Map();
   for(let k=0;k<rounds.length;k++){
-   const rd=rounds[k];if(!rd||Number(rd.number)!==k+1)flags.push(`Raport ${id}: numeracja rund wymaga sprawdzenia`);
+   const rd=rounds[k];if(isCurrent&&(!rd||Number(rd.number)!==k+1))flags.push(`Raport ${id}: numeracja rund wymaga sprawdzenia`);
    const hp=rd?.hp;
-   if(!Array.isArray(hp)||hp.length!==2||hp.some((x,i)=>!Number.isFinite(Number(x))||Number(x)<0||(Number(r.maxHp?.[i])>0&&Number(x)>Number(r.maxHp[i]))))flags.push(`Raport ${id}, runda ${k+1}: PŻ poza zakresem`);
+   if(isCurrent&&(!Array.isArray(hp)||hp.length!==2||hp.some((x,i)=>!Number.isFinite(Number(x))||Number(x)<0||(Number(r.maxHp?.[i])>0&&Number(x)>Number(r.maxHp[i])))))flags.push(`Raport ${id}, runda ${k+1}: PŻ poza zakresem`);
    for(const ev of (Array.isArray(rd?.events)?rd.events:[])){
     if(typeof ev!=='string'||!ev.includes('Mistrzostwo Z'))continue;
     const m=ev.match(/^(.{1,40}?): Mistrzostwo Z\s*[—–-]\s*([^:]+):/);
@@ -313,22 +318,23 @@ function serverZAuditRows(items){
     activations.get(key).push(round);
    }
   }
-  if(rounds.length&&Array.isArray(r.hp)&&Array.isArray(rounds.at(-1)?.hp)){
+  if(isCurrent&&rounds.length&&Array.isArray(r.hp)&&Array.isArray(rounds.at(-1)?.hp)){
    if(r.hp.some((x,i)=>Number(x)!==Number(rounds.at(-1).hp[i])))flags.push(`Raport ${id}: końcowe PŻ nie zgadza się z ostatnią rundą`);
   }
-  if(r.winner!==null&&r.winner!==0&&r.winner!==1)flags.push(`Raport ${id}: nieznana wartość zwycięzcy`);
-  for(const [key,rs] of activations){
+  if(isCurrent&&r.winner!==null&&r.winner!==0&&r.winner!==1)flags.push(`Raport ${id}: nieznana wartość zwycięzcy`);
+  if(isCurrent)for(const [key,rs] of activations){
    const family=key.split('|').at(-1),cap=family==='Techniczny'?2:['Wzmocniony','Pancerny','Wartowniczy','Odporny','Wszechstronny','Zwinny'].includes(family)?1:null;
    if(cap!==null&&rs.length>cap)flags.push(`Raport ${id}: ${family} — ${rs.length} aktywacji (limit ${cap})`);
    if(['Żelazny','Tropicielski','Nomadyczny','Elastyczny'].includes(family)&&rs.some((r,i)=>i>0&&r-rs[i-1]<3))flags.push(`Raport ${id}: ${family} — zbyt krótki odstęp`);
    if(['Spostrzegawczy','Refleksyjny'].includes(family)&&new Set(rs).size!==rs.length)flags.push(`Raport ${id}: ${family} — powtórna aktywacja w rundzie`);
   }
  }
- return {reportsCount,observed,counts,engines,flags:[...new Set(flags)],unsupported};
+ return {reportsCount,observed,counts,engines,flags:[...new Set(flags)],unsupported,currentCount,legacyCount,legacyMissingTotals};
 }
 function serverZAuditText(d){
- return ['ASHEN — audyt zapisanych raportów PvP · v0.4.9.23',
+ return ['ASHEN — audyt zapisanych raportów PvP · v0.4.9.24',
   `Pobrane raporty: ${d.reportsCount}; zdarzenia Z: ${d.observed}; raporty innych/nieznanych silników: ${d.unsupported}`,
+  `SQL 034: ${d.currentCount} raportów; starsze/inne: ${d.legacyCount}; starsze bez liczników: ${d.legacyMissingTotals} (pominięte jako nieporównywalne)`,
   'Silniki: '+[...d.engines].map(([k,v])=>`${k}: ${v}`).join(', '),
   ...SERVER_Z_FAMILIES.map(name=>`${name}: ${d.counts.get(name).events} aktywacji / ${d.counts.get(name).battles.size} raportów`),
   `Sygnały do sprawdzenia: ${d.flags.length}`, ...d.flags,
@@ -340,7 +346,9 @@ function serverZAuditHtml(){
  const engineRows=[...d.engines].map(([engine,n])=>`<tr><td>${esc(SERVER_ENGINE_LABELS[engine]||'Inny/starszy silnik')}</td><td>${esc(engine)}</td><td>${n}</td></tr>`).join('');
  return `<section class="panel section" id="ashen-pvp-server-z-audit" style="margin-top:14px"><h3>📋 Audyt PvP · 15 Mistrzostw Z i spójność raportów</h3>
  <p class="small muted">Dane wyłącznie z raportów pobranych dla zalogowanego konta. To nie pełna historia bazy ani ponowna symulacja walk. Brak aktywacji nie oznacza błędu. Aktualny silnik SQL 034: XY-Z15-v0.4.9.21.</p>
- <p><strong>Raporty: ${d.reportsCount}</strong> · zdarzenia Z: <strong>${d.observed}</strong> · sygnały do sprawdzenia: <strong>${d.flags.length}</strong></p>
+ <p><strong>Raporty: ${d.reportsCount}</strong> · SQL 034: <strong>${d.currentCount}</strong> · starsze: <strong>${d.legacyCount}</strong> · zdarzenia Z: <strong>${d.observed}</strong> · sygnały: <strong>${d.flags.length}</strong></p>
+ <p class="small muted">Starsze raporty bez liczników: ${d.legacyMissingTotals} — pominięto te braki, ponieważ format wcześniejszych silników nie musi zawierać pola totals. Kontrola spójności liczników i PŻ dotyczy tylko raportów SQL 034.</p>
+ ${d.currentCount===0?'<p class="notice"><strong>Brak raportów SQL 034.</strong> Nie można jeszcze ocenić wdrożonych 15 Mistrzostw Z na podstawie rzeczywistych walk. Weryfikacja wymaga nowej walki dwóch prawdziwych kont, z kompletnym zestawem Z jeśli celem jest jego aktywacja.</p>':''}
  <div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Silnik raportu</th><th>Znacznik</th><th>Raporty</th></tr></thead><tbody>${engineRows||'<tr><td colspan="3">Brak raportów</td></tr>'}</tbody></table></div>
  <div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Zdolność</th><th>Aktywacje</th><th>Raporty</th></tr></thead><tbody>${rows}</tbody></table></div>
  ${d.flags.length?`<details><summary>⚠ Sygnały wymagające kontroli (${d.flags.length})</summary>${d.flags.slice(0,30).map(t=>`<p class="small">${esc(t)}</p>`).join('')}${d.flags.length>30?'<p class="small muted">Wyświetlono pierwszych 30. Skopiuj raport, aby zobaczyć wszystkie.</p>':''}</details>`:'<p class="small muted">Nie wykryto oczywistych sprzeczności liczników, PŻ ani podstawowych limitów Z w pobranych raportach. To nie dowodzi pełnej poprawności obliczeń.</p>'}

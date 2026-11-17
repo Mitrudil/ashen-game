@@ -1,3 +1,7 @@
+ASHEN v0.4.9.24 — korekta audytu historycznych raportów.
+
+Po aktualizacji GitHub odśwież Ctrl+F5. Nie trzeba uruchamiać SQL.
+
 # ASHEN v0.4.9.23 — audyt PvP po wdrożeniu SQL 034
 
 **Wdrożony silnik: SQL 034, 15/15 Mistrzostw Z.** Ta aktualizacja GitHub nie wymaga żadnej migracji Supabase, nie zmienia mechaniki obrażeń ani limitów walk.
