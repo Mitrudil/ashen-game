@@ -43,3 +43,6 @@ SQL 038 wyłącza blokadę 2 ataków dziennie w funkcji `ashen_online_attack(uui
 Panel pojawia się tylko kontom jawnie dopuszczonym przez administratora w SQL 039.
 Skrypt SQL 039 należy najpierw przetestować w transakcji, a dopiero potem wdrożyć; nie włącza sam testu żadnemu graczowi.
 Konfiguracja Mistrzostwa Z jest nakładana tylko na migawkę walki, nie na zapis w chmurze.
+
+## v0.4.9.28 — naprawa sesji raportu PvP
+Zwykłe odświeżenie sesji Supabase po przełączeniu karty nie usuwa otwartego raportu. SQL bez zmian.

@@ -36,7 +36,7 @@ function restoreOpenReport(){
  }catch(_){}
 }
 function dismissReport(){openedReport=null;openedBattleId=null;reportMinimized=false;reportContext='pvp';shareFeedback='';rememberOpenReport()}
-function onlinePageChanged(next){if(openedReport){reportMinimized=next!=='pvp'&&next!=='messages';rememberOpenReport()}}
+function onlinePageChanged(next){if(openedReport)rememberOpenReport()}
 function reportResumeButton(){return openedReport?`<button type="button" data-online-resume-report="1" class="ashen-report-resume">📄 ${reportMinimized?'Wróć do raportu':'Schowaj raport'}</button>`:''}
 
 async function rpc(name,args={}){const c=cloud()?.getClient();if(!c||!auth())throw Error('Najpierw zaloguj się do Konta online.');const {data,error}=await c.rpc(name,args);if(error)throw error;return data}
@@ -467,11 +467,11 @@ document.addEventListener('click',async e=>{
   if(!confirm(`Zaatakować gracza ${p.name} (poziom ${p.level})?\nWalka jest rozliczana na serwerze. Limit tymczasowo wyłączony.`))return;
   await action(async()=>{const r=await rpc('ashen_online_attack',{p_defender:id});openedReport=r;openedBattleId=Number(String(r?.id||'').replace(/^online-/,''))||null;shareFeedback='';openedReportSide='attack';reportContext='pvp';reportMinimized=false;rememberOpenReport();notice='Walka zakończona. Raport trafił do obu kont.'});await refresh();return;
  }
- if(b.dataset.onlineMailFolder){mailFolder=b.dataset.onlineMailFolder;mailSelected.clear();openedMail=null;replyDraft='';openedReport=null;expeditionMailReport=null;reportContext='pvp';draw();return}
- if(b.hasAttribute('data-online-mail-back')){openedMail=null;replyDraft='';openedReport=null;expeditionMailReport=null;reportContext='pvp';draw();return}
+ if(b.dataset.onlineMailFolder){mailFolder=b.dataset.onlineMailFolder;mailSelected.clear();openedMail=null;replyDraft='';expeditionMailReport=null;draw();return}
+ if(b.hasAttribute('data-online-mail-back')){openedMail=null;replyDraft='';expeditionMailReport=null;draw();return}
  if(b.hasAttribute('data-online-mail-read-selected')){void batchMail('read');return}
  if(b.hasAttribute('data-online-mail-delete-selected')){void batchMail('delete');return}
- if(b.dataset.onlineMailOpen){openedReport=null;reportContext='pvp';replyDraft='';openedMail=b.dataset.onlineMailOpen;expeditionMailReport=null;expeditionMailLoading=false;expeditionMailError='';
+ if(b.dataset.onlineMailOpen){replyDraft='';openedMail=b.dataset.onlineMailOpen;expeditionMailReport=null;expeditionMailLoading=false;expeditionMailError='';
   const [kind,id]=openedMail.split(':');const m=kind==='expedition'?expeditionNotices.find(x=>String(x.id)===id):mail.find(x=>String(x.id)===id);
   if(kind==='expedition'&&m){const mailKey=openedMail;expeditionMailLoading=true;void rpc('ashen_expedition_report',{p_id:m.expedition_id}).then(result=>{if(openedMail===mailKey)expeditionMailReport=result}).catch(err=>{if(openedMail===mailKey)expeditionMailError=msg(err)}).finally(()=>{if(openedMail===mailKey){expeditionMailLoading=false;draw()}})}
   if(m&&!m.is_read&&(kind==='expedition'||m.recipient_id===cloud()?.getSession()?.user?.id||m.kind==='battle')){
@@ -479,6 +479,7 @@ document.addEventListener('click',async e=>{
   }draw();return}
  if(b.hasAttribute('data-online-profile')){window.ASHEN_OPEN_PLAYER?.(b.dataset.onlineProfile);return}
 });
+window.addEventListener('pagehide',rememberOpenReport);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&openedReport&&!reportMinimized){reportMinimized=true;rememberOpenReport();draw()}});
 window.ASHEN_ONLINE={reportDialog,reportResumeButton,isReportOpen:()=>!!openedReport&&!reportMinimized,onPageChanged:onlinePageChanged,renderPublicReport:(r)=>renderReport(r,'attack',true),pvpHtml,mailHtml,localChanged,published,authChanged,refresh,unreadCount,pauseSync,resumeSync,flushSync};
 window.addEventListener('online',()=>{if(bound())scheduleSync(500);void refresh()});

@@ -1,3 +1,8 @@
+## v0.4.9.28
+- Naprawa zamykania raportu PvP po przełączeniu karty przeglądarki: TOKEN_REFRESHED/ponowne potwierdzenie tej samej sesji Supabase nie resetuje widoku online.
+- Raport pozostaje otwarty podczas nawigacji i nie jest zerowany przez wybór wiadomości; wylogowanie lub zmiana konta czyści raport.
+- Zachowanie raportu przy zawieszeniu karty (pagehide); bez zmian SQL i walki.
+
 ## v0.4.9.27
 - Okno raportu PvP jest renderowane niezależnie od zakładki. Można je schować i ponownie otworzyć z nagłówka.
 - Zapis otwartego raportu w sessionStorage zabezpiecza go przy przeładowaniu karty, w ramach tego samego konta.

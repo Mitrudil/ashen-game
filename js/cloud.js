@@ -30,7 +30,15 @@ function createClient(){
  if(!config){client=null;session=null;return}
  if(!STORAGE_READY()){client=null;show('Nie udało się wczytać biblioteki Supabase. Sprawdź połączenie z Internetem.',true);return}
  client=window.supabase.createClient(config.url,config.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'ashen-auth-v024-'+new URL(config.url).hostname}});
- client.auth.onAuthStateChange((_event,newSession)=>{session=newSession;if(open)paint();if(window.ASHEN_ONLINE)window.ASHEN_ONLINE.authChanged();});
+ client.auth.onAuthStateChange((event,newSession)=>{
+  const previousUserId=session?.user?.id||null;
+  const nextUserId=newSession?.user?.id||null;
+  session=newSession;
+  if(open)paint();
+  // TOKEN_REFRESHED / INITIAL_SESSION / SIGNED_IN for the same account are NOT a logout.
+  // Resetting online UI here discarded the open report when the browser tab regained focus.
+  if(previousUserId!==nextUserId)window.ASHEN_ONLINE?.authChanged?.();
+ });
 }
 async function authInit(){if(!client)return;try{const {data,error}=await client.auth.getSession();if(error)throw error;session=data?.session||null;if(session)await readInfo();else cloudInfo=null;paint()}catch(e){show('Nie udało się przywrócić sesji: '+formatError(e),true)}}
 async function readInfo(){if(!client||!session){cloudInfo=null;return}
