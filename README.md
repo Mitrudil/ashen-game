@@ -1,41 +1,25 @@
-# ASHEN v0.4.8.7 — pełna gra
+# ASHEN — Kroniki Upadku · v0.4.9.8
 
-# ASHEN v0.4.8.7 — udostępnianie raportów PvP
+Przeglądarkowa gra postapokaliptyczna. Obecna wersja zawiera m.in. walki lokalne, PvP online, Ekspedycje, ekwipunek, sety X/Y/Z i laboratorium testowe.
 
-**Aktualizacja z v0.4.8.6.** Wymagany SQL: `sql/026_public_pvp_reports.sql`.
+## Instalacja aktualizacji 0.4.9.8
 
-## Co nowego
-- W oknie raportu PvP: „Kopiuj link” i „Udostępnij”; serwer tworzy losowy token UUID dopiero na żądanie uczestnika walki.
-- Publiczny widok `report.html?report=<token>` dla gości bez konta.
-- Odczyt raportu przez bezpieczne RPC, bez identyfikatorów kont, całych snapshotów ani prywatnych zapisów.
-- Raporty nie są publicznie indeksowane/listowane. Każdy, kto ma link, może go jednak przekazać dalej.
-- Poprawiono wyświetlanie sumy zadanych obrażeń, z rezerwowym przeliczeniem z przebiegu rund; brakujących trafień/krytyków nie fałszujemy jako zero.
-- Usunięto mylący komunikat o konieczności instalacji SQL 025 (zastąpiono informacją warunkową).
-- Historia PvP w przeglądarce pokazuje do 40 pozycji, jeśli tyle zwróci serwer.
+Wgraj na GitHub pliki `index.html`, `js/game.js`, `README.md` i `CHANGELOG.md` z paczki aktualizacyjnej. Nie wykonuj SQL dla tej wersji i nie nadpisuj istniejącego `js/public-config.js` (zawiera publiczne ustawienia raportów).
 
-## Wymagana jednorazowa konfiguracja publicznych linków
-Aby link działał u odbiorców, wypełnij `js/public-config.js`: 
-- `url`: publiczny Project URL Supabase (https://...supabase.co)
-- `key`: **tylko** publishable/anon key (NIE secret/service_role).
+## Nowości
 
-Klucz publishable/anon jest przeznaczony do aplikacji publicznych. Nie wpisuj żadnego klucza tajnego.
-Nie przesyłaj klucza w samym adresie raportu. Po zmianie configu wrzuć plik na GitHub.
+- Laboratorium dodaje trzy kontrolowane próby Mistrzostwa Z: **Elastyczny — Kontratak**, **Refleksyjny — Przebicie po uniku**, **Nomady — Instynkt**.
+- Set akcesoriów `accessory_observant` został nazwany zgodnie z prefiksem **Spostrzegawczy** (w nazwach przedmiotów może występować forma **Spostrzegawcza**); **Tropiciela** to oddzielny sufiks akcesoriów. Identyfikatory i działanie mechaniki pozostają bez zmian.
+- Nadal nie publikujemy przedmiotów wygenerowanych w Laboratorium do zwykłego PvP online.
 
-## Instalacja
-1. W Supabase SQL Editor uruchom `sql/026_public_pvp_reports.sql`, po wykonaniu kopii zapasowej.
-2. Na GitHub wrzuć `index.html`, `report.html`, `js/game.js`, `js/online.js`, `js/public-report.js`, `js/public-config.js` (z publiczną konfiguracją).
-3. Wyczyść cache Ctrl+F5. Otwórz stary lub nowy raport, kliknij „Kopiuj link” i sprawdź go w oknie incognito.
-4. W razie problemów nie wykonuj ponownie SQL 025; SQL 026 nie zmienia silnika walki.
+## Historia i migracje
 
-## Ograniczenia
-- Nie testowano RPC na rzeczywistym serwerze użytkownika. SQL należy uruchomić świadomie w Supabase.
-- Nie ma jeszcze serwerowej walidacji wyposażenia ani mechaniki Z w PvP.
-- Publiczne raporty pozostają dostępne, dopóki istnieje token w bazie; kasowanie tokenu można wykonać administracyjnie w razie potrzeby.
-- Historia zwrócona przez serwer może być ograniczona przez istniejącą funkcję `ashen_online_reports`.
+Szczegółowa historia jest w `CHANGELOG.md`. Folder `sql/` zawiera historyczne migracje i nie powinien być czyszczony. Wersja 0.4.9.8 nie wymaga SQL.
 
+## Raporty publiczne
 
-## Aktualizacja 0.4.8.8
-Zobacz README_0488.md.
+Własna instalacja wymaga adresu projektu Supabase i wyłącznie klucza publishable/anon w `js/public-config.js`. Nigdy nie umieszczaj tam klucza secret/service_role. Istniejąca konfiguracja zostaje zachowana przy tej aktualizacji.
 
+## Testy i ograniczenia
 
-Historia aktualizacji: [CHANGELOG.md](CHANGELOG.md). Nowych plików README z numerami wersji już nie tworzymy.
+Wprowadzono testy laboratoryjne offline, ale nowe scenariusze wymagają potwierdzenia w przeglądarce. Obecna synchronizacja statystyk do serwera wymaga przed publicznym uruchomieniem dodatkowej walidacji po stronie Supabase. Lokalne próby Z nie potwierdzają działania efektów w PvP online.

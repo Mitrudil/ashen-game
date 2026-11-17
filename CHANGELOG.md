@@ -1,3 +1,8 @@
+## 0.4.9.8 — Laboratorium Z i nazewnictwo
+- Testy: Elastyczny — Kontratak; Refleksyjny — Przebicie po uniku; Nomady — Instynkt.
+- Rodzina `accessory_observant` nazywa się Spostrzegawczy (żeńska forma Spostrzegawcza), zgodnie z prefiksem. Sufiks Tropiciela pozostaje osobny.
+- Nie zmieniono identyfikatorów, balansu, PvP online ani migracji SQL.
+
 # ASHEN — Historia zmian
 
 ## v0.4.9.7 — Nowe próby Mistrzostw Z i porządek w dokumentacji
