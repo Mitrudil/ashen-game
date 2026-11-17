@@ -1,3 +1,10 @@
+## v0.4.9.18 — Izolowane testy serwerowe SQL 029 (bez wdrażania)
+- Nowy skrypt `sql/031_sql029_izolowane_testy_serwerowe.sql` dla SQL Editor, testuje obliczenia **obecnie wdrożonej** funkcji PvP na sztucznych profilach (Wzmocniony, Pancerny, Techniczny).
+- Porównania z/bez Z przy tym samym ziarnie generatora losowego; wyniki w trzech wierszach. Osłony/leczenie/penetracja nie zapisują się do kont.
+- Funkcja testowa jest tworzona wyłącznie w bieżącej transakcji i wycofywana przez `ROLLBACK`.
+- Osobna instrukcja `TESTY_SERWEROWE_SQL029_04918.md`; bez zmian PvP, SQL 028/029, danych i limitów.
+- **Niezweryfikowane jeszcze na rzeczywistym Supabase**: wyniki prób i kompatybilność formatowania `pg_get_functiondef` — nie ogłaszać PASS przed raportem z bazy.
+
 ## v0.4.9.17 — Audyt aktywacji Z z raportów serwera
 - Panel PvP zlicza wyłącznie zdarzenia Mistrzostwa Z z raportów oznaczonych `XY-Z6-v0.4.9.14`.
 - Rozróżnia liczbę aktywacji i liczbę raportów oraz sygnalizuje przekroczenia limitu jednej aktywacji dla Wzmocnionego, Pancernego, Wartowniczego i dwóch dla Technicznego.

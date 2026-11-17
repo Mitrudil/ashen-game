@@ -1,3 +1,13 @@
+# ASHEN v0.4.9.18 — Izolowane testy serwerowe SQL 029
+
+Zamiast nowej migracji PvP dostarczamy **test wykonywany w SQL Editor Supabase**: `sql/031_sql029_izolowane_testy_serwerowe.sql`.
+
+Skrypt odczytuje **aktualnie wdrożoną** definicję `public.ashen_online_attack(uuid)`, wyodrębnia obliczenia walki do funkcji sesyjnej, porównuje trzy syntetyczne scenariusze z Z / bez Z przy ustalonym losowaniu i kończy transakcję `ROLLBACK`. Nie wywołuje normalnego ataku PvP ani nie zapisuje raportów, wiadomości, danych profili czy limitów.
+
+**To nie jest nowa migracja. Nie uruchamiaj ponownie SQL 029 ani SQL 028.** Skrypt nie modyfikuje interfejsu i nie zmienia balansu. Wynik będzie prawdziwym testem obliczeń uruchomionych na serwerze, lecz nadal NIE jest testem pełnej ścieżki RPC z autoryzacją użytkownika. Błędy, brak `OK` lub niezgodny format definicji zgłoś zamiast ponawiać zapytanie.
+
+Zobacz `TESTY_SERWEROWE_SQL029_04918.md`.
+
 # ASHEN v0.4.9.17
 
 Panel **PvP online → Audyt rzeczywistych aktywacji Z** zbiera zdarzenia z dostępnych raportów Supabase. Brak raportu lub aktywacji to brak danych, nie wynik negatywny. Bez nowych migracji SQL. Dodatkowy odczytowy skrypt SQL znajduje się w `sql/030_diagnostyka_raportow_z_readonly.sql` (opcjonalny; nie jest migracją).
