@@ -1,3 +1,12 @@
+# ASHEN v0.5.0 — spójność ekwipunku i X/Y/Z
+
+- `statsOf()` dolicza bazowe bonusy atrybutów przedmiotu obok prefiksów i sufiksów. Dotyczy Postaci, Ekwipunku, porównania oraz migawki online. **Może zmienić statystyki i balans po publikacji postaci.**
+- Szczegóły posiadanego i założonego przedmiotu pokazują źródła bonusu (model, prefiks, sufiks).
+- Planer i katalog rodzin korzystają z jednej rzeczywistej formuły `evolutionSetFromQuality()` zamiast deklaracji projektowych. Prawidłowe etykiety X/Y/Z, punkty jakości do kolejnego poziomu, zaokrąglenie prezentacji bez zmian w matematyce walki.
+- Usunięto nieaktualny opis, że tylko 3 z 15 Mistrzostw Z działają online.
+- **Brak zmian w SQL**, zadawaniu obrażeń, progach X/Y/Z lub zapisanych przedmiotach.
+- Po instalacji ponownie opublikuj profile testowe w Supabase i porównaj statystyki; nowe PŻ mogą się różnić, jeśli wyposażenie ma bazową Wytrzymałość.
+
 ## v0.4.9.28
 - Naprawa zamykania raportu PvP po przełączeniu karty przeglądarki: TOKEN_REFRESHED/ponowne potwierdzenie tej samej sesji Supabase nie resetuje widoku online.
 - Raport pozostaje otwarty podczas nawigacji i nie jest zerowany przez wybór wiadomości; wylogowanie lub zmiana konta czyści raport.

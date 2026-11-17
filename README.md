@@ -1,3 +1,7 @@
+# ASHEN v0.5.0 — etap A
+
+Aktualizacja ekwipunku: naprawa bazowych bonusów i ujednolicenie podglądu X/Y/Z. Bez migracji SQL. Po instalacji zrób Ctrl+F5 i sprawdź statystyki postaci Mitrudil i Kowal przed kolejnym PvP; klient publikuje nową migawkę online.
+
 ASHEN v0.4.9.24 — korekta audytu historycznych raportów.
 
 Po aktualizacji GitHub odśwież Ctrl+F5. Nie trzeba uruchamiać SQL.
