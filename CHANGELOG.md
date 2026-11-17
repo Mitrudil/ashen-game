@@ -1,3 +1,9 @@
+## v0.4.9.19 — Kandydat SQL 032: Zwinny, Żelazny, Spostrzegawczy
+- Dodano `sql/032_online_pvp_z_stage3_KANDYDAT.sql` rozszerzający serwerowy PvP o trzy umiejętności Z (9/15 po przyszłym wdrożeniu).
+- Dodano bezpieczne zapytanie SELECT weryfikujące aktywny SQL 029 oraz plan testów regresji i pełnej ścieżki PvP.
+- Gra aktualizuje oznaczenie wersji; obecny serwer nadal ma 6/15 Z do czasu osobnego wdrożenia SQL 032.
+- Nie zmieniano systemu zapisów, balansu lokalnego ani SQL 028/029.
+
 ## v0.4.9.18 — Izolowane testy serwerowe SQL 029 (bez wdrażania)
 - Nowy skrypt `sql/031_sql029_izolowane_testy_serwerowe.sql` dla SQL Editor, testuje obliczenia **obecnie wdrożonej** funkcji PvP na sztucznych profilach (Wzmocniony, Pancerny, Techniczny).
 - Porównania z/bez Z przy tym samym ziarnie generatora losowego; wyniki w trzech wierszach. Osłony/leczenie/penetracja nie zapisują się do kont.

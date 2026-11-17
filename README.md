@@ -1,3 +1,7 @@
+# ASHEN v0.4.9.19 — Kandydat SQL 032 do testów
+
+Aktualizacja GitHub **nie uruchamia SQL 032**. Na działającym serwerze po SQL 029 jest nadal **6/15 Mistrzostw Z**. Kandydat SQL 032 dodaje Zwinnego, Żelaznego i Spostrzegawczego (9/15 dopiero po osobnych testach i wdrożeniu). Test bezpieczny, tylko odczyt: `sql/032_sprawdzenie_wersji_przed_wdrozeniem_READONLY.sql`. Szczegóły: `TESTY_PVP_04919.md`.
+
 # ASHEN v0.4.9.18 — Izolowane testy serwerowe SQL 029
 
 Zamiast nowej migracji PvP dostarczamy **test wykonywany w SQL Editor Supabase**: `sql/031_sql029_izolowane_testy_serwerowe.sql`.
