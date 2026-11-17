@@ -8,6 +8,7 @@ let timer=null,lastSynced='',syncing=false,dirty=false,observed='',syncMessage='
 let mailSelected=new Set(),replyDraft='',replyBusy=false;
 let expeditionMailReport=null,expeditionMailLoading=false,expeditionMailError='';
 let openedBattleId=null,shareBusy=false,shareFeedback='',shareTokenCache=new Map();
+let pvpZLabFamily='reinforced',pvpZLabReport=null,pvpZLabOpen=false;
 const cloud=()=>window.ASHEN_CLOUD;
 const auth=()=>!!(cloud()?.getClient()&&cloud()?.getSession());
 const bound=()=>auth()&&cloud()?.getBoundSlot()===cloud()?.currentSlot();
@@ -119,7 +120,16 @@ function renderReport(r,side='attack',isPublic=false){
   const decimals=(label==='Unik'||label==='Celność')?1:0;
   return `<tr class="${i>=4?'arena-attribute-row':''} ${i===4?'arena-attribute-start':''}"><th scope="row">${esc(label)}</th><td class="${cs[0]}">${esc(reportNumber(v1,decimals))}</td><td class="${cs[1]}">${esc(reportNumber(v2,decimals))}</td></tr>`;
  }).join('');
- const arms=profile=>(profile.attacks||[]).map(x=>`${esc(x.weapon?.name||'Broń')} (${x.hand==='left'?'lewa':'prawa'} ręka${x.weapon?.min!==undefined?`, ${esc(x.weapon.min)}–${esc(x.weapon.max)} obr.`:''})`).join(' · ')||'Brak danych o broni';
+ const arms=profile=>{
+  const groups=new Map();
+  for(const x of Array.isArray(profile?.attacks)?profile.attacks:[]){
+   const name=String(x.weapon?.name||'Broń').replace(/\bNiszczycielska Karabin\b/g,'Niszczycielski Karabin'),hand=x.hand==='left'?'lewa':'prawa';
+   const range=x.weapon?.min!==undefined?`, ${x.weapon.min}–${x.weapon.max} obr.`:'';
+   const key=JSON.stringify([name,hand,range]);
+   if(groups.has(key))groups.get(key).count++;else groups.set(key,{name,hand,range,count:1});
+  }
+  return [...groups.values()].map(x=>`${esc(x.name)} (${x.hand} ręka${esc(x.range)})${x.count>1?` · ${x.count} ataki/ rundę`:''}`).join(' · ')||'Brak danych o broni';
+ };
  const rounds=rnd.map(x=>{
   const roundRaw=Array.isArray(x.hp)?x.hp:[],damageRaw=Array.isArray(x.damage)?x.damage:[];
   const roundHp=order.map(i=>roundRaw[i]);
@@ -142,7 +152,7 @@ function renderReport(r,side='attack',isPublic=false){
  const percent=t=>num(t?.attempts)?`${Math.round(num(t.hits)/num(t.attempts)*100)}%`:'—';
  const statrows=[['Zadane obrażenia',recordedDamage[0],recordedDamage[1]],['Trafienia / próby',hitSummary(tot[0],0),hitSummary(tot[1],1)],['Skuteczność',accuracy(tot[0],0),accuracy(tot[1],1)],['Trafienia krytyczne',criticalSummary(tot[0],0),criticalSummary(tot[1],1)]].map(([k,l,v])=>`<tr><th scope="row">${esc(k)}</th><td>${esc(l)}</td><td>${esc(v)}</td></tr>`).join('');
  return `<div class="arena-report ashen-online-arena-report"><div class="arena-report-header"><div><span class="tag">RAPORT · PvP ONLINE</span><h3>${esc(result)} — ${esc(names[0])} vs ${esc(names[1])}</h3><p class="small muted">${esc(r.at||'')} · ${rnd.length} ${rnd.length===1?'runda':'rund'} · walka rozliczona na serwerze</p></div></div>
- <section class="arena-combat-profile"><div class="arena-battle-section-title"><span>01 / PORÓWNANIE</span><h4>Statystyki przed walką</h4></div><div class="arena-fighter-portraits"><div class="arena-fighter-portrait is-hero">${portrait(fighters[0])}<strong>${esc(names[0])}</strong><small>${isPublic?'Atakujący':'Twoja postać'} · ${roles[0]} · Poziom ${esc(fighters[0].level??'—')}</small></div><span class="arena-fighter-versus">VS</span><div class="arena-fighter-portrait is-enemy">${portrait(fighters[1])}<strong>${esc(names[1])}</strong><small>${isPublic?'Obrońca':'Przeciwnik'} · ${roles[1]} · Poziom ${esc(fighters[1].level??'—')}</small></div></div><div class="arena-combat-table-wrap"><table class="arena-combat-table arena-comparison-expanded"><thead><tr><th>Parametr</th><th>${esc(names[0])}${isPublic?' (Atakujący)':' (Ty)'}</th><th>${esc(names[1])}</th></tr></thead><tbody>${table}</tbody></table></div><p class="arena-profile-explainer">Kolory pokazują porównanie zapisanych parametrów z chwili walki. Obrażenia PvP nie powodują trwałej utraty PŻ ani wyposażenia.</p><div class="arena-profile-weapons"><strong>${isPublic?'Uzbrojenie atakującego:':'Twoje uzbrojenie:'}</strong> ${arms(fighters[0])}<div><strong>${isPublic?'Uzbrojenie obrońcy:':'Uzbrojenie przeciwnika:'}</strong> ${arms(fighters[1])}</div></div></section>
+ <section class="arena-combat-profile"><div class="arena-battle-section-title"><span>01 / PORÓWNANIE</span><h4>Statystyki przed walką</h4></div><div class="arena-fighter-portraits"><div class="arena-fighter-portrait is-hero">${portrait(fighters[0])}<strong>${esc(names[0])}</strong><small>${roles[0]} · Poziom ${esc(fighters[0].level??'—')}</small></div><span class="arena-fighter-versus">VS</span><div class="arena-fighter-portrait is-enemy">${portrait(fighters[1])}<strong>${esc(names[1])}</strong><small>${roles[1]} · Poziom ${esc(fighters[1].level??'—')}</small></div></div><div class="arena-combat-table-wrap"><table class="arena-combat-table arena-comparison-expanded"><thead><tr><th>Parametr</th><th>${esc(names[0])}${isPublic?' (Atakujący)':' (Ty)'}</th><th>${esc(names[1])}</th></tr></thead><tbody>${table}</tbody></table></div><p class="arena-profile-explainer">Kolory pokazują porównanie zapisanych parametrów z chwili walki. Obrażenia PvP nie powodują trwałej utraty PŻ ani wyposażenia.</p><div class="arena-profile-weapons"><strong>${isPublic?'Uzbrojenie atakującego:':'Twoje uzbrojenie:'}</strong> ${arms(fighters[0])}<div><strong>${isPublic?'Uzbrojenie obrońcy:':'Uzbrojenie przeciwnika:'}</strong> ${arms(fighters[1])}</div></div></section>
  <section class="arena-round-review"><div class="arena-battle-section-title"><span>02 / RUNDY</span><h4>Przebieg starcia</h4></div><div class="arena-rounds-list">${rounds||'<p class="muted">W tym raporcie nie zapisano przebiegu rund.</p>'}</div></section>
  <section class="arena-battle-finale"><div class="arena-battle-section-title"><span>03 / WYNIK</span><h4>Podsumowanie starcia</h4></div><div class="arena-outcome-reason ${r.winner===null?'is-draw':''}"><strong>${esc(result)}</strong><p>${r.winner===null?'Po 10 rundach nie wyłoniono zwycięzcy.':`Wynik rozstrzygnął serwer. ${rnd.length} ${rnd.length===1?'runda':'rund'}.`}</p><div class="arena-final-hp"><div><span>${esc(names[0])} · PŻ po walce</span><strong>${hpLabel(hp[0],max[0])}</strong>${health(hp[0],max[0])}</div><div><span>${esc(names[1])} · PŻ po walce</span><strong>${hpLabel(hp[1],max[1])}</strong>${health(hp[1],max[1],true)}</div></div></div></section>
  <div class="ashen-damage-summary"><div class="ashen-damage-header"><strong>⚔ PODSUMOWANIE WALKI</strong><span>${rnd.length} ${rnd.length===1?'runda':'rund'}</span></div><div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Parametr</th><th>${isPublic?'Atakujący':'Twoja postać'}</th><th>${isPublic?'Obrońca':'Przeciwnik'}</th></tr></thead><tbody>${statrows}</tbody></table></div></div><div class="arena-report-reward"><strong>PvP online:</strong> bez nagród i bez utraty przedmiotów lub trwałego PŻ. <span class="small muted">Po wdrożeniu SQL 029 PvP obsługuje X/Y i sześć efektów Z (Przekonujący, Lekki, Wartowniczy, Wzmocniony, Pancerny, Techniczny); przed jego uruchomieniem obowiązuje dotychczasowy SQL 027. W starszych raportach obowiązują zasady z chwili walki.</span></div></div>`;
@@ -185,9 +195,59 @@ function onlineSetDiagnostic(){
  <p class="small">Aktywne poziomy setów w migawce: X ${groups.X}, Y ${groups.Y}, Z ${groups.Z}.</p>
  <p class="small muted">To diagnostyka danych wysyłanych przez przeglądarkę, a nie potwierdzenie działania efektów na serwerze. PvP po wdrożeniu SQL 025 rozlicza część pasywnych premii X/Y. Po wdrożeniu SQL 029 PvP rozlicza sześć Mistrzostw Z. SQL 028 sprawdza spójność setów z zapisem chmurowym, lecz sam zapis może zostać zmodyfikowany przez klienta. Pozostałe Z i Ekspedycje jeszcze nie.</p></details>`;
 }
+// PvP Z lab v0.4.9.15: controlled, client-only mirror of isolated SQL 029 formulas.
+// No network, no player snapshots, no storage, no effect on online attack counters.
+function pvpZLabRun(family){
+ const floor=Math.floor,round=Math.round;
+ if(family==='reinforced'){
+  const max=200,initial=84,incoming=[30,30,30],threshold=max*0.3,healing=round(max*0.1);
+  const run=enabled=>{let hp=initial,used=false,log=[];for(let i=0;i<incoming.length;i++){
+    const hit=Math.min(hp,incoming[i]);hp=Math.max(0,hp-hit);
+    log.push(`Runda ${i+1}: otrzymano ${hit} obrażeń`);
+    if(enabled&&!used&&hp>0&&hp<=threshold){used=true;hp=Math.min(max,hp+healing);log.push(`Mistrzostwo Z — Wzmocniony: drugi oddech (+${healing} PŻ)`)}
+    if(!hp)break;
+   }return {hp,used,log}};
+  const a=run(false),b=run(true);
+  return {title:'Wzmocniony — Drugi oddech',baseline:`PŻ bez Z po 1. trafieniu: ${initial-incoming[0]}`,boosted:`PŻ z Z po 1. trafieniu: ${initial-incoming[0]+healing}`,difference:`Leczenie: +${healing} PŻ; aktywacje: ${b.used?1:0}/1`,passed:b.used&&b.hp>a.hp,notes:'200 maks. PŻ, 84 PŻ na starcie, cios 30 PŻ. Test stosuje serwerowy próg ≤30% i zaokrąglenie ROUND.',logs:b.log};
+ }
+ if(family==='plated'){
+  const max=200,initial=180,damage=[40,40,40];
+  const run=enabled=>{let hp=initial,used=false,log=[],first=0;for(let i=0;i<damage.length;i++){
+    let d=damage[i];if(enabled&&!used&&d>=max*.12){used=true;d=Math.max(1,floor(d*.65));log.push('Mistrzostwo Z — Pancerny: niezłomna płyta (-35% obrażeń)')}
+    if(!i)first=d;hp=Math.max(0,hp-d);log.push(`Runda ${i+1}: otrzymano ${d} obrażeń`);
+   }return {hp,used,first,log}};
+  const a=run(false),b=run(true);
+  return {title:'Pancerny — Niezłomna płyta',baseline:`Pierwszy cios bez Z: ${a.first} obrażeń`,boosted:`Pierwszy cios z Z: ${b.first} obrażeń`,difference:`Redukcja: ${a.first-b.first} obrażeń; aktywacje: ${b.used?1:0}/1`,passed:b.used&&b.first===26&&b.hp>a.hp,notes:'200 maks. PŻ, cios 40 PŻ ≥12% maksymalnego PŻ; redukcja FLOOR(40×0,65).',logs:b.log};
+ }
+ if(family==='technical'){
+  const targetArmor=50,baseDamage=100,armorPen=10,attempts=[true,false,true,true],run=enabled=>{
+    let procs=0,damage=0,log=[];
+    for(let i=0;i<attempts.length;i++){
+      if(!attempts[i]){log.push(`Atak ${i+1}: pudło — bez zużycia skanu`);continue}
+      const scan=enabled&&procs<2?targetArmor*.08:0;
+      if(scan){procs++;log.push(`Mistrzostwo Z — Techniczny: skan pancerza (${procs}/2)`)}
+      const armor=Math.max(0,Math.min(.6,(targetArmor-armorPen-scan)/100));
+      const hit=Math.max(1,Math.floor(baseDamage*(1-armor)));
+      damage+=hit;log.push(`Atak ${i+1}: ${hit} obrażeń`);
+    }return {procs,damage,log}};
+  const a=run(false),b=run(true);
+  return {title:'Techniczny — Skan pancerza',baseline:`Obrażenia bez Z: ${a.damage}`,boosted:`Obrażenia z Z: ${b.damage}`,difference:`Zysk: +${b.damage-a.damage}; aktywacje: ${b.procs}/2`,passed:b.procs===2&&b.damage>a.damage,notes:'Pancerz 50, penetracja bazowa 10. Drugi atak chybia; skan jest zużywany tylko przy trafieniu.',logs:b.log};
+ }
+ return null;
+}
+function pvpZLabHtml(){
+ const cases=[['reinforced','Wzmocniony'],['plated','Pancerny'],['technical','Techniczny']];
+ const r=pvpZLabReport;
+ return `<details class="panel section" id="ashen-pvp-z-lab" ${pvpZLabOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧪 Laboratorium reguł PvP · SQL 029 (bez walk online)</summary>
+ <p class="small muted">Izolowany test matematyki trzech zdolności Z według zasad SQL 029. <strong>To lokalne odwzorowanie wybranych reguł serwera, nie prawdziwa walka PvP ani test produkcyjnej funkcji.</strong> Nie wymaga przedmiotów, nie wysyła danych do Supabase, nie zużywa ataków i nie zapisuje wyniku.</p>
+ <div class="actions" style="flex-wrap:wrap">${cases.map(([k,name])=>`<button type="button" data-pvp-zlab-select="${k}" class="${pvpZLabFamily===k?'primary':''}">${name}</button>`).join('')}</div>
+ <div class="actions"><button class="primary" type="button" data-pvp-zlab-run="1">▶ Uruchom kontrolowaną próbę</button><button type="button" data-pvp-zlab-clear="1">Wyczyść wynik</button></div>
+ ${r?`<div class="notice" role="status"><strong>${r.passed?'✓ Próba lokalna zaliczona':'⚠ Próba lokalna niezaliczona'} — ${esc(r.title)}</strong><p>${esc(r.baseline)}<br>${esc(r.boosted)}<br>${esc(r.difference)}</p><p class="small muted">${esc(r.notes)}</p><details><summary>Przebieg próby</summary>${r.logs.map(line=>`<p class="small">${esc(line)}</p>`).join('')}</details></div>`:''}
+ </details>`;
+}
 function pvpHtml(){
- const entries=opponents.map(p=>`<article class="pvp-choice"><img src="${p.origin==='tech'?'./assets/characters/technician-'+p.gender+'.webp':p.origin==='fighter'?'./assets/characters/warrior-'+p.gender+'.webp':'./assets/characters/scout-'+p.gender+'.webp'}" onerror="this.style.display='none'" alt=""><div><h4>${esc(p.name)}</h4><p class="small muted">Poziom ${p.level} · ${esc(p.origin)} · ostatni zapis ${fmt(p.updated_at)}</p><p>Ataki dziś: ${p.attacks_today}/2</p><button data-online-profile="${esc(p.user_id)}">Profil</button><button class="primary" data-online-attack="${esc(p.user_id)}" ${!bound()||busy||p.attacks_today>=2?'disabled':''}>⚔ Zaatakuj online</button></div></article>`).join('');
- return `<section class="section"><h2>🌐 PvP online — prawdziwe konta</h2><div class="notice" role="note"><strong>Stan silnika serwerowego:</strong> po wdrożeniu SQL 029 działa 6/15 zdolności Z — Przekonujący, Lekki, Wartowniczy, Wzmocniony, Pancerny, Techniczny; przed wdrożeniem obowiązuje SQL 027 (3/15). Pozostałe 9 działa jedynie lokalnie. SQL 028 kontroluje spójność deklaracji z zapisem chmurowym, lecz nie zapewnia pełnego anty-cheat.</div><p class="small muted">Wyniki rozstrzyga Supabase (X/Y: SQL 025; pierwsze trzy Z: SQL 027; kolejne trzy Z: SQL 029 (po osobnym wdrożeniu)), limit dwóch ataków na każdą postać resetuje się o północy czasu polskiego. Nie trzeba być zalogowanym, aby zostać zaatakowanym. Lokalny tryb testowy znajduje się niżej.</p>${intro()}${onlineSetDiagnostic()}${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}<div class="actions"><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież graczy i raporty</button></div><h3>Przeciwnicy (${opponents.length})</h3><div class="pvp-choices">${!auth()?'<p>Połącz konto ASHEN.</p>':!loaded?'<p class="muted">Odśwież listę, aby zobaczyć graczy.</p>':entries||'<p class="muted">Brak innych opublikowanych kont. Do testu potrzebne jest drugie konto e-mail z własną postacią.</p>'}</div><h3>Raporty walk online</h3>${reports.length?reports.slice(0,40).map(x=>{const own=x.side==='attack'?'Atak':'Obrona',r=x.report||{};return `<button class="mail-row" data-online-report="${x.id}"><strong>${own}: ${esc(r.attacker?.name)} vs ${esc(r.defender?.name)}</strong><small>${fmt(x.created_at)}</small></button>`}).join(''):'<p class="muted">Nie stoczono jeszcze walk online.</p>'}</section>${reportDialog()}`;
+ const entries=opponents.map(p=>`<article class="pvp-choice"><img src="${p.origin==='tech'?'./assets/characters/tech-'+(p.gender==='female'?'f':'m')+'.webp':p.origin==='fighter'?'./assets/characters/fighter-'+(p.gender==='female'?'f':'m')+'.webp':'./assets/characters/scout-'+(p.gender==='female'?'f':'m')+'.webp'}" onerror="this.style.display='none'" alt=""><div><h4>${esc(p.name)}</h4><p class="small muted">Poziom ${p.level} · ${esc(p.origin)} · ostatni zapis ${fmt(p.updated_at)}</p><p>Ataki dziś: ${p.attacks_today}/2</p><button data-online-profile="${esc(p.user_id)}">Profil</button><button class="primary" data-online-attack="${esc(p.user_id)}" ${!bound()||busy||p.attacks_today>=2?'disabled':''}>⚔ Zaatakuj online</button></div></article>`).join('');
+ return `<section class="section"><h2>🌐 PvP online — prawdziwe konta</h2><div class="notice" role="note"><strong>Stan silnika serwerowego:</strong> po wdrożeniu SQL 029 działa 6/15 zdolności Z — Przekonujący, Lekki, Wartowniczy, Wzmocniony, Pancerny, Techniczny; przed wdrożeniem obowiązuje SQL 027 (3/15). Pozostałe 9 działa jedynie lokalnie. SQL 028 kontroluje spójność deklaracji z zapisem chmurowym, lecz nie zapewnia pełnego anty-cheat.</div><p class="small muted">Wyniki rozstrzyga Supabase (X/Y: SQL 025; pierwsze trzy Z: SQL 027; kolejne trzy Z: SQL 029 (po osobnym wdrożeniu)), limit dwóch ataków na każdą postać resetuje się o północy czasu polskiego. Nie trzeba być zalogowanym, aby zostać zaatakowanym. Lokalny tryb testowy znajduje się niżej.</p>${intro()}${pvpZLabHtml()}${onlineSetDiagnostic()}${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}<div class="actions"><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież graczy i raporty</button></div><h3>Przeciwnicy (${opponents.length})</h3><div class="pvp-choices">${!auth()?'<p>Połącz konto ASHEN.</p>':!loaded?'<p class="muted">Odśwież listę, aby zobaczyć graczy.</p>':entries||'<p class="muted">Brak innych opublikowanych kont. Do testu potrzebne jest drugie konto e-mail z własną postacią.</p>'}</div><h3>Raporty walk online</h3>${reports.length?reports.slice(0,40).map(x=>{const own=x.side==='attack'?'Atak':'Obrona',r=x.report||{};return `<button class="mail-row" data-online-report="${x.id}"><strong>${own}: ${esc(r.attacker?.name)} vs ${esc(r.defender?.name)}</strong><small>${fmt(x.created_at)}</small></button>`}).join(''):'<p class="muted">Nie stoczono jeszcze walk online.</p>'}</section>${reportDialog()}`;
 }
 function mailItemsForFolder(){
  const uid=cloud()?.getSession()?.user?.id;
@@ -237,10 +297,14 @@ document.addEventListener('submit',async e=>{
  replyBusy=true;error='';notice='';try{await rpc('ashen_online_send',{p_recipient:m.sender_id,p_body:body});replyDraft='';notice='Odpowiedź wysłana.';await refresh()}catch(err){error=msg(err);replyDraft=body}finally{replyBusy=false;draw()}
 });
 
+document.addEventListener('toggle',e=>{if(e.target?.id==='ashen-pvp-z-lab')pvpZLabOpen=e.target.open},true);
 document.addEventListener('click',async e=>{
  if(e.target?.matches?.('[data-online-report-overlay]')){openedReport=null;reportContext='pvp';draw();return}
 
  const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.pvpZlabSelect){pvpZLabOpen=true;pvpZLabFamily=b.dataset.pvpZlabSelect;pvpZLabReport=null;draw();return}
+ if(b.hasAttribute('data-pvp-zlab-run')){pvpZLabOpen=true;pvpZLabReport=pvpZLabRun(pvpZLabFamily);draw();return}
+ if(b.hasAttribute('data-pvp-zlab-clear')){pvpZLabOpen=true;pvpZLabReport=null;draw();return}
  if(b.hasAttribute('data-online-refresh')){e.preventDefault();await refresh();return}
  if(b.hasAttribute('data-online-share-report')){e.preventDefault();await shareCurrentReport(false);return}
  if(b.hasAttribute('data-online-native-share')){e.preventDefault();await shareCurrentReport(true);return}

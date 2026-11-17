@@ -1,3 +1,11 @@
+## v0.4.9.15 — Laboratorium reguł PvP i raporty
+- Lokalna, izolowana symulacja wzorów SQL 029 dla Wzmocnionego, Pancernego i Technicznego w zakładce PvP. Nie odpytuje Supabase, nie zapisuje ani nie ingeruje w zwykłe PvP.
+- Raport publiczny grupuje powtórzone ataki tej samej broni, zamiast sugerować kilka karabinów.
+- Ujednolicono etykiety ról w raportach (bez podwójnego „Atakujący”).
+- Karabin maszynowy PK ma właściwy rodzaj męski w nowych nazwach (Niszczycielski Karabin...).
+- Poprawiono ścieżki portretów graczy na liście PvP.
+- Nie zmieniono SQL 029, reguł serwerowych ani zapisów postaci.
+
 ## v0.4.9.14 — PvP online: Mistrzostwo Z etap 2 (SQL 029; kandydat do testów)
 
 - Nowa **osobna** migracja `sql/029_online_pvp_z_stage2.sql` rozszerza dotychczasowy silnik SQL 027 z 3 do 6 zdolności Z: Wzmocniony (Drugi oddech), Pancerny (Niezłomna płyta), Techniczny (Skan pancerza).

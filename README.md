@@ -15,3 +15,7 @@ Podmień `index.html`, `js/game.js`, `README.md`, `CHANGELOG.md` i dodaj `sql/02
 **Nie uruchamiaj automatycznie na bazie produkcyjnej.** Przed uruchomieniem wykonaj backup definicji `ashen_publish_profile(jsonb)` i przetestuj synchronizację na osobnej bazie / dwóch kontach. Migracja porównuje deklarowane sety z wyposażeniem w chmurowym zapisie postaci. Może odmówić publikacji niezgodnych / starych zapisów. Nie zmienia serwerowego rozliczania walk. **Nie jest pełnym anty-cheatem:** zapis `ashen_cloud_saves.save_data` nadal podlega edycji przez właściciela konta, a pozostałe statystyki profilu nadal są wyliczane przez klienta.
 
 Raport wcześniejszego audytu: `AUDYT_XYZ_PVP_v0.4.9.12.md`.
+
+
+### Laboratorium PvP (v0.4.9.15)
+W zakładce PvP jest symulator trzech izolowanych reguł SQL 029. To tylko test po stronie przeglądarki; nie potwierdza działania funkcji na żywym serwerze. Nie publikuje testowych przedmiotów.
