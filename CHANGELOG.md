@@ -1,3 +1,13 @@
+## v0.4.9.14 — PvP online: Mistrzostwo Z etap 2 (SQL 029; kandydat do testów)
+
+- Nowa **osobna** migracja `sql/029_online_pvp_z_stage2.sql` rozszerza dotychczasowy silnik SQL 027 z 3 do 6 zdolności Z: Wzmocniony (Drugi oddech), Pancerny (Niezłomna płyta), Techniczny (Skan pancerza).
+- Stany aktywacji są osobne dla każdej postaci i walki, bez trwałych zmian PŻ/ekwipunku; zachowane X/Y, limit 2 ataków dziennie, raporty publiczne.
+- Nazwy i komunikaty w interfejsie zaktualizowano; SQL 029 **nie uruchamia się automatycznie** po wgraniu strony.
+- Nie zmienia `ashen_publish_profile`, dlatego nie cofa poprawionej migracji SQL 028 ani limitu 8 ataków przy publikacji Kowala.
+- Plik `sql/028_pvp_set_snapshot_consistency.sql` w pełnej paczce jest teraz poprawioną, przetestowaną wersją (NULL oraz limit 8 ataków); SQL 028 został już wdrożony osobno i **nie wymaga ponownego uruchomienia**.
+- **Testy:** kontrola składni JS i struktury SQL lokalnie; brak uruchomienia na rzeczywistym Supabase. Przed wdrożeniem zrób kopię `ashen_online_attack(uuid)` i sprawdź na bazie testowej.
+- PvP pozostaje testowe; SQL 028 nie jest pełnym zabezpieczeniem przed oszustwami.
+
 ## v0.4.9.13 — Serwerowa kontrola spójności deklaracji setów (testowa)
 
 - Nowa opcjonalna migracja `sql/028_pvp_set_snapshot_consistency.sql` weryfikuje skład, liczebność, sumę jakości, poziom i flagi Mistrzostw Z w migawce z wyposażeniem zapisanym w `ashen_cloud_saves`.

@@ -1,3 +1,7 @@
+# ASHEN v0.4.9.14
+
+Najnowsza aktualizacja dodaje **kandydata SQL 029** dla serwerowego PvP: Wzmocniony, Pancerny i Techniczny (łącznie 6/15 po wdrożeniu). Samo wgranie plików na GitHub **nie aktywuje** nowych zdolności online. Najpierw test w osobnej bazie i kopia funkcji `ashen_online_attack(uuid)`, następnie ostrożne wdrożenie SQL 029. Zachowaj kopię działającej funkcji publikowania postaci z limitem 8 ataków. W pełnej paczce znajduje się poprawiony SQL 028, ale **nie uruchamiaj go ponownie**.
+
 # ASHEN — Kroniki Upadku · v0.4.9.13
 
 15/15 testów lokalnych Mistrzostwa Z zaliczonych. PvP online obsługuje tylko 3 z 15 Z po SQL 027.
