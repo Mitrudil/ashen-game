@@ -1,3 +1,9 @@
+## v0.4.9.27
+- Okno raportu PvP jest renderowane niezależnie od zakładki. Można je schować i ponownie otworzyć z nagłówka.
+- Zapis otwartego raportu w sessionStorage zabezpiecza go przy przeładowaniu karty, w ramach tego samego konta.
+- Zachowywanie pozycji przewijania i rozwiniętych szczegółów rund przy odświeżeniu UI.
+- Bez zmian SQL ani zasad walki.
+
 ## 0.4.9.26 — prywatne testy Mistrzostw Z w serwerowym PvP
 - Panel wyboru testowego Z tylko dla kont dopuszczonych przez administratora.
 - Nowa migracja SQL039: jawna allowlista, RLS, testowy override wyłącznie w trakcie walki.
