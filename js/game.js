@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.9.4';
+const APP_VERSION='0.4.9.5';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -2866,7 +2866,7 @@ function inventoryItemCard(inst,o){
 // v0.4.9.0 — Laboratorium Setow Z. Generuje prawdziwe prefiksy, lecz wylacznie
 // na osobnym profilu lokalnym. Stan sprzed testu jest przywracany w calosci.
 // W czasie aktywnego zestawu eksperymentalnego nie publikujemy statystyk online.
-const ZLAB_PRESETS={accessory_persuasive:{name:'Negocjatora',slots:['extra','extra2','extra3'],ids:['scarf','bandana','nightgoggles']},armor_light:{name:'Lekki',slots:['shirt','pants','outer'],ids:['thermal','cargo','coat']},armor_warden:{name:'Wartownika',slots:['shirt','pants','outer'],ids:['armorshirt','kevlarpants','kevlar']}};
+const ZLAB_PRESETS={accessory_persuasive:{name:'Negocjatora',slots:['extra','extra2','extra3'],ids:['scarf','bandana','nightgoggles']},armor_light:{name:'Lekki',slots:['shirt','pants','outer'],ids:['thermal','cargo','coat']},armor_warden:{name:'Wartownika',slots:['shirt','pants','outer'],ids:['armorshirt','kevlarpants','kevlar']},armor_reinforced:{name:'Wzmocniony',slots:['shirt','pants','outer'],ids:['thermal','cargo','coat']},armor_plated:{name:'Pancerny',slots:['shirt','pants','outer'],ids:['armorshirt','kevlarpants','kevlar']},accessory_technical:{name:'Technika',slots:['extra','extra2','extra3'],ids:['scarf','bandana','nightgoggles']}};
 const ZLAB_DEFAULT_QUALITIES=[4,4,4];
 let zLabBattleResult=null;
 function zLabWardenTest(){
@@ -2923,21 +2923,62 @@ function zLabOtherMasteryTest(family){
    metrics:`Runda 1 · aktywacje Z: ${activated}/2 · obrażenia bez Z: ${firstOff?.heroDamage??'—'} · obrażenia z Z: ${firstOn?.heroDamage??'—'} · różnica: +${(firstOn?.heroDamage||0)-(firstOff?.heroDamage||0)}`,
    details:'Próba korzysta z laboratoryjnej broni o stałych 100 obrażeniach i trzech wymuszonych trafieniach; to nie zmienia wyposażenia ani statystyk Testera. Premia +4% dotyczy drugiego i trzeciego trafienia w rundzie.',
    all:firstOn?.events||[]};
+ } else if(['armor_reinforced','armor_plated','accessory_technical'].includes(family)){
+  // v0.4.9.5: dwa przebiegi tego samego silnika, identyczne dane i sekwencja RNG.
+  // Roznica miedzy nimi to tylko flaga mastery w setEffects.
+  const labMax=snapshot.defense.hp;
+  const enemy={name:'Manekin weryfikacyjny Z',hp:1000000,armor:0,dodge:-100,acc:1000,atk:[1,1]};
+  const setup={testSnapshot:snapshot,testRandom:()=>.4,testMaxRounds:10,recordRounds:true};
+  let initialHp;
+  if(family==='accessory_technical'){
+   enemy.armor=50;enemy.acc=-1000;
+   const weapon={id:'zlab-technical',name:'Broń kalibracyjna',min:100,max:100,accuracy:0,critPp:0,type:'firearm'};
+   snapshot.attacks=[0,1,2].map(i=>({weapon:{...weapon},hand:i===0?'right':'left',power:1}));
+  } else if(family==='armor_plated'){
+   // Wystarczajaco duze trafienie, zeby przekroczyc prog 12% maks. PZ.
+   const armorFactor=1-clamp(snapshot.defense.armor/100,0,.6);
+   const blow=Math.ceil(labMax*.25/armorFactor);
+   enemy.atk=[blow,blow];
+  } else {
+   // Start 35%, pierwszy cios przesuwa ponizej progu 30% i pozwala przezyc.
+   initialHp=Math.max(2,Math.round(labMax*.35));
+   const armorFactor=1-clamp(snapshot.defense.armor/100,0,.6);
+   const blow=Math.ceil(labMax*.10/armorFactor);
+   enemy.atk=[blow,blow];
+  }
+  const baseline={...snapshot,setEffects:{...snapshot.setEffects}};
+  delete baseline.setEffects['master_'+family];
+  const off=fight(enemy,{...setup,testSnapshot:baseline,testInitialHp:initialHp});
+  const on=fight(enemy,{...setup,testSnapshot:snapshot,testInitialHp:initialHp});
+  const names={armor_reinforced:'Wzmocniony — Drugi oddech',armor_plated:'Pancerny — Niezłomna płyta',accessory_technical:'Technika — Skan pancerza'};
+  const pattern={armor_reinforced:/Wzmocniony: drugi oddech/,armor_plated:/Pancerny: niezłomna płyta/,accessory_technical:/Technika: skan pancerza/}[family];
+  const triggers=on.lines.filter(l=>pattern.test(l));
+  const bonusText=family==='accessory_technical'
+   ?`Obrażenia zadane w rundzie 1: bez Z ${off.roundHistory?.[0]?.heroDamage??0}, z Z ${on.roundHistory?.[0]?.heroDamage??0} · aktywacje skanu: ${triggers.length}/2`
+   :family==='armor_plated'
+    ?`Obrażenia otrzymane w rundzie 1: bez Z ${off.roundHistory?.[0]?.enemyDamage??0}, z Z ${on.roundHistory?.[0]?.enemyDamage??0} · aktywacje: ${triggers.length}/1`
+    :`PŻ po rundzie 1: bez Z ${off.roundHistory?.[0]?.heroHp??0}, z Z ${on.roundHistory?.[0]?.heroHp??0} (maks. ${labMax}) · aktywacje: ${triggers.length}/1`;
+  const improved=family==='accessory_technical'?(on.roundHistory?.[0]?.heroDamage||0)>(off.roundHistory?.[0]?.heroDamage||0)
+    :family==='armor_plated'?(on.roundHistory?.[0]?.enemyDamage??Infinity)<(off.roundHistory?.[0]?.enemyDamage??-Infinity):(on.roundHistory?.[0]?.heroHp??0)>(off.roundHistory?.[0]?.heroHp??0);
+  const correctCount=family==='accessory_technical'?triggers.length===2:triggers.length===1;
+  zLabBattleResult={type:'comparison',activated:correctCount&&improved,headline:names[family],metrics:bonusText,
+   details:'Dwie identyczne kontrolowane walki (Z wyłączone / włączone), z tym samym ciągiem losowym. Test nie zapisuje danych i nie dotyczy serwerowego PvP. Wynik wymaga potwierdzenia w przeglądarce.',
+   all:on.lines.filter(l=>pattern.test(l)||/Otrzymujesz|Zadajesz|Osłona pochłania/.test(l)).slice(0,24)};
  } else throw Error('Nieznana rodzina setu.');
  message=zLabBattleResult.activated?'Laboratorium: zdolność Z zaliczyła próbę.':'Laboratorium: sprawdź raport zdolności Z.';
  render();
 }
 function zLabBattleHtml(){
  if(!zLabBattleResult)return '';
- const v=zLabBattleResult;if(v.type==='negotiator'||v.type==='light')return `<div class="panel" style="margin-top:12px"><h4>${escape(v.headline)}</h4><p><strong>${v.activated?'✓ Próba zaliczona':'⚠ Próba niezaliczona'}</strong></p><p>${escape(v.metrics)}</p><p class="small muted">${escape(v.details)}</p><details><summary>Przebieg kontrolny</summary><div class="small">${v.all.map(line=>`<p>${escape(line)}</p>`).join('')}</div></details></div>`;return `<div class="panel" style="margin-top:12px"><h4>Wynik kontrolowanej walki (offline)</h4><p><strong>${v.activated?'✓ Ostatni bastion uruchomiony':'⚠ Brak aktywacji'}</strong> · start ${v.startHp}/${v.maxHp} PŻ · osłona Z: ${v.expectedShield} pkt (15% maks. PŻ) · koniec ${v.actualHp} PŻ · ${v.rounds} rund</p><p class="small muted">Test nie zmienia PŻ, ekwipunku, postępu ani zapisów online. Manekin atakuje za 60 obrażeń przed redukcją, nie można go pokonać.</p><details><summary>Przebieg próby</summary><div class="small">${v.all.map(line=>`<p>${escape(line)}</p>`).join('')}</div></details></div>`;
+ const v=zLabBattleResult;if(v.type==='negotiator'||v.type==='light'||v.type==='comparison')return `<div class="panel" style="margin-top:12px"><h4>${escape(v.headline)}</h4><p><strong>${v.activated?'✓ Próba zaliczona':'⚠ Próba niezaliczona'}</strong></p><p>${escape(v.metrics)}</p><p class="small muted">${escape(v.details)}</p><details><summary>Przebieg kontrolny</summary><div class="small">${v.all.map(line=>`<p>${escape(line)}</p>`).join('')}</div></details></div>`;return `<div class="panel" style="margin-top:12px"><h4>Wynik kontrolowanej walki (offline)</h4><p><strong>${v.activated?'✓ Ostatni bastion uruchomiony':'⚠ Brak aktywacji'}</strong> · start ${v.startHp}/${v.maxHp} PŻ · osłona Z: ${v.expectedShield} pkt (15% maks. PŻ) · koniec ${v.actualHp} PŻ · ${v.rounds} rund</p><p class="small muted">Test nie zmienia PŻ, ekwipunku, postępu ani zapisów online. Manekin atakuje za 60 obrażeń przed redukcją, nie można go pokonać.</p><details><summary>Przebieg próby</summary><div class="small">${v.all.map(line=>`<p>${escape(line)}</p>`).join('')}</div></details></div>`;
 }
 
 function zLabPanel(){
  const backup=state.labSetBackup,other=devActiveId()!=='main';
  const choices=Object.entries(ZLAB_PRESETS).map(([id,p])=>`<option value="${id}">${escape(p.name)} (${id.startsWith('accessory')?'3 akcesoria':'3 elementy odzieży'})</option>`).join('');
  const quality=(i)=>`<label>Element ${i+1}<select class="input" id="zlab-quality-${i}">${rarities.map((r,j)=>`<option value="${j}" ${j===ZLAB_DEFAULT_QUALITIES[i]?'selected':''}>${escape(r.name)} · ${j} pkt</option>`).join('')}</select></label>`;
- const active=backup?setEngineEffects().active.filter(r=>['accessory_persuasive','armor_light','armor_warden'].includes(r.id)).map(r=>`${escape(r.name)}: ${r.count} elementy · ${r.qualityPoints} pkt · X${r.level>=2?'/Y':''}${r.level>=3?'/Z':''}`).join(' · '):'';
- return `<details class="panel section" id="ashen-z-laboratory" ${backup?'open':''} style="margin-bottom:16px"><summary style="cursor:pointer;font-weight:700">🧪 Laboratorium Setów Z · ASHEN 0.4.9.4</summary><p class="small muted">Trzy rodziny z pierwszego etapu PvP: Negocjatora, Lekki i Wartownika. Wybierz jakości każdego elementu i sprawdź prawdziwy silnik aktywacji X/Y/Z. <strong>Wymagane trzy elementy tej samej rodziny.</strong> Próg Z: suma jakości co najmniej 10 punktów dla 3 części (np. 4+4+2).</p>${!other?'<div class="notice">Dla bezpieczeństwa głównej postaci zestawów testowych nie można generować tutaj. Otwórz u góry „Profil”, utwórz lub wybierz Testera 1–4, a następnie wróć do Ekwipunku.</div>':backup?`<div class="notice"><strong>Trwa test na lokalnym profilu.</strong><p>${active||'Sprawdź aktywację w Postaci / Ekwipunku.'}</p><p class="small">Wstrzymano publikowanie statystyk z tym zestawem do Supabase. Po zakończeniu przywróć poprzedni stan. Nie zmieniaj w trakcie testu normalnego ekwipunku, bo te zmiany zostaną cofnięte.</p></div><button class="primary" type="button" data-zlab-restore="1">↩ Przywróć ekwipunek sprzed testu</button>${active.includes('Wartownika:')?`<div class="panel" style="margin-top:12px"><h4>⚔ Próba Ostatniego bastionu</h4><p class="small muted">Ustaw PŻ na start i uruchom symulację w lokalnym silniku. To nie jest serwerowe PvP.</p><div class="actions"><label>Startowe PŻ<select class="input" id="zlab-start-hp"><option value="20">20% (poniżej progu)</option><option value="35">35% (nad progiem)</option><option value="100">100% (pełne zdrowie)</option></select></label><button type="button" class="primary" data-zlab-warden-test="1">▶ Testuj Ostatni bastion</button></div>${zLabBattleHtml()}</div>`:active.includes('Negocjatora:')?`<div class="panel" style="margin-top:12px"><h4>🎯 Próba Autorytetu</h4><p class="small muted">Porównanie celności z i bez premii Z na tym samym przeciwniku. Bez zapisu.</p><button class="primary" type="button" data-zlab-other-test="accessory_persuasive">▶ Testuj Autorytet +3</button>${zLabBattleHtml()}</div>`:active.includes('Lekki:')?`<div class="panel" style="margin-top:12px"><h4>⚔ Próba Serii trafień</h4><p class="small muted">Trzy kontrolowane trafienia w jednej rundzie z porównaniem wyniku z Z i bez Z.</p><button class="primary" type="button" data-zlab-other-test="armor_light">▶ Testuj Serię trafień</button>${zLabBattleHtml()}</div>`:''}`:`<div class="actions" style="align-items:end;flex-wrap:wrap"><label>Rodzina zestawu<select class="input" id="zlab-family">${choices}</select></label>${[0,1,2].map(quality).join('')}</div><div class="actions" style="margin-top:12px"><button type="button" class="primary" data-zlab-generate="1">⚗ Załóż kompletny zestaw na Testerze</button></div><p class="small muted">Ekwipunek i wszystkie zajęte sloty zostaną zapisane jako kopia do przywrócenia. Przedmioty testowe nie są łupami i nie mogą być publikowane w PvP online; walki lokalne można sprawdzać w trybie testowym.</p>`}</details>`;
+ const active=backup?setEngineEffects().active.filter(r=>Object.hasOwn(ZLAB_PRESETS,r.id)).map(r=>`${escape(r.name)}: ${r.count} elementy · ${r.qualityPoints} pkt · X${r.level>=2?'/Y':''}${r.level>=3?'/Z':''}`).join(' · '):'';
+ return `<details class="panel section" id="ashen-z-laboratory" ${backup?'open':''} style="margin-bottom:16px"><summary style="cursor:pointer;font-weight:700">🧪 Laboratorium Setów Z · ASHEN 0.4.9.5</summary><p class="small muted">Sześć rodzin testowych: Negocjatora, Lekki, Wartownika, Wzmocniony, Pancerny i Technika. Pierwsze trzy mają również częściową obsługę w PvP online, nowe trzy testujemy wyłącznie lokalnie. Wybierz jakości każdego elementu i sprawdź prawdziwy silnik aktywacji X/Y/Z. <strong>Wymagane trzy elementy tej samej rodziny.</strong> Próg Z: suma jakości co najmniej 10 punktów dla 3 części (np. 4+4+2).</p>${!other?'<div class="notice">Dla bezpieczeństwa głównej postaci zestawów testowych nie można generować tutaj. Otwórz u góry „Profil”, utwórz lub wybierz Testera 1–4, a następnie wróć do Ekwipunku.</div>':backup?`<div class="notice"><strong>Trwa test na lokalnym profilu.</strong><p>${active||'Sprawdź aktywację w Postaci / Ekwipunku.'}</p><p class="small">Wstrzymano publikowanie statystyk z tym zestawem do Supabase. Po zakończeniu przywróć poprzedni stan. Nie zmieniaj w trakcie testu normalnego ekwipunku, bo te zmiany zostaną cofnięte.</p></div><button class="primary" type="button" data-zlab-restore="1">↩ Przywróć ekwipunek sprzed testu</button>${active.includes('Wartownika:')?`<div class="panel" style="margin-top:12px"><h4>⚔ Próba Ostatniego bastionu</h4><p class="small muted">Ustaw PŻ na start i uruchom symulację w lokalnym silniku. To nie jest serwerowe PvP.</p><div class="actions"><label>Startowe PŻ<select class="input" id="zlab-start-hp"><option value="20">20% (poniżej progu)</option><option value="35">35% (nad progiem)</option><option value="100">100% (pełne zdrowie)</option></select></label><button type="button" class="primary" data-zlab-warden-test="1">▶ Testuj Ostatni bastion</button></div>${zLabBattleHtml()}</div>`:active.includes('Negocjatora:')?`<div class="panel" style="margin-top:12px"><h4>🎯 Próba Autorytetu</h4><p class="small muted">Porównanie celności z i bez premii Z na tym samym przeciwniku. Bez zapisu.</p><button class="primary" type="button" data-zlab-other-test="accessory_persuasive">▶ Testuj Autorytet +3</button>${zLabBattleHtml()}</div>`:active.includes('Lekki:')?`<div class="panel" style="margin-top:12px"><h4>⚔ Próba Serii trafień</h4><p class="small muted">Trzy kontrolowane trafienia w jednej rundzie z porównaniem wyniku z Z i bez Z.</p><button class="primary" type="button" data-zlab-other-test="armor_light">▶ Testuj Serię trafień</button>${zLabBattleHtml()}</div>`:['armor_reinforced','armor_plated','accessory_technical'].some(id=>active.includes(ZLAB_PRESETS[id].name+':'))?`<div class="panel" style="margin-top:12px"><h4>⚔ Porównanie z Z i bez Z</h4><p class="small muted">Dwie deterministyczne próby z tym samym przebiegiem.</p><button class="primary" type="button" data-zlab-other-test="${setEngineEffects().active.find(r=>['armor_reinforced','armor_plated','accessory_technical'].includes(r.id))?.id||''}">▶ Testuj zdolność Z</button>${zLabBattleHtml()}</div>`:''}`:`<div class="actions" style="align-items:end;flex-wrap:wrap"><label>Rodzina zestawu<select class="input" id="zlab-family">${choices}</select></label>${[0,1,2].map(quality).join('')}</div><div class="actions" style="margin-top:12px"><button type="button" class="primary" data-zlab-generate="1">⚗ Załóż kompletny zestaw na Testerze</button></div><p class="small muted">Ekwipunek i wszystkie zajęte sloty zostaną zapisane jako kopia do przywrócenia. Przedmioty testowe nie są łupami i nie mogą być publikowane w PvP online; walki lokalne można sprawdzać w trybie testowym.</p>`}</details>`;
 }
 function zLabGenerate(id,qualities){
  zLabBattleResult=null;
