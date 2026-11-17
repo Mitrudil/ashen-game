@@ -1,3 +1,9 @@
+## 0.4.9.26 — prywatne testy Mistrzostw Z w serwerowym PvP
+- Panel wyboru testowego Z tylko dla kont dopuszczonych przez administratora.
+- Nowa migracja SQL039: jawna allowlista, RLS, testowy override wyłącznie w trakcie walki.
+- Osobny skrypt nadania dostępu Mitrudil i Kowal oraz awaryjne wyłączenie.
+- Brak zmian w mechanice X/Y/Z, zapisach ekwipunku i normalnej walidacji profili.
+
 ## v0.4.9.24 — audyt historycznych raportów PvP
 - Starsze raporty bez totals nie są błędnie oznaczane jako uszkodzone.
 - W audycie osobno pokazano liczbę raportów z SQL 034 i starszych wersji.

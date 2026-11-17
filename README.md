@@ -31,3 +31,9 @@ Po aktualizacji GitHub odśwież Ctrl+F5. Nie trzeba uruchamiać SQL.
 
 ## ASHEN v0.4.9.25 — tymczasowo bez limitu PvP
 SQL 038 wyłącza blokadę 2 ataków dziennie w funkcji `ashen_online_attack(uuid)`; bez zmian w walce i raportach. Aby przycisk ataku nie był blokowany, potrzebna jest też aktualizacja GitHub. SQL do przywrócenia limitu pozostaje w `sql/`, lecz nie uruchamiać go podczas testów.
+
+
+## v0.4.9.26 — prywatny test Z w PvP
+Panel pojawia się tylko kontom jawnie dopuszczonym przez administratora w SQL 039.
+Skrypt SQL 039 należy najpierw przetestować w transakcji, a dopiero potem wdrożyć; nie włącza sam testu żadnemu graczowi.
+Konfiguracja Mistrzostwa Z jest nakładana tylko na migawkę walki, nie na zapis w chmurze.
