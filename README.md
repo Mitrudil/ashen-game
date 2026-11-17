@@ -19,3 +19,6 @@ Raport wcześniejszego audytu: `AUDYT_XYZ_PVP_v0.4.9.12.md`.
 
 ### Laboratorium PvP (v0.4.9.15)
 W zakładce PvP jest symulator trzech izolowanych reguł SQL 029. To tylko test po stronie przeglądarki; nie potwierdza działania funkcji na żywym serwerze. Nie publikuje testowych przedmiotów.
+
+### PvP online i diagnostyka (v0.4.9.16)
+PvP online jest jedynym trybem walk między kontami. Trzy izolowane próby w Laboratorium reguł PvP nie wysyłają ataków ani nie zużywają limitu. Raporty serwerowe wyświetlają osobną listę zapisanych aktywacji Z. Brak komunikatu w raporcie nie oznacza, że wszystkie mechaniki zostały zweryfikowane. Stara Arena PvP offline została usunięta z UI; nie dokonano migracji ani usuwania zapisów użytkownika.

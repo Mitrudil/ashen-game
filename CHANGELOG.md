@@ -1,3 +1,10 @@
+## v0.4.9.16 — Jedno PvP online i diagnostyka Z w raportach
+- Usunięto z ekranu PvP przestarzałą Arenę offline wraz z fikcyjnym rankingiem, pojedynkami testowych Wędrowców, limitami lokalnymi i raportami `undefined`.
+- Usunięto nieużywany kod rozstrzygania offline PvP oraz lokalną historię wyników z interfejsu. Istniejące zapisane postacie i ich dane nie są modyfikowane.
+- Zachowano funkcję `pvpSnapshot` wymaganą do publikacji online oraz Laboratorium reguł PvP w `js/online.js`.
+- Publiczne i prywatne raporty PvP mają panel **Diagnostyka aktywacji Z — zapis serwera**. Zlicza wyłącznie komunikaty faktycznie znajdujące się w zdarzeniach rund; brak wpisu nie jest testem negatywnym.
+- Bez nowych SQL, zmian balansu i operacji na Supabase.
+
 ## v0.4.9.15 — Laboratorium reguł PvP i raporty
 - Lokalna, izolowana symulacja wzorów SQL 029 dla Wzmocnionego, Pancernego i Technicznego w zakładce PvP. Nie odpytuje Supabase, nie zapisuje ani nie ingeruje w zwykłe PvP.
 - Raport publiczny grupuje powtórzone ataki tej samej broni, zamiast sugerować kilka karabinów.
