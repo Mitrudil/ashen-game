@@ -127,9 +127,28 @@ function renderReport(r,side='attack'){
 function reportDialog(){if(!openedReport)return '';
  return `<div class="arena-report-overlay" data-online-report-overlay="1"><div class="arena-report-dialog" role="dialog" aria-modal="true" aria-label="Raport PvP online"><div class="arena-report-dialog-toolbar"><span>⚔ RAPORT STARCIA · PvP ONLINE</span><button type="button" data-online-close-report="1">✕ Wróć</button></div><div class="arena-report-dialog-scroll">${renderReport(openedReport,openedReportSide)}</div></div></div>`;
 }
+function onlineSetDiagnostic(){
+ if(!bound())return '';
+ let snapshot;
+ try{snapshot=window.ASHEN_GET_ONLINE_SNAPSHOT?.()}
+ catch(e){return `<div class="notice">Nie można sprawdzić setów: ${esc(msg(e))}</div>`}
+ if(!snapshot)return '<div class="notice">Brak migawki wyposażenia do synchronizacji.</div>';
+ const active=Array.isArray(snapshot.activeSets)?snapshot.activeSets:[];
+ const groups=active.reduce((t,s)=>{
+  const level=num(s.level);if(level>=1)t.X++;if(level>=2)t.Y++;if(level>=3)t.Z++;
+  return t;
+ },{X:0,Y:0,Z:0});
+ const rows=active.map(s=>`<li>${esc(s.id)} · ${esc(s.category)} · ${Math.max(0,Math.trunc(num(s.count)))} / 3 · jakość ${Math.max(0,Math.trunc(num(s.qualityPoints)))} · poziom ${esc(s.level)}</li>`).join('');
+ const syncState=syncing?'Trwa synchronizacja':activeRaw()===lastSynced&&!!lastSynced?'Lokalny zapis przesłany':'Oczekuje na synchronizację';
+ return `<details class="panel" style="margin:12px 0"><summary><strong>Diagnostyka setów online</strong> · ${active.length} aktywnych rodzin · ${esc(syncState)}</summary>
+ <p class="small muted">Migawka lokalnej postaci: silnik ${esc(snapshot.setEngineVersion||'nieznany')}. Aktywne rodziny z założonych elementów (nie z planera).</p>
+ ${rows?`<ul class="small">${rows}</ul>`:'<p class="small muted">Brak aktywnych pełnych setów.</p>'}
+ <p class="small">Aktywne poziomy setów w migawce: X ${groups.X}, Y ${groups.Y}, Z ${groups.Z}.</p>
+ <p class="small muted">To diagnostyka danych wysyłanych przez przeglądarkę, a nie potwierdzenie działania efektów na serwerze. Serwerowe PvP i Ekspedycje nadal ich nie rozliczają. Dane nie są jeszcze weryfikowane serwerowo.</p></details>`;
+}
 function pvpHtml(){
  const entries=opponents.map(p=>`<article class="pvp-choice"><img src="${p.origin==='tech'?'./assets/characters/technician-'+p.gender+'.webp':p.origin==='fighter'?'./assets/characters/warrior-'+p.gender+'.webp':'./assets/characters/scout-'+p.gender+'.webp'}" onerror="this.style.display='none'" alt=""><div><h4>${esc(p.name)}</h4><p class="small muted">Poziom ${p.level} · ${esc(p.origin)} · ostatni zapis ${fmt(p.updated_at)}</p><p>Ataki dziś: ${p.attacks_today}/2</p><button data-online-profile="${esc(p.user_id)}">Profil</button><button class="primary" data-online-attack="${esc(p.user_id)}" ${!bound()||busy||p.attacks_today>=2?'disabled':''}>⚔ Zaatakuj online</button></div></article>`).join('');
- return `<section class="section"><h2>🌐 PvP online — prawdziwe konta</h2><p class="small muted">Wyniki rozstrzyga Supabase (jeszcze bez mistrzostwa Z), limit dwóch ataków na każdą postać resetuje się o północy czasu polskiego. Nie trzeba być zalogowanym, aby zostać zaatakowanym. Lokalny tryb testowy znajduje się niżej.</p>${intro()}${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}<div class="actions"><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież graczy i raporty</button></div><h3>Przeciwnicy (${opponents.length})</h3><div class="pvp-choices">${!auth()?'<p>Połącz konto ASHEN.</p>':!loaded?'<p class="muted">Odśwież listę, aby zobaczyć graczy.</p>':entries||'<p class="muted">Brak innych opublikowanych kont. Do testu potrzebne jest drugie konto e-mail z własną postacią.</p>'}</div><h3>Raporty walk online</h3>${reports.length?reports.slice(0,15).map(x=>{const own=x.side==='attack'?'Atak':'Obrona',r=x.report||{};return `<button class="mail-row" data-online-report="${x.id}"><strong>${own}: ${esc(r.attacker?.name)} vs ${esc(r.defender?.name)}</strong><small>${fmt(x.created_at)}</small></button>`}).join(''):'<p class="muted">Nie stoczono jeszcze walk online.</p>'}</section>${reportDialog()}`;
+ return `<section class="section"><h2>🌐 PvP online — prawdziwe konta</h2><p class="small muted">Wyniki rozstrzyga Supabase (jeszcze bez mistrzostwa Z), limit dwóch ataków na każdą postać resetuje się o północy czasu polskiego. Nie trzeba być zalogowanym, aby zostać zaatakowanym. Lokalny tryb testowy znajduje się niżej.</p>${intro()}${onlineSetDiagnostic()}${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}<div class="actions"><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież graczy i raporty</button></div><h3>Przeciwnicy (${opponents.length})</h3><div class="pvp-choices">${!auth()?'<p>Połącz konto ASHEN.</p>':!loaded?'<p class="muted">Odśwież listę, aby zobaczyć graczy.</p>':entries||'<p class="muted">Brak innych opublikowanych kont. Do testu potrzebne jest drugie konto e-mail z własną postacią.</p>'}</div><h3>Raporty walk online</h3>${reports.length?reports.slice(0,15).map(x=>{const own=x.side==='attack'?'Atak':'Obrona',r=x.report||{};return `<button class="mail-row" data-online-report="${x.id}"><strong>${own}: ${esc(r.attacker?.name)} vs ${esc(r.defender?.name)}</strong><small>${fmt(x.created_at)}</small></button>`}).join(''):'<p class="muted">Nie stoczono jeszcze walk online.</p>'}</section>${reportDialog()}`;
 }
 function mailItemsForFolder(){
  const uid=cloud()?.getSession()?.user?.id;

@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.8.3';
+const APP_VERSION='0.4.8.4';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -676,7 +676,7 @@ function designedSetPreviewParts(parts,quality=0){
 }
 // ASHEN v0.4.8.0 — X + Y, jakości liczone punktowo i bez strat zaokrągleń.
 // Z pozostaje wyłącznie w Laboratorium; serwerowe Ekspedycje są osobnym silnikiem.
-const SET_ENGINE_VERSION='0.4.8.3';
+const SET_ENGINE_VERSION='0.4.8.4';
 const SET_ATTRIBUTE_KEYS=new Set(['str','dex','end','per','int','cha']);
 const EVOL_X_BASE={armor_reinforced:20,armor_plated:3,armor_flexible:3,armor_agile:2,
  armor_light:2,armor_resistant:2,armor_tracker:2,armor_iron:2,armor_warden:2,armor_nomad:2,
