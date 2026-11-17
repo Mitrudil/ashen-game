@@ -1,5 +1,12 @@
 # ASHEN — CHANGELOG
 
+## v0.4.9.23 — poprawka aktualizacji interfejsu i audytu
+- Audyt PvP jest stałym panelem: nie zamyka się podczas odświeżania raportów ani ponownego renderowania gry.
+- Przycisk „Kopiuj podsumowanie audytu” jest stale dostępny w zakładce PvP online.
+- Zmieniono identyfikator wersji i parametry cache skryptów z 0.4.9.22 na 0.4.9.23.
+- Zaktualizowano pozostałe opisy stanu SQL 029 w diagnostyce; SQL 034 działa już w produkcji.
+- Brak zmian SQL i mechaniki walki.
+
 ## v0.4.9.22 — audyt końcowy serwerowego PvP
 - Produkcyjny SQL 034 obsługuje 15/15 Mistrzostw Z (wdrożenie potwierdzone wcześniej w Supabase). Bez nowej migracji.
 - Panel audytu rozróżnia cztery wersje silnika SQL029/032/033/034, liczy wszystkie 15 zdolności i sygnalizuje oczywiste sprzeczności raportów.

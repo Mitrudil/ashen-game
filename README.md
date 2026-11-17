@@ -1,4 +1,4 @@
-# ASHEN v0.4.9.22 — audyt PvP po wdrożeniu SQL 034
+# ASHEN v0.4.9.23 — audyt PvP po wdrożeniu SQL 034
 
 **Wdrożony silnik: SQL 034, 15/15 Mistrzostw Z.** Ta aktualizacja GitHub nie wymaga żadnej migracji Supabase, nie zmienia mechaniki obrażeń ani limitów walk.
 
@@ -14,8 +14,12 @@
 ## Test praktyczny
 
 1. Wgraj paczkę GitHub; odśwież stronę (w razie potrzeby Ctrl+F5).
-2. Otwórz PvP online → odśwież graczy i raporty → rozwiń audyt.
+2. Otwórz PvP online → odśwież graczy i raporty → audyt jest już widoczny (nie trzeba go rozwijać).
 3. Skopiuj podsumowanie. Brak aktywacji konkretnego Z nie dowodzi awarii — muszą wystąpić właściwe warunki w prawdziwej walce.
 4. W Supabase uruchom osobno 035, 036, 037 i prześlij wyniki CSV. Każdy skrypt jest krótki (poniżej 95 linii) i służy tylko do odczytu.
 
 **Ograniczenia:** Panel widzi tylko historię zwracaną przez konto (`ashen_online_reports`) i nie powtarza serwerowego losowania; SQL czyta całą tabelę, ale nie zwraca nazw graczy, UUID ani treści raportów. Kontrole spójności są diagnostyczne, a nie pełnym matematycznym dowodem poprawności każdej walki. Model publikowania profilu pozostaje częściowo zależny od danych klienta.
+
+## Poprawka 0.4.9.23
+- Audyt nie zwija się podczas odświeżania. Przycisk kopiowania jest od razu widoczny.
+- Przy aktualizacji GitHub należy **nadpisać** także `index.html`, `js/game.js` i `js/online.js`. Sprawdź wersję w nagłówku strony oraz wykonaj Ctrl+F5.

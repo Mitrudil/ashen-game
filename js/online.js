@@ -203,7 +203,7 @@ function onlineSetDiagnostic(){
  <p class="small muted">Migawka lokalnej postaci: silnik ${esc(snapshot.setEngineVersion||'nieznany')}. Aktywne rodziny z założonych elementów (nie z planera).</p>
  ${rows?`<ul class="small">${rows}</ul>`:'<p class="small muted">Brak aktywnych pełnych setów.</p>'}
  <p class="small">Aktywne poziomy setów w migawce: X ${groups.X}, Y ${groups.Y}, Z ${groups.Z}.</p>
- <p class="small muted">To diagnostyka danych wysyłanych przez przeglądarkę, a nie potwierdzenie działania efektów na serwerze. PvP po wdrożeniu SQL 025 rozlicza część pasywnych premii X/Y. Po wdrożeniu SQL 029 PvP rozlicza sześć Mistrzostw Z. SQL 028 sprawdza spójność setów z zapisem chmurowym, lecz sam zapis może zostać zmodyfikowany przez klienta. Pozostałe Z i Ekspedycje jeszcze nie.</p></details>`;
+ <p class="small muted">To diagnostyka danych wysyłanych przez przeglądarkę, a nie potwierdzenie działania efektów na serwerze. PvP po wdrożeniu SQL 025 rozlicza część pasywnych premii X/Y. Aktualny SQL 034 rozlicza wszystkie piętnaście Mistrzostw Z. SQL 028 sprawdza spójność setów z zapisem chmurowym, lecz sam zapis może zostać zmodyfikowany przez klienta. Ekspedycje korzystają z odrębnego systemu walki.</p></details>`;
 }
 // PvP Z lab v0.4.9.15: controlled, client-only mirror of isolated SQL 029 formulas.
 // No network, no player snapshots, no storage, no effect on online attack counters.
@@ -248,7 +248,7 @@ function pvpZLabRun(family){
 function pvpZLabHtml(){
  const cases=[['reinforced','Wzmocniony'],['plated','Pancerny'],['technical','Techniczny']];
  const r=pvpZLabReport;
- return `<details class="panel section" id="ashen-pvp-z-lab" ${pvpZLabOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧪 Laboratorium reguł PvP · SQL 029 (bez walk online)</summary>
+ return `<details class="panel section" id="ashen-pvp-z-lab" ${pvpZLabOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧪 Laboratorium reguł PvP · próby lokalne (bez walk online)</summary>
  <p class="small muted">Izolowany test matematyki trzech zdolności Z według zasad SQL 029. <strong>To lokalne odwzorowanie wybranych reguł serwera, nie prawdziwa walka PvP ani test produkcyjnej funkcji.</strong> Nie wymaga przedmiotów, nie wysyła danych do Supabase, nie zużywa ataków i nie zapisuje wyniku.</p>
  <div class="actions" style="flex-wrap:wrap">${cases.map(([k,name])=>`<button type="button" data-pvp-zlab-select="${k}" class="${pvpZLabFamily===k?'primary':''}">${name}</button>`).join('')}</div>
  <div class="actions"><button class="primary" type="button" data-pvp-zlab-run="1">▶ Uruchom kontrolowaną próbę</button><button type="button" data-pvp-zlab-clear="1">Wyczyść wynik</button></div>
@@ -327,7 +327,7 @@ function serverZAuditRows(items){
  return {reportsCount,observed,counts,engines,flags:[...new Set(flags)],unsupported};
 }
 function serverZAuditText(d){
- return ['ASHEN — audyt zapisanych raportów PvP · v0.4.9.22',
+ return ['ASHEN — audyt zapisanych raportów PvP · v0.4.9.23',
   `Pobrane raporty: ${d.reportsCount}; zdarzenia Z: ${d.observed}; raporty innych/nieznanych silników: ${d.unsupported}`,
   'Silniki: '+[...d.engines].map(([k,v])=>`${k}: ${v}`).join(', '),
   ...SERVER_Z_FAMILIES.map(name=>`${name}: ${d.counts.get(name).events} aktywacji / ${d.counts.get(name).battles.size} raportów`),
@@ -338,14 +338,14 @@ function serverZAuditHtml(){
  const d=serverZAuditRows(reports);
  const rows=SERVER_Z_FAMILIES.map(name=>{const v=d.counts.get(name);return `<tr><th scope="row">${esc(name)}</th><td>${v.events}</td><td>${v.battles.size}</td></tr>`}).join('');
  const engineRows=[...d.engines].map(([engine,n])=>`<tr><td>${esc(SERVER_ENGINE_LABELS[engine]||'Inny/starszy silnik')}</td><td>${esc(engine)}</td><td>${n}</td></tr>`).join('');
- return `<details class="panel section" id="ashen-pvp-server-z-audit" style="margin-top:14px"><summary style="cursor:pointer;font-weight:700">📋 Audyt PvP · 15 Mistrzostw Z i spójność raportów</summary>
+ return `<section class="panel section" id="ashen-pvp-server-z-audit" style="margin-top:14px"><h3>📋 Audyt PvP · 15 Mistrzostw Z i spójność raportów</h3>
  <p class="small muted">Dane wyłącznie z raportów pobranych dla zalogowanego konta. To nie pełna historia bazy ani ponowna symulacja walk. Brak aktywacji nie oznacza błędu. Aktualny silnik SQL 034: XY-Z15-v0.4.9.21.</p>
  <p><strong>Raporty: ${d.reportsCount}</strong> · zdarzenia Z: <strong>${d.observed}</strong> · sygnały do sprawdzenia: <strong>${d.flags.length}</strong></p>
  <div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Silnik raportu</th><th>Znacznik</th><th>Raporty</th></tr></thead><tbody>${engineRows||'<tr><td colspan="3">Brak raportów</td></tr>'}</tbody></table></div>
  <div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Zdolność</th><th>Aktywacje</th><th>Raporty</th></tr></thead><tbody>${rows}</tbody></table></div>
  ${d.flags.length?`<details><summary>⚠ Sygnały wymagające kontroli (${d.flags.length})</summary>${d.flags.slice(0,30).map(t=>`<p class="small">${esc(t)}</p>`).join('')}${d.flags.length>30?'<p class="small muted">Wyświetlono pierwszych 30. Skopiuj raport, aby zobaczyć wszystkie.</p>':''}</details>`:'<p class="small muted">Nie wykryto oczywistych sprzeczności liczników, PŻ ani podstawowych limitów Z w pobranych raportach. To nie dowodzi pełnej poprawności obliczeń.</p>'}
  <div class="actions"><button type="button" data-online-copy-audit="1">📋 Kopiuj podsumowanie audytu</button></div>
- <p class="small muted">Dla pełnego audytu całej bazy uruchom oddzielny skrypt tylko do odczytu w Supabase. Nie potrzeba wykonywać ataków ani modyfikować danych.</p></details>`;
+ <p class="small muted">Dla pełnego audytu całej bazy uruchom oddzielny skrypt tylko do odczytu w Supabase. Nie potrzeba wykonywać ataków ani modyfikować danych.</p></section>`;
 }
 function pvpHtml(){
  const entries=opponents.map(p=>`<article class="pvp-choice"><img src="${p.origin==='tech'?'./assets/characters/tech-'+(p.gender==='female'?'f':'m')+'.webp':p.origin==='fighter'?'./assets/characters/fighter-'+(p.gender==='female'?'f':'m')+'.webp':'./assets/characters/scout-'+(p.gender==='female'?'f':'m')+'.webp'}" onerror="this.style.display='none'" alt=""><div><h4>${esc(p.name)}</h4><p class="small muted">Poziom ${p.level} · ${esc(p.origin)} · ostatni zapis ${fmt(p.updated_at)}</p><p>Ataki dziś: ${p.attacks_today}/2</p><button data-online-profile="${esc(p.user_id)}">Profil</button><button class="primary" data-online-attack="${esc(p.user_id)}" ${!bound()||busy||p.attacks_today>=2?'disabled':''}>⚔ Zaatakuj online</button></div></article>`).join('');

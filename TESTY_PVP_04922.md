@@ -13,3 +13,6 @@
 ## Weryfikacja bezpieczeństwa
 
 Nie uruchamiać podczas audytu produkcyjnych migracji ani testów z COMMIT; nie potrzeba zużywać limitów walk. Wynik „0 aktywacji” jest niejednoznaczny. Audyt nie wykrywa wszystkich oszustw i nie porównuje losowania w pełnych walkach.
+
+## Poprawka interfejsu v0.4.9.23
+Sprawdź numer 0.4.9.23, audyt widoczny bez rozwijania, przycisk kopiowania obecny, brak zamknięcia audytu po „Odśwież graczy i raporty” i po przełączaniu zakładek.
