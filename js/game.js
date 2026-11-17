@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.7.6';
+const APP_VERSION='0.4.7.7';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -695,11 +695,19 @@ function designedSetPreviewParts(parts,quality=0){
   return {id,name:cfg.name,role:cfg.role,description:cfg.description,count,max:cfg.maxPieces,active,effects};
  }).filter(Boolean);
 }
+// ASHEN v0.4.7.7: stan rozwiniętych paneli projektu jest niezależny od renderowania.
+// Katalog wewnątrz Planera nie może zamknąć się przy zmianie wyboru, przewijaniu
+// ani gdy odświeża się zawartość sekcji wyników.
+const SET_DESIGN_OPEN_KEY='ashen-set-design-open-v0477';
+let setDesignOpen=true;
+let setDesignCatalogOpen=false;
+try{const cached=JSON.parse(localStorage.getItem(SET_DESIGN_OPEN_KEY)||'null');if(cached){setDesignOpen=cached.preview!==false;setDesignCatalogOpen=cached.catalog===true}}catch{}
+function saveSetDesignOpen(){try{localStorage.setItem(SET_DESIGN_OPEN_KEY,JSON.stringify({preview:setDesignOpen,catalog:setDesignCatalogOpen}))}catch{}}
 function designedSetPreviewHtml(){
  const cloth=designedSetPreviewParts(setPlanner.clothing,setPlanner.quality);
  const acc=designedSetPreviewParts(setPlanner.accessories,setPlanner.quality);
  const fmt=(rows)=>rows.length?rows.map(r=>`<div style="padding:9px 0;border-bottom:1px solid var(--border,#333)"><strong>${escape(r.name)} · ${r.count}/${r.max} ${r.active?'✓':'—'}</strong><small style="display:block;opacity:.85">${escape(r.role)}</small><div style="margin-top:3px">${r.active?r.effects.map(e=>`${escape(SET_V05_LABELS[e.key]||e.key)} +${String(e.amount).replace('.',',')}`).join(' · '):'Brak premii (minimum 3 elementy)'}</div></div>`).join(''):'<p class="small muted">Nie wybrano żadnej rodziny.</p>';
- return `<details class="panel section" id="ashen-set-v05-design"><summary style="cursor:pointer;font-weight:700">🧭 Projekt ASHEN 0.5 — 15 unikalnych rodzin (podgląd)</summary><p class="small muted"><strong>TYLKO PROJEKT · nie wpływa na statystyki ani Starcia.</strong> Podgląd pokazuje robocze nowe premie dla aktualnego ustawienia Planera. Współczynniki jakości są testowe (celowo łagodniejsze od obecnego ×2,5). Wartości nie są jeszcze zatwierdzone.</p><h4>Odzież · progi 3/4/5/6</h4>${fmt(cloth)}<h4>Akcesoria · tylko 3/3</h4>${fmt(acc)}<details style="margin-top:12px"><summary style="cursor:pointer">Pełny katalog 10 + 5 rodzin</summary>${fmt(Object.entries(SET_V05_DESIGN.clothing).map(([id,cfg])=>({id,name:cfg.name,role:cfg.role,description:cfg.description,count:3,max:6,active:true,effects:[cfg.primary,cfg.secondary].map(e=>({key:e.stat,amount:e.at3}))})))}${fmt(Object.entries(SET_V05_DESIGN.accessories).map(([id,cfg])=>({id,name:cfg.name,role:cfg.role,description:cfg.description,count:3,max:3,active:true,effects:[cfg.primary,cfg.secondary].map(e=>({key:e.stat,amount:e.at3}))})))}</details></details>`;
+ return `<details class="panel section" id="ashen-set-v05-design" ${setDesignOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧭 Projekt ASHEN 0.5 — 15 unikalnych rodzin (podgląd)</summary><p class="small muted"><strong>TYLKO PROJEKT · nie wpływa na statystyki ani Starcia.</strong> Podgląd pokazuje robocze nowe premie dla aktualnego ustawienia Planera. Współczynniki jakości są testowe (celowo łagodniejsze od obecnego ×2,5). Wartości nie są jeszcze zatwierdzone.</p><h4>Odzież · progi 3/4/5/6</h4>${fmt(cloth)}<h4>Akcesoria · tylko 3/3</h4>${fmt(acc)}<details id="ashen-set-v05-catalog" ${setDesignCatalogOpen?'open':''} style="margin-top:12px"><summary style="cursor:pointer">Pełny katalog 10 + 5 rodzin</summary>${fmt(Object.entries(SET_V05_DESIGN.clothing).map(([id,cfg])=>({id,name:cfg.name,role:cfg.role,description:cfg.description,count:3,max:6,active:true,effects:[cfg.primary,cfg.secondary].map(e=>({key:e.stat,amount:e.at3}))})))}${fmt(Object.entries(SET_V05_DESIGN.accessories).map(([id,cfg])=>({id,name:cfg.name,role:cfg.role,description:cfg.description,count:3,max:3,active:true,effects:[cfg.primary,cfg.secondary].map(e=>({key:e.stat,amount:e.at3}))})))}</details></details>`;
 }
 
 function setPrefixId(inst){
@@ -954,7 +962,17 @@ function setPlannerPanel(){
  const field=(type,index,opts)=>`<label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem"><span>${type==='clothing'?slotLabels[['head','shirt','outer','hands','pants','boots'][index]]:`Akcesorium ${index+1}`}</span><select data-set-planner="${type}" data-set-slot="${index}" style="width:100%;min-width:0;padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${opts.map(([id,label])=>`<option value="${id}" ${(setPlanner[type][index]===id)?'selected':''}>${escape(label)}</option>`).join('')}</select></label>`;
  return `<details class="panel section" id="ashen-set-planner" ${setPlannerOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧩 Planer setów — porównaj 6+0 i 3+3 bez zdobywania przedmiotów</summary><p class="small muted">Symulator używa obecnych progów i premii setowych. Nie zmienia ekwipunku, statystyk ani zapisu postaci; zapamiętuje tylko wybór w tej przeglądarce.</p><div class="actions" style="margin:12px 0;flex-wrap:wrap"><button type="button" data-set-preset="full">6 × Wartownika</button><button type="button" data-set-preset="mixed">3 Wartownika + 3 Nomady</button><button type="button" data-set-preset="partial">4 Wartownika + 2 Nomady</button><button type="button" data-set-preset="clear">Wyczyść</button></div><label style="display:flex;align-items:center;gap:8px;margin-bottom:12px">Jakość wszystkich elementów (testowo): <select data-set-planner="quality" style="padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${rarities.map((r,i)=>`<option value="${i}" ${setPlanner.quality===i?'selected':''}>${escape(r.name)} · ×${setQuality({rarity:i}).toFixed(2)}</option>`).join('')}</select></label><h4>Odzież — sześć slotów</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.clothing.map((_,i)=>field('clothing',i,clothingOpts)).join('')}</div><h4>Akcesoria — trzy sloty</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.accessories.map((_,i)=>field('accessories',i,accessoryOpts)).join('')}</div><div id="ashen-set-planner-result" aria-live="polite">${plannerResultHtml()}${designedSetPreviewHtml()}${setCompareHtml()}${allSetsTestPanel()}</div></details>`;
 }
-function updateSetPlannerDisplay(){const target=document.getElementById('ashen-set-planner-result');if(target)target.innerHTML=plannerResultHtml()+designedSetPreviewHtml()+setCompareHtml()+allSetsTestPanel();}
+function updateSetPlannerDisplay(){
+ const target=document.getElementById('ashen-set-planner-result');
+ if(!target)return;
+ // Capture actual DOM state before replacing nested <details> nodes.
+ const preview=document.getElementById('ashen-set-v05-design');
+ const catalog=document.getElementById('ashen-set-v05-catalog');
+ if(preview)setDesignOpen=preview.open;
+ if(catalog)setDesignCatalogOpen=catalog.open;
+ saveSetDesignOpen();
+ target.innerHTML=plannerResultHtml()+designedSetPreviewHtml()+setCompareHtml()+allSetsTestPanel();
+}
 
 function characterSetsPanel(){
  const results=setResults();
@@ -3408,7 +3426,14 @@ if(b.dataset.equip!==undefined){
  }else state.equip[slot]=inst.uid;
  openItemDetail=null;message='Założono: '+statsOf(inst).name;save();render();return
 }if(b.dataset.action==='rename'){let name=prompt('Imię postaci (2–24 znaki):',state.name);if(name!==null&&name.trim().length>=2&&name.trim().length<=24){state.name=name.trim();save();render()}return}if(b.dataset.action==='heal'){if(state.scrap>=20&&state.hp<maxHp()){state.scrap-=20;message='Zdrowie przywrócone.';save();render()}return}if(b.dataset.action==='import'){$('ashen-import-file')?.click();return}if(b.dataset.action==='restore-backup'){restoreSaveBackup();return}if(b.dataset.action==='reset'){if(confirm('Rozpocząć nową grę? Bieżący postęp zostanie zastąpiony, ale zapiszemy jego kopię w tej przeglądarce.')){try{backupCurrentAndReplace(fresh());location.reload()}catch(err){message=err.message;render()}}return}if(b.dataset.action==='export'){exportSave();return}}
-document.addEventListener('toggle',e=>{if(e.target?.id==='ashen-set-planner')setPlannerOpen=e.target.open},true);
+document.addEventListener('toggle',e=>{
+ const t=e.target;
+ // Ignore toggle events from discarded nodes during innerHTML replacement.
+ if(!t?.isConnected)return;
+ if(t.id==='ashen-set-planner')setPlannerOpen=t.open;
+ if(t.id==='ashen-set-v05-design'){setDesignOpen=t.open;saveSetDesignOpen()}
+ if(t.id==='ashen-set-v05-catalog'){setDesignCatalogOpen=t.open;saveSetDesignOpen()}
+},true);
 document.addEventListener('change',e=>{
  const t=e.target;if(!t?.dataset?.setPlanner)return;
  const typ=t.dataset.setPlanner;
