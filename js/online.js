@@ -165,7 +165,7 @@ function renderReport(r,side='attack',isPublic=false){
  <section class="arena-combat-profile"><div class="arena-battle-section-title"><span>01 / PORÓWNANIE</span><h4>Statystyki przed walką</h4></div><div class="arena-fighter-portraits"><div class="arena-fighter-portrait is-hero">${portrait(fighters[0])}<strong>${esc(names[0])}</strong><small>${roles[0]} · Poziom ${esc(fighters[0].level??'—')}</small></div><span class="arena-fighter-versus">VS</span><div class="arena-fighter-portrait is-enemy">${portrait(fighters[1])}<strong>${esc(names[1])}</strong><small>${roles[1]} · Poziom ${esc(fighters[1].level??'—')}</small></div></div><div class="arena-combat-table-wrap"><table class="arena-combat-table arena-comparison-expanded"><thead><tr><th>Parametr</th><th>${esc(names[0])}${isPublic?' (Atakujący)':' (Ty)'}</th><th>${esc(names[1])}</th></tr></thead><tbody>${table}</tbody></table></div><p class="arena-profile-explainer">Kolory pokazują porównanie zapisanych parametrów z chwili walki. Obrażenia PvP nie powodują trwałej utraty PŻ ani wyposażenia.</p><div class="arena-profile-weapons"><strong>${isPublic?'Uzbrojenie atakującego:':'Twoje uzbrojenie:'}</strong> ${arms(fighters[0])}<div><strong>${isPublic?'Uzbrojenie obrońcy:':'Uzbrojenie przeciwnika:'}</strong> ${arms(fighters[1])}</div></div></section>
  <section class="arena-round-review"><div class="arena-battle-section-title"><span>02 / RUNDY</span><h4>Przebieg starcia</h4></div><div class="arena-rounds-list">${rounds||'<p class="muted">W tym raporcie nie zapisano przebiegu rund.</p>'}</div></section>
  ${zAudit}<section class="arena-battle-finale"><div class="arena-battle-section-title"><span>03 / WYNIK</span><h4>Podsumowanie starcia</h4></div><div class="arena-outcome-reason ${r.winner===null?'is-draw':''}"><strong>${esc(result)}</strong><p>${r.winner===null?'Po 10 rundach nie wyłoniono zwycięzcy.':`Wynik rozstrzygnął serwer. ${rnd.length} ${rnd.length===1?'runda':'rund'}.`}</p><div class="arena-final-hp"><div><span>${esc(names[0])} · PŻ po walce</span><strong>${hpLabel(hp[0],max[0])}</strong>${health(hp[0],max[0])}</div><div><span>${esc(names[1])} · PŻ po walce</span><strong>${hpLabel(hp[1],max[1])}</strong>${health(hp[1],max[1],true)}</div></div></div></section>
- <div class="ashen-damage-summary"><div class="ashen-damage-header"><strong>⚔ PODSUMOWANIE WALKI</strong><span>${rnd.length} ${rnd.length===1?'runda':'rund'}</span></div><div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Parametr</th><th>${isPublic?'Atakujący':'Twoja postać'}</th><th>${isPublic?'Obrońca':'Przeciwnik'}</th></tr></thead><tbody>${statrows}</tbody></table></div></div><div class="arena-report-reward"><strong>PvP online:</strong> bez nagród i bez utraty przedmiotów lub trwałego PŻ. <span class="small muted">Po wdrożeniu SQL 029 PvP obsługuje X/Y i sześć efektów Z (Przekonujący, Lekki, Wartowniczy, Wzmocniony, Pancerny, Techniczny); przed jego uruchomieniem obowiązuje dotychczasowy SQL 027. W starszych raportach obowiązują zasady z chwili walki.</span></div></div>`;
+ <div class="ashen-damage-summary"><div class="ashen-damage-header"><strong>⚔ PODSUMOWANIE WALKI</strong><span>${rnd.length} ${rnd.length===1?'runda':'rund'}</span></div><div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Parametr</th><th>${isPublic?'Atakujący':'Twoja postać'}</th><th>${isPublic?'Obrońca':'Przeciwnik'}</th></tr></thead><tbody>${statrows}</tbody></table></div></div><div class="arena-report-reward"><strong>PvP online:</strong> bez nagród i bez utraty przedmiotów lub trwałego PŻ. <span class="small muted">Silnik SQL 034 obsługuje X/Y i 15 Mistrzostw Z. Starsze raporty odzwierciedlają zasady z chwili walki.</span></div></div>`;
 }
 function reportDialog(){if(!openedReport)return '';
  const shareControls=openedBattleId?`<button type="button" data-online-share-report="1" ${shareBusy?'disabled':''}>${shareBusy?'Przygotowywanie…':'🔗 Kopiuj link'}</button><button type="button" data-online-native-share="1" ${shareBusy?'disabled':''}>↗ Udostępnij</button>`:'';
@@ -258,55 +258,98 @@ function pvpZLabHtml(){
 // Audyt wyłącznie zapisanych wyników RPC ashen_online_reports.
 // Brak zdarzeń Z nie oznacza niepowodzenia testu zdolności.
 const SERVER_Z_FAMILIES=[
- ['Przekonujący','master_accessory_persuasive'],
- ['Lekki','master_armor_light'],
- ['Wartowniczy','master_armor_warden'],
- ['Wzmocniony','master_armor_reinforced'],
- ['Pancerny','master_armor_plated'],
- ['Techniczny','master_accessory_technical']
+ 'Przekonujący','Lekki','Wartowniczy','Wzmocniony','Pancerny','Techniczny',
+ 'Zwinny','Żelazny','Spostrzegawczy','Elastyczny','Odporny','Refleksyjny',
+ 'Tropicielski','Nomadyczny','Wszechstronny'
 ];
+const SERVER_Z_ALIASES={'Wartownika':'Wartowniczy','Negocjatora':'Przekonujący','Technika':'Techniczny'};
+const SERVER_ENGINE_LABELS={
+ 'XY-Z6-v0.4.9.14':'SQL 029 · 6 Z',
+ 'XY-Z9-v0.4.9.19':'SQL 032 · 9 Z',
+ 'XY-Z12-v0.4.9.20':'SQL 033 · 12 Z',
+ 'XY-Z15-v0.4.9.21':'SQL 034 · 15 Z'
+};
 function serverZAuditRows(items){
- const current=items.filter(x=>x&&x.report&&x.report.setCombatMode==='XY-Z6-v0.4.9.14');
- const counts=new Map(SERVER_Z_FAMILIES.map(([name])=>[name,{events:0,battles:new Set(),limitIssues:0}]));
- let reportCount=0,observed=0,issues=[];
- for(const item of current){
-  const r=item.report;
+ const counts=new Map(SERVER_Z_FAMILIES.map(name=>[name,{events:0,battles:new Set()}]));
+ const engines=new Map(),flags=[],ids=new Set();
+ let reportsCount=0,observed=0,unsupported=0;
+ for(const item of (Array.isArray(items)?items:[])){
+  if(!item?.report||typeof item.report!=='object')continue;
+  const r=item.report,id=String(item.id??'brak-id'),engine=String(r.setCombatMode||'nieoznaczony');
+  reportsCount++;engines.set(engine,(engines.get(engine)||0)+1);
+  if(!SERVER_ENGINE_LABELS[engine])unsupported++;
+  if(ids.has(id))flags.push(`Powielony identyfikator raportu ${id}`);ids.add(id);
   const rounds=Array.isArray(r.rounds)?r.rounds:[];
-  const perHero=new Map();
-  reportCount++;
-  for(const rd of rounds){
-   for(const ev of (Array.isArray(rd.events)?rd.events:[])){
-    if(typeof ev!=='string'||!ev.includes('Mistrzostwo Z'))continue;
-    const match=ev.match(/^(.{1,40}?): Mistrzostwo Z\s*[—–-]\s*([^:]+):/);
-    if(!match)continue;
-    const combatant=match[1],family=match[2].trim();
-    const key=family==='Wartownika'?'Wartowniczy':family==='Negocjatora'?'Przekonujący':family==='Technika'?'Techniczny':family;
-    if(!counts.has(key))continue;
-    const obj=counts.get(key);obj.events++;obj.battles.add(item.id);observed++;
-    const grouping=key+'|'+combatant;perHero.set(grouping,(perHero.get(grouping)||0)+1);
+  if(rounds.length>10)flags.push(`Raport ${id}: ponad 10 rund`);
+  if(!Array.isArray(r.maxHp)||r.maxHp.length!==2||r.maxHp.some(x=>!Number.isFinite(Number(x))||Number(x)<=0)){
+   flags.push(`Raport ${id}: nieprawidłowe maksymalne PŻ`);
+  }
+  if(!Array.isArray(r.hp)||r.hp.length!==2||r.hp.some((x,i)=>!Number.isFinite(Number(x))||Number(x)<0||(Number(r.maxHp?.[i])>0&&Number(x)>Number(r.maxHp[i])))){
+   flags.push(`Raport ${id}: końcowe PŻ poza zakresem`);
+  }
+  const totals=Array.isArray(r.totals)?r.totals:[];
+  if(totals.length!==2)flags.push(`Raport ${id}: brak statystyk obu stron`);
+  for(const t of totals){
+   if(!t||typeof t!=='object')continue;
+   const attempts=Number(t.attempts),hits=Number(t.hits),misses=Number(t.misses),critical=Number(t.critical),damage=Number(t.damage);
+   if([attempts,hits,misses,critical,damage].some(x=>!Number.isFinite(x)||x<0)||hits>attempts||critical>hits||misses>attempts){
+    flags.push(`Raport ${id}: niespójne liczniki prób i trafień`);break;
    }
   }
-  for(const [group,n] of perHero){
-   const [family]=group.split('|');
-   const cap=family==='Techniczny'?2:['Wzmocniony','Pancerny','Wartowniczy'].includes(family)?1:null;
-   if(cap!==null&&n>cap){counts.get(family).limitIssues++;issues.push('Możliwe przekroczenie limitu '+family+' w jednym raporcie');}
+  const activations=new Map();
+  for(let k=0;k<rounds.length;k++){
+   const rd=rounds[k];if(!rd||Number(rd.number)!==k+1)flags.push(`Raport ${id}: numeracja rund wymaga sprawdzenia`);
+   const hp=rd?.hp;
+   if(!Array.isArray(hp)||hp.length!==2||hp.some((x,i)=>!Number.isFinite(Number(x))||Number(x)<0||(Number(r.maxHp?.[i])>0&&Number(x)>Number(r.maxHp[i]))))flags.push(`Raport ${id}, runda ${k+1}: PŻ poza zakresem`);
+   for(const ev of (Array.isArray(rd?.events)?rd.events:[])){
+    if(typeof ev!=='string'||!ev.includes('Mistrzostwo Z'))continue;
+    const m=ev.match(/^(.{1,40}?): Mistrzostwo Z\s*[—–-]\s*([^:]+):/);
+    if(!m)continue;
+    const family=SERVER_Z_ALIASES[m[2].trim()]||m[2].trim();
+    if(!counts.has(family))continue;
+    const cell=counts.get(family);cell.events++;cell.battles.add(id);observed++;
+    const key=m[1]+'|'+family,round=Number(rd.number);
+    if(!activations.has(key))activations.set(key,[]);
+    activations.get(key).push(round);
+   }
+  }
+  if(rounds.length&&Array.isArray(r.hp)&&Array.isArray(rounds.at(-1)?.hp)){
+   if(r.hp.some((x,i)=>Number(x)!==Number(rounds.at(-1).hp[i])))flags.push(`Raport ${id}: końcowe PŻ nie zgadza się z ostatnią rundą`);
+  }
+  if(r.winner!==null&&r.winner!==0&&r.winner!==1)flags.push(`Raport ${id}: nieznana wartość zwycięzcy`);
+  for(const [key,rs] of activations){
+   const family=key.split('|').at(-1),cap=family==='Techniczny'?2:['Wzmocniony','Pancerny','Wartowniczy','Odporny','Wszechstronny','Zwinny'].includes(family)?1:null;
+   if(cap!==null&&rs.length>cap)flags.push(`Raport ${id}: ${family} — ${rs.length} aktywacji (limit ${cap})`);
+   if(['Żelazny','Tropicielski','Nomadyczny','Elastyczny'].includes(family)&&rs.some((r,i)=>i>0&&r-rs[i-1]<3))flags.push(`Raport ${id}: ${family} — zbyt krótki odstęp`);
+   if(['Spostrzegawczy','Refleksyjny'].includes(family)&&new Set(rs).size!==rs.length)flags.push(`Raport ${id}: ${family} — powtórna aktywacja w rundzie`);
   }
  }
- return {reportCount,observed,counts,issues};
+ return {reportsCount,observed,counts,engines,flags:[...new Set(flags)],unsupported};
+}
+function serverZAuditText(d){
+ return ['ASHEN — audyt zapisanych raportów PvP · v0.4.9.22',
+  `Pobrane raporty: ${d.reportsCount}; zdarzenia Z: ${d.observed}; raporty innych/nieznanych silników: ${d.unsupported}`,
+  'Silniki: '+[...d.engines].map(([k,v])=>`${k}: ${v}`).join(', '),
+  ...SERVER_Z_FAMILIES.map(name=>`${name}: ${d.counts.get(name).events} aktywacji / ${d.counts.get(name).battles.size} raportów`),
+  `Sygnały do sprawdzenia: ${d.flags.length}`, ...d.flags,
+  'Wyniki pochodzą wyłącznie z raportów pobranych na konto; brak zdarzenia nie dowodzi błędu. Audyt nie odtwarza obrażeń cios po ciosie.'].join('\n');
 }
 function serverZAuditHtml(){
- const data=serverZAuditRows(reports);
- const rows=SERVER_Z_FAMILIES.map(([family])=>{const s=data.counts.get(family);return `<tr><th scope="row">${esc(family)}</th><td>${s.events}</td><td>${s.battles.size}</td><td>${s.limitIssues?'⚠ Sprawdź':'—'}</td></tr>`}).join('');
- return `<details class="panel section" id="ashen-pvp-server-z-audit" style="margin-top:14px"><summary style="cursor:pointer;font-weight:700">📋 Audyt rzeczywistych aktywacji Z · raporty Supabase</summary>
- <p class="small muted">Dane tylko z pobranych raportów oznaczonych silnikiem SQL 029 (XY-Z6-v0.4.9.14). Pokazują zaobserwowane zdarzenia, nie stanowią testu pełnej poprawności formuł. Raporty starszego silnika są pomijane. Lista raportów konta może być niepełna lub ograniczona.</p>
- <p><strong>Raporty SQL 029: ${data.reportCount}</strong> · zdarzenia Z: <strong>${data.observed}</strong></p>
- <div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Zdolność</th><th>Aktywacje</th><th>Raporty z aktywacją</th><th>Limit</th></tr></thead><tbody>${rows}</tbody></table></div>
- ${data.issues.length?`<p class="notice">⚠ ${esc(data.issues.join('; '))}. Sprawdź indywidualny raport i przebieg rund.</p>`:'<p class="small muted">Nie wykryto przekroczenia kontrolowanych limitów w znalezionych wpisach. Dla niektórych zdolności nie ma tu limitu liczbowego.</p>'}
- <p class="small muted">0 aktywacji nie oznacza, że zdolność jest niesprawna — może nie być założonego setu, warunek mógł nie wystąpić albo raportu nie ma na liście.</p></details>`;
+ const d=serverZAuditRows(reports);
+ const rows=SERVER_Z_FAMILIES.map(name=>{const v=d.counts.get(name);return `<tr><th scope="row">${esc(name)}</th><td>${v.events}</td><td>${v.battles.size}</td></tr>`}).join('');
+ const engineRows=[...d.engines].map(([engine,n])=>`<tr><td>${esc(SERVER_ENGINE_LABELS[engine]||'Inny/starszy silnik')}</td><td>${esc(engine)}</td><td>${n}</td></tr>`).join('');
+ return `<details class="panel section" id="ashen-pvp-server-z-audit" style="margin-top:14px"><summary style="cursor:pointer;font-weight:700">📋 Audyt PvP · 15 Mistrzostw Z i spójność raportów</summary>
+ <p class="small muted">Dane wyłącznie z raportów pobranych dla zalogowanego konta. To nie pełna historia bazy ani ponowna symulacja walk. Brak aktywacji nie oznacza błędu. Aktualny silnik SQL 034: XY-Z15-v0.4.9.21.</p>
+ <p><strong>Raporty: ${d.reportsCount}</strong> · zdarzenia Z: <strong>${d.observed}</strong> · sygnały do sprawdzenia: <strong>${d.flags.length}</strong></p>
+ <div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Silnik raportu</th><th>Znacznik</th><th>Raporty</th></tr></thead><tbody>${engineRows||'<tr><td colspan="3">Brak raportów</td></tr>'}</tbody></table></div>
+ <div class="ashen-damage-table-wrap"><table class="ashen-damage-table"><thead><tr><th>Zdolność</th><th>Aktywacje</th><th>Raporty</th></tr></thead><tbody>${rows}</tbody></table></div>
+ ${d.flags.length?`<details><summary>⚠ Sygnały wymagające kontroli (${d.flags.length})</summary>${d.flags.slice(0,30).map(t=>`<p class="small">${esc(t)}</p>`).join('')}${d.flags.length>30?'<p class="small muted">Wyświetlono pierwszych 30. Skopiuj raport, aby zobaczyć wszystkie.</p>':''}</details>`:'<p class="small muted">Nie wykryto oczywistych sprzeczności liczników, PŻ ani podstawowych limitów Z w pobranych raportach. To nie dowodzi pełnej poprawności obliczeń.</p>'}
+ <div class="actions"><button type="button" data-online-copy-audit="1">📋 Kopiuj podsumowanie audytu</button></div>
+ <p class="small muted">Dla pełnego audytu całej bazy uruchom oddzielny skrypt tylko do odczytu w Supabase. Nie potrzeba wykonywać ataków ani modyfikować danych.</p></details>`;
 }
 function pvpHtml(){
  const entries=opponents.map(p=>`<article class="pvp-choice"><img src="${p.origin==='tech'?'./assets/characters/tech-'+(p.gender==='female'?'f':'m')+'.webp':p.origin==='fighter'?'./assets/characters/fighter-'+(p.gender==='female'?'f':'m')+'.webp':'./assets/characters/scout-'+(p.gender==='female'?'f':'m')+'.webp'}" onerror="this.style.display='none'" alt=""><div><h4>${esc(p.name)}</h4><p class="small muted">Poziom ${p.level} · ${esc(p.origin)} · ostatni zapis ${fmt(p.updated_at)}</p><p>Ataki dziś: ${p.attacks_today}/2</p><button data-online-profile="${esc(p.user_id)}">Profil</button><button class="primary" data-online-attack="${esc(p.user_id)}" ${!bound()||busy||p.attacks_today>=2?'disabled':''}>⚔ Zaatakuj online</button></div></article>`).join('');
- return `<section class="section"><h2>🌐 PvP online — prawdziwe konta</h2><div class="notice" role="note"><strong>Stan silnika serwerowego:</strong> po wdrożeniu SQL 029 działa 6/15 zdolności Z — Przekonujący, Lekki, Wartowniczy, Wzmocniony, Pancerny, Techniczny; przed wdrożeniem obowiązuje SQL 027 (3/15). Pozostałe 9 działa jedynie lokalnie. SQL 028 kontroluje spójność deklaracji z zapisem chmurowym, lecz nie zapewnia pełnego anty-cheat.</div><p class="small muted">Wyniki rozstrzyga Supabase (X/Y: SQL 025; pierwsze trzy Z: SQL 027; kolejne trzy Z: SQL 029 (po osobnym wdrożeniu)), limit dwóch ataków na każdą postać resetuje się o północy czasu polskiego. Nie trzeba być zalogowanym, aby zostać zaatakowanym. Laboratorium reguł znajduje się w tym panelu i nie wykonuje rzeczywistych ataków.</p>${intro()}${pvpZLabHtml()}${serverZAuditHtml()}${onlineSetDiagnostic()}${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}<div class="actions"><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież graczy i raporty</button></div><h3>Przeciwnicy (${opponents.length})</h3><div class="pvp-choices">${!auth()?'<p>Połącz konto ASHEN.</p>':!loaded?'<p class="muted">Odśwież listę, aby zobaczyć graczy.</p>':entries||'<p class="muted">Brak innych opublikowanych kont. Do testu potrzebne jest drugie konto e-mail z własną postacią.</p>'}</div><h3>Raporty walk online</h3>${reports.length?reports.slice(0,40).map(x=>{const own=x.side==='attack'?'Atak':'Obrona',r=x.report||{};return `<button class="mail-row" data-online-report="${x.id}"><strong>${own}: ${esc(r.attacker?.name)} vs ${esc(r.defender?.name)}</strong><small>${fmt(x.created_at)}</small></button>`}).join(''):'<p class="muted">Nie stoczono jeszcze walk online.</p>'}</section>${reportDialog()}`;
+ return `<section class="section"><h2>🌐 PvP online — prawdziwe konta</h2><div class="notice" role="note"><strong>Stan silnika serwerowego:</strong> wdrożono SQL 034 — obsługa 15/15 Mistrzostw Z. Kontrola SQL 028 sprawdza zgodność deklaracji zestawu z zapisanym ekwipunkiem, ale sam zapis chmurowy nadal nie zapewnia pełnej ochrony przed manipulacją danymi klienta.</div><p class="small muted">Wyniki rozstrzyga Supabase (SQL 034, 15 Mistrzostw Z). Limit dwóch ataków na każdą postać resetuje się o północy czasu polskiego. Nie trzeba być zalogowanym, aby zostać zaatakowanym. Laboratorium reguł znajduje się w tym panelu i nie wykonuje rzeczywistych ataków.</p>${intro()}${pvpZLabHtml()}${serverZAuditHtml()}${onlineSetDiagnostic()}${error?`<div class="notice">${esc(error)}</div>`:''}${notice?`<div class="notice">${esc(notice)}</div>`:''}<div class="actions"><button data-online-refresh="1" ${busy?'disabled':''}>↻ Odśwież graczy i raporty</button></div><h3>Przeciwnicy (${opponents.length})</h3><div class="pvp-choices">${!auth()?'<p>Połącz konto ASHEN.</p>':!loaded?'<p class="muted">Odśwież listę, aby zobaczyć graczy.</p>':entries||'<p class="muted">Brak innych opublikowanych kont. Do testu potrzebne jest drugie konto e-mail z własną postacią.</p>'}</div><h3>Raporty walk online</h3>${reports.length?reports.slice(0,40).map(x=>{const own=x.side==='attack'?'Atak':'Obrona',r=x.report||{};return `<button class="mail-row" data-online-report="${x.id}"><strong>${own}: ${esc(r.attacker?.name)} vs ${esc(r.defender?.name)}</strong><small>${fmt(x.created_at)}</small></button>`}).join(''):'<p class="muted">Nie stoczono jeszcze walk online.</p>'}</section>${reportDialog()}`;
 }
 function mailItemsForFolder(){
  const uid=cloud()?.getSession()?.user?.id;
@@ -364,6 +407,7 @@ document.addEventListener('click',async e=>{
  if(b.dataset.pvpZlabSelect){pvpZLabOpen=true;pvpZLabFamily=b.dataset.pvpZlabSelect;pvpZLabReport=null;draw();return}
  if(b.hasAttribute('data-pvp-zlab-run')){pvpZLabOpen=true;pvpZLabReport=pvpZLabRun(pvpZLabFamily);draw();return}
  if(b.hasAttribute('data-pvp-zlab-clear')){pvpZLabOpen=true;pvpZLabReport=null;draw();return}
+ if(b.hasAttribute('data-online-copy-audit')){e.preventDefault();const t=serverZAuditText(serverZAuditRows(reports));if(navigator.clipboard?.writeText){try{await navigator.clipboard.writeText(t);notice='Podsumowanie audytu skopiowane.';draw()}catch{window.prompt('Skopiuj audyt:',t)}}else window.prompt('Skopiuj audyt:',t);return}
  if(b.hasAttribute('data-online-refresh')){e.preventDefault();await refresh();return}
  if(b.hasAttribute('data-online-share-report')){e.preventDefault();await shareCurrentReport(false);return}
  if(b.hasAttribute('data-online-native-share')){e.preventDefault();await shareCurrentReport(true);return}

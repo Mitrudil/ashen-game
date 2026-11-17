@@ -1,5 +1,13 @@
 # ASHEN — CHANGELOG
 
+## v0.4.9.22 — audyt końcowy serwerowego PvP
+- Produkcyjny SQL 034 obsługuje 15/15 Mistrzostw Z (wdrożenie potwierdzone wcześniej w Supabase). Bez nowej migracji.
+- Panel audytu rozróżnia cztery wersje silnika SQL029/032/033/034, liczy wszystkie 15 zdolności i sygnalizuje oczywiste sprzeczności raportów.
+- Dodano kopiowanie podsumowania oraz trzy krótkie zapytania wyłącznie SELECT do audytu całej tabeli Supabase.
+- Poprawiono przestarzałe opisy SQL 029/033 w PvP, raportach i Laboratorium.
+- Audyt nie jest dowodem pełnej poprawności obliczeń ani zabezpieczeniem anty-cheat.
+
+
 ## v0.4.9.21
 - SQL034: kandydat trzech ostatnich Mistrzostw Z (Tropicielski, Nomadyczny, Wszechstronny) na podstawie wdrożonego SQL033.
 - Uwzględniona produkcyjna poprawka statystyk `totals.damage` obu uczestników.

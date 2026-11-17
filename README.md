@@ -1,17 +1,21 @@
-# ASHEN v0.4.9.21 — ostatnie trzy Mistrzostwa Z
+# ASHEN v0.4.9.22 — audyt PvP po wdrożeniu SQL 034
 
-**SQL033 jest produkcyjny (12/15); SQL034 jest kandydatem, NIE wdrażać!**
+**Wdrożony silnik: SQL 034, 15/15 Mistrzostw Z.** Ta aktualizacja GitHub nie wymaga żadnej migracji Supabase, nie zmienia mechaniki obrażeń ani limitów walk.
 
-Nowe serwerowe mechaniki (zachowujące reguły gry lokalnej):
-- Tropicielski: normalne celne trafienie oznacza cel; późniejszy krytyk z oznaczeniem +10%, z przerwą co najmniej 3 rund.
-- Nomadyczny: po utracie co najmniej 20% maksymalnego PŻ w rundzie, następne celne trafienie +10%, przerwa co najmniej 3 rundy.
-- Wszechstronny: po utracie co najmniej 25% maksymalnego PŻ w rundzie jednorazowa osłona 10% maksymalnego PŻ; chroni dopiero następne trafienia.
+## Co nowego
 
-## Co zrobić teraz
-1. Opcjonalnie wgrać paczkę GitHub v0.4.9.21 (zmienia numer i komunikat Laboratorium, nie zmienia produkcyjnego PvP).
-2. W Supabase uruchomić `sql/034_KONTROLA_PRZED_TESTEM_READONLY.sql`.
-3. Zachować kopię `pg_get_functiondef('public.ashen_online_attack(uuid)'::regprocedure)`.
-4. Uruchomić **w jednym zapytaniu** wszystkie części `034_TEST_KOMPILACJI...`, od początku `BEGIN;` do końca `ROLLBACK;`.
-5. Przesłać wynik. Dopiero potem izolowany test obliczeń i niezależnie sprawdzane wdrożenie produkcyjne.
+- Panel PvP → **Audyt PvP · 15 Mistrzostw Z i spójność raportów**: liczba raportów per wersja serwera, 15 rodzin, podstawowe sprawdzenie PŻ, statystyk i limitów zdolności.
+- Przycisk **Kopiuj podsumowanie audytu**, który przekazuje wyłącznie dane z raportów pobranych przez aktualnie zalogowane konto.
+- Trzy zapytania SQL do osobnego uruchomienia w Supabase SQL Editor (wyłącznie SELECT, bez funkcji i zapisu):
+  - `sql/035_AUDYT_PVP_SILNIKI_READONLY.sql` — liczba raportów z podziałem na wersje.
+  - `sql/036_AUDYT_PVP_AKTYWACJE_READONLY.sql` — rzeczywiście zapisane aktywacje wszystkich rodzin Z.
+  - `sql/037_AUDYT_PVP_SPÓJNOŚĆ_READONLY.sql` — zagregowane sygnały braków i niespójności.
 
-Uwaga: 20 kontroli tekstowych potwierdza obecność implementacji, nie poprawność rachunków.
+## Test praktyczny
+
+1. Wgraj paczkę GitHub; odśwież stronę (w razie potrzeby Ctrl+F5).
+2. Otwórz PvP online → odśwież graczy i raporty → rozwiń audyt.
+3. Skopiuj podsumowanie. Brak aktywacji konkretnego Z nie dowodzi awarii — muszą wystąpić właściwe warunki w prawdziwej walce.
+4. W Supabase uruchom osobno 035, 036, 037 i prześlij wyniki CSV. Każdy skrypt jest krótki (poniżej 95 linii) i służy tylko do odczytu.
+
+**Ograniczenia:** Panel widzi tylko historię zwracaną przez konto (`ashen_online_reports`) i nie powtarza serwerowego losowania; SQL czyta całą tabelę, ale nie zwraca nazw graczy, UUID ani treści raportów. Kontrole spójności są diagnostyczne, a nie pełnym matematycznym dowodem poprawności każdej walki. Model publikowania profilu pozostaje częściowo zależny od danych klienta.
