@@ -1,3 +1,12 @@
+# ASHEN — CHANGELOG
+
+## v0.4.9.21
+- SQL034: kandydat trzech ostatnich Mistrzostw Z (Tropicielski, Nomadyczny, Wszechstronny) na podstawie wdrożonego SQL033.
+- Uwzględniona produkcyjna poprawka statystyk `totals.damage` obu uczestników.
+- Dołączony izolowany test kompilacji (BEGIN/ROLLBACK) w krótkich fragmentach.
+- Numer wersji i komunikat Laboratorium zaktualizowane do stanu SQL033 12/15.
+- Żadna migracja serwerowa nie została wykonana przez ten pakiet.
+
 ## v0.4.9.20 — kandydat SQL033: Elastyczny, Odporny, Refleksyjny
 
 - SQL033 dodaje trzy efekty PvP ponad SQL032, zachowuje poprzednie 9 Z, wiadomości, raporty i limit ataków.

@@ -1,13 +1,17 @@
-# ASHEN v0.4.9.20 — etap 4 Mistrzostw Z
+# ASHEN v0.4.9.21 — ostatnie trzy Mistrzostwa Z
 
-W Supabase działa SQL032 (9/15 Z). **SQL033 to kandydat, nie wdrożenie**.
-Nowe serwerowe umiejętności do sprawdzenia: Elastyczny, Odporny i Refleksyjny.
+**SQL033 jest produkcyjny (12/15); SQL034 jest kandydatem, NIE wdrażać!**
 
-## Bezpieczna kolejność
-1. Wgraj aktualizację GitHub (nie zmienia Supabase).
-2. Uruchom `sql/033_KONTROLA_PRZED_TESTEM_READONLY.sql` i potwierdź SQL032.
-3. Wykonaj kopię `SELECT pg_get_functiondef('public.ashen_online_attack(uuid)'::regprocedure);`.
-4. Uruchom **pełny** `sql/033_TEST_KOMPILACJI_BEZ_WDROZENIA.sql`. Plik zawiera `BEGIN;` i `ROLLBACK;`, nie zapisuje zmian. Długie zapytanie możesz wkleić kolejno z podzielonych plików, nie uruchamiaj ich osobno.
-5. Podeślij wynik testu. Nie uruchamiaj kandydata produkcyjnie przed izolowanymi testami obliczeń i przeglądem.
+Nowe serwerowe mechaniki (zachowujące reguły gry lokalnej):
+- Tropicielski: normalne celne trafienie oznacza cel; późniejszy krytyk z oznaczeniem +10%, z przerwą co najmniej 3 rund.
+- Nomadyczny: po utracie co najmniej 20% maksymalnego PŻ w rundzie, następne celne trafienie +10%, przerwa co najmniej 3 rundy.
+- Wszechstronny: po utracie co najmniej 25% maksymalnego PŻ w rundzie jednorazowa osłona 10% maksymalnego PŻ; chroni dopiero następne trafienia.
 
-Uwaga: kontrola kompilacji/obecności mechanik nie dowodzi poprawności obliczeń ani zachowania we wszystkich walkach.
+## Co zrobić teraz
+1. Opcjonalnie wgrać paczkę GitHub v0.4.9.21 (zmienia numer i komunikat Laboratorium, nie zmienia produkcyjnego PvP).
+2. W Supabase uruchomić `sql/034_KONTROLA_PRZED_TESTEM_READONLY.sql`.
+3. Zachować kopię `pg_get_functiondef('public.ashen_online_attack(uuid)'::regprocedure)`.
+4. Uruchomić **w jednym zapytaniu** wszystkie części `034_TEST_KOMPILACJI...`, od początku `BEGIN;` do końca `ROLLBACK;`.
+5. Przesłać wynik. Dopiero potem izolowany test obliczeń i niezależnie sprawdzane wdrożenie produkcyjne.
+
+Uwaga: 20 kontroli tekstowych potwierdza obecność implementacji, nie poprawność rachunków.
