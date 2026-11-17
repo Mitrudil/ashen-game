@@ -1,4 +1,4 @@
-const APP_VERSION='0.4.7.4';
+const APP_VERSION='0.4.7.5';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -768,7 +768,7 @@ function plannerResultHtml(){
  const extras=r.accessories.length?r.accessories.map(v=>`<div class="ashen-set-member"><span>${escape(v.name)} · ${v.count}/3</span><strong>${v.active?escape(accessoryBonusText(v.bonus)):'Brak premii (wymagane 3/3)'}</strong></div>`).join(''):'<div class="small muted">Brak akcesoriów z rodziny setowej.</div>';
  return `<div class="ashen-sets-grid"><article class="ashen-set-card"><strong>Sety ubioru</strong><div class="ashen-set-members">${cloth}</div></article><article class="ashen-set-card"><strong>Sety akcesoriów</strong><div class="ashen-set-members">${extras}</div></article></div><p class="small muted" style="margin:10px 0 0">Jakość: ×${r.avg.toFixed(2).replace('.',',')} · Liczymy dokładnie jak w aktualnym ekwipunku. Indywidualne premie przedmiotów nie są tu uwzględnione.</p>`;
 }
-// ASHEN v0.4.7.4 — analiza premii setowych w prawdziwym lokalnym fight().
+// ASHEN v0.4.7.5 — analiza premii setowych w prawdziwym lokalnym fight().
 // Nie dotykamy state.equip ani state.inventory: zmieniamy wylacznie testSnapshot.
 const SET_COMPARE_KEY='ashen-set-compare-v0474';
 let setCompareStage=20,setCompareResults=null;
@@ -848,13 +848,90 @@ function setCompareHtml(){
  const table=result?`<div style="overflow-x:auto"><table style="width:100%;font-size:.8rem;white-space:nowrap"><thead><tr><th>Wariant</th><th>Premie</th><th>PŻ max.</th><th>Pancerz</th><th>Potencjał/rundę</th><th>Wygrane</th><th>Śr. runda zwycięstwa</th><th>PŻ po walce</th></tr></thead><tbody>${result.rows.map(r=>`<tr><td>${escape(r.name)}</td><td>${escape(accessoryBonusText(r.bonus)||'—')}${r.armorPct?` · Pancerz +${r.armorPct}%`:''}</td><td>${r.hp}</td><td>${r.armor}</td><td>${formatted(r.potential)}</td><td>${formatted(r.wins)}%</td><td>${r.winRound===null?'—':formatted(r.winRound)}</td><td>${formatted(r.hpRemain)}</td></tr>`).join('')}</tbody></table></div><p class="small muted">Ostatni raport: etap ${result.stage}, jakość ${escape(rarities[result.quality]?.name||'—')}, po 300 walk dla każdego zestawu. Te same losowania we wszystkich wariantach.</p>`:'<p class="small muted">Uruchom porównanie, aby zobaczyć wpływ premii setowych na lokalny silnik Starć.</p>';
  return `<div class="panel" style="padding:14px;margin-top:16px"><h4>⚔ Porównanie setów w Starciach · ASHEN 0.4.7.4</h4><p class="small muted">Cztery warianty premii setowych, bez zdobywania przedmiotów. Korzystamy z Twojej postaci i aktualnie założonej broni. Indywidualne statystyki i pancerz aktualnie założonych ubrań pozostają takie same w każdym wariancie; zamieniamy WYŁĄCZNIE premie setowe. Akcesoria w każdym wariancie odpowiadają konfiguracji z Planera. Wyniki nie dotyczą Ekspedycji serwerowych.</p><div class="actions" style="align-items:center;flex-wrap:wrap;margin-bottom:10px"><label>Przeciwnik <select id="ashen-set-compare-stage" style="padding:7px;background:var(--panel,#171e27);color:inherit"><option value="10" ${setCompareStage===10?'selected':''}>Boss etap 10</option><option value="20" ${setCompareStage===20?'selected':''}>Boss etap 20</option></select></label><button type="button" data-set-compare="run">Porównaj 4 zestawy · 1200 walk</button><button type="button" data-set-compare="clear">Wyczyść raport</button></div>${table}<p class="small muted">Warianty nie zastępują realnie ubrań, więc nie porównują ich pancerza, indywidualnych prefiksów ani sufiksów. Test obejmuje tylko wpływ skumulowanych premii zestawowych oraz atrybutów na walkę.</p></div>`;
 }
+// ASHEN v0.4.7.5 — pelna macierz rodzin setowych (10 odziezowych, 5 akcesoriow).
+// Tylko premie zestawowe; porownanie ze wspolnymi seedami, bez zmian ekwipunku.
+const ALL_SETS_TEST_KEY='ashen-all-sets-v0475';
+let allSetsTestReport=null,allSetsTestRunning=false,allSetsTestStatus='',allSetsTestStage=20;
+try{const saved=JSON.parse(localStorage.getItem(ALL_SETS_TEST_KEY)||'null');if(saved?.version===1&&Array.isArray(saved.rows)){allSetsTestReport=saved;allSetsTestStage=saved.stage===10?10:20;}}catch{}
+function allSetsScenarios(){
+ const ids=Object.keys(SETS),accessoryIds=Object.keys(ACCESSORY_SETS);
+ const result=[{type:'kontrola',name:'Bez premii setowych',clothing:[],accessories:[]}];
+ for(const id of ids)result.push({type:'6/6',name:`6× ${SETS[id].name}`,clothing:Array(6).fill(id),accessories:[]});
+ for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++)result.push({type:'3+3',name:`3× ${SETS[ids[i]].name} + 3× ${SETS[ids[j]].name}`,clothing:[...Array(3).fill(ids[i]),...Array(3).fill(ids[j])],accessories:[]});
+ for(const id of accessoryIds)result.push({type:'akcesoria 3/3',name:`3× ${ACCESSORY_SETS[id].name}`,clothing:[],accessories:Array(3).fill(id)});
+ return result;
+}
+function allSetsTestProfile(scenario,quality){
+ return plannerBonusProfile({clothing:scenario.clothing,accessories:scenario.accessories,quality});
+}
+function allSetsDefense(neutral,currentDefense,profile){
+ const a={...neutral};for(const [key,val] of Object.entries(profile.attributes))a[key]=(a[key]||0)+val;
+ const raw=currentDefense.rawArmor;
+ const defense={...currentDefense,hp:Math.round((60+a.end*10)*(1+.025*(roomLevel('infirmary')-1))),acc:6+a.per*1.3,dodge:3+a.dex*1.1+currentDefense.pet,armor:raw+Math.round(raw*profile.armorPct/100)+Math.floor(a.end/4)+currentDefense.pet,setArmor:profile.armorPct};
+ return {a,defense};
+}
+function allSetsTestTable(rows,heading){
+ const f=n=>Number(n).toFixed(1).replace('.',',');
+ return `<h5 style="margin:14px 0 7px">${heading}</h5><div style="overflow-x:auto"><table style="width:100%;font-size:.78rem;white-space:nowrap"><thead><tr><th>Rodzina / połączenie</th><th>Premie</th><th>PŻ</th><th>Pancerz</th><th>Obrażenia/r.</th><th>Wygrane</th><th>Runda wygranej</th><th>PŻ po walce</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${escape(r.name)}</td><td>${escape(r.bonusText)}</td><td>${r.hp}</td><td>${r.armor}</td><td>${f(r.potential)}</td><td>${f(r.wins)}%</td><td>${r.winRound===null?'—':f(r.winRound)}</td><td>${f(r.hpRemain)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function allSetsTestSummary(){
+ if(!allSetsTestReport)return '<p class="small muted">Uruchom zbiorczy test, aby porównać wszystkie rodziny.</p>';
+ const r=allSetsTestReport,groups=[['6/6','Pełne sety odzieży'],['3+3','Mieszane sety odzieży'],['akcesoria 3/3','Pełne sety akcesoriów']];
+ const qualityTitle=q=>escape(rarities[q]?.name||String(q));
+ return `<div class="small muted" style="margin:10px 0">Boss etap ${r.stage} · ${r.samples} prób na konfigurację · wspólne losowania · ${r.rows.length} wierszy · ${r.totalFights.toLocaleString('pl-PL')} walk. Testowane jakości: zwykła i legendarna.</div>${[0,4].map(q=>`<h4 style="margin-top:18px">Jakość ${qualityTitle(q)}</h4>${groups.map(([type,title])=>allSetsTestTable(r.rows.filter(x=>x.quality===q&&x.type===type),title)).join('')}`).join('')}`;
+}
+function allSetsTestPanel(){
+ const n=allSetsScenarios().length;
+ return `<div class="panel" style="padding:14px;margin-top:16px" id="ashen-all-sets-panel"><h4>🧪 Wszystkie sety — kontrola jakości · ASHEN 0.4.7.5</h4><p class="small muted">Test obejmuje wszystkie ${Object.keys(SETS).length} rodzin odzieży (pełne 6/6), wszystkie ${Object.keys(SETS).length*(Object.keys(SETS).length-1)/2} pary 3+3 i wszystkie ${Object.keys(ACCESSORY_SETS).length} rodziny akcesoriów 3/3. W każdym wariancie porównuje zwykłą i legendarną jakość. Osobno bada sety odzieży i akcesoria; nie zakłada fikcyjnych przedmiotów.</p><div class="actions" style="align-items:center;flex-wrap:wrap"><label>Boss <select id="ashen-all-sets-stage" style="padding:7px;background:var(--panel,#171e27);color:inherit"><option value="10" ${allSetsTestStage===10?'selected':''}>Etap 10</option><option value="20" ${allSetsTestStage!==10?'selected':''}>Etap 20</option></select></label><button data-all-sets="run" ${allSetsTestRunning?'disabled':''}>${allSetsTestRunning?'Test trwa…':`Przetestuj wszystkie rodziny (${n*2*80} walk)`}</button><button data-all-sets="copy" ${!allSetsTestReport?'disabled':''}>Kopiuj raport</button><button data-all-sets="clear" ${allSetsTestRunning?'disabled':''}>Wyczyść</button></div><p id="ashen-all-sets-progress" class="small muted" aria-live="polite">${escape(allSetsTestStatus)}</p><div id="ashen-all-sets-report">${allSetsTestSummary()}</div><p class="small muted">Uwaga: porównujemy same bonusy setowe, nie statystyki indywidualnych przedmiotów, ich pancerz i sufiksy. Nie testuje synergii ubioru z akcesoriami; to osobny etap. Test korzysta z lokalnego fight(), nie serwerowych Ekspedycji.</p></div>`;
+}
+function allSetsTestText(){
+ const r=allSetsTestReport;if(!r)return '';
+ return [`ASHEN · Wszystkie sety · v0.4.7.5`,`${r.totalFights} walk; ${r.samples} prób na wariant; boss etap ${r.stage}`,`Tylko premie setowe, bez indywidualnych statystyk hipotetycznych przedmiotów`,`Jakość | Typ | Zestaw | Premie | PŻ | Pancerz | Potencjał/rundę | Wygrane % | Runda zwycięstwa | PŻ po walce`,...r.rows.map(x=>`${rarities[x.quality]?.name||x.quality} | ${x.type} | ${x.name} | ${x.bonusText} | ${x.hp} | ${x.armor} | ${x.potential.toFixed(1)} | ${x.wins.toFixed(1)} | ${x.winRound===null?'—':x.winRound.toFixed(1)} | ${x.hpRemain.toFixed(1)}`)].join('\n');
+}
+async function allSetsTestRun(){
+ if(!state.created||allSetsTestRunning)return;
+ const stage=allSetsTestStage;
+ allSetsTestRunning=true;allSetsTestStatus='Przygotowanie porównania…';updateSetPlannerDisplay();
+ const samples=80,scenarios=allSetsScenarios(),rows=[],qualities=[0,4];
+ try{
+  const current=attrs(),oldClothing=activeSetBonuses(),oldAccessories=accessorySetBonuses();
+  const neutral={...current};
+  for(const [key,val] of Object.entries(oldClothing.bonus))neutral[key]=(neutral[key]||0)-val;
+  for(const [key,val] of Object.entries(oldAccessories.bonus))neutral[key]=(neutral[key]||0)-val;
+  const currentDefense=heroDefense(),attacks=heroAttacks();
+  const opponent=ARENA_STAGES.find(v=>v.level===stage)||ARENA_STAGES[19];
+  for(const q of qualities){
+   for(let idx=0;idx<scenarios.length;idx++){
+    const scenario=scenarios[idx],profile=allSetsTestProfile(scenario,q),{a,defense}=allSetsDefense(neutral,currentDefense,profile);
+    let wins=0,rounds=0,hpTotal=0,potential=0;
+    for(let i=0;i<samples;i++){
+     const f=fight(opponent,{testSnapshot:{attributes:a,attacks,defense},testRandom:setCompareSeed(7654321+i*9973)});
+     if(f.won){wins++;rounds+=f.damageSummary.rounds}
+     hpTotal+=f.heroHp;potential+=f.damageSummary.hero.potential/Math.max(1,f.damageSummary.rounds);
+    }
+    const bonusText=[accessoryBonusText(profile.attributes),profile.armorPct?`Pancerz +${profile.armorPct}%`:''].filter(Boolean).join(' · ')||'Brak';
+    rows.push({type:scenario.type,name:scenario.name,quality:q,bonusText,hp:defense.hp,armor:defense.armor,potential:potential/samples,wins:100*wins/samples,winRound:wins?rounds/wins:null,hpRemain:hpTotal/samples});
+    if(idx%4===3||idx===scenarios.length-1){
+     allSetsTestStatus=`Test: ${rows.length}/${scenarios.length*qualities.length} wariantów (${rows.length*samples} walk)`;
+     const progress=document.getElementById('ashen-all-sets-progress');if(progress)progress.textContent=allSetsTestStatus;
+     // Przerywamy prace na chwile, by przegladarka mogla odmalowac interfejs.
+     await new Promise(resolve=>setTimeout(resolve,0));
+    }
+   }
+  }
+  allSetsTestReport={version:1,stage,samples,totalFights:rows.length*samples,rows,at:Date.now()};
+  try{localStorage.setItem(ALL_SETS_TEST_KEY,JSON.stringify(allSetsTestReport))}catch{}
+  allSetsTestStatus='Test zakończony — raport zapisany lokalnie.';
+ }catch(error){allSetsTestStatus='Błąd testu: '+String(error?.message||error);console.error('ASHEN all sets test',error)}
+ finally{allSetsTestRunning=false;updateSetPlannerDisplay();}
+}
 function setPlannerPanel(){
  const clothingOpts=[['none','— Bez prefiksu setowego —'],...SET_PLANNER_FAMILIES.map(id=>[id,SETS[id].name])];
  const accessoryOpts=[['none','— Bez prefiksu setowego —'],...Object.keys(ACCESSORY_SETS).map(id=>[id,ACCESSORY_SETS[id].name])];
  const field=(type,index,opts)=>`<label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem"><span>${type==='clothing'?slotLabels[['head','shirt','outer','hands','pants','boots'][index]]:`Akcesorium ${index+1}`}</span><select data-set-planner="${type}" data-set-slot="${index}" style="width:100%;min-width:0;padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${opts.map(([id,label])=>`<option value="${id}" ${(setPlanner[type][index]===id)?'selected':''}>${escape(label)}</option>`).join('')}</select></label>`;
- return `<details class="panel section" id="ashen-set-planner" ${setPlannerOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧩 Planer setów — porównaj 6+0 i 3+3 bez zdobywania przedmiotów</summary><p class="small muted">Symulator używa obecnych progów i premii setowych. Nie zmienia ekwipunku, statystyk ani zapisu postaci; zapamiętuje tylko wybór w tej przeglądarce.</p><div class="actions" style="margin:12px 0;flex-wrap:wrap"><button type="button" data-set-preset="full">6 × Wartownika</button><button type="button" data-set-preset="mixed">3 Wartownika + 3 Nomady</button><button type="button" data-set-preset="partial">4 Wartownika + 2 Nomady</button><button type="button" data-set-preset="clear">Wyczyść</button></div><label style="display:flex;align-items:center;gap:8px;margin-bottom:12px">Jakość wszystkich elementów (testowo): <select data-set-planner="quality" style="padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${rarities.map((r,i)=>`<option value="${i}" ${setPlanner.quality===i?'selected':''}>${escape(r.name)} · ×${setQuality({rarity:i}).toFixed(2)}</option>`).join('')}</select></label><h4>Odzież — sześć slotów</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.clothing.map((_,i)=>field('clothing',i,clothingOpts)).join('')}</div><h4>Akcesoria — trzy sloty</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.accessories.map((_,i)=>field('accessories',i,accessoryOpts)).join('')}</div><div id="ashen-set-planner-result" aria-live="polite">${plannerResultHtml()}${setCompareHtml()}</div></details>`;
+ return `<details class="panel section" id="ashen-set-planner" ${setPlannerOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🧩 Planer setów — porównaj 6+0 i 3+3 bez zdobywania przedmiotów</summary><p class="small muted">Symulator używa obecnych progów i premii setowych. Nie zmienia ekwipunku, statystyk ani zapisu postaci; zapamiętuje tylko wybór w tej przeglądarce.</p><div class="actions" style="margin:12px 0;flex-wrap:wrap"><button type="button" data-set-preset="full">6 × Wartownika</button><button type="button" data-set-preset="mixed">3 Wartownika + 3 Nomady</button><button type="button" data-set-preset="partial">4 Wartownika + 2 Nomady</button><button type="button" data-set-preset="clear">Wyczyść</button></div><label style="display:flex;align-items:center;gap:8px;margin-bottom:12px">Jakość wszystkich elementów (testowo): <select data-set-planner="quality" style="padding:8px;background:var(--panel,#171e27);color:inherit;border:1px solid var(--border,#57606c);border-radius:6px">${rarities.map((r,i)=>`<option value="${i}" ${setPlanner.quality===i?'selected':''}>${escape(r.name)} · ×${setQuality({rarity:i}).toFixed(2)}</option>`).join('')}</select></label><h4>Odzież — sześć slotów</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.clothing.map((_,i)=>field('clothing',i,clothingOpts)).join('')}</div><h4>Akcesoria — trzy sloty</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px">${setPlanner.accessories.map((_,i)=>field('accessories',i,accessoryOpts)).join('')}</div><div id="ashen-set-planner-result" aria-live="polite">${plannerResultHtml()}${setCompareHtml()}${allSetsTestPanel()}</div></details>`;
 }
-function updateSetPlannerDisplay(){const target=document.getElementById('ashen-set-planner-result');if(target)target.innerHTML=plannerResultHtml()+setCompareHtml();}
+function updateSetPlannerDisplay(){const target=document.getElementById('ashen-set-planner-result');if(target)target.innerHTML=plannerResultHtml()+setCompareHtml()+allSetsTestPanel();}
 
 function characterSetsPanel(){
  const results=setResults();
@@ -3323,6 +3400,16 @@ document.addEventListener('click',e=>{
  const button=e.target.closest?.('[data-set-compare]');if(!button)return;
  if(button.dataset.setCompare==='run'){setCompareStage=Number(document.getElementById('ashen-set-compare-stage')?.value)===10?10:20;setCompareRun();}
  else if(button.dataset.setCompare==='clear'){setCompareResults=null;try{localStorage.removeItem(SET_COMPARE_KEY)}catch{}updateSetPlannerDisplay();}
+});
+document.addEventListener('change',e=>{if(e.target?.id==='ashen-all-sets-stage')allSetsTestStage=Number(e.target.value)===10?10:20;});
+document.addEventListener('click',e=>{
+ const b=e.target.closest?.('[data-all-sets]');if(!b)return;
+ if(b.dataset.allSets==='run'){void allSetsTestRun();}
+ else if(b.dataset.allSets==='clear'){allSetsTestReport=null;allSetsTestStatus='';try{localStorage.removeItem(ALL_SETS_TEST_KEY)}catch{}updateSetPlannerDisplay();}
+ else if(b.dataset.allSets==='copy'&&allSetsTestReport){
+  const content=allSetsTestText();if(navigator.clipboard?.writeText){navigator.clipboard.writeText(content).catch(()=>window.prompt('Skopiuj raport:',content));}
+  else window.prompt('Skopiuj raport:',content);
+ }
 });
 document.addEventListener('click',e=>{
  const button=e.target.closest?.('[data-set-preset]');if(!button)return;
