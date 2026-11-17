@@ -1,14 +1,17 @@
-# ASHEN v0.4.7.9 — Laboratorium Ewolucji Setów
+# ASHEN v0.4.8.0 — Ewolucja setów X/Y (Starcia lokalne)
 
-## Instalacja
-Podmień `index.html` oraz `js/game.js` w repozytorium GitHub. Nie potrzeba SQL.
+## Aktualizacja GitHub
+Podmień `index.html` i `js/game.js`. Nie potrzeba SQL.
 
-## Funkcje
-- Postać → Planer setów → Laboratorium Ewolucji Setów.
-- Kalkulator 15 rodzin, liczby elementów 3/4/5/6 (dla akcesoriów tylko 3), mieszanej jakości, progów X/Y/Z.
-- Kontrola wszystkich 19 500 kombinacji jakości i pojedynczych ulepszeń (test matematyczny).
-- Kontrola niezależności zasad jakości wobec wszystkich 6 specjalizacji broni, ale **bez symulowania ich walk**.
-- Lokalny zapis raportu, kopiowanie tekstowe, trwały stan panelu.
+## Zmiany
+- Wspólny kalkulator 15 rodzin: rzeczywista suma punktów jakości, progi X/Y/Z (Z nieaktywne), pełne jednostki X.
+- X działa na PŻ, pancerz, celność, inicjatywę, uniki, krytyki, przebicie, obrażenia i handel.
+- Y reaguje na chybienie, unik, otrzymany krytyk, pierwsze rundy, późne rundy, osłonę i obrażenia krytyczne.
+- 3+3 rodzin odzieży oraz 3/3 akcesoriów działają niezależnie.
+- Wzmocniony zyskuje 4 PŻ na punkt jakości, by wzrost miał znaczenie.
 
-## Istotne ograniczenie
-Wersja nie wdraża jeszcze zdarzeń Y/Z do rzeczywistego `fight()` ani do serwerowych Ekspedycji. Zatem nie podaje DPS, procentu wygranych ani rzekomych wyników walk dla X/Y/Z. Matematyczna walidacja wzoru nie jest dowodem balansu. Obecne Starcia nadal korzystają z działającego silnika z v0.4.7.8.
+## Ograniczenia
+Z nadal nie działa w prawdziwej walce. Serwerowe Ekspedycje i PvP używają własnej matematyki. Stary raport pełnych setów nie jest testem balansu nowych X/Y.
+
+## Kontrola
+Składnia JS i test jednostkowy kalkulatora; zachowanie wizualne i zbalansowanie wszystkich walk wymagają sprawdzenia w przeglądarce.
