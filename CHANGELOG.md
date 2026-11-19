@@ -1,3 +1,8 @@
+## 0.5.2 — progresja zwierząt
+- Progi odblokowania gatunków oraz poziomów postaci i zwierzęcia dla treningów I–III.
+- Wolniejsze PD zwierząt, brak PD za porażki wypraw, ograniczenie farmienia Starć.
+- Zachowanie poziomów i istniejących etapów starych towarzyszy.
+
 ## 0.5.1 (2026-11-19)
 - Wszystkie 12 zasobów w pasku, kompaktowy układ.
 - Nowa kolejność 15 zakładek.

@@ -1,3 +1,7 @@
+## ASHEN 0.5.2 — progresja towarzyszy
+
+Szczegóły w `ZMIANY_052.md`. Bez SQL.
+
 ## ASHEN 0.5.1 — zmiany
 
 Szczegóły: `ZMIANY_051.md`. Wersja nie wymaga nowego SQL.

@@ -1,4 +1,4 @@
-const APP_VERSION='0.5.1';
+const APP_VERSION='0.5.2';
 // Odswiezanie grafik pojazdow przy kazdym zaladowaniu strony; staly token podczas renderow.
 const VEHICLE_ART_LOAD_TOKEN=Date.now();
 
@@ -1323,7 +1323,7 @@ function startArenaFight(number){
  }
  state.xp+=xp;state.scrap+=scrap;state.credits+=credits;
  state.battles++;if(result.won)state.wins++;
- if(result.won)gainCompanionXp(Math.min(20,5+Math.floor(number/4)));
+ if(result.won)gainCompanionXp(firstWin?Math.min(20,5+Math.floor(number/4)):Math.max(1,Math.floor(Math.min(20,5+Math.floor(number/4))*.25)));
  const levels=result.won?levelUp():0;
  let rewardItem=null;
  if(firstWin&&stage.boss){
@@ -2136,10 +2136,17 @@ const COMPANIONS={
  boar:{name:'Dzik pustkowi',desc:'Wytrzymały obrońca. Zwiększa pancerz i zdolność unikania ran.',icon:'🐗'}
 };
 const PET_BONUSES={dog:[12,18,25],cat:[10,15,20],raven:[8,12,16],boar:[2,4,6]};
-function petPower(id=companionId()){return id&&PET_BONUSES[id]?PET_BONUSES[id][companionStage(id)]*(1+0.025*(roomLevel('sanctuary')-1))*(1+0.015*(companionLevel(id)-1)):0}
-function companionStage(id=companionId()){return id?Math.max(0,Math.min(2,Number(state.companionLevels?.[id])||0)):0}
+const COMPANION_UNLOCK_LEVEL={cat:1,dog:5,raven:10,boar:15};
+const COMPANION_TRAIN_LEVEL={cat:[3,8,15],dog:[7,12,20],raven:[12,18,25],boar:[17,23,30]};
+const COMPANION_TRAIN_PET_LEVEL=[2,4,6];
+const COMPANION_TRAIN_COST=[{credits:200,scrap:60,parts:10},{credits:450,scrap:120,parts:20},{credits:900,scrap:240,parts:40}];
+function companionStage(id=companionId()){if(!id)return -1;const n=Number(state.companionLevels?.[id]);return Number.isFinite(n)?Math.max(-1,Math.min(2,Math.trunc(n))):-1}
+function petPower(id=companionId()){const stage=companionStage(id);return id&&PET_BONUSES[id]&&stage>=0?PET_BONUSES[id][stage]*(1+0.025*(roomLevel('sanctuary')-1))*(1+0.015*(companionLevel(id)-1)):0}
 const COMPANION_MAX_LEVEL=10;
-function companionXpNeed(level){return 30+Math.max(0,level-1)*20}
+// Podwyższona krzywa PD: suma do poziomu 3/5/7/10 = 180/520/1020/2070.
+function companionXpNeed(level){return 70+Math.max(0,level-1)*40}
+function companionTrainRequirements(id){const next=companionStage(id)+1;if(next>2||!COMPANION_TRAIN_LEVEL[id])return null;return {step:next,character:COMPANION_TRAIN_LEVEL[id][next],pet:COMPANION_TRAIN_PET_LEVEL[next],cost:COMPANION_TRAIN_COST[next]}}
+function companionTrainBlock(id){const req=companionTrainRequirements(id);if(!req)return '';const missing=[];if(state.level<req.character)missing.push(`postać: poziom ${req.character}`);if(companionLevel(id)<req.pet)missing.push(`zwierzę: poziom ${req.pet}`);return missing.join(' · ')}
 function companionProgress(id){return state.companionExperience?.[id]||{level:1,xp:0}}
 function companionLevel(id){return Math.max(1,Math.min(COMPANION_MAX_LEVEL,Number(companionProgress(id).level)||1))}
 function companionExp(id){return Math.max(0,Number(companionProgress(id).xp)||0)}
@@ -2156,10 +2163,11 @@ function gainCompanionXp(amount){
 function companionBonus(id=companionId()){
  if(!id||!PET_BONUSES[id])return '';
  const n=petPower(id),shown=Number(n.toFixed(1));
+ if(companionStage(id)<0)return 'Trening I nieaktywny — brak bonusu';
  return id==='dog'?`${shown}% szans na dodatkowy łup`:id==='cat'?`+${shown}% złomu`:id==='raven'?`+${shown}% doświadczenia`:`+${shown} pancerza i uniku`;
 }
 function companionArt(id,stage=companionStage(id)){
- return COMPANIONS[id]?`<img src="./assets/rosters/companion-${id}-${stage+1}.webp?v=${APP_VERSION}" alt="${COMPANIONS[id].name}, etap ${stage+1}" loading="lazy">`:'<span>🐾</span>';
+ return COMPANIONS[id]?`<img src="./assets/rosters/companion-${id}-${Math.max(1,stage+1)}.webp?v=${APP_VERSION}" alt="${COMPANIONS[id].name}, etap ${stage+1}" loading="lazy">`:'<span>🐾</span>';
 }
 function vehicleArt(id,stage=0){return VEHICLES.some(v=>v.id===id)?`<img src="./assets/rosters/vehicle-${id}-${id==='foot'?1:stage+1}.webp?v=${APP_VERSION}&load=${VEHICLE_ART_LOAD_TOKEN}" alt="${escape((VEHICLES.find(v=>v.id===id)||{}).name||id)}${id==='foot'?'':`, etap ${stage+1}`}" loading="lazy">`:'<span class="ashen-onfoot">🥾</span>'}
 const VEHICLES=[
@@ -2255,23 +2263,25 @@ function chooseCompanion(id){
  if(isCompanionOwned(id)){
   state.companion=id;message=`Aktywny towarzysz: ${COMPANIONS[id].name}.`;save();render();return;
  }
- if(state.level<20){message='Nowe zwierzęta możesz zdobywać od poziomu 20.';render();return}
+ if(state.level<COMPANION_UNLOCK_LEVEL[id]){message=`${COMPANIONS[id].name} wymaga poziomu postaci ${COMPANION_UNLOCK_LEVEL[id]}.`;render();return}
  const cost=state.ownedCompanions.length?500:0;
  if(state.credits<cost){message=`Potrzebujesz ${cost} kredytów na przygarnięcie towarzysza.`;render();return}
  if(!confirm(`Przygarnąć na stałe: ${COMPANIONS[id].name}${cost?' za '+cost+' kredytów':' bez kosztów'}?`))return;
- state.credits-=cost;state.ownedCompanions.push(id);state.companion=id;
+ state.credits-=cost;state.ownedCompanions.push(id);state.companionLevels[id]=-1;state.companion=id;
  message=`${COMPANIONS[id].name} dołączył do Legowiska i może być wybierany w dowolnej chwili.`;
  save();render();
 }
 function upgradeCompanion(){
- const id=companionId(),stage=companionStage();
- if(!id||stage>=2||state.mission)return;
- const credits=(stage+1)*450,scrap=(stage+1)*120,parts=(stage+1)*20;
+ const id=companionId(),req=companionTrainRequirements(id);
+ if(!id||!req||state.mission)return;
+ const block=companionTrainBlock(id);
+ if(block){message=`Trening ${req.step+1}/3 zablokowany — wymagane: ${block}.`;render();return}
+ const {credits,scrap,parts}=req.cost;
  if(state.credits<credits||state.scrap<scrap||getStock('czesci')<parts){message='Brakuje zasobów na szkolenie towarzysza.';render();return}
- if(!confirm(`Rozwinąć ${COMPANIONS[id].name} do etapu ${stage+2} za ${credits} kr., ${scrap} złomu i ${parts} części?`))return;
+ if(!confirm(`Rozwinąć ${COMPANIONS[id].name} do treningu ${req.step+1}/3?\nWymagania: postać ${req.character} lvl, zwierzę ${req.pet} lvl.\nKoszt: ${credits} kr., ${scrap} złomu i ${parts} części.`))return;
  state.credits-=credits;state.scrap-=scrap;state.materials.czesci-=parts;
- state.companionLevels[id]=stage+1;
- message=`${COMPANIONS[id].name}: osiągnięto etap ${stage+2}/3!`;
+ state.companionLevels[id]=req.step;
+ message=`${COMPANIONS[id].name}: ukończono trening ${req.step+1}/3!`;
  save();render();
 }
 function acquireVehicle(id){
@@ -2390,7 +2400,7 @@ function finish(){
   const change=anomaly.scrap<0?-Math.min(state.scrap,-anomaly.scrap):anomaly.scrap;
   state.scrap+=change;scrap+=change;anomaly.scrap=change;
  }
- gainCompanionXp(result.won?({ruins:12,hospital:23,outpost:35}[loc.id]||12):5);
+ if(result.won)gainCompanionXp(({ruins:12,hospital:23,outpost:35}[loc.id]||12));
  let levels=levelUp();const story=storyForExpedition(loc.id);state.reports.unshift({story:story.text,storyId:story.id,at:new Date().toLocaleString('pl-PL'),location:loc.name,enemy:enemy.name,...result,xp,scrap,drops,special,supplies,exploration,anomaly,drop:drops[0]?.name||null,dropRarity:drops[0]?.rarity||null,levels});
  state.reports=state.reports.slice(0,30);state.mission=null;state.missionOutcomePending=true;
  message=''; // Pełny raport wyprawy jest już wyświetlany na ekranie Wypraw.
@@ -2402,6 +2412,9 @@ function sync(){if(!state.rooms||typeof state.rooms!=='object')state.rooms={};if
  const owned=new Set(state.ownedCompanions.filter(id=>Object.prototype.hasOwnProperty.call(COMPANIONS,id)));
  if(state.companion&&COMPANIONS[state.companion])owned.add(state.companion);
  state.ownedCompanions=Array.from(owned);
+ // Migracja 0.5.2: wcześniej każde posiadane zwierzę miało od razu trening I.
+ // Zachowujemy wszystkie już zdobyte etapy; dopiero nowe zwierzęta zaczynają od 0/3.
+ if(state.companionTrainingSchema!==1){for(const id of owned)if(state.companionLevels[id]===undefined)state.companionLevels[id]=0;state.companionTrainingSchema=1}
  if(!state.companionExperience||typeof state.companionExperience!=='object'||Array.isArray(state.companionExperience))state.companionExperience={};
  for(const id of Object.keys(COMPANIONS)){const old=state.companionExperience[id];if(!old)continue;
   const level=Math.max(1,Math.min(COMPANION_MAX_LEVEL,Math.trunc(Number(old.level)||1)));
@@ -2458,16 +2471,17 @@ function activityConnectionsPanel(){
  <div class="small muted">To podsumowanie aktualnych źródeł premii, nie nowe bonusy. Statystyki do walk online aktualizują się po synchronizacji profilu.</div>
  </div></details>`;
 }
-function character(){let a=attrs();const comp=companionId()?COMPANIONS[companionId()]:null;const vehicle=vehicleDef();const travelBonus=Math.round((1-vehicleTimeFactor())*100);return section('Postać',`<div class="character-screen-modern"><div class="character-top-grid"><div class="character-figure-panel"><div class="character-figure-frame"><img src="${characterFigure(state.origin,state.gender)}" alt="Pełna sylwetka postaci – ${originTitle(state.origin,state.gender)}"></div><div class="character-figure-caption">${originTitle(state.origin,state.gender)}</div></div><div class="character-info-panel"><div class="character-heading"><div><div class="tag">OCALAŁY · POZIOM ${state.level}</div><h3>${escape(state.name)}</h3><p class="small muted">Wybrany wygląd zależy od płci i archetypu postaci. Możesz testować różne warianty na osobnych slotach.</p></div><button data-action="rename">Zmień imię</button></div>${bar('Doświadczenie',state.xp,xpNeed(),'gold')}<div class="character-meta-line"><span><strong>Płeć:</strong> ${genderLabel(state.gender)}</span><span><strong>Ręka dominująca:</strong> ${state.dominantHand==='left'?'lewa':'prawa'}</span><span><strong>Punkty atrybutów:</strong> ${state.points}</span></div><div class="actions"><button data-dominant="right" ${state.dominantHand==='right'?'disabled':''}>Prawa ręka</button><button data-dominant="left" ${state.dominantHand==='left'?'disabled':''}>Lewa ręka</button></div><div class="character-sidecards"><div class="character-sidecard"><div class="character-sidevisual ${comp?'':'placeholder'}">${comp?companionVisual(state.companion):'<div class="character-side-emoji">🐾</div>'}</div><div class="character-sidecontent"><div class="tag">AKTYWNY TOWARZYSZ</div><h4>${comp?comp.name:'Brak towarzysza'}</h4><p class="small muted">${comp?comp.desc:`Towarzysz odblokuje się na poziomie 20. Obecny poziom: ${state.level}.`}</p><p class="good small">${comp?companionBonus():'Jeszcze niedostępny'}</p><button data-page="companion">${comp?'Zmień towarzysza':'Przejdź do towarzyszy'}</button></div></div><div class="character-sidecard"><div class="character-sidevisual transport">${vehicleArt(vehicle.id,vehicleStage())}</div><div class="character-sidecontent"><div class="tag">AKTUALNY TRANSPORT</div><h4>${vehicle.name}</h4><p class="small muted">Przyspieszenie wypraw: <strong>${travelBonus}%</strong>. Usprawnienie: ${vehicleStage()+1}/3.</p><p class="good small">Silnik skraca czas; ładowność zwiększa złom, a pancerz pomaga podczas zwykłych wypraw (nie w Starciach ani PvP).</p><button data-page="transport">Zarządzaj transportem</button></div></div></div></div></div><div class="character-attr-grid">${Object.entries(attrNames).map(([k,n])=>`<div class="character-attr-card"><div class="character-attr-head"><span>${n} <details class="ashen-attr-help"><summary aria-label="Opis atrybutu ${n}" title="Co daje ${n}?">ⓘ</summary><div class="ashen-attr-help-content">${escape(ATTRIBUTE_HELP[k])}</div></details></span><strong>${a[k]}</strong></div><div class="small muted">Baza ${state.attrs[k]}${a[k]!==state.attrs[k]?` · Sprzęt i zestawy ${a[k]-state.attrs[k]>=0?'+':''}${a[k]-state.attrs[k]}`:''}</div><button data-attr="${k}" ${state.points<=0?'disabled':''}>+1</button></div>`).join('')}</div>${combatPanel()}${activityConnectionsPanel()}${characterSetsPanel()}${accessorySetPanel()}${setPlannerPanel()}${resonancePanel()}</div>`)}
+function character(){let a=attrs();const comp=companionId()?COMPANIONS[companionId()]:null;const vehicle=vehicleDef();const travelBonus=Math.round((1-vehicleTimeFactor())*100);return section('Postać',`<div class="character-screen-modern"><div class="character-top-grid"><div class="character-figure-panel"><div class="character-figure-frame"><img src="${characterFigure(state.origin,state.gender)}" alt="Pełna sylwetka postaci – ${originTitle(state.origin,state.gender)}"></div><div class="character-figure-caption">${originTitle(state.origin,state.gender)}</div></div><div class="character-info-panel"><div class="character-heading"><div><div class="tag">OCALAŁY · POZIOM ${state.level}</div><h3>${escape(state.name)}</h3><p class="small muted">Wybrany wygląd zależy od płci i archetypu postaci. Możesz testować różne warianty na osobnych slotach.</p></div><button data-action="rename">Zmień imię</button></div>${bar('Doświadczenie',state.xp,xpNeed(),'gold')}<div class="character-meta-line"><span><strong>Płeć:</strong> ${genderLabel(state.gender)}</span><span><strong>Ręka dominująca:</strong> ${state.dominantHand==='left'?'lewa':'prawa'}</span><span><strong>Punkty atrybutów:</strong> ${state.points}</span></div><div class="actions"><button data-dominant="right" ${state.dominantHand==='right'?'disabled':''}>Prawa ręka</button><button data-dominant="left" ${state.dominantHand==='left'?'disabled':''}>Lewa ręka</button></div><div class="character-sidecards"><div class="character-sidecard"><div class="character-sidevisual ${comp?'':'placeholder'}">${comp?companionVisual(state.companion):'<div class="character-side-emoji">🐾</div>'}</div><div class="character-sidecontent"><div class="tag">AKTYWNY TOWARZYSZ</div><h4>${comp?comp.name:'Brak towarzysza'}</h4><p class="small muted">${comp?comp.desc:`Pierwszy towarzysz dostępny od poziomu 1. Obecny poziom: ${state.level}.`}</p><p class="good small">${comp?companionBonus():'Jeszcze niedostępny'}</p><button data-page="companion">${comp?'Zmień towarzysza':'Przejdź do towarzyszy'}</button></div></div><div class="character-sidecard"><div class="character-sidevisual transport">${vehicleArt(vehicle.id,vehicleStage())}</div><div class="character-sidecontent"><div class="tag">AKTUALNY TRANSPORT</div><h4>${vehicle.name}</h4><p class="small muted">Przyspieszenie wypraw: <strong>${travelBonus}%</strong>. Usprawnienie: ${vehicleStage()+1}/3.</p><p class="good small">Silnik skraca czas; ładowność zwiększa złom, a pancerz pomaga podczas zwykłych wypraw (nie w Starciach ani PvP).</p><button data-page="transport">Zarządzaj transportem</button></div></div></div></div></div><div class="character-attr-grid">${Object.entries(attrNames).map(([k,n])=>`<div class="character-attr-card"><div class="character-attr-head"><span>${n} <details class="ashen-attr-help"><summary aria-label="Opis atrybutu ${n}" title="Co daje ${n}?">ⓘ</summary><div class="ashen-attr-help-content">${escape(ATTRIBUTE_HELP[k])}</div></details></span><strong>${a[k]}</strong></div><div class="small muted">Baza ${state.attrs[k]}${a[k]!==state.attrs[k]?` · Sprzęt i zestawy ${a[k]-state.attrs[k]>=0?'+':''}${a[k]-state.attrs[k]}`:''}</div><button data-attr="${k}" ${state.points<=0?'disabled':''}>+1</button></div>`).join('')}</div>${combatPanel()}${activityConnectionsPanel()}${characterSetsPanel()}${accessorySetPanel()}${setPlannerPanel()}${resonancePanel()}</div>`)}
 function companion(){
  const selected=companionId(),active=selected?COMPANIONS[selected]:null;
  const owned=state.ownedCompanions||[];
- const stage=selected?companionStage(selected):0,level=selected?companionLevel(selected):1,xp=selected?companionExp(selected):0;
- return section('Towarzysz',`<div class="ashen-premium-screen"><div class="premium-hero"><div class="tag">SCHRON 17 · LEGOWISKO TOWARZYSZY</div><h3>Towarzysze Pustkowi</h3><p>Kolekcjonuj wszystkie cztery gatunki, rozwijaj każdego oddzielnie i wybieraj jednego aktywnego. Tylko aktywny towarzysz zapewnia bonusy i zdobywa doświadczenie podczas zwykłych wypraw.</p></div>
- <div class="premium-active"><div class="premium-active-picture">${active?companionArt(selected):'<span>🐾</span>'}</div><div class="premium-active-copy"><div class="tag">AKTYWNY TOWARZYSZ</div><h3>${active?active.name:'Brak aktywnego zwierzęcia'}</h3><p class="muted">${active?active.desc:'Przygarnij zwierzę lub wybierz je z kolekcji.'}</p><div class="premium-active-bonus">${active?`Etap treningu ${stage+1}/3 · Poziom ${level}/${COMPANION_MAX_LEVEL} · ${companionBonus()}`:'Bonusy zwierząt są nieaktywne'}</div>${active?`<div class="ashen-pet-xp">Doświadczenie: ${level>=COMPANION_MAX_LEVEL?'MAX':`${xp} / ${companionXpNeed(level)}`}<div class="ashen-pet-xp-track"><span style="width:${level>=COMPANION_MAX_LEVEL?100:Math.min(100,Math.round(xp/companionXpNeed(level)*100))}%"></span></div></div>`:''}</div>${active&&stage<2?`<button data-companion-upgrade ${state.mission?'disabled':''} class="primary">Rozwiń etap ${stage+2}<span class="premium-btn-sub">${(stage+1)*450} kr. · ${(stage+1)*120} złomu · ${(stage+1)*20} części</span></button>`:'<button data-page="bunker" class="premium-outline">Zobacz Legowisko</button>'}</div>
+ const stage=selected?companionStage(selected):-1,level=selected?companionLevel(selected):1,xp=selected?companionExp(selected):0;
+ const req=selected?companionTrainRequirements(selected):null,block=selected?companionTrainBlock(selected):'';
+ return section('Towarzysz',`<div class="ashen-premium-screen"><div class="premium-hero"><div class="tag">SCHRON 17 · LEGOWISKO TOWARZYSZY</div><h3>Towarzysze Pustkowi</h3><p>Odblokowuj gatunki wraz z poziomem postaci. Zwierzęta zdobywają PD na zwycięskich wyprawach i Starciach. Trening I–III wymaga poziomu postaci, poziomu zwierzęcia i zasobów. Posiadane wcześniej etapy zostały zachowane.</p></div>
+ <div class="premium-active"><div class="premium-active-picture">${active?companionArt(selected):'<span>🐾</span>'}</div><div class="premium-active-copy"><div class="tag">AKTYWNY TOWARZYSZ</div><h3>${active?active.name:'Brak aktywnego zwierzęcia'}</h3><p class="muted">${active?active.desc:'Przygarnij zwierzę lub wybierz je z kolekcji.'}</p><div class="premium-active-bonus">${active?`Etap treningu ${stage+1}/3 · Poziom ${level}/${COMPANION_MAX_LEVEL} · ${companionBonus()}`:'Bonusy zwierząt są nieaktywne'}</div>${active?`<div class="ashen-pet-xp">Doświadczenie: ${level>=COMPANION_MAX_LEVEL?'MAX':`${xp} / ${companionXpNeed(level)}`}<div class="ashen-pet-xp-track"><span style="width:${level>=COMPANION_MAX_LEVEL?100:Math.min(100,Math.round(xp/companionXpNeed(level)*100))}%"></span></div></div>`:''}${req?`<p class="small muted">Trening ${req.step+1}/3: postać ${req.character} lvl, zwierzę ${req.pet} lvl. ${block?'🔒 Brakuje: '+block:'✓ Poziomy spełnione'}</p>`:''}</div>${active&&req?`<button data-companion-upgrade ${state.mission||block?'disabled':''} class="primary">Rozwiń trening ${req.step+1}/3<span class="premium-btn-sub">${req.cost.credits} kr. · ${req.cost.scrap} złomu · ${req.cost.parts} części</span></button>`:'<button data-page="bunker" class="premium-outline">Zobacz Legowisko</button>'}</div>
  <div class="ashen-roster-test-banner"><span>PODGLĄD · Przyciski „Etap 1–3” pokazują tylko grafikę i nie zmieniają aktywnego zwierzęcia. Do wyboru służy „Aktywuj”.</span><button type="button" data-companion-test-select="none" ${selected?'':'disabled'}>Odłącz aktywnego</button></div>
  <div class="premium-section-title"><h3>Twoja kolekcja</h3><span>${owned.length} / ${Object.keys(COMPANIONS).length} gatunków · jeden aktywny</span></div>
- <div class="premium-choices companions">${Object.entries(COMPANIONS).map(([id,c])=>{const has=isCompanionOwned(id),chosen=selected===id,pl=companionLevel(id),petXp=companionExp(id);return `<article class="premium-choice ${chosen?'is-selected':''}"><div class="premium-choice-image">${companionArt(id,companionPreviewStages[id]??companionStage(id))}</div><div class="premium-choice-body"><h3>${c.name}</h3><p>${c.desc}</p><div class="premium-bonus">${has?`Poziom ${pl}/${COMPANION_MAX_LEVEL} · Etap ${companionStage(id)+1}/3 · ${companionBonus(id)}`:'Nieodkryty · dostępny do przygarnięcia'}</div>${has?`<p class="small muted">EXP zwierzęcia: ${pl>=COMPANION_MAX_LEVEL?'MAX':`${petXp}/${companionXpNeed(pl)}`}</p>`:''}${companionTestControls(id)}<div class="premium-foot"><button data-companion="${id}" ${chosen||state.mission||(!has&&state.level<20)?'disabled':''} class="${chosen?'premium-outline':'primary'}">${chosen?'✓ Aktywny':has?'Aktywuj':state.level<20?'Od poziomu 20':`Przygarnij${owned.length?' · 500 kr.':' · za darmo'}`}</button></div></div></article>`}).join('')}</div><p class="small muted">Bonus Legowiska wzmacnia działanie aktywnego zwierzęcia. Poziom towarzysza rośnie od 1 do 10 dzięki zwykłym wyprawom; za każdy poziom otrzymuje +1,5% skuteczności swojego dotychczasowego bonusu. Etapy treningu 1–3 pozostają osobnym systemem.</p></div>`)
+ <div class="premium-choices companions">${Object.entries(COMPANIONS).map(([id,c])=>{const has=isCompanionOwned(id),chosen=selected===id,pl=companionLevel(id),petXp=companionExp(id),unlock=COMPANION_UNLOCK_LEVEL[id],petStage=companionStage(id),next=has?companionTrainRequirements(id):null;return `<article class="premium-choice ${chosen?'is-selected':''}"><div class="premium-choice-image">${companionArt(id,companionPreviewStages[id]??petStage)}</div><div class="premium-choice-body"><h3>${c.name}</h3><p>${c.desc}</p><div class="premium-bonus">${has?`Poziom ${pl}/${COMPANION_MAX_LEVEL} · Trening ${petStage+1}/3 · ${companionBonus(id)}`:`Odblokowanie na poziomie postaci ${unlock}`}</div>${has?`<p class="small muted">EXP zwierzęcia: ${pl>=COMPANION_MAX_LEVEL?'MAX':`${petXp}/${companionXpNeed(pl)}`} ${next?`· Następny trening: postać ${next.character} lvl / zwierzę ${next.pet} lvl`:''}</p>`:''}${companionTestControls(id)}<div class="premium-foot"><button data-companion="${id}" ${chosen||state.mission||(!has&&state.level<unlock)?'disabled':''} class="${chosen?'premium-outline':'primary'}">${chosen?'✓ Aktywny':has?'Aktywuj':state.level<unlock?'Od poziomu '+unlock:`Przygarnij${owned.length?' · 500 kr.':' · za darmo'}`}</button></div></div></article>`}).join('')}</div><p class="small muted">Poziom towarzysza (1–10) pozostaje niezależny od poziomu postaci. Po przegranej wyprawie nie dostaje PD; powtórzone Starcia dają 25% standardowego PD zwierzęcia (minimum 1). Każdy poziom zwiększa skuteczność aktywnego bonusu o 1,5%. Trening włączasz ręcznie po spełnieniu wymagań.</p></div>`)
 }
 function transport(){
  const current=vehicleDef(),stage=vehicleStage(),bonus=Math.round((1-vehicleTimeFactor())*100),ownedVehicles=state.ownedVehicles||[];
