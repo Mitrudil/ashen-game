@@ -1,3 +1,6 @@
+## ASHEN 0.5.4.1 — korekta wersji i okna przedmiotu
+Aktualizacja naprawcza bez SQL. Pasek gry wyświetla v0.5.4.1, a kliknięcie poza modalem przedmiotu zamyka go. Kliknięcie wewnątrz modalu nie zamyka okna.
+
 ## ASHEN v0.5.4 — porównywanie wyposażenia (2026-11-19)
 - Podgląd statystyk postaci przed i po założeniu przedmiotu, bez zapisywania symulacji.
 - Obsługa prawej/lewej ręki, broni dwuręcznej i trzech slotów akcesoriów.

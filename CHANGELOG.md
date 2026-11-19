@@ -1,3 +1,8 @@
+## ASHEN 0.5.4.1 — poprawki widoku (2026-11-19)
+- Naprawiono rozbieżność wersji: APP_VERSION w js/game.js miał 0.5.3 pomimo wydania 0.5.4.
+- Kliknięcie w ciemne tło okna szczegółów przedmiotu zamyka okno; kliknięcia w jego zawartość nie zamykają.
+- Bez zmian mechanik walki, ekwipunku, rezonansów i bazy danych.
+
 ## ASHEN 0.5.4
 - Porównywarka: szczegółowe wyjaśnienie aktywacji/utraty rezonansu (prefiks lub sufiks, liczba zgodnych artefaktów 3/3, Szczęście, eksploracja, atrybuty).
 - Podsumowanie zysków i strat całej postaci; brak podwójnego naliczania premii.
