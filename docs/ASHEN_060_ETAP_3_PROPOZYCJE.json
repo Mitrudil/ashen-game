@@ -1,0 +1,472 @@
+{
+  "status": "PROJEKT NIE WDROZONY",
+  "source": "ASHEN 0.5.4.1 models; stage 2 catalog",
+  "assumptions": {
+    "hit": 0.75,
+    "crit": 0.15,
+    "critical_mult": 1.5,
+    "armor": 40,
+    "armor_factor": "100/(100+armor)"
+  },
+  "weapon_scenarios": [
+    {
+      "model": "Pałka ochroniarza",
+      "type": "Biała 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 3.74,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Żelazna rura",
+      "type": "Biała 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 4.61,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Klucz francuski",
+      "type": "Biała 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 5.47,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Zardzewiały nóż",
+      "type": "Biała 1R",
+      "base_attacks": 2,
+      "base_avg_damage": 9.21,
+      "+1_attack_pct": 50.0,
+      "+2_attacks_pct": 100.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 6.25,
+      "p_zero_plus1_pct": 1.56
+    },
+    {
+      "model": "Tasak z pustkowi",
+      "type": "Biała 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 7.49,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Toporek z odzysku",
+      "type": "Biała 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 8.64,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Szabla konwojenta",
+      "type": "Biała 1R",
+      "base_attacks": 2,
+      "base_avg_damage": 14.4,
+      "+1_attack_pct": 50.0,
+      "+2_attacks_pct": 100.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 6.25,
+      "p_zero_plus1_pct": 1.56
+    },
+    {
+      "model": "Maczeta zbieracza",
+      "type": "Biała 1R",
+      "base_attacks": 2,
+      "base_avg_damage": 17.28,
+      "+1_attack_pct": 50.0,
+      "+2_attacks_pct": 100.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 6.25,
+      "p_zero_plus1_pct": 1.56
+    },
+    {
+      "model": "Pistolet M-9",
+      "type": "Palna 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 8.64,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Pistolet pustynny",
+      "type": "Palna 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 12.96,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Rewolwer Strażnika",
+      "type": "Palna 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 13.53,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Pistolet maszynowy Viper",
+      "type": "Palna 1R",
+      "base_attacks": 3,
+      "base_avg_damage": 18.14,
+      "+1_attack_pct": 33.3,
+      "+2_attacks_pct": 66.7,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 1.56,
+      "p_zero_plus1_pct": 0.39
+    },
+    {
+      "model": "Karabin szabrownika",
+      "type": "Palna 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 12.96,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Karabinek warty",
+      "type": "Palna 2R",
+      "base_attacks": 2,
+      "base_avg_damage": 19.0,
+      "+1_attack_pct": 50.0,
+      "+2_attacks_pct": 100.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 6.25,
+      "p_zero_plus1_pct": 1.56
+    },
+    {
+      "model": "Strzelba pustkowi",
+      "type": "Palna 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 20.16,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Karabin dalekiego zasięgu",
+      "type": "Palna 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 25.92,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Karabin maszynowy PK",
+      "type": "Palna 2R",
+      "base_attacks": 3,
+      "base_avg_damage": 28.51,
+      "+1_attack_pct": 33.3,
+      "+2_attacks_pct": 66.7,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 1.56,
+      "p_zero_plus1_pct": 0.39
+    },
+    {
+      "model": "Kusza tropiciela",
+      "type": "Dystansowa 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 13.25,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Wyrzutnia harpunów",
+      "type": "Dystansowa 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 16.99,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Miotacz żaru",
+      "type": "Technologiczna 2R",
+      "base_attacks": 3,
+      "base_avg_damage": 26.78,
+      "+1_attack_pct": 33.3,
+      "+2_attacks_pct": 66.7,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 1.56,
+      "p_zero_plus1_pct": 0.39
+    },
+    {
+      "model": "Łom zbrojony",
+      "type": "Biała 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 10.94,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Młot złomiarza",
+      "type": "Biała 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 15.55,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Prototypowa broń szynowa",
+      "type": "Technologiczna 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 22.46,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Młot wyburzeniowy",
+      "type": "Biała 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 23.61,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    }
+  ],
+  "weapon_prefix_proposals": [
+    {
+      "name": "Precyzyjny",
+      "now": "Celność +3; Percepcja +2",
+      "proposal": "Pozostawić +3 celności, +2 Percepcji"
+    },
+    {
+      "name": "Brutalny",
+      "now": "Siła +2; dmg +4%",
+      "proposal": "Siła +2, dmg +6% (broń biała)"
+    },
+    {
+      "name": "Niszczycielski",
+      "now": "Dmg +8%",
+      "proposal": "Dmg +10%"
+    },
+    {
+      "name": "Zabójczy",
+      "now": "Krytyk +4 pp",
+      "proposal": "Krytyk +5 pp"
+    },
+    {
+      "name": "Szybki",
+      "now": "1 dodatkowy osłabiony cios",
+      "proposal": "Pełny dodatkowy atak; tylko po teście balansu broni 1/3 ataki"
+    },
+    {
+      "name": "Stabilny",
+      "now": "Celność +5; krytyk +2 pp",
+      "proposal": "Celność +5; krytyk +2 pp"
+    },
+    {
+      "name": "Przebijający",
+      "now": "Przebicie +4",
+      "proposal": "Przebicie +4"
+    }
+  ],
+  "weapon_suffix_proposals": [
+    {
+      "name": "Łowcy",
+      "now": "Percepcja +2; celność +2",
+      "proposal": "Bez zmian"
+    },
+    {
+      "name": "Snajpera",
+      "now": "Percepcja +2; krytyk +2 pp",
+      "proposal": "Krytyk +3 pp; Percepcja +2"
+    },
+    {
+      "name": "Berserkera",
+      "now": "Dmg +8%; celność −4",
+      "proposal": "Dmg +12%; celność −4"
+    },
+    {
+      "name": "Egzekutora",
+      "now": "Krytyk +4 pp",
+      "proposal": "Krytyk +5 pp"
+    },
+    {
+      "name": "Wojownika",
+      "now": "Siła +2; dmg +3%",
+      "proposal": "Siła +2; dmg +5%"
+    },
+    {
+      "name": "Niszczyciela",
+      "now": "Dmg +5%; przebicie +1",
+      "proposal": "Dmg +6%; przebicie +2"
+    },
+    {
+      "name": "Penetratora",
+      "now": "Przebicie +5",
+      "proposal": "Bez zmian"
+    },
+    {
+      "name": "Fechmistrza",
+      "now": "Krytyk +3 pp; celność +3",
+      "proposal": "Bez zmian"
+    }
+  ],
+  "set_roles": [
+    {
+      "name": "Wzmocniony",
+      "x": "PŻ, Wytrzymałość",
+      "y": "Odporność na obrażenia",
+      "z": "Drugi oddech"
+    },
+    {
+      "name": "Pancerny",
+      "x": "Pancerz",
+      "y": "Redukcja obrażeń",
+      "z": "Niezłomna płyta"
+    },
+    {
+      "name": "Elastyczny",
+      "x": "Unik",
+      "y": "Wzmocnienie po uniku",
+      "z": "Kontratak po uniku"
+    },
+    {
+      "name": "Zwinny",
+      "x": "Celność / inicjatywa",
+      "y": "Bonus ruchliwości",
+      "z": "Błyskawiczny start"
+    },
+    {
+      "name": "Lekki",
+      "x": "Celność",
+      "y": "Dodatkowy atak (kandydat, do balansu)",
+      "z": "Seria trafień"
+    },
+    {
+      "name": "Odporny",
+      "x": "Wytrzymałość",
+      "y": "Odporność na krytyki",
+      "z": "Redukcja krytyka"
+    },
+    {
+      "name": "Tropicielski",
+      "x": "Percepcja / celność",
+      "y": "Krytyk +pp",
+      "z": "Oznaczenie celu"
+    },
+    {
+      "name": "Żelazny",
+      "x": "Siła",
+      "y": "Przebicie i moc trafienia",
+      "z": "Miażdżący cios"
+    },
+    {
+      "name": "Wartowniczy",
+      "x": "Wytrzymałość",
+      "y": "Tarcza / przeżywalność",
+      "z": "Tarcza ratunkowa"
+    },
+    {
+      "name": "Nomadyczny",
+      "x": "Zręczność",
+      "y": "Premia eksploracyjna",
+      "z": "Bonus po utracie PŻ"
+    },
+    {
+      "name": "Techniczny",
+      "x": "Inteligencja",
+      "y": "Przebicie pancerza",
+      "z": "Skan pancerza"
+    },
+    {
+      "name": "Spostrzegawczy",
+      "x": "Percepcja",
+      "y": "Krytyk +pp",
+      "z": "Drugi celny cios"
+    },
+    {
+      "name": "Przekonujący",
+      "x": "Charyzma",
+      "y": "Celność",
+      "z": "Autorytet"
+    },
+    {
+      "name": "Refleksyjny",
+      "x": "Zręczność",
+      "y": "Unik",
+      "z": "Przebicie po uniku"
+    },
+    {
+      "name": "Wszechstronny",
+      "x": "Percepcja / Inteligencja",
+      "y": "Defensywa warunkowa",
+      "z": "Jednorazowa osłona"
+    }
+  ]
+}
