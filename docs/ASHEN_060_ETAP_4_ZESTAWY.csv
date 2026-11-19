@@ -1,0 +1,16 @@
+﻿Zestaw;Typ;X stat;X wartość;Y stat;Y wartość;Z (bez zmian)
+Wzmocniony;Odzież;max_hp_pct;6;damage_reduction_pct;3;Drugi oddech
+Pancerny;Odzież;armor_pct;8;damage_reduction_pct;3;Niezłomna płyta
+Elastyczny;Odzież;dodge_points;1.2;hit_after_dodge_dmg_pct;4;Kontratak po uniku
+Zwinny;Odzież;accuracy_points;2;initiative_points;3;Błyskawiczny start
+Lekki;Odzież;accuracy_points;2;extra_attacks;1;Seria trafień
+Odporny;Odzież;endurance;2;critical_bonus_reduction_pct;8;Redukcja krytyka
+Tropicielski;Odzież;perception;2;crit_points;2;Oznaczenie celu
+Żelazny;Odzież;strength;2;penetration_points;2;Miażdżący cios
+Wartowniczy;Odzież;max_hp_pct;5;shield_capacity_pct;3;Tarcza ratunkowa
+Nomadyczny;Odzież;agility;2;expedition_resources_pct;5;Bonus po utracie PŻ
+Techniczny;Akcesoria;intelligence;2;penetration_points;3;Skan pancerza
+Spostrzegawczy;Akcesoria;perception;2;crit_points;2;Drugi celny cios
+Przekonujący;Akcesoria;charisma;2;accuracy_points;3;Autorytet
+Refleksyjny;Akcesoria;agility;2;dodge_points;1;Przebicie po uniku
+Wszechstronny;Akcesoria;perception;1;max_hp_pct;4;Jednorazowa osłona
