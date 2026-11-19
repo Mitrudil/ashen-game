@@ -1439,3 +1439,22 @@ body.arena-report-modal-open{overflow:hidden}
 @media(max-width:590px){.ashen-global-resources.is-compact{grid-template-columns:repeat(3,minmax(0,1fr))}.ashen-global-resources.is-compact .mission-resource{min-height:42px;padding:5px;gap:5px}.ashen-global-resources.is-compact .mission-resource .ico{width:20px;height:20px;flex-basis:20px}.ashen-global-resources.is-compact .mission-resource .lab{font-size:8px}.ashen-global-resources.is-compact .mission-resource .num{font-size:13px}}
 /* Okno przedmiotu otwarte z raportu bossa musi być nad raportem Starć. */
 .ashen-item-overlay{z-index:10020}
+
+/* ASHEN 0.5.3 — porównywarka wyposażenia, także na telefonach */
+.ashen-item-compare{border:1px solid rgba(186,153,81,.42);background:rgba(13,20,28,.55);border-radius:12px;padding:14px;margin:18px 0;color:inherit}
+.ashen-item-compare h3{font-size:1.07rem;margin:0 0 8px}
+.ashen-compare-targets{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.ashen-compare-targets button{font-size:.82rem}
+.ashen-compare-table-wrap{max-width:100%;overflow-x:auto}
+.ashen-compare-table{width:100%;border-collapse:collapse;font-size:.88rem;font-variant-numeric:tabular-nums}
+.ashen-compare-table th,.ashen-compare-table td{padding:7px 8px;border-bottom:1px solid rgba(174,185,197,.14);text-align:right;white-space:nowrap}
+.ashen-compare-table th:first-child{text-align:left}
+.ashen-compare-table thead th{color:#b7c3cf;font-size:.78rem}
+.ashen-compare-gain{color:#76d7a0}
+.ashen-compare-loss{color:#ff9292}
+.ashen-compare-same{color:#aebac4}
+.ashen-compare-warning{color:#f1c66d;font-size:.85rem}
+.ashen-compare-set-changes{margin-top:14px;padding-top:10px;border-top:1px solid rgba(174,185,197,.2);font-size:.87rem;line-height:1.65}
+.ashen-compare-set-changes h4{margin:0 0 6px}
+.ashen-compare-set-changes summary{cursor:pointer}
+@media(max-width:620px){.ashen-item-compare{padding:9px}.ashen-compare-table th,.ashen-compare-table td{padding:6px 5px;font-size:.78rem}}

@@ -1,3 +1,10 @@
+## ASHEN v0.5.3 — porównywanie wyposażenia (2026-11-19)
+- Podgląd statystyk postaci przed i po założeniu przedmiotu, bez zapisywania symulacji.
+- Obsługa prawej/lewej ręki, broni dwuręcznej i trzech slotów akcesoriów.
+- Zmiany kompletów X/Y/Z i rezonansu artefaktów w podglądzie.
+- Wspólna logika wyboru slotów w porównaniu i faktycznym zakładaniu przedmiotów.
+- Bez zmian SQL i formuł walki.
+
 ## ASHEN 0.5.2 — progresja towarzyszy
 
 Szczegóły w `ZMIANY_052.md`. Bez SQL.
