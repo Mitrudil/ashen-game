@@ -1,0 +1,560 @@
+{
+  "status": "projekt 0.6.0 — BEZ aktywacji w grze",
+  "source_version": "0.5.4.1",
+  "qualities": [
+    {
+      "id": "common",
+      "name": "Zwykły",
+      "baseMult": 1,
+      "sockets": [
+        75,
+        25,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "rare",
+      "name": "Rzadki",
+      "baseMult": 1.12,
+      "sockets": [
+        45,
+        40,
+        15,
+        0
+      ]
+    },
+    {
+      "id": "epic",
+      "name": "Epicki",
+      "baseMult": 1.26,
+      "sockets": [
+        25,
+        40,
+        25,
+        10
+      ]
+    },
+    {
+      "id": "legendary",
+      "name": "Legendarny",
+      "baseMult": 1.42,
+      "sockets": [
+        15,
+        30,
+        40,
+        15
+      ]
+    },
+    {
+      "id": "mythic",
+      "name": "Mityczny",
+      "baseMult": 1.6,
+      "sockets": [
+        10,
+        25,
+        45,
+        20
+      ]
+    }
+  ],
+  "rules": {
+    "base_weapon_attacks_level_independent": true,
+    "sockets_only_at_drop": true,
+    "sockets_in_all_equipment": true,
+    "upgrade_does_not_change_sockets": true,
+    "artifacts_change_effect_by_equipment_slot": true,
+    "artifact_families": 8,
+    "artifacts_per_family": 2,
+    "set_accessories_requires": 3,
+    "sets_XYZ_remain": true
+  },
+  "artifact_families": [
+    {
+      "id": "oslonowe",
+      "name": "Osłonowe",
+      "role": "Obrona i PŻ",
+      "planned_artifacts": 2
+    },
+    {
+      "id": "niszczycielskie",
+      "name": "Niszczycielskie",
+      "role": "Obrażenia i przebicie",
+      "planned_artifacts": 2
+    },
+    {
+      "id": "tropicielskie",
+      "name": "Tropicielskie",
+      "role": "Celność i eksploracja",
+      "planned_artifacts": 2
+    },
+    {
+      "id": "refleksyjne",
+      "name": "Refleksyjne",
+      "role": "Unik i tempo",
+      "planned_artifacts": 2
+    },
+    {
+      "id": "zelazne",
+      "name": "Żelazne",
+      "role": "Wytrzymałość i odporność",
+      "planned_artifacts": 2
+    },
+    {
+      "id": "techniczne",
+      "name": "Techniczne",
+      "role": "Precyzja i pancerz",
+      "planned_artifacts": 2
+    },
+    {
+      "id": "nomadyczne",
+      "name": "Nomadyczne",
+      "role": "Surowce i wyprawy",
+      "planned_artifacts": 2
+    },
+    {
+      "id": "anomalne",
+      "name": "Anomalne",
+      "role": "Efekty specjalne",
+      "planned_artifacts": 2
+    }
+  ],
+  "current_weapon_catalog": [
+    {
+      "id": "baton",
+      "name": "Pałka ochroniarza",
+      "category": "Biała 1R",
+      "currentAttacks": 1,
+      "currentMin": 5,
+      "currentMax": 8,
+      "accuracy": 2,
+      "crit": 0,
+      "penetration": 0
+    },
+    {
+      "id": "pipe",
+      "name": "Żelazna rura",
+      "category": "Biała 1R",
+      "currentAttacks": 1,
+      "currentMin": 6,
+      "currentMax": 10,
+      "accuracy": -2,
+      "crit": 0,
+      "penetration": 1
+    },
+    {
+      "id": "wrench",
+      "name": "Klucz francuski",
+      "category": "Biała 1R",
+      "currentAttacks": 1,
+      "currentMin": 7,
+      "currentMax": 12,
+      "accuracy": 2,
+      "crit": 0,
+      "penetration": 0
+    },
+    {
+      "id": "knife",
+      "name": "Zardzewiały nóż",
+      "category": "Biała 1R",
+      "currentAttacks": 2,
+      "currentMin": 6,
+      "currentMax": 10,
+      "accuracy": 4,
+      "crit": 3,
+      "penetration": 0
+    },
+    {
+      "id": "cleaver",
+      "name": "Tasak z pustkowi",
+      "category": "Biała 1R",
+      "currentAttacks": 1,
+      "currentMin": 10,
+      "currentMax": 16,
+      "accuracy": -3,
+      "crit": 5,
+      "penetration": 0
+    },
+    {
+      "id": "hatchet",
+      "name": "Toporek z odzysku",
+      "category": "Biała 1R",
+      "currentAttacks": 1,
+      "currentMin": 12,
+      "currentMax": 18,
+      "accuracy": -2,
+      "crit": 2,
+      "penetration": 2
+    },
+    {
+      "id": "saber",
+      "name": "Szabla konwojenta",
+      "category": "Biała 1R",
+      "currentAttacks": 2,
+      "currentMin": 10,
+      "currentMax": 15,
+      "accuracy": 1,
+      "crit": 2,
+      "penetration": 0
+    },
+    {
+      "id": "machete",
+      "name": "Maczeta zbieracza",
+      "category": "Biała 1R",
+      "currentAttacks": 2,
+      "currentMin": 12,
+      "currentMax": 18,
+      "accuracy": -1,
+      "crit": 1,
+      "penetration": 0
+    },
+    {
+      "id": "pistol",
+      "name": "Pistolet M-9",
+      "category": "Palna 1R",
+      "currentAttacks": 1,
+      "currentMin": 12,
+      "currentMax": 18,
+      "accuracy": 5,
+      "crit": 0,
+      "penetration": 0
+    },
+    {
+      "id": "deserteagle",
+      "name": "Pistolet pustynny",
+      "category": "Palna 1R",
+      "currentAttacks": 1,
+      "currentMin": 18,
+      "currentMax": 27,
+      "accuracy": -3,
+      "crit": 2,
+      "penetration": 1
+    },
+    {
+      "id": "revolver",
+      "name": "Rewolwer Strażnika",
+      "category": "Palna 1R",
+      "currentAttacks": 1,
+      "currentMin": 19,
+      "currentMax": 28,
+      "accuracy": 0,
+      "crit": 5,
+      "penetration": 1
+    },
+    {
+      "id": "smg",
+      "name": "Pistolet maszynowy Viper",
+      "category": "Palna 1R",
+      "currentAttacks": 3,
+      "currentMin": 8,
+      "currentMax": 13,
+      "accuracy": -7,
+      "crit": -2,
+      "penetration": 0
+    },
+    {
+      "id": "rifle",
+      "name": "Karabin szabrownika",
+      "category": "Palna 2R",
+      "currentAttacks": 1,
+      "currentMin": 18,
+      "currentMax": 27,
+      "accuracy": 2,
+      "crit": 0,
+      "penetration": 1
+    },
+    {
+      "id": "carbine",
+      "name": "Karabinek warty",
+      "category": "Palna 2R",
+      "currentAttacks": 2,
+      "currentMin": 13,
+      "currentMax": 20,
+      "accuracy": 2,
+      "crit": 0,
+      "penetration": 1
+    },
+    {
+      "id": "shotgun",
+      "name": "Strzelba pustkowi",
+      "category": "Palna 2R",
+      "currentAttacks": 1,
+      "currentMin": 28,
+      "currentMax": 42,
+      "accuracy": -7,
+      "crit": 1,
+      "penetration": 1
+    },
+    {
+      "id": "sniper",
+      "name": "Karabin dalekiego zasięgu",
+      "category": "Palna 2R",
+      "currentAttacks": 1,
+      "currentMin": 36,
+      "currentMax": 54,
+      "accuracy": 5,
+      "crit": 5,
+      "penetration": 4
+    },
+    {
+      "id": "lmg",
+      "name": "Karabin maszynowy PK",
+      "category": "Palna 2R",
+      "currentAttacks": 3,
+      "currentMin": 13,
+      "currentMax": 20,
+      "accuracy": -10,
+      "crit": -2,
+      "penetration": 1
+    },
+    {
+      "id": "crossbow",
+      "name": "Kusza tropiciela",
+      "category": "Dystansowa 2R",
+      "currentAttacks": 1,
+      "currentMin": 18,
+      "currentMax": 28,
+      "accuracy": 1,
+      "crit": 4,
+      "penetration": 3
+    },
+    {
+      "id": "harpoon",
+      "name": "Wyrzutnia harpunów",
+      "category": "Dystansowa 2R",
+      "currentAttacks": 1,
+      "currentMin": 23,
+      "currentMax": 36,
+      "accuracy": -3,
+      "crit": 3,
+      "penetration": 4
+    },
+    {
+      "id": "flame",
+      "name": "Miotacz żaru",
+      "category": "Technologiczna 2R",
+      "currentAttacks": 3,
+      "currentMin": 12,
+      "currentMax": 19,
+      "accuracy": -6,
+      "crit": -3,
+      "penetration": 2
+    },
+    {
+      "id": "crowbar",
+      "name": "Łom zbrojony",
+      "category": "Biała 2R",
+      "currentAttacks": 1,
+      "currentMin": 15,
+      "currentMax": 23,
+      "accuracy": -2,
+      "crit": 0,
+      "penetration": 3
+    },
+    {
+      "id": "hammer",
+      "name": "Młot złomiarza",
+      "category": "Biała 2R",
+      "currentAttacks": 1,
+      "currentMin": 21,
+      "currentMax": 33,
+      "accuracy": -4,
+      "crit": 2,
+      "penetration": 2
+    },
+    {
+      "id": "rail",
+      "name": "Prototypowa broń szynowa",
+      "category": "Technologiczna 2R",
+      "currentAttacks": 1,
+      "currentMin": 31,
+      "currentMax": 47,
+      "accuracy": 3,
+      "crit": 3,
+      "penetration": 6
+    },
+    {
+      "id": "sledge",
+      "name": "Młot wyburzeniowy",
+      "category": "Biała 2R",
+      "currentAttacks": 1,
+      "currentMin": 32,
+      "currentMax": 50,
+      "accuracy": -6,
+      "crit": 4,
+      "penetration": 3
+    }
+  ],
+  "current_prefixes": [
+    {
+      "id": "weapon_precise",
+      "name": "Precyzyjny"
+    },
+    {
+      "id": "weapon_brutal",
+      "name": "Brutalny"
+    },
+    {
+      "id": "weapon_destructive",
+      "name": "Niszczycielski"
+    },
+    {
+      "id": "weapon_lethal",
+      "name": "Zabójczy"
+    },
+    {
+      "id": "weapon_quick",
+      "name": "Szybki"
+    },
+    {
+      "id": "weapon_stable",
+      "name": "Stabilny"
+    },
+    {
+      "id": "weapon_piercing",
+      "name": "Przebijający"
+    },
+    {
+      "id": "armor_reinforced",
+      "name": "Wzmocniony"
+    },
+    {
+      "id": "armor_plated",
+      "name": "Pancerny"
+    },
+    {
+      "id": "armor_agile",
+      "name": "Zwinny"
+    },
+    {
+      "id": "armor_flexible",
+      "name": "Elastyczny"
+    },
+    {
+      "id": "armor_light",
+      "name": "Lekki"
+    },
+    {
+      "id": "armor_resistant",
+      "name": "Odporny"
+    },
+    {
+      "id": "armor_tracker",
+      "name": "Tropicielski"
+    },
+    {
+      "id": "armor_iron",
+      "name": "Żelazny"
+    },
+    {
+      "id": "armor_warden",
+      "name": "Wartowniczy"
+    },
+    {
+      "id": "armor_nomad",
+      "name": "Nomadyczny"
+    },
+    {
+      "id": "accessory_technical",
+      "name": "Techniczny"
+    },
+    {
+      "id": "accessory_observant",
+      "name": "Spostrzegawczy"
+    },
+    {
+      "id": "accessory_persuasive",
+      "name": "Przekonujący"
+    },
+    {
+      "id": "accessory_reflexive",
+      "name": "Refleksyjny"
+    },
+    {
+      "id": "accessory_versatile",
+      "name": "Wszechstronny"
+    }
+  ],
+  "current_suffixes": [
+    {
+      "id": "weapon_hunter",
+      "name": "Łowcy"
+    },
+    {
+      "id": "weapon_sniper",
+      "name": "Snajpera"
+    },
+    {
+      "id": "weapon_berserker",
+      "name": "Berserkera"
+    },
+    {
+      "id": "weapon_executioner",
+      "name": "Egzekutora"
+    },
+    {
+      "id": "weapon_warrior",
+      "name": "Wojownika"
+    },
+    {
+      "id": "weapon_destroyer",
+      "name": "Niszczyciela"
+    },
+    {
+      "id": "weapon_piercer",
+      "name": "Penetratora"
+    },
+    {
+      "id": "weapon_duelist",
+      "name": "Fechmistrza"
+    },
+    {
+      "id": "armor_survivor",
+      "name": "Ocalonego"
+    },
+    {
+      "id": "armor_guard",
+      "name": "Strażnika"
+    },
+    {
+      "id": "armor_wanderer",
+      "name": "Wędrowca"
+    },
+    {
+      "id": "armor_scout",
+      "name": "Zwiadowcy"
+    },
+    {
+      "id": "armor_tough",
+      "name": "Twardziela"
+    },
+    {
+      "id": "armor_ironwill",
+      "name": "Żelaznej Woli"
+    },
+    {
+      "id": "accessory_technician",
+      "name": "Technika"
+    },
+    {
+      "id": "accessory_negotiator",
+      "name": "Negocjatora"
+    },
+    {
+      "id": "accessory_tracker",
+      "name": "Tropiciela"
+    },
+    {
+      "id": "accessory_leader",
+      "name": "Przywódcy"
+    },
+    {
+      "id": "accessory_explorer",
+      "name": "Odkrywcy"
+    },
+    {
+      "id": "accessory_survivor",
+      "name": "Ocalałego"
+    }
+  ]
+}
