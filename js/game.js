@@ -2699,7 +2699,7 @@ function itemCompareSnapshot(equip){
  try{
   state.equip=equip;
   const attributes=attrs(),defense=heroDefense(),combat=inventoryCombatSummary();
-  const sets=setEngineEffects(),resonance=resonanceResults().filter(r=>r.active);
+  const sets=setEngineEffects(),resonance=resonanceResults();
   return {attributes,defense,combat,sets, resonance};
  }finally{state.equip=original;}
 }
@@ -2709,23 +2709,50 @@ function itemCompareDelta(before,after){
  const mode=diff>0?'gain':diff<0?'loss':'same';
  return `<strong class="ashen-compare-${mode}">${diff>0?'+':''}${itemCompareNum(diff)}</strong>`;
 }
+// ASHEN 0.5.4 — premia zestawu i rezonansu jest opisana osobno od sumy statystyk.
+// W podsumowaniu nie dodajemy jej ponownie: tabela bazuje już na pełnym kalkulatorze postaci.
+function itemCompareEffectLines(effects,kind){
+ const entries=Object.entries(effects||{}).filter(([,value])=>Math.abs(Number(value)||0)>0.00001);
+ return entries.map(([key,value])=>{
+  const names={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
+  const label=kind==='resonance'?(names[key]||SET_V05_LABELS[key]||key):(SET_V05_LABELS[key]||key);
+  return `${escape(label)} ${Number(value)>0?'+':''}${itemCompareNum(Number(value))}`;
+ });
+}
+function itemCompareResonanceBenefits(row){
+ const cfg=row?.config||{},out=itemCompareEffectLines(cfg.bonus,'resonance');
+ if(cfg.luck)out.push(`Szczęście +${itemCompareNum(cfg.luck)}`);
+ if(cfg.explore)out.push(`Eksploracja +${itemCompareNum(cfg.explore)} p.p.`);
+ return out;
+}
 function itemCompareSets(a,b){
  const map=rows=>new Map(rows.map(x=>[x.category+':'+x.id,x]));
  const first=map(a.sets.active),last=map(b.sets.active);
  const labels=[];
  for(const key of new Set([...first.keys(),...last.keys()])){
-  const was=first.get(key),now=last.get(key);
-  const label=escape((now||was).name);
-  if(!was&&now)labels.push(`<div class="ashen-compare-gain">✓ ${label}: aktywuje X${now.level>=2?' + Y':''}${now.level>=3?' + Z':''} (${now.count} części)</div>`);
-  else if(was&&!now)labels.push(`<div class="ashen-compare-loss">✕ ${label}: utrata X${was.level>=2?' + Y':''}${was.level>=3?' + Z':''}</div>`);
-  else if(was&&now&&(was.level!==now.level||was.x!==now.x||was.count!==now.count))labels.push(`<div>${label}: X ${itemCompareNum(was.x)} → ${itemCompareNum(now.x)} · Y/Z ${was.level} → ${now.level} · części ${was.count} → ${now.count}</div>`);
+  const was=first.get(key),now=last.get(key),v=now||was;
+  const label=escape(v.name),levels=r=>`X${r.level>=2?' + Y':''}${r.level>=3?' + Z':''}`;
+  if(!was&&now)labels.push(`<div class="ashen-compare-synergy ashen-compare-gain"><strong>✓ ${label}: aktywacja ${levels(now)}</strong><span>${now.count} części · Premie: ${itemCompareEffectLines(now.effects).join(' · ')||'premia reaktywna Z'}</span></div>`);
+  else if(was&&!now)labels.push(`<div class="ashen-compare-synergy ashen-compare-loss"><strong>✕ ${label}: utrata ${levels(was)}</strong><span>Przed zmianą: ${was.count} części · Utracone premie: ${itemCompareEffectLines(was.effects).join(' · ')||'premia reaktywna Z'}</span></div>`);
+  else if(was&&now&&(was.level!==now.level||was.x!==now.x||was.count!==now.count||was.qualityPoints!==now.qualityPoints)){
+   const effects=[];
+   for(const effect of new Set([...Object.keys(was.effects||{}),...Object.keys(now.effects||{})])){
+    const old=Number(was.effects?.[effect]||0),next=Number(now.effects?.[effect]||0);
+    if(Math.abs(next-old)>0.00001)effects.push(`${escape(SET_V05_LABELS[effect]||effect)} ${itemCompareNum(old)} → ${itemCompareNum(next)}`);
+   }
+   labels.push(`<div class="ashen-compare-synergy"><strong>${label}: ${levels(was)} → ${levels(now)}</strong><span>${was.count} → ${now.count} części · ${effects.join(' · ')||'Bez zmiany premii liczbowych'}</span></div>`);
+  }
  }
  const resonanceKey=x=>x.kind+':'+x.id;
  const r1=new Map(a.resonance.map(r=>[resonanceKey(r),r])),r2=new Map(b.resonance.map(r=>[resonanceKey(r),r]));
  for(const key of new Set([...r1.keys(),...r2.keys()])){
   const old=r1.get(key),now=r2.get(key),v=now||old;
-  if(!old&&now)labels.push(`<div class="ashen-compare-gain">✓ Rezonans ${escape(v.config.name)} — aktywowany</div>`);
-  else if(old&&!now)labels.push(`<div class="ashen-compare-loss">✕ Rezonans ${escape(v.config.name)} — utracony</div>`);
+  const wasActive=!!old?.active,isActive=!!now?.active;
+  if(wasActive===isActive)continue;
+  const added=isActive,benefits=itemCompareResonanceBenefits(v);
+  const previous=old?.count||0,next=now?.count||0;
+  const reason=added?'Zebrano wymagane 3 artefakty z tym samym modyfikatorem.':'Po zamianie pozostaje mniej niż 3 artefakty z tym samym modyfikatorem.';
+  labels.push(`<div class="ashen-compare-synergy ${added?'ashen-compare-gain':'ashen-compare-loss'}"><strong>${added?'✓':'✕'} Rezonans ${escape(v.config.name)} — ${added?'aktywowany':'utracony'}</strong><span>${v.kind==='prefix'?'Wspólny prefiks':'Wspólny sufiks'} · ${previous}/3 → ${next}/3. ${reason}</span><span>${added?'Uzyskane':'Utracone'} premie rezonansu: ${benefits.join(' · ')||'brak premii liczbowych'}</span></div>`);
  }
  const effects1=a.sets.effects,effects2=b.sets.effects;
  const effects=[];
@@ -2735,8 +2762,23 @@ function itemCompareSets(a,b){
   if(Math.abs(after-before)<0.00001)continue;
   effects.push(`<div>${escape(SET_V05_LABELS[key]||key)}: ${itemCompareNum(before)} → ${itemCompareNum(after)} (${itemCompareDelta(before,after)})</div>`);
  }
- return `<div class="ashen-compare-set-changes"><h4>Wpływ na zestawy X/Y/Z i rezonans</h4>${labels.join('')||'<p class="small muted">Bez zmian aktywacji zestawów.</p>'}${effects.length?`<details><summary>Zmiany premii zestawowych (${effects.length})</summary>${effects.join('')}</details>`:''}</div>`;
+ return `<div class="ashen-compare-set-changes"><h4>Wpływ na zestawy X/Y/Z i rezonans</h4>${labels.join('')||'<p class="small muted">Bez zmian aktywacji zestawów i rezonansu.</p>'}${effects.length?`<details><summary>Łączne zmiany premii X/Y/Z (${effects.length})</summary>${effects.join('')}</details>`:''}<p class="small muted">Premie zestawów i rezonansu są już zawarte w statystykach „Po zmianie” powyżej. Nie należy dodawać ich ponownie.</p></div>`;
 }
+function itemCompareVerdict(before,after){
+ const deltas=[
+  ['PŻ',before.defense.hp,after.defense.hp],['pancerz',before.defense.armor,after.defense.armor],
+  ['unik',before.defense.dodge,after.defense.dodge],['celność',before.defense.acc,after.defense.acc],
+  ['ataki na rundę',before.combat.attacks,after.combat.attacks],
+  ['minimalne obrażenia / rundę',before.combat.range.low,after.combat.range.low],
+  ['maksymalne obrażenia / rundę',before.combat.range.high,after.combat.range.high],
+  ...Object.entries({str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'}).map(([key,label])=>[label,before.attributes[key]||0,after.attributes[key]||0])
+ ];
+ const gains=deltas.filter(x=>x[2]>x[1]+0.00001),losses=deltas.filter(x=>x[2]<x[1]-0.00001);
+ const fmt=list=>list.map(([name,a,b])=>`${name} ${b-a>0?'+':''}${itemCompareNum(Number((b-a).toFixed(2)))}`).join(' · ');
+ const title=gains.length&&losses.length?'Zamiana ma zarówno korzyści, jak i straty.':gains.length?'Zamiana zwiększy wskazane statystyki.':losses.length?'Zamiana osłabi wskazane statystyki.':'Podstawowe statystyki postaci pozostaną bez zmian.';
+ return `<div class="ashen-compare-verdict"><strong>Podsumowanie zamiany</strong><p>${title}</p>${gains.length?`<div class="ashen-compare-gain">▲ Zyskujesz: ${escape(fmt(gains))}</div>`:''}${losses.length?`<div class="ashen-compare-loss">▼ Tracisz: ${escape(fmt(losses))}</div>`:''}<p class="small muted">To bilans całej postaci po uwzględnieniu wyposażenia, zestawów i rezonansu. Warunkowe efekty walki i Szczęście są opisane osobno poniżej.</p></div>`;
+}
+
 function itemComparePanel(inst){
  const slots=itemEquipSlots(inst);if(!slots.length)return '';
  const target=slots.includes(itemCompareSlot)?itemCompareSlot:itemEquipDefaultSlot(inst);
@@ -2759,7 +2801,7 @@ function itemComparePanel(inst){
  const attrNames={str:'Siła',dex:'Zręczność',end:'Wytrzymałość',per:'Percepcja',int:'Inteligencja',cha:'Charyzma'};
  for(const [key,label] of Object.entries(attrNames))stats.push([label,Number(before.attributes[key]||0),Number(after.attributes[key]||0)]);
  const rows=stats.map(([label,a,b])=>`<tr><th scope="row">${label}</th><td>${itemCompareNum(a)}</td><td>${itemCompareNum(b)}</td><td>${itemCompareDelta(a,b)}</td></tr>`).join('');
- return `<section class="ashen-item-compare" aria-label="Porównanie wyposażenia przed założeniem"><h3>⚖ Porównanie przed założeniem</h3><p class="small muted">Symulacja bez zmiany ekwipunku i zapisu postaci. Wyniki wykorzystują ten sam kalkulator statystyk co zakładka Postać.</p>${slots.length>1?`<div class="ashen-compare-targets" role="group" aria-label="Wybierz slot do porównania">${slots.map(slot=>`<button type="button" data-item-compare-slot="${slot}" class="${slot===target?'primary':''}">${escape(slotLabels[slot])}</button>`).join('')}</div>`:''}<p class="small">Docelowy slot: <strong>${escape(slotLabels[target])}</strong>. ${replaced&&replaced.uid!==inst.uid?'Zamieniasz: <strong>'+escape(statsOf(replaced).name)+'</strong>.':'Pusty slot.'}</p>${removed.length?`<p class="ashen-compare-warning">⚠ Dodatkowo zdejmiesz: ${escape(removed.join('; '))}.</p>`:''}<div class="ashen-compare-table-wrap"><table class="ashen-compare-table"><thead><tr><th>Parametr</th><th>Teraz</th><th>Po zmianie</th><th>Różnica</th></tr></thead><tbody>${rows}</tbody></table></div>${itemCompareSets(before,after)}<p class="small muted">Obrażenia to orientacyjny zakres wszystkich ataków przed trafieniem i pancerzem przeciwnika. Bonusy reaktywne Z zależą od przebiegu walki.</p></section>`;
+ return `<section class="ashen-item-compare" aria-label="Porównanie wyposażenia przed założeniem"><h3>⚖ Porównanie przed założeniem</h3><p class="small muted">Symulacja bez zmiany ekwipunku i zapisu postaci. Wyniki wykorzystują ten sam kalkulator statystyk co zakładka Postać.</p>${slots.length>1?`<div class="ashen-compare-targets" role="group" aria-label="Wybierz slot do porównania">${slots.map(slot=>`<button type="button" data-item-compare-slot="${slot}" class="${slot===target?'primary':''}">${escape(slotLabels[slot])}</button>`).join('')}</div>`:''}<p class="small">Docelowy slot: <strong>${escape(slotLabels[target])}</strong>. ${replaced&&replaced.uid!==inst.uid?'Zamieniasz: <strong>'+escape(statsOf(replaced).name)+'</strong>.':'Pusty slot.'}</p>${removed.length?`<p class="ashen-compare-warning">⚠ Dodatkowo zdejmiesz: ${escape(removed.join('; '))}.</p>`:''}<div class="ashen-compare-table-wrap"><table class="ashen-compare-table"><thead><tr><th>Parametr</th><th>Teraz</th><th>Po zmianie</th><th>Różnica</th></tr></thead><tbody>${rows}</tbody></table></div>${itemCompareVerdict(before,after)}${itemCompareSets(before,after)}<p class="small muted">Obrażenia to orientacyjny zakres wszystkich ataków przed trafieniem i pancerzem przeciwnika. Bonusy reaktywne Z zależą od przebiegu walki.</p></section>`;
 }
 function itemDetailContent(){if(!openItemDetail)return '';
  const owned=openItemDetail.kind==='owned'?instance(openItemDetail.id):null;

@@ -1,3 +1,9 @@
+## ASHEN 0.5.4
+- Porównywarka: szczegółowe wyjaśnienie aktywacji/utraty rezonansu (prefiks lub sufiks, liczba zgodnych artefaktów 3/3, Szczęście, eksploracja, atrybuty).
+- Podsumowanie zysków i strat całej postaci; brak podwójnego naliczania premii.
+- W przypadku zmian zestawów X/Y/Z pokazujemy ich indywidualne premie i zmianę poziomu.
+- Brak zmian w mechanice walki i zapisie.
+
 ## ASHEN v0.5.3 — porównywanie wyposażenia (2026-11-19)
 - Podgląd statystyk postaci przed i po założeniu przedmiotu, bez zapisywania symulacji.
 - Obsługa prawej/lewej ręki, broni dwuręcznej i trzech slotów akcesoriów.

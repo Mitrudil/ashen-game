@@ -1458,3 +1458,12 @@ body.arena-report-modal-open{overflow:hidden}
 .ashen-compare-set-changes h4{margin:0 0 6px}
 .ashen-compare-set-changes summary{cursor:pointer}
 @media(max-width:620px){.ashen-item-compare{padding:9px}.ashen-compare-table th,.ashen-compare-table td{padding:6px 5px;font-size:.78rem}}
+
+/* ASHEN 0.5.4 — wyjaśnienie zmian rezonansu i bilans zamiany. */
+.ashen-compare-verdict{margin-top:12px;padding:11px 12px;border:1px solid rgba(174,185,197,.22);border-radius:9px;background:rgba(255,255,255,.035);font-size:.87rem;line-height:1.65;overflow-wrap:anywhere}
+.ashen-compare-verdict>p{margin:5px 0 8px}
+.ashen-compare-verdict>div{margin:5px 0}
+.ashen-compare-synergy{margin:9px 0;padding:9px 11px;border-left:3px solid rgba(174,185,197,.5);background:rgba(255,255,255,.035);border-radius:5px;display:flex;flex-direction:column;gap:4px;overflow-wrap:anywhere}
+.ashen-compare-synergy.ashen-compare-gain{border-left-color:#76d7a0}
+.ashen-compare-synergy.ashen-compare-loss{border-left-color:#ff9292}
+.ashen-compare-synergy span{color:var(--text,#d7dde1)}

@@ -1,4 +1,4 @@
-## ASHEN v0.5.3 — porównywanie wyposażenia (2026-11-19)
+## ASHEN v0.5.4 — porównywanie wyposażenia (2026-11-19)
 - Podgląd statystyk postaci przed i po założeniu przedmiotu, bez zapisywania symulacji.
 - Obsługa prawej/lewej ręki, broni dwuręcznej i trzech slotów akcesoriów.
 - Zmiany kompletów X/Y/Z i rezonansu artefaktów w podglądzie.
@@ -65,3 +65,6 @@ Konfiguracja Mistrzostwa Z jest nakładana tylko na migawkę walki, nie na zapis
 
 ## v0.4.9.28 — naprawa sesji raportu PvP
 Zwykłe odświeżenie sesji Supabase po przełączeniu karty nie usuwa otwartego raportu. SQL bez zmian.
+
+
+ASHEN 0.5.4: porównywarka zawiera opis przyczyn i wartości premii rezonansu oraz podsumowanie zmian statystyk.
