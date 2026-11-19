@@ -1,3 +1,7 @@
+## ASHEN 0.5.1 — zmiany
+
+Szczegóły: `ZMIANY_051.md`. Wersja nie wymaga nowego SQL.
+
 # ASHEN v0.5.0 — etap A
 
 Aktualizacja ekwipunku: naprawa bazowych bonusów i ujednolicenie podglądu X/Y/Z. Bez migracji SQL. Po instalacji zrób Ctrl+F5 i sprawdź statystyki postaci Mitrudil i Kowal przed kolejnym PvP; klient publikuje nową migawkę online.

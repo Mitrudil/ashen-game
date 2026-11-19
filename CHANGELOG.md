@@ -1,3 +1,11 @@
+## 0.5.1 (2026-11-19)
+- Wszystkie 12 zasobów w pasku, kompaktowy układ.
+- Nowa kolejność 15 zakładek.
+- Wyprawy: brak przedmiotów po porażce; mniejsze i zróżnicowane szanse drugiego/trzeciego łupu.
+- Starcia: podgląd przedmiotu bossa.
+- Okno przedmiotu: sprzedaż, zezłomowanie i kłódka z potwierdzeniem.
+- Zwierzęta: progi odblokowań bez zmian, do dalszego projektu.
+
 # ASHEN v0.5.0 — spójność ekwipunku i X/Y/Z
 
 - `statsOf()` dolicza bazowe bonusy atrybutów przedmiotu obok prefiksów i sufiksów. Dotyczy Postaci, Ekwipunku, porównania oraz migawki online. **Może zmienić statystyki i balans po publikacji postaci.**

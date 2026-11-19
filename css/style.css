@@ -1426,3 +1426,16 @@ body.arena-report-modal-open{overflow:hidden}
 .expedition-support-choice:has(input:disabled){opacity:.55;cursor:default}
 .faction-support-note{padding:12px!important;margin:9px 0}
 @media(max-width:600px){.expedition-personal-support{gap:5px;padding:9px}.expedition-support-choice{font-size:.83rem}}
+
+/* ASHEN 0.5.1 — dwanaście zasobów w kompaktowym pasku */
+.ashen-global-resources.is-compact{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.ashen-global-resources.is-compact .mission-resource{padding:6px 7px;gap:6px;min-height:47px}
+.ashen-global-resources.is-compact .mission-resource .ico{width:24px;height:24px;flex:0 0 24px}
+.ashen-global-resources.is-compact .mission-resource .ico span{font-size:20px;line-height:1}
+.ashen-global-resources.is-compact .mission-resource .lab{font-size:9px;letter-spacing:.02em;line-height:1.05}
+.ashen-global-resources.is-compact .mission-resource .num{font-size:15px;line-height:1.1}
+.ashen-item-modal .ashen-modal-equip-actions{flex-wrap:wrap}
+@media(max-width:1100px){.ashen-global-resources.is-compact{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:590px){.ashen-global-resources.is-compact{grid-template-columns:repeat(3,minmax(0,1fr))}.ashen-global-resources.is-compact .mission-resource{min-height:42px;padding:5px;gap:5px}.ashen-global-resources.is-compact .mission-resource .ico{width:20px;height:20px;flex-basis:20px}.ashen-global-resources.is-compact .mission-resource .lab{font-size:8px}.ashen-global-resources.is-compact .mission-resource .num{font-size:13px}}
+/* Okno przedmiotu otwarte z raportu bossa musi być nad raportem Starć. */
+.ashen-item-overlay{z-index:10020}
