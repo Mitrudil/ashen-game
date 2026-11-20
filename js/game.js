@@ -622,7 +622,35 @@ function prepare060Award(inst){
  if(!d||d.slot==='material'||d.artifact)return inst;
  return window.Ashen060Loot.prepareNewLoot(inst,window.Ashen060Bonuses);
 }
+// Dopiero zgodna wersja silnika Supabase pozwoli zmienic ta flage na true.
+// Nigdy nie aktywujemy nowych jakosci na podstawie URL lub localStorage.
+const ASHEN_060_MODERN_DROPS_ENABLED=window.ASHEN_BUILD?.modernDropsEnabled===true;
+function modernExpeditionPool(loc){
+ const id=typeof loc==='string'?loc:loc?.id;
+ return ['ruins','hospital','outpost'].includes(id)?id:null;
+}
+function modernRarityWeightsFor(loc,luck=0){
+ const pool=modernExpeditionPool(loc);
+ return pool?window.Ashen060Loot.modernWeights(pool,window.Ashen060Quality,luck):null;
+}
+function modernRollItem(id,expedition=null,luck=0){
+ const d=item(id),pool=modernExpeditionPool(expedition);
+ if(!pool||!d||d.slot==='material'||d.artifact)return null;
+ const weights=modernRarityWeightsFor(expedition,luck);
+ const rar=window.Ashen060Loot.rollWeightedQuality(weights);
+ // Legacy afiksy uzywaja indeksow swoich progow. Nowe jakosci mapujemy
+ // na analogiczne progi sily afiksow BEZ podmieniania indeksu samej jakosci.
+ const affixTier=[0,2,3,4,4][rar];
+ const prefix=Math.random()<prefixChance[affixTier]?pickModifier(prefixDefs,d,affixTier):null;
+ const suffix=Math.random()<suffixChance[affixTier]?pickModifier(suffixDefs,d,affixTier):null;
+ const base={uid:'loot-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),id,prefix,suffix,artifactAffixesInitialized:false,locked:rar>=3};
+ // Generator przyjmuje szanse z lokalizacji razem z premia szczescia.
+ const rngQuality=()=>{const baseWeights=window.Ashen060Quality.DROP_POOLS[pool];const lo=baseWeights.slice(0,rar).reduce((a,b)=>a+b,0)/100;return lo+baseWeights[rar]/200};
+ return window.Ashen060Loot.prepareModernLoot(base,pool,window.Ashen060Quality,window.Ashen060Bonuses,rngQuality);
+}
 function rollItem(id,expedition=null,luck=0){
+ if(ASHEN_060_MODERN_DROPS_ENABLED){const modern=modernRollItem(id,expedition,luck);if(modern)return modern;}
+
  const d=item(id);
  let weights=explorationRarityWeights(expedition,luck);
  // Artefakty zaczynają się od rzadkiej jakości; legenda tylko na dalekiej wyprawie.
