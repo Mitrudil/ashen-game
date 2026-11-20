@@ -1,0 +1,1195 @@
+{
+  "version": "060-e17",
+  "source": "js/game.js",
+  "weapons": {
+    "baton": {
+      "min": 5,
+      "max": 8,
+      "attacks": 1,
+      "accuracy": 2,
+      "crit": 0,
+      "pen": 0,
+      "category": "Biała 1R",
+      "scale": 0.72,
+      "critMultiplier": 2,
+      "bonus": {},
+      "name": "Pałka ochroniarza",
+      "slot": "hand1"
+    },
+    "pipe": {
+      "min": 6,
+      "max": 10,
+      "attacks": 1,
+      "accuracy": -2,
+      "crit": 0,
+      "pen": 1,
+      "category": "Biała 1R",
+      "scale": 0.72,
+      "critMultiplier": 2,
+      "bonus": {},
+      "name": "Żelazna rura",
+      "slot": "weapon"
+    },
+    "wrench": {
+      "min": 7,
+      "max": 12,
+      "attacks": 1,
+      "accuracy": 2,
+      "crit": 0,
+      "pen": 0,
+      "category": "Biała 1R",
+      "scale": 0.72,
+      "critMultiplier": 2,
+      "bonus": {},
+      "name": "Klucz francuski",
+      "slot": "hand1"
+    },
+    "knife": {
+      "min": 6,
+      "max": 10,
+      "attacks": 2,
+      "accuracy": 4,
+      "crit": 3,
+      "pen": 0,
+      "category": "Biała 1R",
+      "scale": 0.72,
+      "critMultiplier": 2,
+      "bonus": {},
+      "name": "Zardzewiały nóż",
+      "slot": "weapon"
+    },
+    "cleaver": {
+      "min": 10,
+      "max": 16,
+      "attacks": 1,
+      "accuracy": -3,
+      "crit": 5,
+      "pen": 0,
+      "category": "Biała 1R",
+      "scale": 0.72,
+      "critMultiplier": 2,
+      "bonus": {},
+      "name": "Tasak z pustkowi",
+      "slot": "weapon"
+    },
+    "hatchet": {
+      "min": 12,
+      "max": 18,
+      "attacks": 1,
+      "accuracy": -2,
+      "crit": 2,
+      "pen": 2,
+      "category": "Biała 1R",
+      "scale": 0.72,
+      "critMultiplier": 2,
+      "bonus": {},
+      "name": "Toporek z odzysku",
+      "slot": "hand1"
+    },
+    "saber": {
+      "min": 10,
+      "max": 15,
+      "attacks": 2,
+      "accuracy": 1,
+      "crit": 2,
+      "pen": 0,
+      "category": "Biała 1R",
+      "scale": 0.72,
+      "critMultiplier": 2,
+      "bonus": {},
+      "name": "Szabla konwojenta",
+      "slot": "hand1"
+    },
+    "machete": {
+      "min": 12,
+      "max": 18,
+      "attacks": 2,
+      "accuracy": -1,
+      "crit": 1,
+      "pen": 0,
+      "category": "Biała 1R",
+      "scale": 0.72,
+      "critMultiplier": 2,
+      "bonus": {},
+      "name": "Maczeta zbieracza",
+      "slot": "weapon"
+    },
+    "pistol": {
+      "min": 12,
+      "max": 18,
+      "attacks": 1,
+      "accuracy": 5,
+      "crit": 0,
+      "pen": 0,
+      "category": "Palna 1R",
+      "scale": 1.12,
+      "critMultiplier": 1.6,
+      "bonus": {},
+      "name": "Pistolet M-9",
+      "slot": "weapon"
+    },
+    "deserteagle": {
+      "min": 18,
+      "max": 27,
+      "attacks": 1,
+      "accuracy": -3,
+      "crit": 2,
+      "pen": 1,
+      "category": "Palna 1R",
+      "scale": 1.12,
+      "critMultiplier": 1.6,
+      "bonus": {},
+      "name": "Pistolet pustynny",
+      "slot": "hand1"
+    },
+    "revolver": {
+      "min": 19,
+      "max": 28,
+      "attacks": 1,
+      "accuracy": 0,
+      "crit": 5,
+      "pen": 1,
+      "category": "Palna 1R",
+      "scale": 1.12,
+      "critMultiplier": 1.6,
+      "bonus": {},
+      "name": "Rewolwer Strażnika",
+      "slot": "weapon"
+    },
+    "smg": {
+      "min": 8,
+      "max": 13,
+      "attacks": 3,
+      "accuracy": -7,
+      "crit": -2,
+      "pen": 0,
+      "category": "Palna 1R",
+      "scale": 1.12,
+      "critMultiplier": 1.6,
+      "bonus": {},
+      "name": "Pistolet maszynowy Viper",
+      "slot": "weapon"
+    },
+    "rifle": {
+      "min": 18,
+      "max": 27,
+      "attacks": 1,
+      "accuracy": 2,
+      "crit": 0,
+      "pen": 1,
+      "category": "Palna 2R",
+      "scale": 0.93,
+      "critMultiplier": 1.8,
+      "bonus": {
+        "per": 2
+      },
+      "name": "Karabin szabrownika",
+      "slot": "weapon"
+    },
+    "carbine": {
+      "min": 13,
+      "max": 20,
+      "attacks": 2,
+      "accuracy": 2,
+      "crit": 0,
+      "pen": 1,
+      "category": "Palna 2R",
+      "scale": 0.93,
+      "critMultiplier": 1.8,
+      "bonus": {
+        "per": 1
+      },
+      "name": "Karabinek warty",
+      "slot": "weapon"
+    },
+    "shotgun": {
+      "min": 28,
+      "max": 42,
+      "attacks": 1,
+      "accuracy": -7,
+      "crit": 1,
+      "pen": 1,
+      "category": "Palna 2R",
+      "scale": 0.93,
+      "critMultiplier": 1.8,
+      "bonus": {
+        "dex": -1
+      },
+      "name": "Strzelba pustkowi",
+      "slot": "weapon"
+    },
+    "sniper": {
+      "min": 36,
+      "max": 54,
+      "attacks": 1,
+      "accuracy": 5,
+      "crit": 5,
+      "pen": 4,
+      "category": "Palna 2R",
+      "scale": 0.93,
+      "critMultiplier": 1.8,
+      "bonus": {
+        "per": 3
+      },
+      "name": "Karabin dalekiego zasięgu",
+      "slot": "weapon"
+    },
+    "lmg": {
+      "min": 13,
+      "max": 20,
+      "attacks": 3,
+      "accuracy": -10,
+      "crit": -2,
+      "pen": 1,
+      "category": "Palna 2R",
+      "scale": 0.93,
+      "critMultiplier": 1.8,
+      "bonus": {
+        "end": 1
+      },
+      "name": "Karabin maszynowy PK",
+      "slot": "hand2"
+    },
+    "crossbow": {
+      "min": 18,
+      "max": 28,
+      "attacks": 1,
+      "accuracy": 1,
+      "crit": 4,
+      "pen": 3,
+      "category": "Dystansowa 2R",
+      "scale": 1.42,
+      "critMultiplier": 2.3,
+      "bonus": {
+        "per": 2
+      },
+      "name": "Kusza tropiciela",
+      "slot": "weapon"
+    },
+    "harpoon": {
+      "min": 23,
+      "max": 36,
+      "attacks": 1,
+      "accuracy": -3,
+      "crit": 3,
+      "pen": 4,
+      "category": "Dystansowa 2R",
+      "scale": 1.42,
+      "critMultiplier": 2.3,
+      "bonus": {
+        "per": 2
+      },
+      "name": "Wyrzutnia harpunów",
+      "slot": "hand2"
+    },
+    "flame": {
+      "min": 12,
+      "max": 19,
+      "attacks": 3,
+      "accuracy": -6,
+      "crit": -3,
+      "pen": 2,
+      "category": "Technologiczna 2R",
+      "scale": 1.22,
+      "critMultiplier": 1.8,
+      "bonus": {
+        "int": 2
+      },
+      "name": "Miotacz żaru",
+      "slot": "weapon"
+    },
+    "crowbar": {
+      "min": 15,
+      "max": 23,
+      "attacks": 1,
+      "accuracy": -2,
+      "crit": 0,
+      "pen": 3,
+      "category": "Biała 2R",
+      "scale": 0.91,
+      "critMultiplier": 2.8,
+      "bonus": {
+        "str": 1
+      },
+      "name": "Łom zbrojony",
+      "slot": "hand2"
+    },
+    "hammer": {
+      "min": 21,
+      "max": 33,
+      "attacks": 1,
+      "accuracy": -4,
+      "crit": 2,
+      "pen": 2,
+      "category": "Biała 2R",
+      "scale": 0.91,
+      "critMultiplier": 2.8,
+      "bonus": {
+        "str": 2,
+        "dex": -1
+      },
+      "name": "Młot złomiarza",
+      "slot": "weapon"
+    },
+    "rail": {
+      "min": 31,
+      "max": 47,
+      "attacks": 1,
+      "accuracy": 3,
+      "crit": 3,
+      "pen": 6,
+      "category": "Technologiczna 2R",
+      "scale": 1.22,
+      "critMultiplier": 1.8,
+      "bonus": {
+        "int": 3
+      },
+      "name": "Prototypowa broń szynowa",
+      "slot": "weapon"
+    },
+    "sledge": {
+      "min": 32,
+      "max": 50,
+      "attacks": 1,
+      "accuracy": -6,
+      "crit": 4,
+      "pen": 3,
+      "category": "Biała 2R",
+      "scale": 0.91,
+      "critMultiplier": 2.8,
+      "bonus": {
+        "str": 3,
+        "dex": -1
+      },
+      "name": "Młot wyburzeniowy",
+      "slot": "hand2"
+    }
+  },
+  "weaponAffixes": [
+    {
+      "id": "weapon_precise",
+      "name": "Precyzyjny",
+      "forms": {
+        "m": "Precyzyjny",
+        "f": "Precyzyjna",
+        "p": "Precyzyjne"
+      },
+      "bonus": {
+        "per": 2
+      },
+      "accuracy": 3,
+      "on": "weapon",
+      "kind": "prefix",
+      "allowedWeapons": [
+        "baton",
+        "pipe",
+        "wrench",
+        "knife",
+        "cleaver",
+        "hatchet",
+        "saber",
+        "machete",
+        "pistol",
+        "deserteagle",
+        "revolver",
+        "smg",
+        "rifle",
+        "carbine",
+        "shotgun",
+        "sniper",
+        "lmg",
+        "crossbow",
+        "harpoon",
+        "flame",
+        "crowbar",
+        "hammer",
+        "rail",
+        "sledge"
+      ]
+    },
+    {
+      "id": "weapon_brutal",
+      "name": "Brutalny",
+      "forms": {
+        "m": "Brutalny",
+        "f": "Brutalna",
+        "p": "Brutalne"
+      },
+      "bonus": {
+        "str": 2
+      },
+      "damagePct": 4,
+      "on": "meleeWeapon",
+      "kind": "prefix",
+      "allowedWeapons": [
+        "baton",
+        "pipe",
+        "wrench",
+        "knife",
+        "cleaver",
+        "hatchet",
+        "saber",
+        "machete",
+        "crowbar",
+        "hammer",
+        "sledge"
+      ]
+    },
+    {
+      "id": "weapon_destructive",
+      "name": "Niszczycielski",
+      "forms": {
+        "m": "Niszczycielski",
+        "f": "Niszczycielska",
+        "p": "Niszczycielskie"
+      },
+      "damagePct": 8,
+      "on": "weapon",
+      "kind": "prefix",
+      "allowedWeapons": [
+        "baton",
+        "pipe",
+        "wrench",
+        "knife",
+        "cleaver",
+        "hatchet",
+        "saber",
+        "machete",
+        "pistol",
+        "deserteagle",
+        "revolver",
+        "smg",
+        "rifle",
+        "carbine",
+        "shotgun",
+        "sniper",
+        "lmg",
+        "crossbow",
+        "harpoon",
+        "flame",
+        "crowbar",
+        "hammer",
+        "rail",
+        "sledge"
+      ]
+    },
+    {
+      "id": "weapon_lethal",
+      "name": "Zabójczy",
+      "forms": {
+        "m": "Zabójczy",
+        "f": "Zabójcza",
+        "p": "Zabójcze"
+      },
+      "critPp": 4,
+      "on": "weapon",
+      "kind": "prefix",
+      "allowedWeapons": [
+        "baton",
+        "pipe",
+        "wrench",
+        "knife",
+        "cleaver",
+        "hatchet",
+        "saber",
+        "machete",
+        "pistol",
+        "deserteagle",
+        "revolver",
+        "smg",
+        "rifle",
+        "carbine",
+        "shotgun",
+        "sniper",
+        "lmg",
+        "crossbow",
+        "harpoon",
+        "flame",
+        "crowbar",
+        "hammer",
+        "rail",
+        "sledge"
+      ]
+    },
+    {
+      "id": "weapon_quick",
+      "name": "Szybki",
+      "forms": {
+        "m": "Szybki",
+        "f": "Szybka",
+        "p": "Szybkie"
+      },
+      "extraAttacks": 1,
+      "on": "lightWeapon",
+      "kind": "prefix",
+      "allowedWeapons": [
+        "baton",
+        "pipe",
+        "wrench",
+        "knife",
+        "cleaver",
+        "hatchet",
+        "saber",
+        "machete",
+        "pistol",
+        "revolver",
+        "smg"
+      ]
+    },
+    {
+      "id": "weapon_stable",
+      "name": "Stabilny",
+      "forms": {
+        "m": "Stabilny",
+        "f": "Stabilna",
+        "p": "Stabilne"
+      },
+      "accuracy": 5,
+      "critPp": 2,
+      "on": "weapon",
+      "kind": "prefix",
+      "allowedWeapons": [
+        "baton",
+        "pipe",
+        "wrench",
+        "knife",
+        "cleaver",
+        "hatchet",
+        "saber",
+        "machete",
+        "pistol",
+        "deserteagle",
+        "revolver",
+        "smg",
+        "rifle",
+        "carbine",
+        "shotgun",
+        "sniper",
+        "lmg",
+        "crossbow",
+        "harpoon",
+        "flame",
+        "crowbar",
+        "hammer",
+        "rail",
+        "sledge"
+      ]
+    },
+    {
+      "id": "weapon_piercing",
+      "name": "Przebijający",
+      "forms": {
+        "m": "Przebijający",
+        "f": "Przebijająca",
+        "p": "Przebijające"
+      },
+      "armorPen": 4,
+      "on": "weapon",
+      "kind": "prefix",
+      "allowedWeapons": [
+        "baton",
+        "pipe",
+        "wrench",
+        "knife",
+        "cleaver",
+        "hatchet",
+        "saber",
+        "machete",
+        "pistol",
+        "deserteagle",
+        "revolver",
+        "smg",
+        "rifle",
+        "carbine",
+        "shotgun",
+        "sniper",
+        "lmg",
+        "crossbow",
+        "harpoon",
+        "flame",
+        "crowbar",
+        "hammer",
+        "rail",
+        "sledge"
+      ]
+    },
+    {
+      "id": "weapon_hunter",
+      "name": "Łowcy",
+      "bonus": {
+        "per": 2
+      },
+      "accuracy": 2,
+      "on": "weapon",
+      "kind": "suffix",
+      "allowedWeapons": [
+        "baton",
+        "pipe",
+        "wrench",
+        "knife",
+        "cleaver",
+        "hatchet",
+        "saber",
+        "machete",
+        "pistol",
+        "deserteagle",
+        "revolver",
+        "smg",
+        "rifle",
+        "carbine",
+        "shotgun",
+        "sniper",
+        "lmg",
+        "crossbow",
+        "harpoon",
+        "flame",
+        "crowbar",
+        "hammer",
+        "rail",
+        "sledge"
+      ]
+    },
+    {
+      "id": "weapon_sniper",
+      "name": "Snajpera",
+      "bonus": {
+        "per": 2
+      },
+      "critPp": 2,
+      "on": "ranged",
+      "kind": "suffix",
+      "allowedWeapons": [
+        "pistol",
+        "deserteagle",
+        "revolver",
+        "smg",
+        "rifle",
+        "carbine",
+        "shotgun",
+        "sniper",
+        "lmg",
+        "crossbow",
+        "harpoon",
+        "flame",
+        "rail"
+      ]
+    },
+    {
+      "id": "weapon_berserker",
+      "name": "Berserkera",
+      "damagePct": 8,
+      "accuracy": -4,
+      "on": "weapon",
+      "kind": "suffix",
+      "allowedWeapons": [
+        "baton",
+        "pipe",
+        "wrench",
+        "knife",
+        "cleaver",
+        "hatchet",
+        "saber",
+        "machete",
+        "pistol",
+        "deserteagle",
+        "revolver",
+        "smg",
+        "rifle",
+        "carbine",
+        "shotgun",
+        "sniper",
+        "lmg",
+        "crossbow",
+        "harpoon",
+        "flame",
+        "crowbar",
+        "hammer",
+        "rail",
+        "sledge"
+      ]
+    },
+    {
+      "id": "weapon_executioner",
+      "name": "Egzekutora",
+      "critPp": 4,
+      "on": "weapon",
+      "kind": "suffix",
+      "allowedWeapons": [
+        "baton",
+        "pipe",
+        "wrench",
+        "knife",
+        "cleaver",
+        "hatchet",
+        "saber",
+        "machete",
+        "pistol",
+        "deserteagle",
+        "revolver",
+        "smg",
+        "rifle",
+        "carbine",
+        "shotgun",
+        "sniper",
+        "lmg",
+        "crossbow",
+        "harpoon",
+        "flame",
+        "crowbar",
+        "hammer",
+        "rail",
+        "sledge"
+      ]
+    },
+    {
+      "id": "weapon_warrior",
+      "name": "Wojownika",
+      "bonus": {
+        "str": 2
+      },
+      "damagePct": 3,
+      "on": "meleeWeapon",
+      "kind": "suffix",
+      "allowedWeapons": [
+        "baton",
+        "pipe",
+        "wrench",
+        "knife",
+        "cleaver",
+        "hatchet",
+        "saber",
+        "machete",
+        "crowbar",
+        "hammer",
+        "sledge"
+      ]
+    },
+    {
+      "id": "weapon_destroyer",
+      "name": "Niszczyciela",
+      "damagePct": 5,
+      "armorPen": 1,
+      "on": "weapon",
+      "kind": "suffix",
+      "allowedWeapons": [
+        "baton",
+        "pipe",
+        "wrench",
+        "knife",
+        "cleaver",
+        "hatchet",
+        "saber",
+        "machete",
+        "pistol",
+        "deserteagle",
+        "revolver",
+        "smg",
+        "rifle",
+        "carbine",
+        "shotgun",
+        "sniper",
+        "lmg",
+        "crossbow",
+        "harpoon",
+        "flame",
+        "crowbar",
+        "hammer",
+        "rail",
+        "sledge"
+      ]
+    },
+    {
+      "id": "weapon_piercer",
+      "name": "Penetratora",
+      "armorPen": 5,
+      "on": "weapon",
+      "kind": "suffix",
+      "allowedWeapons": [
+        "baton",
+        "pipe",
+        "wrench",
+        "knife",
+        "cleaver",
+        "hatchet",
+        "saber",
+        "machete",
+        "pistol",
+        "deserteagle",
+        "revolver",
+        "smg",
+        "rifle",
+        "carbine",
+        "shotgun",
+        "sniper",
+        "lmg",
+        "crossbow",
+        "harpoon",
+        "flame",
+        "crowbar",
+        "hammer",
+        "rail",
+        "sledge"
+      ]
+    },
+    {
+      "id": "weapon_duelist",
+      "name": "Fechmistrza",
+      "critPp": 3,
+      "accuracy": 3,
+      "on": "oneHandWeapon",
+      "kind": "suffix",
+      "allowedWeapons": [
+        "baton",
+        "pipe",
+        "wrench",
+        "knife",
+        "cleaver",
+        "hatchet",
+        "saber",
+        "machete",
+        "pistol",
+        "deserteagle",
+        "revolver",
+        "smg"
+      ]
+    }
+  ],
+  "equipmentAffixes": [
+    {
+      "id": "armor_reinforced",
+      "name": "Wzmocniony",
+      "forms": {
+        "m": "Wzmocniony",
+        "f": "Wzmocniona",
+        "p": "Wzmocnione"
+      },
+      "bonus": {
+        "end": 2
+      },
+      "on": "clothing",
+      "setId": "armor_reinforced",
+      "kind": "prefix"
+    },
+    {
+      "id": "armor_plated",
+      "name": "Pancerny",
+      "forms": {
+        "m": "Pancerny",
+        "f": "Pancerna",
+        "p": "Pancerne"
+      },
+      "armorPct": 15,
+      "on": "clothingArmor",
+      "setId": "armor_plated",
+      "kind": "prefix"
+    },
+    {
+      "id": "armor_agile",
+      "name": "Zwinny",
+      "forms": {
+        "m": "Zwinny",
+        "f": "Zwinna",
+        "p": "Zwinne"
+      },
+      "bonus": {
+        "dex": 2
+      },
+      "on": "clothing",
+      "setId": "armor_agile",
+      "kind": "prefix"
+    },
+    {
+      "id": "armor_flexible",
+      "name": "Elastyczny",
+      "forms": {
+        "m": "Elastyczny",
+        "f": "Elastyczna",
+        "p": "Elastyczne"
+      },
+      "bonus": {
+        "dex": 2
+      },
+      "on": "clothing",
+      "setId": "armor_flexible",
+      "kind": "prefix"
+    },
+    {
+      "id": "armor_light",
+      "name": "Lekki",
+      "forms": {
+        "m": "Lekki",
+        "f": "Lekka",
+        "p": "Lekkie"
+      },
+      "bonus": {
+        "dex": 1,
+        "per": 1
+      },
+      "on": "clothing",
+      "setId": "armor_light",
+      "kind": "prefix"
+    },
+    {
+      "id": "armor_resistant",
+      "name": "Odporny",
+      "forms": {
+        "m": "Odporny",
+        "f": "Odporna",
+        "p": "Odporne"
+      },
+      "armorPct": 8,
+      "bonus": {
+        "end": 1
+      },
+      "on": "clothingArmor",
+      "setId": "armor_resistant",
+      "kind": "prefix"
+    },
+    {
+      "id": "armor_tracker",
+      "name": "Tropicielski",
+      "forms": {
+        "m": "Tropicielski",
+        "f": "Tropicielska",
+        "p": "Tropicielskie"
+      },
+      "bonus": {
+        "per": 2
+      },
+      "on": "clothing",
+      "setId": "armor_tracker",
+      "kind": "prefix"
+    },
+    {
+      "id": "armor_iron",
+      "name": "Żelazny",
+      "forms": {
+        "m": "Żelazny",
+        "f": "Żelazna",
+        "p": "Żelazne"
+      },
+      "bonus": {
+        "str": 3
+      },
+      "on": "clothing",
+      "setId": "armor_iron",
+      "kind": "prefix"
+    },
+    {
+      "id": "armor_warden",
+      "name": "Wartowniczy",
+      "forms": {
+        "m": "Wartowniczy",
+        "f": "Wartownicza",
+        "p": "Wartownicze"
+      },
+      "bonus": {
+        "end": 2
+      },
+      "on": "clothing",
+      "setId": "armor_warden",
+      "kind": "prefix"
+    },
+    {
+      "id": "armor_nomad",
+      "name": "Nomadyczny",
+      "forms": {
+        "m": "Nomadyczny",
+        "f": "Nomadyczna",
+        "p": "Nomadyczne"
+      },
+      "bonus": {
+        "dex": 2
+      },
+      "on": "clothing",
+      "setId": "armor_nomad",
+      "kind": "prefix"
+    },
+    {
+      "id": "accessory_technical",
+      "name": "Techniczny",
+      "forms": {
+        "m": "Techniczny",
+        "f": "Techniczna",
+        "p": "Techniczne"
+      },
+      "bonus": {
+        "int": 2
+      },
+      "on": "accessory",
+      "setId": "accessory_technical",
+      "kind": "prefix"
+    },
+    {
+      "id": "accessory_observant",
+      "name": "Spostrzegawczy",
+      "forms": {
+        "m": "Spostrzegawczy",
+        "f": "Spostrzegawcza",
+        "p": "Spostrzegawcze"
+      },
+      "bonus": {
+        "per": 2
+      },
+      "on": "accessory",
+      "setId": "accessory_observant",
+      "kind": "prefix"
+    },
+    {
+      "id": "accessory_persuasive",
+      "name": "Przekonujący",
+      "forms": {
+        "m": "Przekonujący",
+        "f": "Przekonująca",
+        "p": "Przekonujące"
+      },
+      "bonus": {
+        "cha": 2
+      },
+      "on": "accessory",
+      "setId": "accessory_persuasive",
+      "kind": "prefix"
+    },
+    {
+      "id": "accessory_reflexive",
+      "name": "Refleksyjny",
+      "forms": {
+        "m": "Refleksyjny",
+        "f": "Refleksyjna",
+        "p": "Refleksyjne"
+      },
+      "bonus": {
+        "dex": 2
+      },
+      "on": "accessory",
+      "setId": "accessory_reflexive",
+      "kind": "prefix"
+    },
+    {
+      "id": "accessory_versatile",
+      "name": "Wszechstronny",
+      "forms": {
+        "m": "Wszechstronny",
+        "f": "Wszechstronna",
+        "p": "Wszechstronne"
+      },
+      "bonus": {
+        "per": 1,
+        "int": 1
+      },
+      "on": "accessory",
+      "setId": "accessory_versatile",
+      "kind": "prefix"
+    },
+    {
+      "id": "armor_survivor",
+      "name": "Ocalonego",
+      "bonus": {
+        "end": 3
+      },
+      "on": "clothing",
+      "kind": "suffix"
+    },
+    {
+      "id": "armor_guard",
+      "name": "Strażnika",
+      "armorPct": 10,
+      "on": "clothingArmor",
+      "kind": "suffix"
+    },
+    {
+      "id": "armor_wanderer",
+      "name": "Wędrowca",
+      "bonus": {
+        "end": 1,
+        "per": 1
+      },
+      "on": "clothing",
+      "kind": "suffix"
+    },
+    {
+      "id": "armor_scout",
+      "name": "Zwiadowcy",
+      "bonus": {
+        "dex": 2
+      },
+      "on": "clothing",
+      "kind": "suffix"
+    },
+    {
+      "id": "armor_tough",
+      "name": "Twardziela",
+      "bonus": {
+        "str": 2
+      },
+      "on": "clothing",
+      "kind": "suffix"
+    },
+    {
+      "id": "armor_ironwill",
+      "name": "Żelaznej Woli",
+      "bonus": {
+        "end": 1,
+        "int": 1
+      },
+      "on": "clothing",
+      "kind": "suffix"
+    },
+    {
+      "id": "accessory_technician",
+      "name": "Technika",
+      "bonus": {
+        "int": 3
+      },
+      "on": "accessory",
+      "kind": "suffix"
+    },
+    {
+      "id": "accessory_negotiator",
+      "name": "Negocjatora",
+      "bonus": {
+        "cha": 3
+      },
+      "on": "accessory",
+      "kind": "suffix"
+    },
+    {
+      "id": "accessory_tracker",
+      "name": "Tropiciela",
+      "bonus": {
+        "per": 3
+      },
+      "on": "accessory",
+      "kind": "suffix"
+    },
+    {
+      "id": "accessory_leader",
+      "name": "Przywódcy",
+      "bonus": {
+        "cha": 2,
+        "end": 1
+      },
+      "on": "accessory",
+      "kind": "suffix"
+    },
+    {
+      "id": "accessory_explorer",
+      "name": "Odkrywcy",
+      "bonus": {
+        "int": 1,
+        "per": 1
+      },
+      "on": "accessory",
+      "kind": "suffix"
+    },
+    {
+      "id": "accessory_survivor",
+      "name": "Ocalałego",
+      "bonus": {
+        "end": 2
+      },
+      "on": "accessory",
+      "kind": "suffix"
+    }
+  ]
+}
