@@ -460,8 +460,8 @@
       "family": "Niszczycielski",
       "artifact": "Rdzeń Rozdarcia",
       "slot_category": "buty",
-      "key": "przebicie",
-      "value": "0",
+      "key": "celność",
+      "value": "1",
       "condition": ""
     },
     {
@@ -564,32 +564,32 @@
       "family": "Tropicielski",
       "artifact": "Soczewka Łowcy",
       "slot_category": "kurtka",
-      "key": "krytyk pp",
-      "value": "0",
+      "key": "celność",
+      "value": "1",
       "condition": ""
     },
     {
       "family": "Tropicielski",
       "artifact": "Soczewka Łowcy",
       "slot_category": "koszulka",
-      "key": "krytyk pp",
-      "value": "0",
+      "key": "celność",
+      "value": "1",
       "condition": ""
     },
     {
       "family": "Tropicielski",
       "artifact": "Soczewka Łowcy",
       "slot_category": "spodnie",
-      "key": "krytyk pp",
-      "value": "0",
+      "key": "celność",
+      "value": "1",
       "condition": ""
     },
     {
       "family": "Tropicielski",
       "artifact": "Soczewka Łowcy",
       "slot_category": "buty",
-      "key": "krytyk pp",
-      "value": "0",
+      "key": "celność",
+      "value": "1",
       "condition": ""
     },
     {
@@ -788,8 +788,8 @@
       "family": "Żelazny",
       "artifact": "Żyła Żelaza",
       "slot_category": "nakrycie głowy",
-      "key": "wytrzymałość",
-      "value": "0",
+      "key": "pancerz",
+      "value": "1",
       "condition": ""
     },
     {
@@ -884,32 +884,32 @@
       "family": "Techniczny",
       "artifact": "Skaner Rdzenia",
       "slot_category": "kurtka",
-      "key": "przebicie",
-      "value": "0",
+      "key": "pancerz",
+      "value": "1",
       "condition": ""
     },
     {
       "family": "Techniczny",
       "artifact": "Skaner Rdzenia",
       "slot_category": "koszulka",
-      "key": "przebicie",
-      "value": "0",
+      "key": "celność",
+      "value": "1",
       "condition": ""
     },
     {
       "family": "Techniczny",
       "artifact": "Skaner Rdzenia",
       "slot_category": "spodnie",
-      "key": "przebicie",
-      "value": "0",
+      "key": "celność",
+      "value": "1",
       "condition": ""
     },
     {
       "family": "Techniczny",
       "artifact": "Skaner Rdzenia",
       "slot_category": "buty",
-      "key": "przebicie",
-      "value": "0",
+      "key": "celność",
+      "value": "1",
       "condition": ""
     },
     {
@@ -949,7 +949,7 @@
       "artifact": "Moduł Celownika",
       "slot_category": "kurtka",
       "key": "celność",
-      "value": "0",
+      "value": "1",
       "condition": ""
     },
     {
@@ -965,7 +965,7 @@
       "artifact": "Moduł Celownika",
       "slot_category": "spodnie",
       "key": "celność",
-      "value": "0",
+      "value": "1",
       "condition": ""
     },
     {
@@ -973,7 +973,7 @@
       "artifact": "Moduł Celownika",
       "slot_category": "buty",
       "key": "celność",
-      "value": "0",
+      "value": "1",
       "condition": ""
     },
     {
@@ -1140,32 +1140,32 @@
       "family": "Anomalny",
       "artifact": "Echo Burzy",
       "slot_category": "kurtka",
-      "key": "krytyk pp",
-      "value": "0",
+      "key": "PŻ",
+      "value": "4",
       "condition": ""
     },
     {
       "family": "Anomalny",
       "artifact": "Echo Burzy",
       "slot_category": "koszulka",
-      "key": "krytyk pp",
-      "value": "0",
+      "key": "PŻ",
+      "value": "3",
       "condition": ""
     },
     {
       "family": "Anomalny",
       "artifact": "Echo Burzy",
       "slot_category": "spodnie",
-      "key": "krytyk pp",
-      "value": "0",
+      "key": "PŻ",
+      "value": "3",
       "condition": ""
     },
     {
       "family": "Anomalny",
       "artifact": "Echo Burzy",
       "slot_category": "buty",
-      "key": "krytyk pp",
-      "value": "0",
+      "key": "PŻ",
+      "value": "3",
       "condition": ""
     },
     {

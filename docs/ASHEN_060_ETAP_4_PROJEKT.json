@@ -373,8 +373,8 @@
           "value": 1
         },
         "buty": {
-          "stat": "przebicie",
-          "value": 0
+          "stat": "celność",
+          "value": 1
         },
         "nakrycie głowy": {
           "stat": "przebicie",
@@ -441,20 +441,20 @@
           "value": 1
         },
         "kurtka": {
-          "stat": "krytyk pp",
-          "value": 0
+          "stat": "celność",
+          "value": 1
         },
         "koszulka": {
-          "stat": "krytyk pp",
-          "value": 0
+          "stat": "celność",
+          "value": 1
         },
         "spodnie": {
-          "stat": "krytyk pp",
-          "value": 0
+          "stat": "celność",
+          "value": 1
         },
         "buty": {
-          "stat": "krytyk pp",
-          "value": 0
+          "stat": "celność",
+          "value": 1
         },
         "nakrycie głowy": {
           "stat": "krytyk pp",
@@ -578,8 +578,8 @@
           "value": 1
         },
         "nakrycie głowy": {
-          "stat": "wytrzymałość",
-          "value": 0
+          "stat": "pancerz",
+          "value": 1
         },
         "rękawice": {
           "stat": "wytrzymałość",
@@ -642,20 +642,20 @@
           "value": 2
         },
         "kurtka": {
-          "stat": "przebicie",
-          "value": 0
+          "stat": "pancerz",
+          "value": 1
         },
         "koszulka": {
-          "stat": "przebicie",
-          "value": 0
+          "stat": "celność",
+          "value": 1
         },
         "spodnie": {
-          "stat": "przebicie",
-          "value": 0
+          "stat": "celność",
+          "value": 1
         },
         "buty": {
-          "stat": "przebicie",
-          "value": 0
+          "stat": "celność",
+          "value": 1
         },
         "nakrycie głowy": {
           "stat": "przebicie",
@@ -683,7 +683,7 @@
         },
         "kurtka": {
           "stat": "celność",
-          "value": 0
+          "value": 1
         },
         "koszulka": {
           "stat": "celność",
@@ -691,11 +691,11 @@
         },
         "spodnie": {
           "stat": "celność",
-          "value": 0
+          "value": 1
         },
         "buty": {
           "stat": "celność",
-          "value": 0
+          "value": 1
         },
         "nakrycie głowy": {
           "stat": "celność",
@@ -802,20 +802,20 @@
           "value": 2
         },
         "kurtka": {
-          "stat": "krytyk pp",
-          "value": 0
+          "stat": "PŻ",
+          "value": 4
         },
         "koszulka": {
-          "stat": "krytyk pp",
-          "value": 0
+          "stat": "PŻ",
+          "value": 3
         },
         "spodnie": {
-          "stat": "krytyk pp",
-          "value": 0
+          "stat": "PŻ",
+          "value": 3
         },
         "buty": {
-          "stat": "krytyk pp",
-          "value": 0
+          "stat": "PŻ",
+          "value": 3
         },
         "nakrycie głowy": {
           "stat": "krytyk pp",
