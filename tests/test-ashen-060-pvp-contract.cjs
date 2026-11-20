@@ -1,0 +1,33 @@
+const assert=require('node:assert/strict');
+const C=require('../js/ashen-060-pvp-contract.js'),Q=require('../js/ashen-060-quality.js');
+let n=0;
+function ok(x,y){assert.deepEqual(x,y);n++}
+function err(fn,code){assert.throws(fn,e=>e.code===code);n++}
+const old={uid:'knife',id:'knife',rarity:1,socketCapacity:0,socketedArtifacts:[]};
+const newer={uid:'new',id:'rifle',rarity:4,quality:'mityczny',qualitySchema:'ashen-v06',socketCapacity:3,socketedArtifacts:[]};
+const make=(inventory,equip={right:'knife',left:null})=>({inventory,equip,name:'Tester',level:1});
+const snap=()=>({hp:120,armor:5,acc:20,dodge:10,activeSets:[],setEffects:{},attacks:[{hand:'right',power:1,weapon:{min:8,max:12,name:'Noz'}}]});
+ok(C.auditSave(make([old]),Q).legacyCount,1);
+ok(C.auditSave(make([old]),Q).modernCount,0);
+ok(C.auditSave(make([old,newer]),Q).modernCount,1);
+ok(C.auditSave(make([old,newer],{right:'new'}),Q).equippedModern,1);
+ok(C.assertReady(make([old]),snap(),Q,{modernDropsEnabled:false}).modernCount,0);
+err(()=>C.assertReady(make([old,newer]),snap(),Q,{modernDropsEnabled:false}),'MODERN_NOT_SUPPORTED');
+err(()=>C.assertReady(make([old]),snap(),Q,{modernDropsEnabled:true}),'UNSAFE_BUILD');
+err(()=>C.auditSave(make([old,{...old}]),Q),'INVALID_INVENTORY');
+err(()=>C.auditSave(make([old],{right:'missing'}),Q),'INVALID_EQUIPMENT');
+err(()=>C.auditSave(make([old],{right:'knife',left:'knife'}),Q),'INVALID_EQUIPMENT');
+err(()=>C.auditSave(make([{...old,rarity:5}]),Q),'INVALID_QUALITY');
+err(()=>C.auditSave(make([{...old,socketCapacity:4}]),Q),'INVALID_SOCKET');
+err(()=>C.auditSave(make([{...old,socketedArtifacts:[{id:'x'}]}]),Q),'INVALID_SOCKET');
+const broken=snap();broken.attacks[0].weapon.max=3;
+err(()=>C.assertSnapshot(broken),'INVALID_SNAPSHOT');
+const bad=snap();bad.attacks=Array(9).fill(snap().attacks[0]);
+err(()=>C.assertSnapshot(bad),'INVALID_SNAPSHOT');
+const fs=require('fs'),path=require('path'),root=path.join(__dirname,'..');
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+assert(html.indexOf('ashen-060-pvp-contract.js')<html.indexOf('game.js'));n++;
+assert(html.indexOf('ashen-060-pvp-contract.js')<html.indexOf('online.js'));n++;
+assert.match(fs.readFileSync(path.join(root,'js/online.js'),'utf8'),/Ashen060PvpContract\.assertReady\(save,snapshot/);n++;
+assert.match(fs.readFileSync(path.join(root,'js/ashen-build.js'),'utf8'),/modernDropsEnabled:false/);n++;
+console.log(`ASHEN 0.6 etap 15: ${n} kontroli zgodności migawki OK`);

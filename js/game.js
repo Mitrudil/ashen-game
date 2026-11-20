@@ -3742,6 +3742,9 @@ function messages(){
 }
 function pvpOtherProfiles(){return devProfileList().filter(p=>p.id!==devActiveId()).map(p=>({...p,save:devProfileState(p.id)})).filter(p=>p.save.created&&p.save.version===1)}
 function pvpSnapshot(profileSave){
+ // 0.6.0: No new-quality gear may be translated into legacy PvP numbers by accident.
+ window.Ashen060PvpContract.auditSave(profileSave,window.Ashen060Quality);
+
  // Reuse the exact current player-equipment functions for BOTH fighters.
  // No mutations of player saves or equipment; the temporary state is always restored.
  const previous=state;

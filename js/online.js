@@ -56,6 +56,7 @@ async function publish(){
  try{
   const save=JSON.parse(current);if(!save?.created)return;
   const snapshot=window.ASHEN_GET_ONLINE_SNAPSHOT?.();if(!snapshot)throw Error('Nie udało się przygotować statystyk postaci.');
+  window.Ashen060PvpContract.assertReady(save,snapshot,window.Ashen060Quality,window.ASHEN_BUILD);
   // Check identity before sending. Never mix a snapshot from one slot with another account.
   if(!bound()||cloud().currentSlot()!==slot||cloud().getSession()?.user?.id!==account||cloud().getProjectUrl()!==project)return;
   const c=cloud().getClient();
