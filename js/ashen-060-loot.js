@@ -11,7 +11,7 @@ function prepareNewLoot(item, engine, rng=Math.random){
  const tier=LEGACY_SOCKET_TIER[item.rarity];
  if(!tier)throw Error('Nieprawidłowa stara rzadkość');
  const result=engine.createLootItem(item,tier,rng);
- return {...result};
+ return {...result,qualitySchema:'legacy-v05'};
 }
 return Object.freeze({LEGACY_SOCKET_TIER,prepareNewLoot});
 });
