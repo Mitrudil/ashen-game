@@ -1,0 +1,7 @@
+﻿Scenariusz;Bazowe ataki;Bonus ataków;Bonus dmg %;Bonus kryta pp;Średnie obrażenia / runda;Pusta runda %
+Jednoatakowa, bez premii;1;0;0;0;6.45;25.0
+Jednoatakowa, +1 atak;1;1;0;0;12.9;6.25
+Trzyatakowa, bez premii;3;0;0;0;19.35;1.562
+Trzyatakowa, +1 atak;3;1;0;0;25.8;0.391
+Trzyatakowa, +10% dmg;3;0;10;0;22.185;1.562
+Trzyatakowa, +5 pp kryta;3;0;0;5;20.025;1.562

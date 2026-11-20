@@ -1,0 +1,1280 @@
+{
+  "status": "PROJEKT — NIE WDROŻONO W GRZE ANI SQL",
+  "version": "0.6.0 etap 4",
+  "source": "ASHEN 0.6.0 etap 2/3, bazowe 24 bronie, istniejące 15 rodzin",
+  "principles": [
+    "Statystyki bazowe broni i liczba ataków nie rosną z poziomem postaci",
+    "X/Y skalowane przez średnią jakość, Z bez zmian",
+    "Zestaw akcesoriów 3/3, zestaw odzieży od 3 elementów",
+    "Gniazda 0-3 tylko przy zdobyciu przedmiotu, także akcesoria",
+    "Jedna rodzina artefaktu maksymalnie raz w jednym przedmiocie",
+    "Rezonans przy 3 osadzonych artefaktach tej samej rodziny, jeden bonus na rodzinę",
+    "Nie zmieniamy produkcyjnego PvP, przedmiotów ani SQL"
+  ],
+  "quality_order": [
+    "Zwykły",
+    "Rzadki",
+    "Epicki",
+    "Legendarny",
+    "Mityczny"
+  ],
+  "quality_scale_proposal": "1 + 0,12 * (średnia jakość - 1); skalowane tylko wartości X/Y procentowe i liczbowe, nie dodatkowe ataki ani aktywacje Z",
+  "sets": [
+    {
+      "name": "Wzmocniony",
+      "category": "Odzież",
+      "x": {
+        "stat": "max_hp_pct",
+        "value": 6
+      },
+      "y": {
+        "stat": "damage_reduction_pct",
+        "value": 3
+      },
+      "z_unchanged": "Drugi oddech",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    },
+    {
+      "name": "Pancerny",
+      "category": "Odzież",
+      "x": {
+        "stat": "armor_pct",
+        "value": 8
+      },
+      "y": {
+        "stat": "damage_reduction_pct",
+        "value": 3
+      },
+      "z_unchanged": "Niezłomna płyta",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    },
+    {
+      "name": "Elastyczny",
+      "category": "Odzież",
+      "x": {
+        "stat": "dodge_points",
+        "value": 1.2
+      },
+      "y": {
+        "stat": "hit_after_dodge_dmg_pct",
+        "value": 4
+      },
+      "z_unchanged": "Kontratak po uniku",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    },
+    {
+      "name": "Zwinny",
+      "category": "Odzież",
+      "x": {
+        "stat": "accuracy_points",
+        "value": 2
+      },
+      "y": {
+        "stat": "initiative_points",
+        "value": 3
+      },
+      "z_unchanged": "Błyskawiczny start",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    },
+    {
+      "name": "Lekki",
+      "category": "Odzież",
+      "x": {
+        "stat": "accuracy_points",
+        "value": 2
+      },
+      "y": {
+        "stat": "extra_attacks",
+        "value": 1
+      },
+      "z_unchanged": "Seria trafień",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    },
+    {
+      "name": "Odporny",
+      "category": "Odzież",
+      "x": {
+        "stat": "endurance",
+        "value": 2
+      },
+      "y": {
+        "stat": "critical_bonus_reduction_pct",
+        "value": 8
+      },
+      "z_unchanged": "Redukcja krytyka",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    },
+    {
+      "name": "Tropicielski",
+      "category": "Odzież",
+      "x": {
+        "stat": "perception",
+        "value": 2
+      },
+      "y": {
+        "stat": "crit_points",
+        "value": 2
+      },
+      "z_unchanged": "Oznaczenie celu",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    },
+    {
+      "name": "Żelazny",
+      "category": "Odzież",
+      "x": {
+        "stat": "strength",
+        "value": 2
+      },
+      "y": {
+        "stat": "penetration_points",
+        "value": 2
+      },
+      "z_unchanged": "Miażdżący cios",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    },
+    {
+      "name": "Wartowniczy",
+      "category": "Odzież",
+      "x": {
+        "stat": "max_hp_pct",
+        "value": 5
+      },
+      "y": {
+        "stat": "shield_capacity_pct",
+        "value": 3
+      },
+      "z_unchanged": "Tarcza ratunkowa",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    },
+    {
+      "name": "Nomadyczny",
+      "category": "Odzież",
+      "x": {
+        "stat": "agility",
+        "value": 2
+      },
+      "y": {
+        "stat": "expedition_resources_pct",
+        "value": 5
+      },
+      "z_unchanged": "Bonus po utracie PŻ",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    },
+    {
+      "name": "Techniczny",
+      "category": "Akcesoria",
+      "x": {
+        "stat": "intelligence",
+        "value": 2
+      },
+      "y": {
+        "stat": "penetration_points",
+        "value": 3
+      },
+      "z_unchanged": "Skan pancerza",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    },
+    {
+      "name": "Spostrzegawczy",
+      "category": "Akcesoria",
+      "x": {
+        "stat": "perception",
+        "value": 2
+      },
+      "y": {
+        "stat": "crit_points",
+        "value": 2
+      },
+      "z_unchanged": "Drugi celny cios",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    },
+    {
+      "name": "Przekonujący",
+      "category": "Akcesoria",
+      "x": {
+        "stat": "charisma",
+        "value": 2
+      },
+      "y": {
+        "stat": "accuracy_points",
+        "value": 3
+      },
+      "z_unchanged": "Autorytet",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    },
+    {
+      "name": "Refleksyjny",
+      "category": "Akcesoria",
+      "x": {
+        "stat": "agility",
+        "value": 2
+      },
+      "y": {
+        "stat": "dodge_points",
+        "value": 1
+      },
+      "z_unchanged": "Przebicie po uniku",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    },
+    {
+      "name": "Wszechstronny",
+      "category": "Akcesoria",
+      "x": {
+        "stat": "perception",
+        "value": 1
+      },
+      "y": {
+        "stat": "max_hp_pct",
+        "value": 4
+      },
+      "z_unchanged": "Jednorazowa osłona",
+      "note": "Wartości bazowe przy średniej jakości 1; do kalibracji z realnymi progami SQL"
+    }
+  ],
+  "artifacts": [
+    {
+      "family": "Osłonowy",
+      "name": "Płytka Bastionu",
+      "effects": {
+        "broń": {
+          "stat": "pancerz",
+          "value": 2
+        },
+        "kurtka": {
+          "stat": "pancerz",
+          "value": 3
+        },
+        "koszulka": {
+          "stat": "pancerz",
+          "value": 1
+        },
+        "spodnie": {
+          "stat": "pancerz",
+          "value": 1
+        },
+        "buty": {
+          "stat": "pancerz",
+          "value": 1
+        },
+        "nakrycie głowy": {
+          "stat": "pancerz",
+          "value": 1
+        },
+        "rękawice": {
+          "stat": "pancerz",
+          "value": 2
+        },
+        "akcesorium": {
+          "stat": "pancerz",
+          "value": 1
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Osłonowy",
+      "name": "Membrana Schronu",
+      "effects": {
+        "broń": {
+          "stat": "PŻ",
+          "value": 3
+        },
+        "kurtka": {
+          "stat": "PŻ",
+          "value": 8
+        },
+        "koszulka": {
+          "stat": "PŻ",
+          "value": 5
+        },
+        "spodnie": {
+          "stat": "PŻ",
+          "value": 5
+        },
+        "buty": {
+          "stat": "PŻ",
+          "value": 4
+        },
+        "nakrycie głowy": {
+          "stat": "PŻ",
+          "value": 4
+        },
+        "rękawice": {
+          "stat": "PŻ",
+          "value": 5
+        },
+        "akcesorium": {
+          "stat": "PŻ",
+          "value": 5
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Niszczycielski",
+      "name": "Żar Bez Płomienia",
+      "effects": {
+        "broń": {
+          "stat": "obrażenia %",
+          "value": 3
+        },
+        "kurtka": {
+          "stat": "obrażenia %",
+          "value": 1
+        },
+        "koszulka": {
+          "stat": "obrażenia %",
+          "value": 1
+        },
+        "spodnie": {
+          "stat": "obrażenia %",
+          "value": 1
+        },
+        "buty": {
+          "stat": "obrażenia %",
+          "value": 1
+        },
+        "nakrycie głowy": {
+          "stat": "obrażenia %",
+          "value": 1
+        },
+        "rękawice": {
+          "stat": "obrażenia %",
+          "value": 2
+        },
+        "akcesorium": {
+          "stat": "obrażenia %",
+          "value": 1
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Niszczycielski",
+      "name": "Rdzeń Rozdarcia",
+      "effects": {
+        "broń": {
+          "stat": "przebicie",
+          "value": 2
+        },
+        "kurtka": {
+          "stat": "przebicie",
+          "value": 1
+        },
+        "koszulka": {
+          "stat": "przebicie",
+          "value": 1
+        },
+        "spodnie": {
+          "stat": "przebicie",
+          "value": 1
+        },
+        "buty": {
+          "stat": "przebicie",
+          "value": 0
+        },
+        "nakrycie głowy": {
+          "stat": "przebicie",
+          "value": 1
+        },
+        "rękawice": {
+          "stat": "przebicie",
+          "value": 1
+        },
+        "akcesorium": {
+          "stat": "przebicie",
+          "value": 1
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Tropicielski",
+      "name": "Oko Martwej Strefy",
+      "effects": {
+        "broń": {
+          "stat": "celność",
+          "value": 2
+        },
+        "kurtka": {
+          "stat": "celność",
+          "value": 1
+        },
+        "koszulka": {
+          "stat": "celność",
+          "value": 1
+        },
+        "spodnie": {
+          "stat": "celność",
+          "value": 1
+        },
+        "buty": {
+          "stat": "celność",
+          "value": 1
+        },
+        "nakrycie głowy": {
+          "stat": "celność",
+          "value": 2
+        },
+        "rękawice": {
+          "stat": "celność",
+          "value": 1
+        },
+        "akcesorium": {
+          "stat": "celność",
+          "value": 1
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Tropicielski",
+      "name": "Soczewka Łowcy",
+      "effects": {
+        "broń": {
+          "stat": "krytyk pp",
+          "value": 1
+        },
+        "kurtka": {
+          "stat": "krytyk pp",
+          "value": 0
+        },
+        "koszulka": {
+          "stat": "krytyk pp",
+          "value": 0
+        },
+        "spodnie": {
+          "stat": "krytyk pp",
+          "value": 0
+        },
+        "buty": {
+          "stat": "krytyk pp",
+          "value": 0
+        },
+        "nakrycie głowy": {
+          "stat": "krytyk pp",
+          "value": 1
+        },
+        "rękawice": {
+          "stat": "krytyk pp",
+          "value": 1
+        },
+        "akcesorium": {
+          "stat": "krytyk pp",
+          "value": 1
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Refleksyjny",
+      "name": "Impuls Ruchu",
+      "effects": {
+        "broń": {
+          "stat": "unik pkt",
+          "value": 0.4
+        },
+        "kurtka": {
+          "stat": "unik pkt",
+          "value": 0.6
+        },
+        "koszulka": {
+          "stat": "unik pkt",
+          "value": 0.5
+        },
+        "spodnie": {
+          "stat": "unik pkt",
+          "value": 0.7
+        },
+        "buty": {
+          "stat": "unik pkt",
+          "value": 0.8
+        },
+        "nakrycie głowy": {
+          "stat": "unik pkt",
+          "value": 0.3
+        },
+        "rękawice": {
+          "stat": "unik pkt",
+          "value": 0.4
+        },
+        "akcesorium": {
+          "stat": "unik pkt",
+          "value": 0.5
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Refleksyjny",
+      "name": "Iskra Tempa",
+      "effects": {
+        "broń": {
+          "stat": "szybkość",
+          "value": 1,
+          "condition": "Tylko modele z co najmniej 2 bazowymi atakami; +1 pełny atak (kandydat do balansu)"
+        },
+        "kurtka": {
+          "stat": "unik pkt",
+          "value": 0.3
+        },
+        "koszulka": {
+          "stat": "unik pkt",
+          "value": 0.3
+        },
+        "spodnie": {
+          "stat": "unik pkt",
+          "value": 0.3
+        },
+        "buty": {
+          "stat": "unik pkt",
+          "value": 0.3
+        },
+        "nakrycie głowy": {
+          "stat": "celność",
+          "value": 1
+        },
+        "rękawice": {
+          "stat": "celność",
+          "value": 1
+        },
+        "akcesorium": {
+          "stat": "celność",
+          "value": 1
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Żelazny",
+      "name": "Żyła Żelaza",
+      "effects": {
+        "broń": {
+          "stat": "wytrzymałość",
+          "value": 1
+        },
+        "kurtka": {
+          "stat": "wytrzymałość",
+          "value": 2
+        },
+        "koszulka": {
+          "stat": "wytrzymałość",
+          "value": 1
+        },
+        "spodnie": {
+          "stat": "wytrzymałość",
+          "value": 1
+        },
+        "buty": {
+          "stat": "wytrzymałość",
+          "value": 1
+        },
+        "nakrycie głowy": {
+          "stat": "wytrzymałość",
+          "value": 0
+        },
+        "rękawice": {
+          "stat": "wytrzymałość",
+          "value": 1
+        },
+        "akcesorium": {
+          "stat": "wytrzymałość",
+          "value": 1
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Żelazny",
+      "name": "Gwóźdź Opoki",
+      "effects": {
+        "broń": {
+          "stat": "pancerz",
+          "value": 1
+        },
+        "kurtka": {
+          "stat": "pancerz",
+          "value": 2
+        },
+        "koszulka": {
+          "stat": "pancerz",
+          "value": 1
+        },
+        "spodnie": {
+          "stat": "pancerz",
+          "value": 2
+        },
+        "buty": {
+          "stat": "pancerz",
+          "value": 1
+        },
+        "nakrycie głowy": {
+          "stat": "pancerz",
+          "value": 1
+        },
+        "rękawice": {
+          "stat": "pancerz",
+          "value": 1
+        },
+        "akcesorium": {
+          "stat": "pancerz",
+          "value": 1
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Techniczny",
+      "name": "Skaner Rdzenia",
+      "effects": {
+        "broń": {
+          "stat": "przebicie",
+          "value": 2
+        },
+        "kurtka": {
+          "stat": "przebicie",
+          "value": 0
+        },
+        "koszulka": {
+          "stat": "przebicie",
+          "value": 0
+        },
+        "spodnie": {
+          "stat": "przebicie",
+          "value": 0
+        },
+        "buty": {
+          "stat": "przebicie",
+          "value": 0
+        },
+        "nakrycie głowy": {
+          "stat": "przebicie",
+          "value": 1
+        },
+        "rękawice": {
+          "stat": "przebicie",
+          "value": 1
+        },
+        "akcesorium": {
+          "stat": "przebicie",
+          "value": 1
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Techniczny",
+      "name": "Moduł Celownika",
+      "effects": {
+        "broń": {
+          "stat": "celność",
+          "value": 2
+        },
+        "kurtka": {
+          "stat": "celność",
+          "value": 0
+        },
+        "koszulka": {
+          "stat": "celność",
+          "value": 1
+        },
+        "spodnie": {
+          "stat": "celność",
+          "value": 0
+        },
+        "buty": {
+          "stat": "celność",
+          "value": 0
+        },
+        "nakrycie głowy": {
+          "stat": "celność",
+          "value": 2
+        },
+        "rękawice": {
+          "stat": "celność",
+          "value": 1
+        },
+        "akcesorium": {
+          "stat": "celność",
+          "value": 1
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Nomadyczny",
+      "name": "Kompas Popiołu",
+      "effects": {
+        "broń": {
+          "stat": "surowce %",
+          "value": 1
+        },
+        "kurtka": {
+          "stat": "surowce %",
+          "value": 1
+        },
+        "koszulka": {
+          "stat": "surowce %",
+          "value": 2
+        },
+        "spodnie": {
+          "stat": "surowce %",
+          "value": 2
+        },
+        "buty": {
+          "stat": "surowce %",
+          "value": 2
+        },
+        "nakrycie głowy": {
+          "stat": "surowce %",
+          "value": 2
+        },
+        "rękawice": {
+          "stat": "surowce %",
+          "value": 1
+        },
+        "akcesorium": {
+          "stat": "surowce %",
+          "value": 2
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Nomadyczny",
+      "name": "Pamięć Szlaku",
+      "effects": {
+        "broń": {
+          "stat": "PD wypraw %",
+          "value": 1
+        },
+        "kurtka": {
+          "stat": "PD wypraw %",
+          "value": 1
+        },
+        "koszulka": {
+          "stat": "PD wypraw %",
+          "value": 1
+        },
+        "spodnie": {
+          "stat": "PD wypraw %",
+          "value": 2
+        },
+        "buty": {
+          "stat": "PD wypraw %",
+          "value": 2
+        },
+        "nakrycie głowy": {
+          "stat": "PD wypraw %",
+          "value": 1
+        },
+        "rękawice": {
+          "stat": "PD wypraw %",
+          "value": 1
+        },
+        "akcesorium": {
+          "stat": "PD wypraw %",
+          "value": 2
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Anomalny",
+      "name": "Echo Burzy",
+      "effects": {
+        "broń": {
+          "stat": "krytyk pp",
+          "value": 2
+        },
+        "kurtka": {
+          "stat": "krytyk pp",
+          "value": 0
+        },
+        "koszulka": {
+          "stat": "krytyk pp",
+          "value": 0
+        },
+        "spodnie": {
+          "stat": "krytyk pp",
+          "value": 0
+        },
+        "buty": {
+          "stat": "krytyk pp",
+          "value": 0
+        },
+        "nakrycie głowy": {
+          "stat": "krytyk pp",
+          "value": 1
+        },
+        "rękawice": {
+          "stat": "krytyk pp",
+          "value": 1
+        },
+        "akcesorium": {
+          "stat": "krytyk pp",
+          "value": 1
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    },
+    {
+      "family": "Anomalny",
+      "name": "Ziarno Ciszy",
+      "effects": {
+        "broń": {
+          "stat": "PŻ",
+          "value": 4
+        },
+        "kurtka": {
+          "stat": "PŻ",
+          "value": 6
+        },
+        "koszulka": {
+          "stat": "PŻ",
+          "value": 4
+        },
+        "spodnie": {
+          "stat": "PŻ",
+          "value": 3
+        },
+        "buty": {
+          "stat": "PŻ",
+          "value": 4
+        },
+        "nakrycie głowy": {
+          "stat": "PŻ",
+          "value": 3
+        },
+        "rękawice": {
+          "stat": "PŻ",
+          "value": 4
+        },
+        "akcesorium": {
+          "stat": "PŻ",
+          "value": 4
+        }
+      },
+      "quality": "odrębna od jakości przedmiotu",
+      "stage": "PROJEKT"
+    }
+  ],
+  "resonances": {
+    "Osłonowy": {
+      "stat": "pancerz",
+      "value": 3
+    },
+    "Niszczycielski": {
+      "stat": "obrażenia %",
+      "value": 3
+    },
+    "Tropicielski": {
+      "stat": "celność",
+      "value": 2
+    },
+    "Refleksyjny": {
+      "stat": "unik pkt",
+      "value": 1
+    },
+    "Żelazny": {
+      "stat": "wytrzymałość",
+      "value": 2
+    },
+    "Techniczny": {
+      "stat": "przebicie",
+      "value": 2
+    },
+    "Nomadyczny": {
+      "stat": "surowce %",
+      "value": 4
+    },
+    "Anomalny": {
+      "stat": "krytyk pp",
+      "value": 1
+    }
+  },
+  "model_weapons": [
+    {
+      "model": "Pałka ochroniarza",
+      "type": "Biała 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 3.74,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Żelazna rura",
+      "type": "Biała 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 4.61,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Klucz francuski",
+      "type": "Biała 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 5.47,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Zardzewiały nóż",
+      "type": "Biała 1R",
+      "base_attacks": 2,
+      "base_avg_damage": 9.21,
+      "+1_attack_pct": 50.0,
+      "+2_attacks_pct": 100.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 6.25,
+      "p_zero_plus1_pct": 1.56
+    },
+    {
+      "model": "Tasak z pustkowi",
+      "type": "Biała 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 7.49,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Toporek z odzysku",
+      "type": "Biała 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 8.64,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Szabla konwojenta",
+      "type": "Biała 1R",
+      "base_attacks": 2,
+      "base_avg_damage": 14.4,
+      "+1_attack_pct": 50.0,
+      "+2_attacks_pct": 100.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 6.25,
+      "p_zero_plus1_pct": 1.56
+    },
+    {
+      "model": "Maczeta zbieracza",
+      "type": "Biała 1R",
+      "base_attacks": 2,
+      "base_avg_damage": 17.28,
+      "+1_attack_pct": 50.0,
+      "+2_attacks_pct": 100.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 6.25,
+      "p_zero_plus1_pct": 1.56
+    },
+    {
+      "model": "Pistolet M-9",
+      "type": "Palna 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 8.64,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Pistolet pustynny",
+      "type": "Palna 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 12.96,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Rewolwer Strażnika",
+      "type": "Palna 1R",
+      "base_attacks": 1,
+      "base_avg_damage": 13.53,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Pistolet maszynowy Viper",
+      "type": "Palna 1R",
+      "base_attacks": 3,
+      "base_avg_damage": 18.14,
+      "+1_attack_pct": 33.3,
+      "+2_attacks_pct": 66.7,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 1.56,
+      "p_zero_plus1_pct": 0.39
+    },
+    {
+      "model": "Karabin szabrownika",
+      "type": "Palna 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 12.96,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Karabinek warty",
+      "type": "Palna 2R",
+      "base_attacks": 2,
+      "base_avg_damage": 19.0,
+      "+1_attack_pct": 50.0,
+      "+2_attacks_pct": 100.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 6.25,
+      "p_zero_plus1_pct": 1.56
+    },
+    {
+      "model": "Strzelba pustkowi",
+      "type": "Palna 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 20.16,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Karabin dalekiego zasięgu",
+      "type": "Palna 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 25.92,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Karabin maszynowy PK",
+      "type": "Palna 2R",
+      "base_attacks": 3,
+      "base_avg_damage": 28.51,
+      "+1_attack_pct": 33.3,
+      "+2_attacks_pct": 66.7,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 1.56,
+      "p_zero_plus1_pct": 0.39
+    },
+    {
+      "model": "Kusza tropiciela",
+      "type": "Dystansowa 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 13.25,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Wyrzutnia harpunów",
+      "type": "Dystansowa 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 16.99,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Miotacz żaru",
+      "type": "Technologiczna 2R",
+      "base_attacks": 3,
+      "base_avg_damage": 26.78,
+      "+1_attack_pct": 33.3,
+      "+2_attacks_pct": 66.7,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 1.56,
+      "p_zero_plus1_pct": 0.39
+    },
+    {
+      "model": "Łom zbrojony",
+      "type": "Biała 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 10.94,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Młot złomiarza",
+      "type": "Biała 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 15.55,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Prototypowa broń szynowa",
+      "type": "Technologiczna 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 22.46,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    },
+    {
+      "model": "Młot wyburzeniowy",
+      "type": "Biała 2R",
+      "base_attacks": 1,
+      "base_avg_damage": 23.61,
+      "+1_attack_pct": 100.0,
+      "+2_attacks_pct": 200.0,
+      "+10_dmg_pct": 10.0,
+      "+5pp_crit_pct": 2.33,
+      "p_zero_base_pct": 25.0,
+      "p_zero_plus1_pct": 6.25
+    }
+  ],
+  "prefix_proposals": [
+    {
+      "name": "Precyzyjny",
+      "now": "Celność +3; Percepcja +2",
+      "proposal": "Pozostawić +3 celności, +2 Percepcji"
+    },
+    {
+      "name": "Brutalny",
+      "now": "Siła +2; dmg +4%",
+      "proposal": "Siła +2, dmg +6% (broń biała)"
+    },
+    {
+      "name": "Niszczycielski",
+      "now": "Dmg +8%",
+      "proposal": "Dmg +10%"
+    },
+    {
+      "name": "Zabójczy",
+      "now": "Krytyk +4 pp",
+      "proposal": "Krytyk +5 pp"
+    },
+    {
+      "name": "Szybki",
+      "now": "1 dodatkowy osłabiony cios",
+      "proposal": "Pełny dodatkowy atak; tylko po teście balansu broni 1/3 ataki"
+    },
+    {
+      "name": "Stabilny",
+      "now": "Celność +5; krytyk +2 pp",
+      "proposal": "Celność +5; krytyk +2 pp"
+    },
+    {
+      "name": "Przebijający",
+      "now": "Przebicie +4",
+      "proposal": "Przebicie +4"
+    }
+  ],
+  "suffix_proposals": [
+    {
+      "name": "Łowcy",
+      "now": "Percepcja +2; celność +2",
+      "proposal": "Bez zmian"
+    },
+    {
+      "name": "Snajpera",
+      "now": "Percepcja +2; krytyk +2 pp",
+      "proposal": "Krytyk +3 pp; Percepcja +2"
+    },
+    {
+      "name": "Berserkera",
+      "now": "Dmg +8%; celność −4",
+      "proposal": "Dmg +12%; celność −4"
+    },
+    {
+      "name": "Egzekutora",
+      "now": "Krytyk +4 pp",
+      "proposal": "Krytyk +5 pp"
+    },
+    {
+      "name": "Wojownika",
+      "now": "Siła +2; dmg +3%",
+      "proposal": "Siła +2; dmg +5%"
+    },
+    {
+      "name": "Niszczyciela",
+      "now": "Dmg +5%; przebicie +1",
+      "proposal": "Dmg +6%; przebicie +2"
+    },
+    {
+      "name": "Penetratora",
+      "now": "Przebicie +5",
+      "proposal": "Bez zmian"
+    },
+    {
+      "name": "Fechmistrza",
+      "now": "Krytyk +3 pp; celność +3",
+      "proposal": "Bez zmian"
+    }
+  ]
+}
