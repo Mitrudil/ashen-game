@@ -263,7 +263,7 @@ if(state.inventory.some(x=>typeof x==='string')){
   let found=state.inventory.find(x=>x.id===id&&!used.has(x.uid));if(found){eq[slot]=found.uid;used.add(found.uid)}
  }state.equip=eq;
 }
-const instance=uid=>state.inventory.find(x=>x.uid===uid),def=inst=>items.find(x=>x.id===inst?.id),rarity=inst=>rarities[inst?.rarity||0]||rarities[0];
+const instance=uid=>state.inventory.find(x=>x.uid===uid),def=inst=>items.find(x=>x.id===inst?.id),rarity=inst=>window.Ashen060QualityBridge.resolve(inst,window.Ashen060Quality);
 normalizeEquip();
 if(!Number.isFinite(state.credits)||state.credits<0)state.credits=0;
 if(!Number.isFinite(state.cores)||state.cores<0)state.cores=0;
@@ -365,7 +365,7 @@ function prefixLabel(mod,base){
 }
 // Rzadkość jest częścią pełnej nazwy. Zwykły pozostaje bez dodatkowego przymiotnika.
 const rarityForms={f:['','Ulepszona','Rzadka','Epicka','Legendarna'],p:['','Ulepszone','Rzadkie','Epickie','Legendarne'],m:['','Ulepszony','Rzadki','Epicki','Legendarny']};
-function rarityPrefix(inst,d){let n=Number(inst?.rarity)||0;let form=pluralItemIds.has(d.id)?'p':feminineItemIds.has(d.id)?'f':'m';return rarityForms[form][n]||'';}
+function rarityPrefix(inst,d){const form=pluralItemIds.has(d.id)?'p':feminineItemIds.has(d.id)?'f':'m';return window.Ashen060QualityBridge.prefix(inst,form,window.Ashen060Quality);}
 
 
 // Prefiksy ze starych zapisów pozostają czytelne i nie zmieniają swojego ID,
@@ -510,7 +510,7 @@ function statsOf(inst){
  return {...d,name:upgradedName,upgrade,rarity:rarity(inst).name,
   min:weapon?Math.max(1,combatModel?Math.round(combatModel.min*combatModel.scale*m*(1+dmgPct/100)*(1+COMBAT_V2_WORKSHOP[upgrade])):Math.round(d.min*m*(1+dmgPct/100))+UPGRADE_POWER[upgrade]):undefined,
   max:weapon?Math.max(1,combatModel?Math.round(combatModel.max*combatModel.scale*m*(1+dmgPct/100)*(1+COMBAT_V2_WORKSHOP[upgrade])):Math.round(d.max*m*(1+dmgPct/100))+UPGRADE_POWER[upgrade]):undefined,
-  armor:!weapon&&d.slot!=='material'?Math.max(0,Math.round((d.armor||0)*m*(1+armorPct/100))+((d.armor||0)===0 ? [0,1,2,3,5][Math.min(4,Math.max(0,Number(inst?.rarity)||0))] : 0)+armorUp):undefined,
+  armor:!weapon&&d.slot!=='material'?Math.max(0,Math.round((d.armor||0)*m*(1+armorPct/100))+((d.armor||0)===0 ? window.Ashen060QualityBridge.qualityArmorFloor(inst,window.Ashen060Quality) : 0)+armorUp):undefined,
   bonus:rolledBonus(inst),critPp:critPp+(combatModel?.crit||0),accuracy:accuracy+(combatModel?.accuracy||0),extraAttacks,damagePct:dmgPct,armorPct,
   combatV2:!!combatModel,baseAttacks:combatModel?.attacks||1,labPen:(combatModel?.pen||0)+armorPen,labCritMultiplier:combatModel?.critMultiplier||1.6,
   prefixName:prefixLabel(pref,d)||null,suffixName:suf?.name||null,
@@ -2994,9 +2994,9 @@ function inventorySortEntries(rows){
   if(mode==='newest')return b.originalIndex-a.originalIndex;
   if(mode==='oldest')return a.originalIndex-b.originalIndex;
   if(mode==='name')return a.o.name.localeCompare(b.o.name,'pl')||a.originalIndex-b.originalIndex;
-  if(mode==='power-desc')return power(b)-power(a)||(b.inst.rarity||0)-(a.inst.rarity||0)||a.originalIndex-b.originalIndex;
-  if(mode==='power-asc')return power(a)-power(b)||(b.inst.rarity||0)-(a.inst.rarity||0)||a.originalIndex-b.originalIndex;
-  const rarityDelta=(Number(b.inst.rarity)||0)-(Number(a.inst.rarity)||0);
+  if(mode==='power-desc')return power(b)-power(a)||window.Ashen060QualityBridge.ranking(b.inst,window.Ashen060Quality)-window.Ashen060QualityBridge.ranking(a.inst,window.Ashen060Quality)||a.originalIndex-b.originalIndex;
+  if(mode==='power-asc')return power(a)-power(b)||window.Ashen060QualityBridge.ranking(b.inst,window.Ashen060Quality)-window.Ashen060QualityBridge.ranking(a.inst,window.Ashen060Quality)||a.originalIndex-b.originalIndex;
+  const rarityDelta=window.Ashen060QualityBridge.ranking(b.inst,window.Ashen060Quality)-window.Ashen060QualityBridge.ranking(a.inst,window.Ashen060Quality);
   const rarityCompare=mode==='rarity-asc'?-rarityDelta:rarityDelta;
   return rarityCompare||(Number(b.inst.upgrade)||0)-(Number(a.inst.upgrade)||0)||power(b)-power(a)||a.o.name.localeCompare(b.o.name,'pl')||a.originalIndex-b.originalIndex;
  });
