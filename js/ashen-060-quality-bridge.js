@@ -20,5 +20,16 @@ function resolve(inst,qualityApi){
 function prefix(inst,form,qualityApi){const q=resolve(inst,qualityApi);if(!['m','f','p'].includes(form))throw Error('Nieznana odmiana');return (q.schema==='ashen-v06'?NEW_FORMS:OLD_FORMS)[form][q.index]||''}
 function ranking(inst,qualityApi){return resolve(inst,qualityApi).rank}
 function qualityArmorFloor(inst,qualityApi){const q=resolve(inst,qualityApi);return (q.schema==='ashen-v06'?[0,1,2,3,5]:[0,1,2,3,5])[q.index]}
-return Object.freeze({resolve,prefix,ranking,qualityArmorFloor,LEGACY_COLORS,MODERN_COLORS});
+// Wspolny odczyt ekonomii obu schematow. Dawne wartosci pozostaja nietkniete.
+// Wartosc mnoznika dla nowych jakosci jest wstepna i nie aktywuje nowych dropow.
+const MODERN_ECONOMY=Object.freeze({sale:Object.freeze([1,2.4,4.5,8,11]),salvage:Object.freeze([1,1.5,2,2.7,3.4])});
+function economyMultiplier(inst,kind,qualityApi,economy){
+ if(!['sale','salvage'].includes(kind))throw Error('Nieznany typ ekonomii');
+ const q=resolve(inst,qualityApi);
+ if(q.schema==='ashen-v06')return MODERN_ECONOMY[kind][q.index];
+ const table=kind==='sale'?economy?.saleRarity:economy?.yieldRarity;
+ if(!Array.isArray(table)||table.length!==5)throw Error('Brak tabeli starej ekonomii');
+ return table[q.index];
+}
+return Object.freeze({resolve,prefix,ranking,qualityArmorFloor,economyMultiplier,MODERN_ECONOMY,LEGACY_COLORS,MODERN_COLORS});
 });

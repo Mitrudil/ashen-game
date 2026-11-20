@@ -1467,3 +1467,6 @@ body.arena-report-modal-open{overflow:hidden}
 .ashen-compare-synergy.ashen-compare-gain{border-left-color:#76d7a0}
 .ashen-compare-synergy.ashen-compare-loss{border-left-color:#ff9292}
 .ashen-compare-synergy span{color:var(--text,#d7dde1)}
+
+/* ASHEN 0.6 — komunikat o etapie instalacji */
+.ashen-build-tag{display:inline-block;margin-left:.45rem;padding:.1rem .45rem;border:1px solid #856d40;border-radius:999px;color:#e9c88d;font-size:.76rem;font-weight:700;letter-spacing:.01em;vertical-align:middle;}
