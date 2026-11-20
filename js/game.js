@@ -1122,6 +1122,33 @@ function heroDefense(options={}){
   armor:rawArmor+Math.round(rawArmor*setArmor/100)+Math.floor(a.end/4)+pet+vehicleArmor+(bonusEffects.armorFlat||0),
   setArmor,pet,vehicleArmor,rawArmor};
 }
+// ASHEN 0.6 etap 18: diagnostyka bez efektów ubocznych. Wywołaj w konsoli
+// window.ashen060CheckCharacter() — nie zapisuje danych i nie publikuje migawki.
+window.ashen060CheckCharacter=function(){
+ const ref=window.Ashen060CharacterReference;
+ if(!ref)throw Error('Brak referencyjnego kalkulatora etapu 18');
+ const equipment={};const equipped={...state.equip};
+ for(const uid of new Set(Object.values(equipped).filter(Boolean))){
+  const inst=instance(uid),o=statsOf(inst);
+  if(!o)throw Error('Brak przedmiotu '+uid);
+  equipment[uid]={uid,id:o.id,slot:o.slot,min:o.min,max:o.max,armor:o.armor||0,bonus:{...o.bonus},baseAttacks:o.baseAttacks,extraAttacks:o.extraAttacks};
+ }
+ const snap={baseAttrs:{...state.attrs},equip:equipped,equipment,
+  setEffects:{...setEngineEffects().effects},resonanceBonus:{...resonanceBonuses().bonus},
+  infirmaryLevel:roomLevel('infirmary'),petArmor:companionId()==='boar'?petPower('boar'):0,
+  dominantHand:state.dominantHand,fallbackKnife:statsOf({id:'knife',rarity:0})};
+ const expected=ref.calculate(snap),actual={attributes:attrs(),defense:heroDefense(),attacks:heroAttacks()};
+ const mismatches=[];
+ for(const [k,v] of Object.entries(expected.attributes))if(Math.abs(v-(actual.attributes[k]||0))>1e-9)mismatches.push('atrybut '+k);
+ for(const [k,v] of Object.entries(expected.defense))if(Math.abs(v-(actual.defense[k]||0))>1e-9)mismatches.push('obrona '+k);
+ if(expected.attackCount!==actual.attacks.length)mismatches.push('liczba ataków');
+ for(let i=0;i<Math.min(expected.attackCount,actual.attacks.length);i++){
+  const e=expected.attacks[i],a=actual.attacks[i];
+  if(e.id!==a.weapon?.id||e.hand!==a.hand||Math.abs(e.power-a.power)>1e-9)mismatches.push('atak '+(i+1));
+ }
+ return {ok:!mismatches.length,mismatches,expected,actual:{attributes:actual.attributes,defense:actual.defense,attacks:actual.attacks.map(x=>({id:x.weapon?.id,hand:x.hand,power:x.power}))}};
+};
+
 function fight(enemy,options={}){
  const a=options.testSnapshot?.attributes||attrs();
  const attacks=options.testSnapshot?.attacks||heroAttacks();
