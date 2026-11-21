@@ -632,6 +632,28 @@ function modernLootOfflineEligible(){
  return !cloud?.getSession?.()?.user?.id && !cloud?.getBoundSlot?.();
 }
 function modernLootOfflineActive(){return state.modernLootOffline===true && modernLootOfflineEligible();}
+// Etap 38: nowe jakości jako PRAWDZIWE łupy na zapisanej postaci online.
+// Dopóki serwer nie zna ich statystyk, przedmiot 0.6 może być przechowywany,
+// ale nie może zostać założony ani opublikowany jako część migawki PvP.
+function modernLootOnlineEligible(){
+ const cloud=window.ASHEN_CLOUD;
+ return !!(cloud?.getSession?.()?.user?.id && cloud.getBoundSlot?.()===cloud.currentSlot?.());
+}
+function modernLootOnlineActive(){return state.modernLootOnline===true&&modernLootOnlineEligible();}
+function toggleModernLootOnline(){
+ if(!modernLootOnlineEligible()){
+  message='Nowe łupy online można włączyć tylko na aktywnej postaci przypisanej do zalogowanego konta.';render();return;
+ }
+ if(!state.modernLootOnline){
+  if(!confirm('Włączyć nowe jakości 0.6 na tej postaci online? Nowe łupy trafią do prawdziwego ekwipunku i zapisu w chmurze. Można je przeglądać i przechowywać, ale NIE zakładać do czasu aktualizacji serwerowego PvP. Kontynuować?'))return;
+  // Lokalny punkt przywracania sprzed pierwszego uruchomienia tej funkcji.
+  try{const key='ashen-060-before-online-loot:'+window.ASHEN_CLOUD.getSession().user.id+':'+window.ASHEN_CLOUD.currentSlot();if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(state));}
+  catch{message='Nie udało się utworzyć lokalnej kopii bezpieczeństwa — tryb nie został włączony.';render();return;}
+ }
+ state.modernLootOnline=!state.modernLootOnline;
+ message=state.modernLootOnline?'Włączono prawdziwe łupy 0.6 na obecnym koncie. Nowe przedmioty można przechowywać, ale jeszcze nie zakładać.':'Wyłączono generowanie nowych łupów 0.6. Zdobyte przedmioty pozostają w ekwipunku.';
+ save();render();
+}
 function toggleModernLootOffline(){
  if(!modernLootOfflineEligible()){
   message='Nowa jakość łupów jest na razie dostępna wyłącznie bez zalogowanego konta i powiązania z chmurą. Wyłączono tryb testowy.';
@@ -677,13 +699,16 @@ function modernPreviewCapture(id,expedition,luck){
 }
 function modernPreviewPanel(){
  const data=modernPreviewRead();
+ const online=modernLootOnlineEligible();
+ const realCount=state.inventory.filter(x=>x.qualitySchema==='ashen-v06').length;
+ const onlinePanel=`<div class="panel section" style="margin-bottom:12px"><span class="tag">ŁUPY 0.6 · EKWIPUNEK ONLINE</span><h3>Nowe jakości na obecnej postaci</h3><p class="small muted">${online?'Postać jest połączona z chmurą.':'Aby uruchomić tę funkcję, przypisz aktywną postać do konta online.'} Nowe łupy z Wypraw zapisują się jako rzeczywiste przedmioty w ekwipunku i chmurze. Na razie nie można ich zakładać — serwer PvP nie waliduje jeszcze nowego systemu przedmiotów. Dotychczasowe przedmioty działają bez zmian. Zebrane przedmioty 0.6: <strong>${realCount}</strong>.</p><div class="actions"><button type="button" data-action="modern-loot-online-toggle" ${online?'':'disabled'}>${state.modernLootOnline?'Wyłącz nowe łupy online':'Włącz nowe łupy online'}</button></div></div>`;
  const items=data.items.slice(-12).reverse();
- return `<div class="panel section" style="margin-bottom:12px"><span class="tag">ŁUPY 0.6 · PODGLĄD BEZ WYLOGOWANIA</span>
+ return onlinePanel+`<details class="panel section" style="margin-bottom:12px"><summary>Starszy podgląd łupów 0.6 (bez zapisu w ekwipunku)</summary><div><span class="tag">ŁUPY 0.6 · PODGLĄD</span>
  <h3>Nowe jakości podczas Wypraw</h3>
  <p class="small muted">Możesz pozostać na swojej obecnej postaci online. Każda zdobyta nagroda nadal trafia do zwykłego ekwipunku i synchronizuje się normalnie. Równolegle gra pokazuje próbkę nowego przedmiotu 0.6 w osobnej kolekcji na tym urządzeniu. Zwykłe nagrody nadal mogą mieć jakość „Ulepszony”, ponieważ korzystają ze starego schematu. Próbki 0.6 używają nowej skali z jakością „Mityczny”. Próbki nie dają statystyk, nie można ich założyć i NIE zapisują się do chmury. To jeszcze nie nowy ekwipunek online.</p>
  <div class="actions"><button type="button" data-action="modern-preview-toggle">${data.enabled?'Wyłącz podgląd 0.6':'Włącz podgląd 0.6'}</button><span class="small muted">Zapisane próbki: ${data.items.length}/100</span></div>
  ${items.length?`<details style="margin-top:10px"><summary>Ostatnie próbki łupów (${items.length})</summary><div class="small">${items.map(x=>`<p>${escape(x.name)} · ${escape(x.quality)} · gniazda: ${Number(x.sockets)||0}</p>`).join('')}</div></details>`:'<p class="small muted">Brak próbek. Włącz podgląd i wykonaj Wyprawę.</p>'}
- </div>`;
+ </div></details>`;
 }
 function modernExpeditionPool(loc){
  const id=typeof loc==='string'?loc:loc?.id;
@@ -709,7 +734,7 @@ function modernRollItem(id,expedition=null,luck=0){
  return window.Ashen060Loot.prepareModernLoot(base,pool,window.Ashen060Quality,window.Ashen060Bonuses,rngQuality);
 }
 function rollItem(id,expedition=null,luck=0){
- if(ASHEN_060_MODERN_DROPS_ENABLED||modernLootOfflineActive()){const modern=modernRollItem(id,expedition,luck);if(modern)return modern;}
+ if(ASHEN_060_MODERN_DROPS_ENABLED||modernLootOfflineActive()||modernLootOnlineActive()){const modern=modernRollItem(id,expedition,luck);if(modern)return modern;}
 
  const d=item(id);
  let weights=explorationRarityWeights(expedition,luck);
@@ -2981,7 +3006,7 @@ function itemDetailContent(){if(!openItemDetail)return '';
  const o=owned?statsOf(owned):{...defn,rarity:'Zwykły',name:defn.name,bonus:defn.bonus||{}};
  const wornSlot=owned?Object.keys(state.equip).find(slot=>state.equip[slot]===owned.uid):null;
  const previewSlot=owned?(itemEquipSlots(owned).includes(itemCompareSlot)?itemCompareSlot:itemEquipDefaultSlot(owned)):null;
- const equipActions=!owned||defn.slot==='material'?'':wornSlot?`<button class="primary" data-unequip="${wornSlot}">Zdejmij</button>`:`<button class="primary" data-equip="${escape(owned.uid)}" ${defn.slot==='hand1'?`data-hand="${previewSlot}"`:''} ${defn.slot==='extra'?`data-extra-slot="${previewSlot}"`:''}>Załóż · ${escape(slotLabels[previewSlot]||'wybrany slot')}</button>`;
+ const equipActions=!owned||defn.slot==='material'?'':(owned.qualitySchema==='ashen-v06'&&modernLootOnlineEligible())?'<span class="small muted">Przedmiot 0.6: zakładanie online dostępne po aktualizacji PvP.</span>':wornSlot?`<button class="primary" data-unequip="${wornSlot}">Zdejmij</button>`:`<button class="primary" data-equip="${escape(owned.uid)}" ${defn.slot==='hand1'?`data-hand="${previewSlot}"`:''} ${defn.slot==='extra'?`data-extra-slot="${previewSlot}"`:''}>Załóż · ${escape(slotLabels[previewSlot]||'wybrany slot')}</button>`;
  return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned&&Number.isInteger(owned.socketCapacity)?`<div class="detail-stat"><span>Gniazda artefaktów</span><strong>${owned.socketCapacity} / 3</strong></div>`:""}${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${(Number(o.baseAttacks)||1)+(Number(o.extraAttacks)||0)}</strong></div>${o.combatV2?`<div class="detail-stat"><span>Model walki</span><strong>ASHEN 0.5 · test bojowy</strong></div>`:''}`:''}<div class="detail-affix"><strong>${modifierGlyph('prefix',defn,owned?findModifier(prefixDefs,owned.prefix):null)} Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span></div><div class="detail-affix"><strong>${modifierGlyph('suffix',defn,owned?findModifier(suffixDefs,owned.suffix):null)} Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span></div>${owned?`<div class="small muted">${statDetails(o)}${itemBonusSourceHtml(owned)}</div>${itemSetPanel(owned)}${accessorySetItemPanel(owned)}${artifactDetailPanel(owned)}`:''}</div></div>${owned&&!wornSlot&&defn.slot!=='material'?itemComparePanel(owned):''}${owned?item060PreviewPanel(owned,wornSlot||previewSlot):''}<div class="actions ashen-modal-equip-actions">${equipActions}${owned&&defn.slot!=='material'?`<button data-lock="${escape(owned.uid)}">${owned.locked?'🔒 Odblokuj':'🔓 Zabezpiecz'}</button><button data-sale="${escape(owned.uid)}" ${wornSlot||owned.locked?'disabled':''}>Sprzedaj · ${saleValue(owned)} kr.</button><button data-salvage="${escape(owned.uid)}" ${wornSlot||owned.locked?'disabled':''}>Zezłomuj · ${escape(salvageLabel(salvageValue(owned)))}</button>`:''}<button data-item-close>Zamknij</button></div></div></div>`
 }
 function slotChip(slot,uid){
@@ -3215,7 +3240,7 @@ function inventoryItemCard(inst,o){
  const weapon=o.slot==='hand1';
  const rarityMeta=rarity(inst);
  const slotLabel=slotName(o.slot);
- const buttons=o.slot==='material'?'':worn?`<span class="inventory-action-tag equipped">Założony</span><button data-unequip="${Object.keys(state.equip).find(k=>state.equip[k]===inst.uid)||''}">Zdejmij</button>`:weapon?`<button class="primary" data-equip="${inst.uid}" data-hand="right">Prawa ręka</button><button data-equip="${inst.uid}" data-hand="left">Lewa ręka</button>`:(o.slot==='extra'?['extra','extra2','extra3'].map((s,i)=>`<button class="${state.equip[s]?'':'primary'}" data-equip="${inst.uid}" data-extra-slot="${s}" title="${state.equip[s]?'Zastąpi aktualne akcesorium w tym slocie':'Wolny slot akcesorium'}">Slot ${i+1}${state.equip[s]?' ↺':''}</button>`).join(''):`<button class="primary" data-equip="${inst.uid}">Załóż</button>`);
+ const buttons=o.slot==='material'?'':(inst.qualitySchema==='ashen-v06'&&modernLootOnlineEligible())?'<span class="inventory-action-tag">0.6 · do przechowania, bez zakładania online</span>':worn?`<span class="inventory-action-tag equipped">Założony</span><button data-unequip="${Object.keys(state.equip).find(k=>state.equip[k]===inst.uid)||''}">Zdejmij</button>`:weapon?`<button class="primary" data-equip="${inst.uid}" data-hand="right">Prawa ręka</button><button data-equip="${inst.uid}" data-hand="left">Lewa ręka</button>`:(o.slot==='extra'?['extra','extra2','extra3'].map((s,i)=>`<button class="${state.equip[s]?'':'primary'}" data-equip="${inst.uid}" data-extra-slot="${s}" title="${state.equip[s]?'Zastąpi aktualne akcesorium w tym slocie':'Wolny slot akcesorium'}">Slot ${i+1}${state.equip[s]?' ↺':''}</button>`).join(''):`<button class="primary" data-equip="${inst.uid}">Załóż</button>`);
  return `<article class="item inventory-premium-item ashen-rarity-${Math.min(4,Math.max(0,Number(inst.rarity)||0))} ${bulkSelected.has(inst.uid)?'bulk-picked':''}">
    <div class="inventory-premium-head">
       <label class="bulk-select inventory-bulk-marker" title="Zaznacz do operacji zbiorczej"><input type="checkbox" data-bulk-uid="${inst.uid}" ${bulkSelected.has(inst.uid)?'checked':''} ${eligibleForBulk(inst)?'':'disabled'}></label>
@@ -3950,6 +3975,7 @@ function act(e){if(e.target?.matches?.('.ashen-item-overlay')){openItemDetail=nu
  if(page==='messages'||page==='pvp')void window.ASHEN_ONLINE?.refresh?.();
  if(page==='players')void window.ASHEN_PLAYERS?.refresh?.();
  return}if(b.dataset.action==='create'){let n=$('hero-name')?.value.trim();if(!n||n.length<2||n.length>24){message='Podaj imię od 2 do 24 znaków.';render();return}state.name=n;state.gender=normalizeGender(state.gender);state.origin=normalizeOrigin(state.origin);state.created=true;let bonus=origins[state.origin]?.bonus||{};for(const [k,v] of Object.entries(bonus))state.attrs[k]+=v;message='Witaj na Pustkowiach, '+n+'!';setPage('character');save();render();return}if(b.dataset.workshopSelect){workshopUid=b.dataset.workshopSelect;render();return}if(b.dataset.workshopUpgrade){applyUpgrade(b.dataset.workshopUpgrade);return}if(b.dataset.action==='workshop-test'){grantWorkshopTest();return}if(b.dataset.action==='faction-test-pack'){grantFactionTestPack();return}if(b.dataset.dominant){if(['left','right'].includes(b.dataset.dominant)){state.dominantHand=b.dataset.dominant;message='Zmieniono rękę dominującą.';save();render()}return}if(b.dataset.attr){if(state.points>0){state.attrs[b.dataset.attr]++;state.points--;save();render()}return}if(b.dataset.mission){let l=locations.find(x=>x.id===b.dataset.mission);if(!l||state.mission)return;/* Testy: energia nie jest zużywana */state.missionOutcomePending=false;state.mission={id:l.id,started:Date.now(),durationMs:travelSeconds(l)*1000,ends:Date.now()+travelSeconds(l)*1000,exploration:explorationStats()};message='';save();render();return}if(b.dataset.lock){const inst=instance(b.dataset.lock);if(inst){inst.locked=!inst.locked;message=inst.locked?'Przedmiot zabezpieczony.':'Zdjęto zabezpieczenie.';save();render()}return}
+if(b.dataset.action==='modern-loot-online-toggle'){toggleModernLootOnline();return}
 if(b.dataset.action==='modern-preview-toggle'){toggleModernPreview();return}
 if(b.dataset.action==='modern-loot-offline-toggle'){toggleModernLootOffline();return}
 if(b.dataset.action==='bulk-visible'){const arr=bulkEligibleVisible(invFilter);if(arr.length&&arr.every(x=>bulkSelected.has(x.uid)))arr.forEach(x=>bulkSelected.delete(x.uid));else arr.forEach(x=>bulkSelected.add(x.uid));render();return}
@@ -3962,6 +3988,9 @@ if(b.dataset.salvage){disposeItem(b.dataset.salvage,'salvage');return}
 if(b.dataset.invGroup){const groups={all:'all',sockets:'socketed',weapons:'weapons-all',clothing:'clothing-all',accessories:'accessories-all',artifacts:'artifacts-all'};if(Object.prototype.hasOwnProperty.call(groups,b.dataset.invGroup)){invGroup=b.dataset.invGroup;invFilter=groups[invGroup];render()}return}if(b.dataset.filter){invFilter=b.dataset.filter;render();return}if(b.dataset.inspect){selectedUid=b.dataset.inspect;render();return}if(b.dataset.action==='close-inspect'){selectedUid=null;render();return}if(b.dataset.unequip){let slot=b.dataset.unequip;if(slot in state.equip){state.equip[slot]=null;openItemDetail=null;message='Zdjęto przedmiot.';save();render()}return}
 if(b.dataset.equip!==undefined){
  const inst=instance(b.dataset.equip),obj=def(inst);if(!obj||obj.slot==='material')return;
+ if(inst.qualitySchema==='ashen-v06'&&modernLootOnlineEligible()){
+  message='Przedmiot 0.6 został zapisany w ekwipunku online, ale nie można go jeszcze założyć — PvP nie obsługuje jego statystyk.';render();return;
+ }
  const slot=obj.slot==='hand1'?(b.dataset.hand==='left'?'left':'right'):obj.slot==='hand2'?'right':obj.slot==='extra'?(['extra','extra2','extra3'].includes(b.dataset.extraSlot)?b.dataset.extraSlot:['extra','extra2','extra3'].find(s=>!state.equip[s])||'extra'):obj.slot;
  const next=itemEquipAfter(inst,slot);if(!next)return;
  state.equip=next;

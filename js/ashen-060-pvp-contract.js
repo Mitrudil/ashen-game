@@ -49,7 +49,9 @@ function assertReady(save,snapshot,quality,build){
  const audit=auditSave(save,quality);assertSnapshot(snapshot);
  // An innocuous build flag is not proof of server compatibility.
  // A separate server-verified capability protocol is required before accepting modern items.
- if(audit.modernCount)error('MODERN_NOT_SUPPORTED','Wstrzymano publikację PvP: zapis zawiera przedmioty jakości ASHEN 0.6. Serwer nie potwierdził obsługi tej jakości.');
+ // Przedmioty w plecaku nie modyfikują migawki; serwer przechowuje je tylko
+ // w prywatnym JSON zapisu. Założenie choć jednego pozostaje zabronione.
+ if(audit.equippedModern)error('MODERN_EQUIPPED_NOT_SUPPORTED','Zdejmij przedmioty jakości 0.6 przed publikacją PvP. Serwer nie wylicza jeszcze ich statystyk.');
  if(build?.modernDropsEnabled===true)error('UNSAFE_BUILD','Nowy generator jakości włączono bez potwierdzonej zgodności serwera PvP.');
  return audit;
 }
