@@ -69,9 +69,20 @@ async function publish(){
   const {error:e1}=await c.from('ashen_cloud_saves').upsert({user_id:account,save_data:save,character_name:String(save.name).slice(0,40),character_level:save.level},{onConflict:'user_id'});
   if(e1)throw e1;
   // A profile publication may finish after a new local change; we requeue the latest version.
-  if(snapshot)await rpc('ashen_publish_profile',{p_snapshot:snapshot});
+  let legacyPvpSuspended=false;
+  if(snapshot){
+   await rpc('ashen_publish_profile',{p_snapshot:snapshot});
+  }else{
+   // Optional SQL 046 suspends a stale defender snapshot. Until installed,
+   // continue saving the character but do not claim that PvP is protected.
+   try{legacyPvpSuspended=(await rpc('ashen_060_suspend_legacy_pvp'))===true}
+   catch(e){
+    const notInstalled=e?.code==='PGRST202'||e?.code==='42883';
+    if(!notInstalled)throw e;
+   }
+  }
   if(bound()&&cloud().currentSlot()===slot&&cloud().getSession()?.user?.id===account&&cloud().getProjectUrl()===project){
-   lastSynced=current;syncMessage=snapshot?'Zapis zsynchronizowany':'Postać zapisana; nowe wyposażenie czeka na aktualizację PvP';
+   lastSynced=current;syncMessage=snapshot?'Zapis i profil PvP zsynchronizowane':legacyPvpSuspended?'Postać zapisana; stary profil PvP zawieszony':'Postać zapisana; stary profil PvP może być nieaktualny (brak SQL 046)';
    if(error.startsWith('Automatyczny zapis'))error='';
   }
  }catch(e){syncMessage='Błąd synchronizacji';error='Automatyczny zapis online: '+msg(e)}
