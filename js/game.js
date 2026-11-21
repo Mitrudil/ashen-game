@@ -1184,8 +1184,19 @@ function fight(enemy,options={}){
    const accuracy=isHero&&weapon?weaponAccuracy(a,weapon.weapon)+(se.accuracy||0)+(xy.missed?(se.afterMissAccuracy||0):0)+(xy.dodged?(se.afterDodgeAccuracy||0):0)+(r<=2?(se.earlyAccuracy||0):0)+zEarly:attacker.acc;
    const chance=clamp(70+2*(accuracy-defender.dodge)+(isHero?(weapon?.weapon.accuracy||0):0),15,95);
    const handName=weapon?' ('+(weapon.hand==='right'?'prawa':'lewa')+' ręka, '+Math.round(weapon.power*100)+'%)':'';
-   if(random()*100>=chance){performance.misses++;if(isHero)xy.missed=true;else {xy.dodged=true;if(zActive('armor_flexible')||zActive('accessory_reflexive')){mastery.chargedDodge=true;mastery.dodgeRound=r}}lines.push(`Runda ${r}: ${isHero?'Chybiasz':'Przeciwnik chybia'}${handName}.`);return}
-   const critical=isHero?random()<clamp(.05+a.per*.005+(weapon?.weapon.critPp||0)/100+(se.critChance||0)/100,0,.35):random()<.06;
+   // Pierwsza rzeczywista integracja 0.6.0: tylko Starcia PvE.
+   // Nie modyfikuje wypraw, ekspedycji, PvP ani trybu Laboratorium.
+   const modern=options.combat060===true;
+   const criticalChance=isHero?clamp(5+a.per*.5+(weapon?.weapon.critPp||0)+(se.critChance||0),0,35):6;
+   const verdict=modern?window.Ashen060PveBridge.outcome({
+     attacker:{hp:attacker.hp,acc:accuracy,dodge:attacker.dodge,armor:attacker.armor},
+     defender:{hp:defender.hp,acc:defender.acc,dodge:defender.dodge,armor:defender.armor},
+     attack:{min:weapon?.weapon.min??attacker.atk?.[0]??1,max:weapon?.weapon.max??attacker.atk?.[1]??1,accuracy:isHero?(weapon?.weapon.accuracy||0):0},
+     critChance:criticalChance
+   },random):null;
+   const failed=modern?verdict.outcome==='miss'||verdict.outcome==='dodge':random()*100>=chance;
+   if(failed){performance.misses++;if(isHero)xy.missed=true;else {xy.dodged=true;if(zActive('armor_flexible')||zActive('accessory_reflexive')){mastery.chargedDodge=true;mastery.dodgeRound=r}}lines.push(`Runda ${r}: ${modern&&verdict.outcome==='dodge'?'Unik':isHero?'Chybiasz':'Przeciwnik chybia'}${handName}.`);return}
+   const critical=modern?verdict.critical:isHero?random()<criticalChance/100:random()<.06;
    let raw;
    if(weapon){raw=Math.max(1,Math.floor((randomInt(weapon.weapon.min,weapon.weapon.max)+weaponAttributeDamage(a,weapon.weapon))*weapon.power));}
    else raw=randomInt(attacker.atk[0],attacker.atk[1]);
@@ -1365,7 +1376,8 @@ function startArenaFight(number){
  const stage=ARENA_STAGES.find(s=>s.level===number),progress=arenaData();
  if(!stage||!state.created||(!arenaTestMode&&number>Math.min(ARENA_STAGES.length,progress.highest+1)))return;
  if(!confirm(`${arenaTestMode?'TEST · bez nagród i zapisu postępu\n\n':''}Starcie ${number}/${ARENA_STAGES.length}: ${stage.name}${stage.boss?' (BOSS)':''}\n\nWalka trwa maksymalnie 10 rund. Zwyciężysz, jeśli pokonasz przeciwnika. Jeśli po 10 rundach obie strony nadal żyją, nastąpi REMIS: bez nagród i odblokowania kolejnego etapu.\n\nRozpocząć starcie?`))return;
- const result=fight(arenaEnemy(stage),{recordRounds:true});
+ const result=fight(arenaEnemy(stage),{recordRounds:true,combat060:true});
+ result.combatEngine='060-pve-hit-dodge';
  // Profil taktyczny jest pochodną bazowych statystyk wroga; nie zmienia walki.
  result.battleProfile.enemy.attributes=arenaEnemyAttributes(stage);
  if(arenaTestMode){
