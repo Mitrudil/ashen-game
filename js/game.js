@@ -625,6 +625,24 @@ function prepare060Award(inst){
 // Dopiero zgodna wersja silnika Supabase pozwoli zmienic ta flage na true.
 // Nigdy nie aktywujemy nowych jakosci na podstawie URL lub localStorage.
 const ASHEN_060_MODERN_DROPS_ENABLED=window.ASHEN_BUILD?.modernDropsEnabled===true;
+// Etap 35: nowy drop dostępny w prawdziwych Wyprawach WYŁĄCZNIE na świadomie
+// wybranym, niezwiązanym z chmurą profilu testowym. Serwer PvP pozostaje nietknięty.
+function modernLootOfflineEligible(){
+ const cloud=window.ASHEN_CLOUD;
+ return !cloud?.getSession?.()?.user?.id && !cloud?.getBoundSlot?.();
+}
+function modernLootOfflineActive(){return state.modernLootOffline===true && modernLootOfflineEligible();}
+function toggleModernLootOffline(){
+ if(!modernLootOfflineEligible()){
+  message='Nowa jakość łupów jest na razie dostępna wyłącznie bez zalogowanego konta i powiązania z chmurą. Wyłączono tryb testowy.';
+  state.modernLootOffline=false;save();render();return;
+ }
+ if(!state.modernLootOffline && !confirm('Włączyć nowe jakości łupów 0.6 na tej lokalnej postaci? Przedmioty 0.6 nie są obsługiwane przez serwerowe PvP ani synchronizację online. Przed łączeniem tego profilu z kontem wykonaj eksport zapisu.'))return;
+ state.modernLootOffline=!state.modernLootOffline;
+ message=state.modernLootOffline?'Włączono nowe łupy 0.6 na lokalnych Wyprawach.':'Przywrócono standardowe łupy na kolejnych Wyprawach.';
+ save();render();
+}
+
 function modernExpeditionPool(loc){
  const id=typeof loc==='string'?loc:loc?.id;
  return ['ruins','hospital','outpost'].includes(id)?id:null;
@@ -649,7 +667,7 @@ function modernRollItem(id,expedition=null,luck=0){
  return window.Ashen060Loot.prepareModernLoot(base,pool,window.Ashen060Quality,window.Ashen060Bonuses,rngQuality);
 }
 function rollItem(id,expedition=null,luck=0){
- if(ASHEN_060_MODERN_DROPS_ENABLED){const modern=modernRollItem(id,expedition,luck);if(modern)return modern;}
+ if(ASHEN_060_MODERN_DROPS_ENABLED||modernLootOfflineActive()){const modern=modernRollItem(id,expedition,luck);if(modern)return modern;}
 
  const d=item(id);
  let weights=explorationRarityWeights(expedition,luck);
@@ -3452,6 +3470,12 @@ function inventory(){
  <div class="actions"><button class="primary" data-action="bulk-sell" ${selectedForBulk.length?'':'disabled'}>Sprzedaj zaznaczone (${selectedForBulk.length})</button><button data-action="bulk-salvage" ${selectedForBulk.length?'':'disabled'}>Rozłóż zaznaczone (${selectedForBulk.length})</button></div>
  <div class="bulk-hint">Założone i zabezpieczone przedmioty nie mogą zostać zaznaczone. Potwierdzenie pokaże łączną nagrodę. Zaznaczenie nie jest zapisywane między uruchomieniami gry.</div></div>`;
  return section('Ekwipunek',`${zLabPanel()}
+ <div class="panel section" style="margin-bottom:12px"><span class="tag">ŁUPY 0.6 · TEST LOKALNY</span>
+ <h3>Nowe jakości na Wyprawach</h3>
+ <p class="small muted">${modernLootOfflineEligible()?'Na niezwiązanej z chmurą postaci możesz włączyć losowanie nowych jakości przedmiotów podczas zwykłych Wypraw (Ruiny, Szpital, Posterunek). Nowe przedmioty są zapisywane w lokalnym ekwipunku.':'Niedostępne na profilu połączonym z kontem online. Stare łupy pozostają aktywne, dopóki serwer PvP nie obsłuży jakości 0.6.'} Przedmioty 0.6 nie mogą obecnie zostać opublikowane w PvP online.</p>
+ <p class="small">Nowe przedmioty na tej postaci: <strong>${state.inventory.filter(x=>x.qualitySchema==='ashen-v06').length}</strong>. Tryb: <strong>${modernLootOfflineActive()?'WŁĄCZONY':'WYŁĄCZONY'}</strong>.</p>
+ <div class="actions"><button type="button" data-action="modern-loot-offline-toggle" ${modernLootOfflineEligible()?'':'disabled'}>${modernLootOfflineActive()?'Wyłącz nowe łupy':'Włącz nowe łupy (tylko offline)'}</button></div>
+ </div>
  <div class="inventory-premium-intro">
    <div class="inventory-premium-copyblock">
       <span class="tag">SEKTOR OPERACYJNY</span>
@@ -3887,6 +3911,7 @@ function act(e){if(e.target?.matches?.('.ashen-item-overlay')){openItemDetail=nu
  if(page==='messages'||page==='pvp')void window.ASHEN_ONLINE?.refresh?.();
  if(page==='players')void window.ASHEN_PLAYERS?.refresh?.();
  return}if(b.dataset.action==='create'){let n=$('hero-name')?.value.trim();if(!n||n.length<2||n.length>24){message='Podaj imię od 2 do 24 znaków.';render();return}state.name=n;state.gender=normalizeGender(state.gender);state.origin=normalizeOrigin(state.origin);state.created=true;let bonus=origins[state.origin]?.bonus||{};for(const [k,v] of Object.entries(bonus))state.attrs[k]+=v;message='Witaj na Pustkowiach, '+n+'!';setPage('character');save();render();return}if(b.dataset.workshopSelect){workshopUid=b.dataset.workshopSelect;render();return}if(b.dataset.workshopUpgrade){applyUpgrade(b.dataset.workshopUpgrade);return}if(b.dataset.action==='workshop-test'){grantWorkshopTest();return}if(b.dataset.action==='faction-test-pack'){grantFactionTestPack();return}if(b.dataset.dominant){if(['left','right'].includes(b.dataset.dominant)){state.dominantHand=b.dataset.dominant;message='Zmieniono rękę dominującą.';save();render()}return}if(b.dataset.attr){if(state.points>0){state.attrs[b.dataset.attr]++;state.points--;save();render()}return}if(b.dataset.mission){let l=locations.find(x=>x.id===b.dataset.mission);if(!l||state.mission)return;/* Testy: energia nie jest zużywana */state.missionOutcomePending=false;state.mission={id:l.id,started:Date.now(),durationMs:travelSeconds(l)*1000,ends:Date.now()+travelSeconds(l)*1000,exploration:explorationStats()};message='';save();render();return}if(b.dataset.lock){const inst=instance(b.dataset.lock);if(inst){inst.locked=!inst.locked;message=inst.locked?'Przedmiot zabezpieczony.':'Zdjęto zabezpieczenie.';save();render()}return}
+if(b.dataset.action==='modern-loot-offline-toggle'){toggleModernLootOffline();return}
 if(b.dataset.action==='bulk-visible'){const arr=bulkEligibleVisible(invFilter);if(arr.length&&arr.every(x=>bulkSelected.has(x.uid)))arr.forEach(x=>bulkSelected.delete(x.uid));else arr.forEach(x=>bulkSelected.add(x.uid));render();return}
 if(b.dataset.action==='bulk-all'){state.inventory.filter(eligibleForBulk).forEach(x=>bulkSelected.add(x.uid));render();return}
 if(b.dataset.action==='bulk-clear'){bulkSelected.clear();render();return}
