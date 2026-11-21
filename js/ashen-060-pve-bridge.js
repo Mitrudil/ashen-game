@@ -17,5 +17,9 @@
   const strike=stat.resolveStrike({min:Math.max(0,Number(w.min)||0),max:Math.max(0,Number(w.max)||0),attributeDamage:0,accuracy:Number(w.accuracy)||0,power:1},combatant(a),combatant(d),rolls,{critChance:config.critChance??5});
   return {outcome:strike.outcome,critical:strike.critical,hitChance:strike.hitChance,dodgeChance:strike.dodgeChance};
  }
- return Object.freeze({outcome});
+ function damage(raw,armor,penetration=0){
+  if(!stat||typeof stat.resolveDamage!=='function')throw Error('Brak kalkulatora obrażeń 0.6.0');
+  return stat.resolveDamage(raw,armor,penetration);
+ }
+ return Object.freeze({outcome,damage});
 });

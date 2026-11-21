@@ -19,6 +19,14 @@
   for(const key of ['hp','acc','dodge','armor'])check(finite(c.defense[key])&&c.defense[key]>=0,'Nieprawidłowa statystyka '+id+'.'+key);
   check(c.defense.hp>0,'PŻ muszą być dodatnie');
  }
+ // Jedno źródło obliczania obrażeń po pancerzu dla diagnostyki i Starć PvE.
+ function resolveDamage(baseDamage,armor,penetration=0){
+  check(finite(baseDamage)&&baseDamage>=0,'Nieprawidłowe obrażenia bazowe');
+  check(finite(armor)&&armor>=0,'Nieprawidłowy pancerz');
+  check(finite(penetration)&&penetration>=0,'Nieprawidłowe przebicie');
+  const effectiveArmor=Math.max(0,armor-penetration);
+  return {damage:Math.max(1,Math.round(baseDamage*100/(100+effectiveArmor))),effectiveArmor};
+ }
  function resolveStrike(attack,attacker,defender,rolls,options={}){
   validCombatant(attacker,'atakującej');validCombatant(defender,'broniącej');validRolls(rolls);
   check(attack&&finite(attack.min)&&finite(attack.max)&&attack.min>=0&&attack.max>=attack.min,'Nieprawidłowy zakres broni');
@@ -39,8 +47,7 @@
   else{
    critical=rolls.critical<criticalChance/100;
    outcome=critical?'critical_hit':'hit';
-   const armor=Math.max(0,defender.defense.armor-penetration);
-   damage=Math.max(1,Math.round(baseDamage*(critical?criticalMultiplier:1)-armor));
+   damage=resolveDamage(baseDamage*(critical?criticalMultiplier:1),defender.defense.armor,penetration).damage;
   }
   return {outcome,damage,baseDamage,critical,hitChance,dodgeChance,criticalChance,
    effectiveArmor:Math.max(0,defender.defense.armor-penetration),status:'diagnostic_only'};
@@ -111,5 +118,5 @@
     'Dodatkowe ataki, inicjatywa i rezonanse bez reguł pozostają nieaktywne.',
     'Wciąż jest to diagnostyka, nie serwerowy silnik walki.']};
  }
- return Object.freeze({resolveStrike,simulate});
+ return Object.freeze({resolveDamage,resolveStrike,simulate});
 });

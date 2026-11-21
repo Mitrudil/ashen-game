@@ -1217,7 +1217,10 @@ function fight(enemy,options={}){
      if(zActive('accessory_observant')&&mastery.roundHits>=1&&mastery.observantRound!==r){raw=Math.max(1,Math.floor(raw*1.08));mastery.observantRound=r;zLog(r,'Spostrzegawczy: oznaczenie celu')}
    }
    if(critical&&!labWeapon)raw=Math.floor(raw*1.6);
-   let dmg=Math.max(1,Math.floor(raw*(1-clamp(effectiveArmor/100,0,.6))));
+   // Etap 30: w aktywnych Starciach PvE pancerz obniża obrażenia z malejącą skutecznością.
+   // Wszystkie pozostałe tryby (PvP, Wyprawy, Laboratorium) zachowują dotychczasowy wzór.
+   let dmg=modern?window.Ashen060PveBridge.damage(raw,effectiveArmor).damage:
+     Math.max(1,Math.floor(raw*(1-clamp(effectiveArmor/100,0,.6))));
    if(critical&&labWeapon)dmg=Math.max(1,Math.floor(dmg*(labWeapon.labCritMultiplier||1.6)));
    if(isHero&&critical){
      dmg=Math.max(1,Math.floor(dmg*(1+(se.critDamagePct||0)/100)));
