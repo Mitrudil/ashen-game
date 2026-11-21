@@ -2689,7 +2689,7 @@ const WEAPON_CATEGORIES={
  'hand2-melee':{name:'Broń biała dwuręczna',ids:['crowbar','hammer','rail','sledge']}
 };
 function weaponCategoryFor(d){return d?Object.keys(WEAPON_CATEGORIES).find(k=>WEAPON_CATEGORIES[k].ids.includes(d.id))||null:null}
-function inventoryMatchesFilter(inst,filter){const d=def(inst);if(!d)return false;if(filter==='all')return true;if(filter==='weapons-all')return d.slot==='hand1'||d.slot==='hand2';if(filter==='clothing-all')return ['shirt','pants','boots','outer','head','hands'].includes(d.slot);if(filter==='accessories-all')return d.slot==='extra'&&!d.artifact;if(filter==='artifacts-all')return !!d.artifact;return WEAPON_CATEGORIES[filter]?weaponCategoryFor(d)===filter:d.slot===filter}
+function inventoryMatchesFilter(inst,filter){const d=def(inst);if(!d)return false;if(filter==='all')return true;if(filter==='socketed')return Number.isInteger(inst.socketCapacity)&&inst.socketCapacity>0;if(filter==='weapons-all')return d.slot==='hand1'||d.slot==='hand2';if(filter==='clothing-all')return ['shirt','pants','boots','outer','head','hands'].includes(d.slot);if(filter==='accessories-all')return d.slot==='extra'&&!d.artifact;if(filter==='artifacts-all')return !!d.artifact;return WEAPON_CATEGORIES[filter]?weaponCategoryFor(d)===filter:d.slot===filter}
 let openItemDetail=null;
 function weaponFamilyLabel(d){const c=weaponCategoryFor(d);return c?WEAPON_CATEGORIES[c].name:slotName(d?.slot||'')}
 function itemDetailImage(d){if(itemArtUrl(d))return `<img class="ashen-detail-artwork" src="${itemArtUrl(d)}" alt="${escape(d.name)}">`;return d?.id&&!!weaponCategoryFor(d)?`<div class="detail-placeholder" aria-label="Grafika przedmiotu będzie dodana później">${itemIcon(d,'')}<span>Grafika w przygotowaniu</span></div>`:itemIcon(d,'')}
@@ -2929,7 +2929,7 @@ function slotChip(slot,uid){
  const name=empty?(blocked?'<span class="mini blocked-hand-note" title="Slot zajmuje broń dwuręczna">Zajęta (broń dwuręczna)</span>':'<span class="mini">Puste miejsce</span>'):`<button class="item-view-name mini equipped-item-trigger" data-item-open="${escape(inst.uid)}" title="${escape(o.name)}">${escape(o.name)}</button>${itemAffixBadges(o,def(inst),inst)}`;
  return `<div class="slot-anchor ${empty?'empty':''} ${blocked?'blocked-by-twohanded':''}" data-slot="${slot}"><div class="label">${label}</div>${icon}${name}</div>`
 }
-function equippedDetail(slot){const uid=state.equip[slot],inst=instance(uid),o=statsOf(inst),blocked=slot==='left'&&state.equip.right&&def(instance(state.equip.right))?.slot==='hand2'; return `<div class="eq-detail"><div>${o?itemIcon(inst):`<div class="iconbox">${svgIcon(slotPlaceholder(slot),'#64717a')}</div>`}</div><div class="grow"><div class="slotname">${slotLabels[slot]}</div>${o?`<button class="item-view-name" style="color:${rarities.find(r=>r.name===o.rarity)?.color}" data-item-open="${inst.uid}">${escape(o.name)}</button><div class="small muted">${statDetails(o)}${itemBonusSourceHtml(inst)}</div>${itemAffixBadges(o,def(inst),inst)}${affixDetails(o)}<div class="actions"><button data-unequip="${slot}">Zdejmij</button></div>`:`<div class="muted">${blocked?'Zajęta przez broń dwuręczną.':'Brak przedmiotu.'}</div>`}</div></div>`}
+function equippedDetail(slot){const uid=state.equip[slot],inst=instance(uid),o=statsOf(inst),blocked=slot==='left'&&state.equip.right&&def(instance(state.equip.right))?.slot==='hand2'; return `<div class="eq-detail"><div>${o?itemIcon(inst):`<div class="iconbox">${svgIcon(slotPlaceholder(slot),'#64717a')}</div>`}</div><div class="grow"><div class="slotname">${slotLabels[slot]}</div>${o?`<button class="item-view-name" style="color:${rarity(inst).color}" data-item-open="${inst.uid}">${escape(o.name)}</button><div class="small muted">${statDetails(o)}${itemBonusSourceHtml(inst)}</div>${itemAffixBadges(o,def(inst),inst)}${affixDetails(o)}<div class="actions"><button data-unequip="${slot}">Zdejmij</button></div>`:`<div class="muted">${blocked?'Zajęta przez broń dwuręczną.':'Brak przedmiotu.'}</div>`}</div></div>`}
 function itemSummary(inst,o,showSlot=true){return `<div class="itemline"><button class="item-view-icon" data-item-open="${escape(inst.uid)}" aria-label="Otwórz opis: ${escape(o.name)}">${itemIcon(inst)}</button><div class="grow"><button class="item-view-name" data-item-open="${escape(inst.uid)}" style="color:${rarity(inst).color}">${escape(o.name)}</button>${itemAffixBadges(o,def(inst),inst)}</div></div>`}
 
 // Ekonomia v0.1.24: wartości testowe, łatwo zmienialne w jednym miejscu.
@@ -3068,6 +3068,7 @@ const INVENTORY_SORTS=[
  ['rarity-asc','Rzadkość: zwykłe na górze'],
  ['power-desc','Siła / pancerz: malejąco'],
  ['power-asc','Siła / pancerz: rosnąco'],
+ ['sockets-desc','Gniazda artefaktów: najwięcej'],
  ['name','Nazwa: A–Z'],
  ['newest','Ostatnio zdobyte'],
  ['oldest','Najdawniej zdobyte']
@@ -3079,6 +3080,7 @@ function inventorySortEntries(rows){
   if(mode==='newest')return b.originalIndex-a.originalIndex;
   if(mode==='oldest')return a.originalIndex-b.originalIndex;
   if(mode==='name')return a.o.name.localeCompare(b.o.name,'pl')||a.originalIndex-b.originalIndex;
+  if(mode==='sockets-desc')return (b.inst.socketCapacity||0)-(a.inst.socketCapacity||0)||window.Ashen060QualityBridge.ranking(b.inst,window.Ashen060Quality)-window.Ashen060QualityBridge.ranking(a.inst,window.Ashen060Quality)||a.originalIndex-b.originalIndex;
   if(mode==='power-desc')return power(b)-power(a)||window.Ashen060QualityBridge.ranking(b.inst,window.Ashen060Quality)-window.Ashen060QualityBridge.ranking(a.inst,window.Ashen060Quality)||a.originalIndex-b.originalIndex;
   if(mode==='power-asc')return power(a)-power(b)||window.Ashen060QualityBridge.ranking(b.inst,window.Ashen060Quality)-window.Ashen060QualityBridge.ranking(a.inst,window.Ashen060Quality)||a.originalIndex-b.originalIndex;
   const rarityDelta=window.Ashen060QualityBridge.ranking(b.inst,window.Ashen060Quality)-window.Ashen060QualityBridge.ranking(a.inst,window.Ashen060Quality);
@@ -3157,7 +3159,7 @@ function inventoryItemCard(inst,o){
       <label class="bulk-select inventory-bulk-marker" title="Zaznacz do operacji zbiorczej"><input type="checkbox" data-bulk-uid="${inst.uid}" ${bulkSelected.has(inst.uid)?'checked':''} ${eligibleForBulk(inst)?'':'disabled'}></label>
       <button class="item-view-icon inventory-premium-icon" data-item-open="${escape(inst.uid)}" aria-label="Otwórz opis: ${escape(o.name)}">${itemIcon(inst)}</button>
       <div class="inventory-premium-copy">
-         <div class="inventory-premium-badges"><span class="inventory-slot-chip">${escape(slotLabel)}</span><span class="inventory-rarity-chip" style="--rarity:${rarityMeta.color}">${escape(rarityMeta.name)}</span>${worn?'<span class="inventory-action-tag equipped">Założony</span>':''}${inst.locked?'<span class="inventory-action-tag locked">Zabezpieczony</span>':''}</div>
+         <div class="inventory-premium-badges"><span class="inventory-slot-chip">${escape(slotLabel)}</span><span class="inventory-rarity-chip" style="--rarity:${rarityMeta.color}">${escape(rarityMeta.name)}</span>${Number.isInteger(inst.socketCapacity)&&inst.socketCapacity>0?`<span class="inventory-slot-chip" title="Gniazda artefaktów">◇ ${Math.max(0,inst.socketCapacity-(inst.socketedArtifacts||[]).length)}/${inst.socketCapacity} wolnych</span>`:''}${worn?'<span class="inventory-action-tag equipped">Założony</span>':''}${inst.locked?'<span class="inventory-action-tag locked">Zabezpieczony</span>':''}</div>
          <button class="item-view-name inventory-premium-name" data-item-open="${escape(inst.uid)}" style="color:${rarityMeta.color}">${escape(o.name)}</button>
          ${itemAffixBadges(o,def(inst),inst)}
       </div>
@@ -3435,8 +3437,8 @@ function zLabRestore(){
  message='Przywrócono ekwipunek Testera sprzed eksperymentu.';save();render();
 }
 function inventory(){
- const categories=[['all','▣ Wszystko','all'],['weapons','⚔ Broń','weapons-all'],['clothing','⬡ Odzież i pancerz','clothing-all'],['accessories','◈ Akcesoria','accessories-all'],['artifacts','✧ Artefakty','artifacts-all']];
- const filtersByGroup={all:[],weapons:[['weapons-all','Wszystkie bronie'],...Object.entries(WEAPON_CATEGORIES).map(([id,v])=>[id,v.name])],clothing:[['clothing-all','Cała odzież'],['shirt','Koszulki'],['pants','Spodnie'],['boots','Buty'],['outer','Kurtki / pancerze'],['head','Nakrycia głowy'],['hands','Rękawice / karwasze']],accessories:[['accessories-all','Wszystkie akcesoria']],artifacts:[['artifacts-all','Wszystkie artefakty']]};
+ const categories=[['all','▣ Wszystko','all'],['sockets','◇ Z gniazdami','socketed'],['weapons','⚔ Broń','weapons-all'],['clothing','⬡ Odzież i pancerz','clothing-all'],['accessories','◈ Akcesoria','accessories-all'],['artifacts','✧ Artefakty','artifacts-all']];
+ const filtersByGroup={all:[],sockets:[],weapons:[['weapons-all','Wszystkie bronie'],...Object.entries(WEAPON_CATEGORIES).map(([id,v])=>[id,v.name])],clothing:[['clothing-all','Cała odzież'],['shirt','Koszulki'],['pants','Spodnie'],['boots','Buty'],['outer','Kurtki / pancerze'],['head','Nakrycia głowy'],['hands','Rękawice / karwasze']],accessories:[['accessories-all','Wszystkie akcesoria']],artifacts:[['artifacts-all','Wszystkie artefakty']]};
  const filters=filtersByGroup[invGroup]||[];
  const visible=inventorySortEntries(state.inventory.map(inst=>({inst,o:statsOf(inst)})).filter(x=>x.o&&inventoryMatchesFilter(x.inst,invFilter)));
  for(const uid of [...bulkSelected])if(!eligibleForBulk(instance(uid)))bulkSelected.delete(uid);
@@ -3458,6 +3460,7 @@ function inventory(){
    </div>
    <div class="inventory-premium-quickstrip">
       <div class="inventory-quick-pill"><span>Przedmioty</span><strong>${state.inventory.length}</strong></div>
+      <div class="inventory-quick-pill"><span>Z gniazdami</span><strong>${state.inventory.filter(x=>Number.isInteger(x.socketCapacity)&&x.socketCapacity>0).length}</strong></div>
       <div class="inventory-quick-pill"><span>Założone sloty</span><strong>${Object.values(state.equip).filter(Boolean).length}</strong></div>
       <div class="inventory-quick-pill"><span>Artefakty</span><strong>${['extra','extra2','extra3'].filter(s=>instance(state.equip[s])&&def(instance(state.equip[s]))?.artifact).length}/3</strong></div>
       <div class="inventory-quick-pill"><span>Dominująca ręka</span><strong>${state.dominantHand==='left'?'Lewa':'Prawa'}</strong></div>
@@ -3891,7 +3894,7 @@ if(b.dataset.action==='bulk-sell'){disposeBulk('sell');return}
 if(b.dataset.action==='bulk-salvage'){disposeBulk('salvage');return}
 if(b.dataset.sale){disposeItem(b.dataset.sale,'sell');return}
 if(b.dataset.salvage){disposeItem(b.dataset.salvage,'salvage');return}
-if(b.dataset.invGroup){const groups={all:'all',weapons:'weapons-all',clothing:'clothing-all',accessories:'accessories-all',artifacts:'artifacts-all'};if(Object.prototype.hasOwnProperty.call(groups,b.dataset.invGroup)){invGroup=b.dataset.invGroup;invFilter=groups[invGroup];render()}return}if(b.dataset.filter){invFilter=b.dataset.filter;render();return}if(b.dataset.inspect){selectedUid=b.dataset.inspect;render();return}if(b.dataset.action==='close-inspect'){selectedUid=null;render();return}if(b.dataset.unequip){let slot=b.dataset.unequip;if(slot in state.equip){state.equip[slot]=null;openItemDetail=null;message='Zdjęto przedmiot.';save();render()}return}
+if(b.dataset.invGroup){const groups={all:'all',sockets:'socketed',weapons:'weapons-all',clothing:'clothing-all',accessories:'accessories-all',artifacts:'artifacts-all'};if(Object.prototype.hasOwnProperty.call(groups,b.dataset.invGroup)){invGroup=b.dataset.invGroup;invFilter=groups[invGroup];render()}return}if(b.dataset.filter){invFilter=b.dataset.filter;render();return}if(b.dataset.inspect){selectedUid=b.dataset.inspect;render();return}if(b.dataset.action==='close-inspect'){selectedUid=null;render();return}if(b.dataset.unequip){let slot=b.dataset.unequip;if(slot in state.equip){state.equip[slot]=null;openItemDetail=null;message='Zdjęto przedmiot.';save();render()}return}
 if(b.dataset.equip!==undefined){
  const inst=instance(b.dataset.equip),obj=def(inst);if(!obj||obj.slot==='material')return;
  const slot=obj.slot==='hand1'?(b.dataset.hand==='left'?'left':'right'):obj.slot==='hand2'?'right':obj.slot==='extra'?(['extra','extra2','extra3'].includes(b.dataset.extraSlot)?b.dataset.extraSlot:['extra','extra2','extra3'].find(s=>!state.equip[s])||'extra'):obj.slot;
