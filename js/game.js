@@ -645,13 +645,13 @@ function toggleModernLootOnline(){
   message='Nowe łupy online można włączyć tylko na aktywnej postaci przypisanej do zalogowanego konta.';render();return;
  }
  if(!state.modernLootOnline){
-  if(!confirm('Włączyć nowe jakości 0.6 na tej postaci online? Nowe łupy trafią do prawdziwego ekwipunku i zapisu w chmurze. Można je przeglądać i przechowywać, ale NIE zakładać do czasu aktualizacji serwerowego PvP. Kontynuować?'))return;
+  if(!confirm('Włączyć nowe jakości 0.6 na tej postaci online? Nowe łupy trafią do normalnego ekwipunku i można je zakładać do Starć oraz Wypraw. Do czasu aktualizacji serwera profil PvP nie będzie aktualizowany po założeniu nowego przedmiotu. Kontynuować?'))return;
   // Lokalny punkt przywracania sprzed pierwszego uruchomienia tej funkcji.
   try{const key='ashen-060-before-online-loot:'+window.ASHEN_CLOUD.getSession().user.id+':'+window.ASHEN_CLOUD.currentSlot();if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(state));}
   catch{message='Nie udało się utworzyć lokalnej kopii bezpieczeństwa — tryb nie został włączony.';render();return;}
  }
  state.modernLootOnline=!state.modernLootOnline;
- message=state.modernLootOnline?'Włączono prawdziwe łupy 0.6 na obecnym koncie. Nowe przedmioty można wybrać do lokalnego PvE, ale nie do PvP online.':'Wyłączono generowanie nowych łupów 0.6. Zdobyte przedmioty pozostają w ekwipunku.';
+ message=state.modernLootOnline?'Włączono nowe łupy 0.6 w zwykłym ekwipunku. Statystyki PvP nie będą publikowane z założonym nowym przedmiotem.':'Wyłączono generowanie nowych łupów 0.6. Zdobyte przedmioty pozostają w ekwipunku.';
  save();render();
 }
 function toggleModernLootOffline(){
@@ -1480,7 +1480,7 @@ function startArenaFight(number){
  const stage=ARENA_STAGES.find(s=>s.level===number),progress=arenaData();
  if(!stage||!state.created||(!arenaTestMode&&number>Math.min(ARENA_STAGES.length,progress.highest+1)))return;
  if(!confirm(`${arenaTestMode?'TEST · bez nagród i zapisu postępu\n\n':''}Starcie ${number}/${ARENA_STAGES.length}: ${stage.name}${stage.boss?' (BOSS)':''}\n\nWalka trwa maksymalnie 15 rund. Zwyciężysz, jeśli pokonasz przeciwnika. Jeśli po 15 rundach obie strony nadal żyją, nastąpi REMIS: bez nagród i odblokowania kolejnego etapu.\n\nRozpocząć starcie?`))return;
- const result=pve060Fight(arenaEnemy(stage),{recordRounds:true,combat060:true,maxRounds:15});
+ const result=fight(arenaEnemy(stage),{recordRounds:true,combat060:true,maxRounds:15});
  result.combatEngine='060-pve-unified';
  // Profil taktyczny jest pochodną bazowych statystyk wroga; nie zmienia walki.
  result.battleProfile.enemy.attributes=arenaEnemyAttributes(stage);
@@ -2548,7 +2548,7 @@ function reportLocId(r){return r.location?.includes('szpital')?'hospital':r.loca
 function reportStory(r){return r.story||'Wśród ruin doszło do nieoczekiwanego spotkania. Szczegółowy zapis tej wyprawy pochodzi ze starszej wersji gry.'}
 function finish(){
  let m=state.mission;if(!m||Date.now()<m.ends)return;
- let loc=locations.find(x=>x.id===m.id),enemy=loc.enemies[rand(0,loc.enemies.length-1)],result=pve060Fight(enemy,{expedition:true,combat060:true}),xp=result.won?rand(...loc.xp):Math.ceil(loc.xp[0]*.3),scrap=result.won?rand(...loc.scrap):0;
+ let loc=locations.find(x=>x.id===m.id),enemy=loc.enemies[rand(0,loc.enemies.length-1)],result=fight(enemy,{expedition:true,combat060:true}),xp=result.won?rand(...loc.xp):Math.ceil(loc.xp[0]*.3),scrap=result.won?rand(...loc.scrap):0;
  xp=Math.ceil(xp*(1+0.03*(roomLevel('bedroom')-1))*(companionId()==='raven'?1+petPower('raven')/100:1));scrap=Math.ceil(scrap*(companionId()==='cat'?1+petPower('cat')/100:1)*(1+activeVehicleModule('cargo')*.05));state.xp+=xp;state.scrap+=scrap;state.battles++;if(result.won)state.wins++;
   // Porażka: zero przedmiotów, w tym łupów z eksploracji, anomalii i zwierzęcia.
   const snapshot=m.exploration||explorationStats();
@@ -2865,90 +2865,6 @@ function itemEquipDefaultSlot(inst){
 }
 // Ten sam układ slotów obsługuje podgląd i rzeczywiste zakładanie.
 // Etap 39 — oddzielny zestaw PvE. Bez ingerencji w wyposażenie publikowane w PvP.
-function pve060Chosen(){return state.pveEquip060&&typeof state.pveEquip060==='object'&&!Array.isArray(state.pveEquip060)?state.pveEquip060:{}}
-function pve060EffectiveEquip(){
- const api=window.Ashen060PveLoadout;
- if(!api)return state.equip;
- return api.resolve(state.equip,pve060Chosen(),state.inventory,def);
-}
-// Porownanie PvE 0.6: obie serie uzywaja tego samego przeciwnika i zestawu ziaren.
-// Dziala bez save(), nagrod, postepu oraz publikacji danych do chmury.
-let pve060Comparison=null;
-function pve060Seed(seed){
- let x=seed>>>0;return ()=>{x=(Math.imul(x,1664525)+1013904223)>>>0;return x/4294967296;};
-}
-function pve060Compare(){
- const stage=ARENA_STAGES.find(s=>s.level===arenaSelected)||ARENA_STAGES[0];
- const initial=state.equip,modern=pve060EffectiveEquip();
- if(!Object.keys(pve060Chosen()).length){message='Najpierw przypisz przedmiot do zestawu PvE 0.6.';render();return;}
- const profile=(equip)=>{
-  state.equip=equip;
-  const d=heroDefense(),attacks=heroAttacks({combat060:true}),a=attrs();
-  const potential=attacks.reduce((t,w)=>{const r=weaponDamageRange(a,w.weapon,w.power);return t+(r.low+r.high)/2;},0);
-  return {hp:d.hp,armor:d.armor,accuracy:d.acc,dodge:d.dodge,attacks:attacks.length,potential:Math.round(potential)};
- };
- const totals=()=>({wins:0,draws:0,losses:0,damage:0,taken:0,rounds:0});
- const old=totals(),fresh=totals(),count=20;
- const run=(equip,total,seed)=>{
-  state.equip=equip;
-  const r=fight(arenaEnemy(stage),{combat060:true,maxRounds:15,testRandom:pve060Seed(seed)});
-  const outcome=r.enemyHp<=0?'wins':r.heroHp<=0?'losses':'draws';
-  total[outcome]++;total.damage+=r.damageSummary.hero.damage;
-  total.taken+=r.damageSummary.foe.damage;total.rounds+=r.damageSummary.rounds;
- };
- try{
-  const baseline=profile(initial),alternative=profile(modern);
-  for(let i=0;i<count;i++){
-   const seed=(0xA5E60000+i*7919)>>>0;
-   run(initial,old,seed);run(modern,fresh,seed);
-  }
-  pve060Comparison={stage:stage.name,level:stage.level,count,baseline,alternative,old,fresh};
-  message='Porownanie wykonane bez przyznawania nagrod i zmiany postepu.';
- }catch(err){pve060Comparison=null;message='Porownanie nie powiodlo sie: '+err.message;}
- finally{state.equip=initial;render();}
-}
-function pve060ComparisonHtml(){
- const c=pve060Comparison;
- if(!c)return '';
- const n=x=>Number(x).toLocaleString('pl-PL',{maximumFractionDigits:1});
- const avg=(v)=>n(v/c.count);
- const metrics=[['Maksymalne PŻ','hp'],['Pancerz','armor'],['Celność','accuracy'],['Unik','dodge'],['Ataki na rundę','attacks'],['Suma średnich obrażeń broni','potential']];
- return `<div class="panel section" style="margin-top:12px"><h4>Porównanie · ${escape(c.stage)} (etap ${c.level})</h4><p class="small muted">Dwie serie po ${c.count} prób, identyczny przeciwnik i ziarno losowania w odpowiadających sobie próbach. Każda walka może zużywać inną liczbę rzutów. To diagnostyka, nie gwarancja wyniku. Maks. 15 rund, bez nagród i zapisu postępu.</p><div style="overflow-x:auto"><table style="width:100%;text-align:left;border-collapse:collapse"><thead><tr><th>Parametr</th><th>Zwykły zestaw</th><th>PvE 0.6</th></tr></thead><tbody>${metrics.map(([label,key])=>`<tr><td>${label}</td><td>${n(c.baseline[key])}</td><td>${n(c.alternative[key])}</td></tr>`).join('')}<tr><td>Wygrane / remisy / porażki</td><td>${c.old.wins} / ${c.old.draws} / ${c.old.losses}</td><td>${c.fresh.wins} / ${c.fresh.draws} / ${c.fresh.losses}</td></tr><tr><td>Średnie zadane obrażenia</td><td>${avg(c.old.damage)}</td><td>${avg(c.fresh.damage)}</td></tr><tr><td>Średnie otrzymane obrażenia</td><td>${avg(c.old.taken)}</td><td>${avg(c.fresh.taken)}</td></tr><tr><td>Średnia liczba rund</td><td>${avg(c.old.rounds)}</td><td>${avg(c.fresh.rounds)}</td></tr></tbody></table></div><p class="small muted">Wyniki obejmują faktycznie zadane obrażenia (ograniczone PŻ celu), a nie teoretyczny DPS. Zmiana ekwipunku wymaga ponownego porównania.</p></div>`;
-}
-function pve060Set(inst,slot){
- if(!inst||inst.qualitySchema!=='ashen-v06'||!modernLootOnlineEligible()||!itemEquipSlots(inst).includes(slot))return false;
- pve060Comparison=null;
- const chosen={...pve060Chosen()};
- // Nie pozwól przypisać jednego przedmiotu do kilku slotów.
- for(const key of Object.keys(chosen))if(chosen[key]===inst.uid)delete chosen[key];
- if(def(inst)?.slot==='hand2')delete chosen.left;
- if(def(inst)?.slot==='hand1'&&slot==='left'){
-  const right=instance(chosen.right);if(right&&def(right)?.slot==='hand2')delete chosen.right;
- }
- chosen[slot]=inst.uid;state.pveEquip060=chosen;save();render();return true;
-}
-function pve060Remove(slot){
- if(!Object.prototype.hasOwnProperty.call(pve060Chosen(),slot))return;
- pve060Comparison=null;const chosen={...pve060Chosen()};delete chosen[slot];state.pveEquip060=chosen;save();render();
-}
-function pve060Fight(enemy,options){
- // Walka jest synchroniczna: tylko w jej trakcie podstawiamy zestaw PvE.
- // finally przywraca rzeczywisty stan nawet w przypadku wyjątku.
- const original=state.equip;
- try{state.equip=pve060EffectiveEquip();return fight(enemy,options);}
- finally{state.equip=original;}
-}
-function pve060Panel(){
- if(!modernLootOnlineEligible())return '';
- const chosen=pve060Chosen(),selected=Object.entries(chosen).filter(([,uid])=>instance(uid)?.qualitySchema==='ashen-v06');
- const content=selected.map(([slot,uid])=>`<div class="small" style="margin:5px 0">${escape(slotLabels[slot]||slot)}: <strong>${escape(statsOf(instance(uid)).name)}</strong> <button type="button" data-pve060-remove="${escape(slot)}">Usuń</button></div>`).join('');
- return `<div class="panel section" style="margin-bottom:12px"><span class="tag">PvE 0.6 · OSOBNY ZESTAW</span><h3>Nowe przedmioty w Starciach i Wyprawach</h3><p class="small muted">Możesz używać przedmiotów 0.6 w lokalnych walkach PvE bez wylogowania. Wybierz przedmiot i użyj przycisku „Do PvE 0.6”. Normalny ekwipunek, statystyki i zestawy publikowane w PvP pozostają bez zmian. Osobny zestaw PvE zapisuje się razem z postacią, ale serwerowe PvP go nie odczytuje.</p>${content||'<p class="small muted">Nie wybrano jeszcze przedmiotów do dodatkowego zestawu PvE.</p>'}<div class="actions"><button type="button" data-pve060-compare ${selected.length?'':'disabled'}>Porównaj 20 walk · zwykły vs PvE 0.6</button></div>${pve060ComparisonHtml()}</div>`;
-}
-function pve060Buttons(inst){
- if(!modernLootOnlineEligible()||inst?.qualitySchema!=='ashen-v06')return '';
- const slots=itemEquipSlots(inst);
- return `<div class="actions">${slots.map(slot=>`<button type="button" data-pve060-equip="${escape(inst.uid)}" data-pve060-slot="${escape(slot)}">Do PvE 0.6 · ${escape(slotLabels[slot]||slot)}</button>`).join('')}</div>`;
-}
 function itemEquipAfter(inst,slot){
  const d=def(inst);if(!d||!itemEquipSlots(inst).includes(slot))return null;
  const equip={...state.equip};
@@ -3091,7 +3007,7 @@ function itemDetailContent(){if(!openItemDetail)return '';
  const o=owned?statsOf(owned):{...defn,rarity:'Zwykły',name:defn.name,bonus:defn.bonus||{}};
  const wornSlot=owned?Object.keys(state.equip).find(slot=>state.equip[slot]===owned.uid):null;
  const previewSlot=owned?(itemEquipSlots(owned).includes(itemCompareSlot)?itemCompareSlot:itemEquipDefaultSlot(owned)):null;
- const equipActions=!owned||defn.slot==='material'?'':(owned.qualitySchema==='ashen-v06'&&modernLootOnlineEligible())?'<span class="small muted">PvP: wymaga aktualizacji serwera.</span>'+pve060Buttons(owned):wornSlot?`<button class="primary" data-unequip="${wornSlot}">Zdejmij</button>`:`<button class="primary" data-equip="${escape(owned.uid)}" ${defn.slot==='hand1'?`data-hand="${previewSlot}"`:''} ${defn.slot==='extra'?`data-extra-slot="${previewSlot}"`:''}>Załóż · ${escape(slotLabels[previewSlot]||'wybrany slot')}</button>`;
+ const equipActions=!owned||defn.slot==='material'?'':wornSlot?`<button class="primary" data-unequip="${wornSlot}">Zdejmij</button>`:`<button class="primary" data-equip="${escape(owned.uid)}" ${defn.slot==='hand1'?`data-hand="${previewSlot}"`:''} ${defn.slot==='extra'?`data-extra-slot="${previewSlot}"`:''}>Załóż · ${escape(slotLabels[previewSlot]||'wybrany slot')}</button>`;
  return `<div class="ashen-item-overlay" role="presentation"><div class="ashen-item-modal" role="dialog" aria-modal="true" aria-labelledby="ashen-item-title"><button class="ashen-item-close" data-item-close aria-label="Zamknij szczegóły">✕</button><div class="tag">${escape(weaponFamilyLabel(defn))}</div><h2 id="ashen-item-title">${escape(o.name)}</h2><div class="ashen-item-modal-grid"><div class="ashen-item-art">${itemDetailImage(defn)}</div><div class="ashen-item-facts"><p class="small muted">${escape(defn.flavor||'Przedmiot zdobyty na Pustkowiach.')}</p><div class="detail-stat"><span>${weaponSlot(o.slot)?'Obrażenia':o.slot==='material'?'Rodzaj':'Pancerz'}</span><strong>${weaponSlot(o.slot)?`${Number(o.min)||0}–${Number(o.max)||0}`:o.slot==='material'?'Surowiec':String(Number(o.armor)||0)}</strong></div><div class="detail-stat"><span>Rzadkość</span><strong>${escape(o.rarity||'Zwykły')}</strong></div>${owned&&Number.isInteger(owned.socketCapacity)?`<div class="detail-stat"><span>Gniazda artefaktów</span><strong>${owned.socketCapacity} / 3</strong></div>`:""}${owned?`<div class="detail-stat"><span>Ulepszenie</span><strong>+${owned.upgrade||0}</strong></div>`:''}${weaponSlot(defn.slot)?`<div class="detail-stat"><span>Ręce</span><strong>${defn.slot==='hand1'?'Jedna':'Dwie'}</strong></div><div class="detail-stat"><span>Ataki na rundę</span><strong>${(Number(o.baseAttacks)||1)+(Number(o.extraAttacks)||0)}</strong></div>${o.combatV2?`<div class="detail-stat"><span>Model walki</span><strong>ASHEN 0.5 · test bojowy</strong></div>`:''}`:''}<div class="detail-affix"><strong>${modifierGlyph('prefix',defn,owned?findModifier(prefixDefs,owned.prefix):null)} Prefiks</strong><span>${escape(o.prefixName||'Brak')}</span></div><div class="detail-affix"><strong>${modifierGlyph('suffix',defn,owned?findModifier(suffixDefs,owned.suffix):null)} Sufiks</strong><span>${escape(o.suffixName||'Brak')}</span></div>${owned?`<div class="small muted">${statDetails(o)}${itemBonusSourceHtml(owned)}</div>${itemSetPanel(owned)}${accessorySetItemPanel(owned)}${artifactDetailPanel(owned)}`:''}</div></div>${owned&&!wornSlot&&defn.slot!=='material'?itemComparePanel(owned):''}${owned?item060PreviewPanel(owned,wornSlot||previewSlot):''}<div class="actions ashen-modal-equip-actions">${equipActions}${owned&&defn.slot!=='material'?`<button data-lock="${escape(owned.uid)}">${owned.locked?'🔒 Odblokuj':'🔓 Zabezpiecz'}</button><button data-sale="${escape(owned.uid)}" ${wornSlot||owned.locked?'disabled':''}>Sprzedaj · ${saleValue(owned)} kr.</button><button data-salvage="${escape(owned.uid)}" ${wornSlot||owned.locked?'disabled':''}>Zezłomuj · ${escape(salvageLabel(salvageValue(owned)))}</button>`:''}<button data-item-close>Zamknij</button></div></div></div>`
 }
 function slotChip(slot,uid){
@@ -3126,7 +3042,6 @@ function disposeItem(uid,mode){
  const inst=instance(uid),o=statsOf(inst);
  if(!inst||!o||o.slot==='material'){message='Nie można przetworzyć tego przedmiotu.';render();return}
  if(Object.values(state.equip).includes(uid)){message='Najpierw zdejmij ten przedmiot z postaci.';render();return}
- if(Object.values(pve060Chosen()).includes(uid)){message='Najpierw usuń przedmiot z zestawu PvE 0.6.';render();return}
  if(inst.locked){message='Przedmiot jest zabezpieczony. Otwórz kłódkę przed sprzedażą lub rozłożeniem.';render();return}
  const earned=mode==='sell'?saleValue(inst):salvageValue(inst);
  const detail=mode==='sell'?`${earned} kredytów`:salvageLabel(earned);
@@ -3326,7 +3241,7 @@ function inventoryItemCard(inst,o){
  const weapon=o.slot==='hand1';
  const rarityMeta=rarity(inst);
  const slotLabel=slotName(o.slot);
- const buttons=o.slot==='material'?'':(inst.qualitySchema==='ashen-v06'&&modernLootOnlineEligible())?'<span class="inventory-action-tag">0.6 · PvP bez zmian</span>'+pve060Buttons(inst):worn?`<span class="inventory-action-tag equipped">Założony</span><button data-unequip="${Object.keys(state.equip).find(k=>state.equip[k]===inst.uid)||''}">Zdejmij</button>`:weapon?`<button class="primary" data-equip="${inst.uid}" data-hand="right">Prawa ręka</button><button data-equip="${inst.uid}" data-hand="left">Lewa ręka</button>`:(o.slot==='extra'?['extra','extra2','extra3'].map((s,i)=>`<button class="${state.equip[s]?'':'primary'}" data-equip="${inst.uid}" data-extra-slot="${s}" title="${state.equip[s]?'Zastąpi aktualne akcesorium w tym slocie':'Wolny slot akcesorium'}">Slot ${i+1}${state.equip[s]?' ↺':''}</button>`).join(''):`<button class="primary" data-equip="${inst.uid}">Załóż</button>`);
+ const buttons=o.slot==='material'?'':worn?`<span class="inventory-action-tag equipped">Założony</span><button data-unequip="${Object.keys(state.equip).find(k=>state.equip[k]===inst.uid)||''}">Zdejmij</button>`:weapon?`<button class="primary" data-equip="${inst.uid}" data-hand="right">Prawa ręka</button><button data-equip="${inst.uid}" data-hand="left">Lewa ręka</button>`:(o.slot==='extra'?['extra','extra2','extra3'].map((s,i)=>`<button class="${state.equip[s]?'':'primary'}" data-equip="${inst.uid}" data-extra-slot="${s}" title="${state.equip[s]?'Zastąpi aktualne akcesorium w tym slocie':'Wolny slot akcesorium'}">Slot ${i+1}${state.equip[s]?' ↺':''}</button>`).join(''):`<button class="primary" data-equip="${inst.uid}">Załóż</button>`);
  return `<article class="item inventory-premium-item ashen-rarity-${Math.min(4,Math.max(0,Number(inst.rarity)||0))} ${bulkSelected.has(inst.uid)?'bulk-picked':''}">
    <div class="inventory-premium-head">
       <label class="bulk-select inventory-bulk-marker" title="Zaznacz do operacji zbiorczej"><input type="checkbox" data-bulk-uid="${inst.uid}" ${bulkSelected.has(inst.uid)?'checked':''} ${eligibleForBulk(inst)?'':'disabled'}></label>
@@ -3625,7 +3540,7 @@ function inventory(){
  <div class="actions"><button class="primary" data-action="bulk-sell" ${selectedForBulk.length?'':'disabled'}>Sprzedaj zaznaczone (${selectedForBulk.length})</button><button data-action="bulk-salvage" ${selectedForBulk.length?'':'disabled'}>Rozłóż zaznaczone (${selectedForBulk.length})</button></div>
  <div class="bulk-hint">Założone i zabezpieczone przedmioty nie mogą zostać zaznaczone. Potwierdzenie pokaże łączną nagrodę. Zaznaczenie nie jest zapisywane między uruchomieniami gry.</div></div>`;
  return section('Ekwipunek',`${zLabPanel()}
- ${modernPreviewPanel()}${pve060Panel()}
+ <div class="small muted" style="margin:8px 0 14px">Nowe przedmioty 0.6 zakładasz zwykłym przyciskiem „Załóż” i wykorzystujesz w Starciach oraz Wyprawach. ${modernLootOnlineEligible()?`<button type="button" data-action="modern-loot-online-toggle">${state.modernLootOnline?'Wyłącz nowe łupy':'Włącz nowe łupy'}</button>`:''} ${Object.values(state.equip).some(uid=>instance(uid)?.qualitySchema==='ashen-v06')?'Nowe wyposażenie w PvP online oczekuje na zgodność serwera; postać może być zapisywana w chmurze.':''}</div>
  <div class="inventory-premium-intro">
    <div class="inventory-premium-copyblock">
       <span class="tag">SEKTOR OPERACYJNY</span>
@@ -4055,7 +3970,7 @@ if(preview060WasOpen&&preview060Restored)preview060Restored.open=true;
 const preview060RestoredDialog=document.querySelector('.ashen-item-modal');
 if(preview060RestoredDialog&&preview060Scroll)preview060RestoredDialog.scrollTop=preview060Scroll;
 let c=$('countdown');if(c)c.textContent=Math.max(0,Math.ceil((state.mission?.ends-Date.now())/1000))+' s'}
-function act(e){if(e.target?.matches?.('.ashen-item-overlay')){openItemDetail=null;itemCompareSlot=null;render();return}if(e.target.closest?.('[data-zlab-other-test]')){try{zLabOtherMasteryTest(e.target.closest('[data-zlab-other-test]').dataset.zlabOtherTest)}catch(err){message=err.message;render()}return}if(e.target.closest?.('[data-zlab-warden-test]')){try{zLabWardenTest()}catch(err){message=err.message;render()}return}if(e.target.closest?.('[data-zlab-generate]')){try{const family=$('zlab-family')?.value;const qualities=[0,1,2].map(i=>Number($('zlab-quality-'+i)?.value));zLabGenerate(family,qualities)}catch(err){message=err.message;render()}return}if(e.target.closest?.('[data-zlab-restore]')){try{zLabRestore()}catch(err){message=err.message;render()}return}if(e.target?.matches?.('[data-arena-overlay]')){arenaReportOpen=null;render();return}let b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-pve060-compare')){pve060Compare();return}if(b.dataset.pve060Remove){pve060Remove(b.dataset.pve060Remove);return}if(b.dataset.pve060Equip){const selected=instance(b.dataset.pve060Equip);if(!pve060Set(selected,b.dataset.pve060Slot)){message='Nie można wybrać przedmiotu do PvE.';render()}return}if(b.dataset.mailFolder){mailFolder=b.dataset.mailFolder;mailOpenedId=null;mailComposeTo=null;render();return}if(b.dataset.mailCompose){mailComposeTo='';mailOpenedId=null;render();return}if(b.dataset.mailCancel){mailComposeTo=null;render();return}if(b.dataset.mailOpen){mailOpen(b.dataset.mailOpen);return}if(b.dataset.mailBack){mailOpenedId=null;render();return}if(b.dataset.mailReply){mailComposeTo=b.dataset.mailReply;mailOpenedId=null;render();return}if(b.dataset.mailSend){try{mailSend($('mail-target')?.value,$('mail-body')?.value)}catch(err){message=err.message;render()}return}if(b.dataset.mailReport){setPage('pvp');message='Historyczne raporty offline nie są już obsługiwane. Nowe raporty znajdziesz w PvP online.';render();return}if(b.dataset.devPanel){devPanelOpen=!devPanelOpen;if(!devPanelOpen)devPendingResetId=null;render();return}if(b.dataset.devCreate){try{devCreateProfile()}catch(err){message=err.message;render()}return}if(b.dataset.devSwitch){try{devSwitch(b.dataset.devSwitch)}catch(err){message=err.message;render()}return}if(b.dataset.devDelete){try{devDeleteProfile(b.dataset.devDelete)}catch(err){message=err.message;render()}return}if(b.dataset.devResetCancel){devPendingResetId=null;render();return}if(b.dataset.devResetConfirm){try{devResetTestProfile(b.dataset.devResetConfirm)}catch(err){message=err.message;render()}return}if(b.dataset.devReset){try{devAskResetTestProfile(b.dataset.devReset)}catch(err){message=err.message;render()}return}if(b.dataset.ashen060Artifact){item060ChosenArtifact=b.dataset.ashen060Artifact;render();return}if(b.hasAttribute('data-item-close')){openItemDetail=null;itemCompareSlot=null;render();return}if(b.dataset.itemCompareSlot){if(openItemDetail?.kind==='owned'){const inst=instance(openItemDetail.id);if(inst&&itemEquipSlots(inst).includes(b.dataset.itemCompareSlot)){itemCompareSlot=b.dataset.itemCompareSlot;item060ChosenArtifact=null;render();}}return}if(b.dataset.itemOpen){openItemDetail={kind:'owned',id:b.dataset.itemOpen};itemCompareSlot=null;item060ChosenArtifact=null;render();return}if(b.dataset.itemCatalog){openItemDetail={kind:'catalog',id:b.dataset.itemCatalog};itemCompareSlot=null;item060ChosenArtifact=null;render();return}if(b.dataset.wlabStress){weaponStressRun();return}if(b.dataset.wlabStressCopy){weaponStressCopy();return}if(b.dataset.wlabCandidate){weaponCandidateRun();return}if(b.dataset.wlabCandidateCopy){weaponCandidateCopy();return}if(b.dataset.wlabNormal){weaponNormalRun();return}if(b.dataset.wlabNormalCopy){weaponNormalCopy();return}if(b.dataset.wlabKits){weaponKitRun();return}if(b.dataset.wlabKitsCopy){weaponKitCopy();return}if(b.dataset.wlabBalance){weaponBalanceRun();return}if(b.dataset.wlabBalanceCopy){weaponBalanceCopy();return}if(b.dataset.wlabPreset){weaponLabPreset(b.dataset.wlabPreset);return}if(b.dataset.weaponLabRun){weaponLabReadControls();weaponLabRun();return;}if(b.dataset.combatLabRun){const selected=$('combat-lab-enemy')?.value;const count=Number($('combat-lab-count')?.value);const rounds=Number($('combat-lab-rounds')?.value);if([10,15,20].includes(rounds))combatLabRounds=rounds;if(COMBAT_LAB_FOES[selected])combatLabEnemy=selected;if([10,100,1000].includes(count))combatLabCount=count;combatLabRun();return;}if(b.dataset.arenaTestToggle){arenaTestMode=!arenaTestMode;arenaReportOpen=null;arenaTestReport=null;message='';render();return;}if(b.dataset.arenaChapter){arenaChapter=Number(b.dataset.arenaChapter);arenaSelected=(arenaChapter-1)*10+1;message='';render();return;}if(b.dataset.arenaSelect){arenaSelected=Number(b.dataset.arenaSelect);arenaChapter=Math.ceil(arenaSelected/10);message='';render();return;}if(b.dataset.arenaFight){startArenaFight(Number(b.dataset.arenaFight));return;}if(b.dataset.arenaReport){arenaReportOpen=Number(b.dataset.arenaReport);message='';render();return;}if(b.dataset.arenaReportClose!==undefined){arenaReportOpen=null;render();return;}if(b.dataset.missionDetail){const key=b.dataset.missionDetail;if(key==='report'||key==='loot'){missionExpand[key]=!missionExpand[key];render()}return;}if(b.dataset.action==='mission-dismiss-result'){state.missionOutcomePending=false;save();render();return;}if(b.dataset.companionTestStage){const [id,n]=b.dataset.companionTestStage.split(':');companionTestStage(id,n);return}if(b.dataset.companionTestSelect){companionTestSelect(b.dataset.companionTestSelect);return}if(b.dataset.vehicleTestSelect){vehicleTestSelect(b.dataset.vehicleTestSelect);return}if(b.dataset.vehicleTestUnlock){testUnlockVehicle(b.dataset.vehicleTestUnlock);return}if(b.dataset.vehicleStage){const [id,n]=b.dataset.vehicleStage.split(':');selectVehicleStage(id,n);return}if(b.dataset.vehicleModule){upgradeVehicleModule(b.dataset.vehicleModule);return}if(b.dataset.companion){chooseCompanion(b.dataset.companion);return}if(b.hasAttribute('data-companion-upgrade')){upgradeCompanion();return}if(b.dataset.vehicle){acquireVehicle(b.dataset.vehicle);return}if(b.hasAttribute('data-vehicle-upgrade')){upgradeVehicle();return}if(b.dataset.bunkerRoom&&BUNKER_ROOMS[b.dataset.bunkerRoom]){activeBunkerRoom=b.dataset.bunkerRoom;message='';render();return;}if(b.dataset.roomTestLevel){const [id,level]=b.dataset.roomTestLevel.split(':');roomTestSet(id,level);return}if(b.dataset.roomUpgrade){roomUpgrade(b.dataset.roomUpgrade);return}if(b.dataset.roomDowngrade){roomDowngrade(b.dataset.roomDowngrade);return}if(b.dataset.action==='hideout-reset'){if(confirm('Przywrócić początkowe wyposażenie i oświetlenie kryjówki?')){state.hideout=hideoutDefault();message='Przywrócono podstawowy wygląd schronu.';save();render()}return}if(b.dataset.page){if(!state.created)return;arenaReportOpen=null;setPage(b.dataset.page);if(b.dataset.workshopSelect)workshopUid=b.dataset.workshopSelect;message='';render();
+function act(e){if(e.target?.matches?.('.ashen-item-overlay')){openItemDetail=null;itemCompareSlot=null;render();return}if(e.target.closest?.('[data-zlab-other-test]')){try{zLabOtherMasteryTest(e.target.closest('[data-zlab-other-test]').dataset.zlabOtherTest)}catch(err){message=err.message;render()}return}if(e.target.closest?.('[data-zlab-warden-test]')){try{zLabWardenTest()}catch(err){message=err.message;render()}return}if(e.target.closest?.('[data-zlab-generate]')){try{const family=$('zlab-family')?.value;const qualities=[0,1,2].map(i=>Number($('zlab-quality-'+i)?.value));zLabGenerate(family,qualities)}catch(err){message=err.message;render()}return}if(e.target.closest?.('[data-zlab-restore]')){try{zLabRestore()}catch(err){message=err.message;render()}return}if(e.target?.matches?.('[data-arena-overlay]')){arenaReportOpen=null;render();return}let b=e.target.closest('button');if(!b)return;if(b.dataset.mailFolder){mailFolder=b.dataset.mailFolder;mailOpenedId=null;mailComposeTo=null;render();return}if(b.dataset.mailCompose){mailComposeTo='';mailOpenedId=null;render();return}if(b.dataset.mailCancel){mailComposeTo=null;render();return}if(b.dataset.mailOpen){mailOpen(b.dataset.mailOpen);return}if(b.dataset.mailBack){mailOpenedId=null;render();return}if(b.dataset.mailReply){mailComposeTo=b.dataset.mailReply;mailOpenedId=null;render();return}if(b.dataset.mailSend){try{mailSend($('mail-target')?.value,$('mail-body')?.value)}catch(err){message=err.message;render()}return}if(b.dataset.mailReport){setPage('pvp');message='Historyczne raporty offline nie są już obsługiwane. Nowe raporty znajdziesz w PvP online.';render();return}if(b.dataset.devPanel){devPanelOpen=!devPanelOpen;if(!devPanelOpen)devPendingResetId=null;render();return}if(b.dataset.devCreate){try{devCreateProfile()}catch(err){message=err.message;render()}return}if(b.dataset.devSwitch){try{devSwitch(b.dataset.devSwitch)}catch(err){message=err.message;render()}return}if(b.dataset.devDelete){try{devDeleteProfile(b.dataset.devDelete)}catch(err){message=err.message;render()}return}if(b.dataset.devResetCancel){devPendingResetId=null;render();return}if(b.dataset.devResetConfirm){try{devResetTestProfile(b.dataset.devResetConfirm)}catch(err){message=err.message;render()}return}if(b.dataset.devReset){try{devAskResetTestProfile(b.dataset.devReset)}catch(err){message=err.message;render()}return}if(b.dataset.ashen060Artifact){item060ChosenArtifact=b.dataset.ashen060Artifact;render();return}if(b.hasAttribute('data-item-close')){openItemDetail=null;itemCompareSlot=null;render();return}if(b.dataset.itemCompareSlot){if(openItemDetail?.kind==='owned'){const inst=instance(openItemDetail.id);if(inst&&itemEquipSlots(inst).includes(b.dataset.itemCompareSlot)){itemCompareSlot=b.dataset.itemCompareSlot;item060ChosenArtifact=null;render();}}return}if(b.dataset.itemOpen){openItemDetail={kind:'owned',id:b.dataset.itemOpen};itemCompareSlot=null;item060ChosenArtifact=null;render();return}if(b.dataset.itemCatalog){openItemDetail={kind:'catalog',id:b.dataset.itemCatalog};itemCompareSlot=null;item060ChosenArtifact=null;render();return}if(b.dataset.wlabStress){weaponStressRun();return}if(b.dataset.wlabStressCopy){weaponStressCopy();return}if(b.dataset.wlabCandidate){weaponCandidateRun();return}if(b.dataset.wlabCandidateCopy){weaponCandidateCopy();return}if(b.dataset.wlabNormal){weaponNormalRun();return}if(b.dataset.wlabNormalCopy){weaponNormalCopy();return}if(b.dataset.wlabKits){weaponKitRun();return}if(b.dataset.wlabKitsCopy){weaponKitCopy();return}if(b.dataset.wlabBalance){weaponBalanceRun();return}if(b.dataset.wlabBalanceCopy){weaponBalanceCopy();return}if(b.dataset.wlabPreset){weaponLabPreset(b.dataset.wlabPreset);return}if(b.dataset.weaponLabRun){weaponLabReadControls();weaponLabRun();return;}if(b.dataset.combatLabRun){const selected=$('combat-lab-enemy')?.value;const count=Number($('combat-lab-count')?.value);const rounds=Number($('combat-lab-rounds')?.value);if([10,15,20].includes(rounds))combatLabRounds=rounds;if(COMBAT_LAB_FOES[selected])combatLabEnemy=selected;if([10,100,1000].includes(count))combatLabCount=count;combatLabRun();return;}if(b.dataset.arenaTestToggle){arenaTestMode=!arenaTestMode;arenaReportOpen=null;arenaTestReport=null;message='';render();return;}if(b.dataset.arenaChapter){arenaChapter=Number(b.dataset.arenaChapter);arenaSelected=(arenaChapter-1)*10+1;message='';render();return;}if(b.dataset.arenaSelect){arenaSelected=Number(b.dataset.arenaSelect);arenaChapter=Math.ceil(arenaSelected/10);message='';render();return;}if(b.dataset.arenaFight){startArenaFight(Number(b.dataset.arenaFight));return;}if(b.dataset.arenaReport){arenaReportOpen=Number(b.dataset.arenaReport);message='';render();return;}if(b.dataset.arenaReportClose!==undefined){arenaReportOpen=null;render();return;}if(b.dataset.missionDetail){const key=b.dataset.missionDetail;if(key==='report'||key==='loot'){missionExpand[key]=!missionExpand[key];render()}return;}if(b.dataset.action==='mission-dismiss-result'){state.missionOutcomePending=false;save();render();return;}if(b.dataset.companionTestStage){const [id,n]=b.dataset.companionTestStage.split(':');companionTestStage(id,n);return}if(b.dataset.companionTestSelect){companionTestSelect(b.dataset.companionTestSelect);return}if(b.dataset.vehicleTestSelect){vehicleTestSelect(b.dataset.vehicleTestSelect);return}if(b.dataset.vehicleTestUnlock){testUnlockVehicle(b.dataset.vehicleTestUnlock);return}if(b.dataset.vehicleStage){const [id,n]=b.dataset.vehicleStage.split(':');selectVehicleStage(id,n);return}if(b.dataset.vehicleModule){upgradeVehicleModule(b.dataset.vehicleModule);return}if(b.dataset.companion){chooseCompanion(b.dataset.companion);return}if(b.hasAttribute('data-companion-upgrade')){upgradeCompanion();return}if(b.dataset.vehicle){acquireVehicle(b.dataset.vehicle);return}if(b.hasAttribute('data-vehicle-upgrade')){upgradeVehicle();return}if(b.dataset.bunkerRoom&&BUNKER_ROOMS[b.dataset.bunkerRoom]){activeBunkerRoom=b.dataset.bunkerRoom;message='';render();return;}if(b.dataset.roomTestLevel){const [id,level]=b.dataset.roomTestLevel.split(':');roomTestSet(id,level);return}if(b.dataset.roomUpgrade){roomUpgrade(b.dataset.roomUpgrade);return}if(b.dataset.roomDowngrade){roomDowngrade(b.dataset.roomDowngrade);return}if(b.dataset.action==='hideout-reset'){if(confirm('Przywrócić początkowe wyposażenie i oświetlenie kryjówki?')){state.hideout=hideoutDefault();message='Przywrócono podstawowy wygląd schronu.';save();render()}return}if(b.dataset.page){if(!state.created)return;arenaReportOpen=null;setPage(b.dataset.page);if(b.dataset.workshopSelect)workshopUid=b.dataset.workshopSelect;message='';render();
  if(page==='expeditions')void window.ASHEN_EXPEDITIONS?.refresh?.();
  if(page==='clans')void window.ASHEN_CLANS?.refresh?.();
  if(page==='messages'||page==='pvp')void window.ASHEN_ONLINE?.refresh?.();
@@ -4074,9 +3989,6 @@ if(b.dataset.salvage){disposeItem(b.dataset.salvage,'salvage');return}
 if(b.dataset.invGroup){const groups={all:'all',sockets:'socketed',weapons:'weapons-all',clothing:'clothing-all',accessories:'accessories-all',artifacts:'artifacts-all'};if(Object.prototype.hasOwnProperty.call(groups,b.dataset.invGroup)){invGroup=b.dataset.invGroup;invFilter=groups[invGroup];render()}return}if(b.dataset.filter){invFilter=b.dataset.filter;render();return}if(b.dataset.inspect){selectedUid=b.dataset.inspect;render();return}if(b.dataset.action==='close-inspect'){selectedUid=null;render();return}if(b.dataset.unequip){let slot=b.dataset.unequip;if(slot in state.equip){state.equip[slot]=null;openItemDetail=null;message='Zdjęto przedmiot.';save();render()}return}
 if(b.dataset.equip!==undefined){
  const inst=instance(b.dataset.equip),obj=def(inst);if(!obj||obj.slot==='material')return;
- if(inst.qualitySchema==='ashen-v06'&&modernLootOnlineEligible()){
-  message='Przedmiot 0.6 został zapisany w ekwipunku online, ale nie można go jeszcze założyć — PvP nie obsługuje jego statystyk.';render();return;
- }
  const slot=obj.slot==='hand1'?(b.dataset.hand==='left'?'left':'right'):obj.slot==='hand2'?'right':obj.slot==='extra'?(['extra','extra2','extra3'].includes(b.dataset.extraSlot)?b.dataset.extraSlot:['extra','extra2','extra3'].find(s=>!state.equip[s])||'extra'):obj.slot;
  const next=itemEquipAfter(inst,slot);if(!next)return;
  state.equip=next;

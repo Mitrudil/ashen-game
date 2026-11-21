@@ -55,17 +55,23 @@ async function publish(){
  syncing=true;syncMessage='Zapisywanie w chmurze…';
  try{
   const save=JSON.parse(current);if(!save?.created)return;
-  const snapshot=window.ASHEN_GET_ONLINE_SNAPSHOT?.();if(!snapshot)throw Error('Nie udało się przygotować statystyk postaci.');
-  window.Ashen060PvpContract.assertReady(save,snapshot,window.Ashen060Quality,window.ASHEN_BUILD);
+  // Persist character inventory independently from PvP profile publication.
+  // The modern gear contract is fail-closed for PvP until the server is upgraded.
+  const audit=window.Ashen060PvpContract.auditSave(save,window.Ashen060Quality);
+  const snapshot=audit.equippedModern?null:window.ASHEN_GET_ONLINE_SNAPSHOT?.();
+  if(!audit.equippedModern){
+   if(!snapshot)throw Error('Nie udało się przygotować statystyk postaci.');
+   window.Ashen060PvpContract.assertReady(save,snapshot,window.Ashen060Quality,window.ASHEN_BUILD);
+  }
   // Check identity before sending. Never mix a snapshot from one slot with another account.
   if(!bound()||cloud().currentSlot()!==slot||cloud().getSession()?.user?.id!==account||cloud().getProjectUrl()!==project)return;
   const c=cloud().getClient();
   const {error:e1}=await c.from('ashen_cloud_saves').upsert({user_id:account,save_data:save,character_name:String(save.name).slice(0,40),character_level:save.level},{onConflict:'user_id'});
   if(e1)throw e1;
   // A profile publication may finish after a new local change; we requeue the latest version.
-  await rpc('ashen_publish_profile',{p_snapshot:snapshot});
+  if(snapshot)await rpc('ashen_publish_profile',{p_snapshot:snapshot});
   if(bound()&&cloud().currentSlot()===slot&&cloud().getSession()?.user?.id===account&&cloud().getProjectUrl()===project){
-   lastSynced=current;syncMessage='Zapis zsynchronizowany';
+   lastSynced=current;syncMessage=snapshot?'Zapis zsynchronizowany':'Postać zapisana; nowe wyposażenie czeka na aktualizację PvP';
    if(error.startsWith('Automatyczny zapis'))error='';
   }
  }catch(e){syncMessage='Błąd synchronizacji';error='Automatyczny zapis online: '+msg(e)}
