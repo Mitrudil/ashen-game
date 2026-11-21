@@ -471,8 +471,22 @@ document.addEventListener('click',async e=>{
  if(b.hasAttribute('data-online-resume-report')){reportMinimized=!reportMinimized;rememberOpenReport();draw();return}
  if(b.dataset.onlineReport){const item=reports.find(x=>String(x.id)===b.dataset.onlineReport);if(item){openedReport=item.report;openedBattleId=Number(item.id)||null;shareFeedback='';openedReportSide=item.side==='defense'?'defense':'attack';reportContext=b.closest('[data-online-mail-view]')?'mail':'pvp';reportMinimized=false;rememberOpenReport();error='';draw();return}error='Nie znaleziono raportu walki na liście pobranych raportów. Kliknij Odśwież i spróbuj ponownie.';draw();return}
  if(b.dataset.onlineAttack){const id=b.dataset.onlineAttack,p=opponents.find(x=>x.user_id===id);if(!p||!bound())return;
+  // A server fight uses the published combat snapshot, never the current UI
+  // state. With 0.6 gear equipped it would be stale; with unsynced legacy gear
+  // it may also be stale. Verify the current profile before allowing an attack.
+  try{
+   const raw=activeRaw();if(!raw)throw Error('Nie znaleziono zapisu aktywnej postaci.');
+   window.Ashen060PvpContract.assertOnlineAttackEligible(JSON.parse(raw),window.Ashen060Quality);
+  }catch(err){error=msg(err);draw();return}
   if(!confirm(`Zaatakować gracza ${p.name} (poziom ${p.level})?\nWalka jest rozliczana na serwerze. Limit tymczasowo wyłączony.`))return;
-  await action(async()=>{const r=await rpc('ashen_online_attack',{p_defender:id});openedReport=r;openedBattleId=Number(String(r?.id||'').replace(/^online-/,''))||null;shareFeedback='';openedReportSide='attack';reportContext='pvp';reportMinimized=false;rememberOpenReport();notice='Walka zakończona. Raport trafił do obu kont.'});await refresh();return;
+  await action(async()=>{
+   const account=cloud()?.getSession()?.user?.id,slot=cloud()?.currentSlot();
+   if(!await flushSync())throw Error('Nie udało się zsynchronizować profilu PvP. Spróbuj ponownie po zakończeniu zapisu.');
+   if(!bound()||cloud()?.getSession()?.user?.id!==account||cloud()?.currentSlot()!==slot)
+    throw Error('Konto lub postać zmieniły się podczas synchronizacji.');
+   window.Ashen060PvpContract.assertOnlineAttackEligible(JSON.parse(activeRaw()),window.Ashen060Quality);
+   const r=await rpc('ashen_online_attack',{p_defender:id});openedReport=r;openedBattleId=Number(String(r?.id||'').replace(/^online-/,''))||null;shareFeedback='';openedReportSide='attack';reportContext='pvp';reportMinimized=false;rememberOpenReport();notice='Walka zakończona. Raport trafił do obu kont.'
+  });await refresh();return;
  }
  if(b.dataset.onlineMailFolder){mailFolder=b.dataset.onlineMailFolder;mailSelected.clear();openedMail=null;replyDraft='';expeditionMailReport=null;draw();return}
  if(b.hasAttribute('data-online-mail-back')){openedMail=null;replyDraft='';expeditionMailReport=null;draw();return}

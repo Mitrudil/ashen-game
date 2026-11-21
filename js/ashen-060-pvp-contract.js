@@ -47,6 +47,13 @@ function equipmentManifest(save,quality){
  }
  return entries;
 }
+// PvP 0.5 cannot calculate equipped 0.6 gear yet. Reject an attack rather
+// than silently using a previously published combat snapshot.
+function assertOnlineAttackEligible(save,quality){
+ const audit=auditSave(save,quality);
+ if(audit.equippedModern)error('PVP_MODERN_UNSUPPORTED','PvP online wymaga aktualizacji serwera dla przedmiotów 0.6. Zapis postaci i walki PvE działają normalnie.');
+ return audit;
+}
 function assertSnapshot(snapshot){
  if(!snapshot||typeof snapshot!=='object'||!Array.isArray(snapshot.attacks)||snapshot.attacks.length<1||snapshot.attacks.length>8)error('INVALID_SNAPSHOT','Migawka PvP ma nieprawidłową liczbę ataków.');
  for(const k of ['hp','armor','acc','dodge']){
@@ -70,5 +77,5 @@ function assertReady(save,snapshot,quality,build){
  if(build?.modernDropsEnabled===true)error('UNSAFE_BUILD','Nowy generator jakości włączono bez potwierdzonej zgodności serwera PvP.');
  return audit;
 }
-return Object.freeze({auditSave,equipmentManifest,assertSnapshot,assertReady,EQUIPMENT_SLOTS});
+return Object.freeze({auditSave,equipmentManifest,assertSnapshot,assertReady,assertOnlineAttackEligible,EQUIPMENT_SLOTS});
 });
