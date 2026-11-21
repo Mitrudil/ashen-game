@@ -1087,7 +1087,7 @@ function weaponDamageRange(a,weapon,power=1){
 }
 function damage(p,e){let base=rand(p.min,p.max)+Math.floor(e.str/3);return Math.max(1,Math.floor(base*(1-clamp((e.armor||0)/100,0,.6))))}
 // Jedno źródło prawdy dla liczby ataków: bitwa i karta postaci.
-function heroAttacks(){
+function heroAttacks(options={}){
  const hands=[state.dominantHand,state.dominantHand==='right'?'left':'right'];
  const main=statsOf(instance(state.equip[hands[0]])),off=statsOf(instance(state.equip[hands[1]]));
  const attacks=[];
@@ -1097,7 +1097,14 @@ function heroAttacks(){
   // Extra strike from Szybki is weak relative to ENTIRE base attack sequence,
   // not a free full hit from a single-shot high-damage weapon.
   // 0.12 applies to this weapon's sequence; never more than one bonus strike.
-  if(weapon?.extraAttacks>0&&weapon.slot==='hand1')attacks.push({weapon,hand,power:Math.min(.36,.12*count*power)});
+  if(weapon?.extraAttacks>0&&weapon.slot==='hand1'){
+   if(options.combat060===true){
+    // 0.6.0: bonus pochodzi z przedmiotu, a nie z poziomu postaci.
+    // Pełne dodatkowe ataki, maksymalnie 3 na broń, bez skalowania liczby bazowej.
+    const extra=Math.min(3,Math.floor(Number(weapon.extraAttacks)||0));
+    for(let i=0;i<extra;i++)attacks.push({weapon,hand,power,extra:true});
+   } else attacks.push({weapon,hand,power:Math.min(.36,.12*count*power)});
+  }
  };
  if(main&&main.slot==='hand1')addWeapon(main,hands[0],1);
  if(off&&off.slot==='hand2'){attacks.length=0;addWeapon(off,hands[1],1);}
@@ -1105,7 +1112,9 @@ function heroAttacks(){
  // Also support equipping 2R weapon in primary hand if UI permits it.
  if(!attacks.length&&main&&main.slot==='hand2')addWeapon(main,hands[0],1);
  if(!attacks.length)addWeapon(statsOf({id:'knife',rarity:0}),hands[0],1);
- return attacks;
+ // Stary kontrakt PvP dopuszcza maksymalnie osiem akcji ataku.
+ // Przekroczenie limitu w Starciach 0.6.0 rozstrzygamy bez dodatkowych rzutów RNG.
+ return options.combat060===true?attacks.slice(0,8):attacks;
 }
 // ASHEN v0.4.4: shared combat defense computation for exploration, Starcia,
 // PvP snapshots and the character panel. The expedition flag here is historical:
@@ -1151,7 +1160,7 @@ window.ashen060CheckCharacter=function(){
 
 function fight(enemy,options={}){
  const a=options.testSnapshot?.attributes||attrs();
- const attacks=options.testSnapshot?.attacks||heroAttacks();
+ const attacks=options.testSnapshot?.attacks||heroAttacks({combat060:options.combat060===true});
  const d=options.testSnapshot?.defense||heroDefense(options);
  const random=typeof options.testRandom==='function'?options.testRandom:Math.random;
  const randomInt=(lo,hi)=>Math.floor(random()*(hi-lo+1))+lo;
@@ -1209,7 +1218,7 @@ function fight(enemy,options={}){
      raw=Math.max(1,Math.floor(raw*(1+(se.damagePct||0)/100+(xy.missed?(se.afterMissDamage||0):0)/100)));
      xy.missed=false;xy.dodged=false;
      if(r===1&&performance.hits===0)raw=Math.floor(raw*(1+(se.firstHit||0)/100));
-     if(zActive('armor_agile')&&performance.hits===0){raw=Math.max(1,Math.floor(raw*1.12));zLog(r,'Zwinny: błyskawiczny start')}
+     if(zActive('armor_agile')&&performance.hits===0&&!modern){raw=Math.max(1,Math.floor(raw*1.12));zLog(r,'Zwinny: błyskawiczny start')}
      if(zActive('armor_flexible')&&mastery.chargedDodge&&zCooldown('armor_flexible',r,2)){raw=Math.max(1,Math.floor(raw*1.08));zLog(r,'Elastyczny: kontratak')}
      if(zActive('armor_iron')&&defender.armor>0&&zCooldown('armor_iron',r,3)){raw=Math.max(1,Math.floor(raw*1.08));zLog(r,'Żelazny: miażdżący cios')}
      if(zActive('armor_nomad')&&mastery.chargeNomad&&zCooldown('armor_nomad',r,3)){raw=Math.max(1,Math.floor(raw*1.10));mastery.chargeNomad=false;zLog(r,'Nomadyczny: instynkt')}
@@ -1259,7 +1268,10 @@ function fight(enemy,options={}){
    const startLine=lines.length,heroDamageStart=damageSummary.hero.damage,foeDamageStart=damageSummary.foe.damage;
    damageSummary.rounds=r;
    mastery.roundHits=0;mastery.lightRound=0;mastery.roundLoss=0;
-   const order=randomInt(1,20)+a.dex+(se.initiative||0)>=randomInt(1,20)+foe.dodge?['hero','foe']:['foe','hero'];
+   const order=options.combat060===true?window.Ashen060PveBridge.initiativeOrder({
+    heroDex:a.dex,heroInitiative:(se.initiative||0)+(zActive('armor_agile')?6:0),enemyInitiative:foe.dodge,
+    heroRoll:randomInt(1,20),enemyRoll:randomInt(1,20)
+   }):randomInt(1,20)+a.dex+(se.initiative||0)>=randomInt(1,20)+foe.dodge?['hero','foe']:['foe','hero'];
    for(const who of order){
      if(hero.hp<=0||foe.hp<=0)break;
      if(who==='hero'){
@@ -1382,7 +1394,7 @@ function startArenaFight(number){
  if(!stage||!state.created||(!arenaTestMode&&number>Math.min(ARENA_STAGES.length,progress.highest+1)))return;
  if(!confirm(`${arenaTestMode?'TEST · bez nagród i zapisu postępu\n\n':''}Starcie ${number}/${ARENA_STAGES.length}: ${stage.name}${stage.boss?' (BOSS)':''}\n\nWalka trwa maksymalnie 10 rund. Zwyciężysz, jeśli pokonasz przeciwnika. Jeśli po 10 rundach obie strony nadal żyją, nastąpi REMIS: bez nagród i odblokowania kolejnego etapu.\n\nRozpocząć starcie?`))return;
  const result=fight(arenaEnemy(stage),{recordRounds:true,combat060:true});
- result.combatEngine='060-pve-hit-dodge';
+ result.combatEngine='060-pve-attack-sequence';
  // Profil taktyczny jest pochodną bazowych statystyk wroga; nie zmienia walki.
  result.battleProfile.enemy.attributes=arenaEnemyAttributes(stage);
  if(arenaTestMode){

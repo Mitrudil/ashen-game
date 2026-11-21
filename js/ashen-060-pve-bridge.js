@@ -31,5 +31,15 @@
   if(!stat||typeof stat.resolveDamage!=='function')throw Error('Brak kalkulatora obrażeń 0.6.0');
   return stat.resolveDamage(raw,armor,penetration);
  }
- return Object.freeze({outcome,damage,impact});
+ // Kolejność działa w rzeczywistych Starciach; identyczne rzuty dają identyczny wynik.
+ function initiativeOrder(config){
+  const keys=['heroDex','heroInitiative','enemyInitiative','heroRoll','enemyRoll'];
+  if(!config||keys.some(k=>!Number.isFinite(config[k])))throw Error('Nieprawidłowa inicjatywa');
+  if(config.heroRoll<1||config.heroRoll>20||config.enemyRoll<1||config.enemyRoll>20)
+   throw Error('Rzuty inicjatywy poza zakresem 1–20');
+  const hero=config.heroRoll+config.heroDex+config.heroInitiative;
+  const enemy=config.enemyRoll+config.enemyInitiative;
+  return hero>=enemy?['hero','foe']:['foe','hero'];
+ }
+ return Object.freeze({outcome,damage,impact,initiativeOrder});
 });
