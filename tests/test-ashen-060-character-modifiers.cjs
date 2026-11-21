@@ -1,0 +1,20 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const B=require('../js/ashen-060-bonuses.js');
+const R=require('../js/ashen-060-character-reference.js');
+const M=require('../js/ashen-060-character-modifiers.js');
+const catalog=JSON.parse(fs.readFileSync('data/ashen-060-katalog.json','utf8'));
+const make=()=>({baseAttrs:{str:10,dex:10,end:10,per:10,int:5,cha:5},equipment:{w:{uid:'w',id:'knife',slot:'hand1',min:4,max:6,baseAttacks:2,bonus:{}},h:{uid:'h',id:'test',slot:'head',armor:20,bonus:{}}},equip:{right:'w',head:'h'},infirmaryLevel:1,dominantHand:'right',fallbackKnife:{id:'knife',slot:'hand1',min:4,max:6,baseAttacks:2}});
+let n=0;
+function t(label,fn){fn();n++;console.log('OK',label)}
+t('Pusta lista premii = dokładnie stary kalkulator',()=>{const s=make(),r=M.preview(s,{modifiers:[]},R),base=R.calculate(s);assert.deepEqual(r.attributes,base.attributes);assert.deepEqual(r.defense,base.defense);assert.equal(r.complete,true)});
+t('Atrybut i premia HP bez modyfikacji wejścia',()=>{const s=make(),before=JSON.stringify(s);const result=B.compute({items:{},modifiers:[{source:'prefix',key:'endurance',value:3},{source:'suffix',key:'max_hp_pct',value:10},{source:'upgrade',key:'PŻ',value:5}]},catalog);const r=M.preview(s,result,R);assert.equal(r.attributes.end,13);assert.equal(r.defense.hp,Math.round(190*1.10+5));assert.equal(JSON.stringify(s),before)});
+t('Pancerz procentowy dotyczy surowego pancerza ekwipunku',()=>{const r=M.preview(make(),B.compute({items:{},modifiers:[{source:'prefix',key:'armor_pct',value:15},{source:'suffix',key:'pancerz',value:4}]},catalog),R);assert.equal(r.defense.armor,20+Math.floor(10/4)+3+4)});
+t('Artefakt na kurtce zmienia obronę w podglądzie',()=>{const result=B.compute({items:{jacket:{id:'a',socketCapacity:1,socketedArtifacts:['Płytka Bastionu']}}},catalog);const r=M.preview(make(),result,R);assert.equal(r.defense.armor,22+result.modifiers[0].value);assert.equal(r.complete,true)});
+t('Brak podwójnego liczenia efektów starego zestawu',()=>{const s=make();s.setEffects={armorFlat:2};assert.throws(()=>M.preview(s,{modifiers:[]},R),/must not mix/)});
+t('Nieznane zasady pełnych ataków pozostają jawnie nierozstrzygnięte',()=>{const r=M.preview(make(),B.compute({items:{},modifiers:[{source:'prefix',key:'extra_attacks',value:1}]},catalog),R);assert.equal(r.attackCount,2);assert.equal(r.complete,false);assert.equal(r.unresolved[0].reason,'target_weapon_and_attack_policy_pending')});
+t('Rezonans oznaczony jako oczekujący, bez fałszywej premii',()=>{const result=B.compute({items:Object.fromEntries(['jacket','head','boots'].map((slot,i)=>[slot,{id:'x'+i,socketCapacity:1,socketedArtifacts:['Płytka Bastionu']}]))},catalog);const r=M.preview(make(),result,R);assert.equal(r.pendingSignals.length,1);assert.equal(r.complete,false)});
+t('Brak aktywacji zestawu akcesoriów 2/3',()=>{const items={accessory1:{id:'x',setFamily:'Techniczny',socketCapacity:0},accessory2:{id:'y',setFamily:'Techniczny',socketCapacity:0}};const res=B.compute({items,activeSets:[{family:'Techniczny',kind:'Akcesoria',x:true,y:true}]},catalog);const r=M.preview(make(),res,R);assert.equal(r.complete,true);assert.equal(r.pendingSignals.length,0)});
+t('Wszystkie nieobsługiwane efekty wskazane, a nie pominięte po cichu',()=>{const result=B.compute({items:{},modifiers:[{source:'prefix',key:'crit_points',value:5}]},catalog);const r=M.preview(make(),result,R);assert.equal(r.unresolved.length,1);assert.equal(r.complete,false)});
+t('Walidacja wartości: NaN jest błędem',()=>{assert.throws(()=>M.preview(make(),{modifiers:[{stat_key:'hp',operation:'flat',value:NaN}]},R),/Invalid modifier/)});
+console.log(`ASHEN 0.6 etap 19: ${n}/${n} testów OK`);
