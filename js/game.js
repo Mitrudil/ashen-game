@@ -3904,11 +3904,30 @@ if(b.dataset.sale){disposeItem(b.dataset.sale,'sell');return}
 if(b.dataset.salvage){disposeItem(b.dataset.salvage,'salvage');return}
 if(b.dataset.invGroup){const groups={all:'all',sockets:'socketed',weapons:'weapons-all',clothing:'clothing-all',accessories:'accessories-all',artifacts:'artifacts-all'};if(Object.prototype.hasOwnProperty.call(groups,b.dataset.invGroup)){invGroup=b.dataset.invGroup;invFilter=groups[invGroup];render()}return}if(b.dataset.filter){invFilter=b.dataset.filter;render();return}if(b.dataset.inspect){selectedUid=b.dataset.inspect;render();return}if(b.dataset.action==='close-inspect'){selectedUid=null;render();return}if(b.dataset.unequip){let slot=b.dataset.unequip;if(slot in state.equip){state.equip[slot]=null;openItemDetail=null;message='Zdjęto przedmiot.';save();render()}return}
 if(b.dataset.equip!==undefined){
- const inst=instance(b.dataset.equip),obj=def(inst);if(!obj||obj.slot==='material')return;
+ // W razie niezgodnego przedmiotu nie kończymy bez wyjaśnienia.
+ const inst=instance(b.dataset.equip),obj=def(inst);
+ if(!inst||!obj||obj.slot==='material'){
+  message='Nie można założyć tego przedmiotu: nie znaleziono go w ekwipunku lub jego typ nie ma slotu. Odśwież widok ekwipunku.';
+  render();return;
+ }
  const slot=obj.slot==='hand1'?(b.dataset.hand==='left'?'left':'right'):obj.slot==='hand2'?'right':obj.slot==='extra'?(['extra','extra2','extra3'].includes(b.dataset.extraSlot)?b.dataset.extraSlot:['extra','extra2','extra3'].find(s=>!state.equip[s])||'extra'):obj.slot;
- const next=itemEquipAfter(inst,slot);if(!next)return;
- state.equip=next;
- openItemDetail=null;message='Założono: '+statsOf(inst).name;save();render();return
+ const next=itemEquipAfter(inst,slot);
+ if(!next){message='Nie można założyć przedmiotu w slocie: '+slotName(slot)+'.';render();return;}
+ const previous={...state.equip};
+ try{
+  state.equip=next;
+  const equippedName=statsOf(inst)?.name||obj.name;
+  // Natychmiast sprawdzamy obliczenia, żeby błąd nie uszkodził interfejsu.
+  attrs();heroDefense();inventoryCombatSummary();
+  openItemDetail=null;message='Założono: '+equippedName;
+  save();render();
+ }catch(err){
+  state.equip=previous;
+  console.error('[ASHEN] Błąd zakładania przedmiotu',err);
+  message='Nie udało się założyć przedmiotu: '+(err?.message||'nieznany błąd')+'. Zmiany wyposażenia cofnięto.';
+  try{render()}catch(renderErr){console.error('[ASHEN] Błąd odświeżania ekwipunku',renderErr);alert(message)}
+ }
+ return;
 }if(b.dataset.action==='rename'){let name=prompt('Imię postaci (2–24 znaki):',state.name);if(name!==null&&name.trim().length>=2&&name.trim().length<=24){state.name=name.trim();save();render()}return}if(b.dataset.action==='heal'){if(state.scrap>=20&&state.hp<maxHp()){state.scrap-=20;message='Zdrowie przywrócone.';save();render()}return}if(b.dataset.action==='import'){$('ashen-import-file')?.click();return}if(b.dataset.action==='restore-backup'){restoreSaveBackup();return}if(b.dataset.action==='reset'){if(confirm('Rozpocząć nową grę? Bieżący postęp zostanie zastąpiony, ale zapiszemy jego kopię w tej przeglądarce.')){try{backupCurrentAndReplace(fresh());location.reload()}catch(err){message=err.message;render()}}return}if(b.dataset.action==='export'){exportSave();return}}
 document.addEventListener('toggle',e=>{
  const t=e.target;
