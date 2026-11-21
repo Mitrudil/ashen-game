@@ -49,7 +49,7 @@
  function simulate(config,deps){
   check(config&&Array.isArray(config.rounds)&&config.rounds.length>=1&&config.rounds.length<=20,'Wymagane 1–20 rund');
   check(deps&&deps.battle&&typeof deps.battle.simulate==='function'&&deps.trigger&&deps.effect,'Brak modułów etapów 22/24/25');
-  const resolved={},plan=[],details=[];
+  const resolved={},details=[];
   for(const id of ['a','b']){
    check(config[id]&&config[id].stats,'Brak statystyk '+id);
    validCombatant(config[id].stats,id);
@@ -60,27 +60,40 @@
    check(finite(maxHp)&&maxHp>0&&finite(hp)&&hp>0&&hp<=maxHp,'Nieprawidłowe PŻ '+id);
    resolved[id]={...rest,hp,maxHp};
   }
-  for(let i=0;i<config.rounds.length;i++){
-   const actions=config.rounds[i];check(Array.isArray(actions)&&actions.length<=24,'Błędna liczba ataków w rundzie');
-   const result=[];
-   for(let j=0;j<actions.length;j++){
-    const act=actions[j];check(act&&['a','b'].includes(act.attacker),'Błędny atakujący');
-    const target=act.attacker==='a'?'b':'a';
-    const source=config[act.attacker].stats,defender=config[target].stats;
+  for(const actions of config.rounds){
+   check(Array.isArray(actions)&&actions.length<=24,'Błędna liczba ataków w rundzie');
+   for(const act of actions){
+    check(act&&['a','b'].includes(act.attacker),'Błędny atakujący');
+    const source=config[act.attacker].stats;
     check(Number.isInteger(act.attackIndex)&&act.attackIndex>=0&&act.attackIndex<source.attacks.length,'Nieistniejący atak broni');
-    const strike=resolveStrike(source.attacks[act.attackIndex],source,defender,act.rolls,act.options||{});
-    result.push({attacker:act.attacker,outcome:strike.outcome,damage:strike.damage});
-    details.push({round:i+1,action:j+1,attacker:act.attacker,victim:target,attackIndex:act.attackIndex,...strike});
+    validRolls(act.rolls);
    }
-   plan.push(result);
   }
-  const battle=deps.battle.simulate({...resolved,rounds:plan},deps);
+  function resolveAction(action,context){
+   const source=config[context.attacker].stats;
+   const target=config[context.victim].stats;
+   const offensive=context.actors[context.attacker].modifiers;
+   const defensive=context.actors[context.victim].modifiers;
+   const boostedTarget={...target,defense:{...target.defense,armor:target.defense.armor+(defensive.armor_flat||0)}};
+   const options={...action.options,
+    accuracyBonus:(action.options?.accuracyBonus||0)+(offensive.accuracy_flat||0),
+    damageBonusPercent:(action.options?.damageBonusPercent||0)+(offensive.damage_percent||0),
+    penetration:(action.options?.penetration||0)+(offensive.penetration_flat||0)};
+   const strike=resolveStrike(source.attacks[action.attackIndex],source,boostedTarget,action.rolls,options);
+   const detailsForStrike={round:context.round,action:context.action,attacker:context.attacker,victim:context.victim,
+    attackIndex:action.attackIndex,modifiersUsed:{attacker:{...offensive},defender:{...defensive}},...strike};
+   details.push(detailsForStrike);
+   return {outcome:strike.outcome,damage:strike.damage,details:detailsForStrike};
+  }
+  const battle=deps.battle.simulate({...resolved,rounds:config.rounds}, {...deps,resolveAction});
   return {status:'diagnostic_only',readyForLive:false,balanceStatus:'proposal_not_approved',
-   battle,strikes:details,rounds:plan,
-   limitations:['Progi trafienia/uniku/krytyka i redukcja pancerza są propozycją, nie zatwierdzonymi regułami PvP.',
-    'Rzuty są jawnie przekazane, bez losowania i bez synchronizacji Supabase.',
-    'Aktywne modyfikatory statusów Z nie zmieniają jeszcze obliczanych trafień/obrażeń.',
-    'Wciąż obowiązuje wyłącznie diagnostyka — nie jest to serwerowy silnik walki.']};
+   battle,strikes:details,
+   limitations:['Progi trafienia/uniku/krytyka i redukcja pancerza nadal są propozycją balansu.',
+    'Rzuty są jawnie przekazane, bez losowania i synchronizacji Supabase.',
+    'Aktywne bonusy do celności, obrażeń, pancerza i przebicia wpływają na kolejne rozstrzygane ataki.',
+    'Efekty Z wyzwalane trafieniem lub unikiem działają od następnego ataku, nie wstecz.',
+    'Dodatkowe ataki, inicjatywa i rezonanse bez reguł pozostają nieaktywne.',
+    'Wciąż jest to diagnostyka, nie serwerowy silnik walki.']};
  }
  return Object.freeze({resolveStrike,simulate});
 });

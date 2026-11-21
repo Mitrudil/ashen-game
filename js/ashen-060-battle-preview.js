@@ -63,22 +63,25 @@
    roundsPlayed=round;add('round_start',round,null);
    for(const [j,action] of actions.entries()){
     valid(action&&['a','b'].includes(action.attacker),'Nieprawidłowy atakujący');
-    valid(['hit','critical_hit','miss','dodge'].includes(action.outcome),'Nieznany wynik ataku');
+    if(typeof dependencies.resolveAction!=='function')valid(['hit','critical_hit','miss','dodge'].includes(action.outcome),'Nieznany wynik ataku');
     const attacker=action.attacker,victim=other(attacker);
-    valid(number(action.damage)&&action.damage>=0&&(action.outcome==='hit'||action.outcome==='critical_hit'||action.damage===0),'Nieprawidłowe obrażenia');
+    const resolved=typeof dependencies.resolveAction==='function'?dependencies.resolveAction(action,{round,action:j+1,attacker,victim,actors}):action;
+    valid(resolved&&['hit','critical_hit','miss','dodge'].includes(resolved.outcome),'Nieprawidłowy wynik obliczonego ataku');
+    valid(number(resolved.damage)&&resolved.damage>=0&&(resolved.outcome==='hit'||resolved.outcome==='critical_hit'||resolved.damage===0),'Nieprawidłowe obrażenia');
     valid(actors[attacker].hp>0&&actors[victim].hp>0,'Nie można atakować po zakończeniu walki');
     const before={hp:actors[victim].hp,shield:actors[victim].shield};
     const steps=[];
-    if(action.outcome==='dodge')steps.push(add('dodge',round,victim));
-    else if(action.outcome==='miss')steps.push(add('miss',round,attacker));
+    if(resolved.outcome==='dodge')steps.push(add('dodge',round,victim));
+    else if(resolved.outcome==='miss')steps.push(add('miss',round,attacker));
     else{
      steps.push(add('hit',round,attacker));
-     if(action.outcome==='critical_hit')steps.push(add('critical_hit',round,attacker));
-     steps.push(addDamage(round,victim,action.damage));
+     if(resolved.outcome==='critical_hit')steps.push(add('critical_hit',round,attacker));
+     steps.push(addDamage(round,victim,resolved.damage));
      if(actors[victim].hp/actors[victim].maxHp<=(config.hpThreshold===undefined?0.3:config.hpThreshold))
       steps.push(add('hp_below_threshold',round,victim));
     }
-    logs.push({round,action:j+1,attacker,victim,outcome:action.outcome,baseDamage:action.damage,
+    logs.push({round,action:j+1,attacker,victim,outcome:resolved.outcome,baseDamage:resolved.damage,
+     ...(resolved.details?{strike:resolved.details}:{}),
      hpBefore:before.hp,hpAfter:actors[victim].hp,shieldBefore:before.shield,shieldAfter:actors[victim].shield,
      events:steps.map(s=>({a:s.a.applied,b:s.b.applied,blocked:{a:s.a.blocked,b:s.b.blocked}}))});
     if(actors[victim].hp<=0){winner=attacker;break;}
@@ -93,8 +96,8 @@
   }
   return {status:'diagnostic_only',readyForLive:false,balanceStatus:'proposal_not_approved',
    winner,draw:winner===null,roundsPlayed,actors,log:logs,unresolved,
-   limitations:['Wyniki trafień, uników i bazowe obrażenia są danymi scenariusza, a nie wyliczeniem silnika.',
-    'Modyfikatory obrażeń/pancerza/celności i dodatkowe ataki nie zmieniają przebiegu pojedynku.',
+   limitations:[typeof dependencies.resolveAction==='function'?'Wyniki ataków obliczone przez przekazany resolver diagnostyczny.':'Wyniki trafień, uników i bazowe obrażenia są danymi scenariusza.',
+    typeof dependencies.resolveAction==='function'?'Modyfikatory wskazane przez resolver zmieniają następne ataki; dodatkowe ataki nie są generowane.':'Modyfikatory obrażeń/pancerza/celności i dodatkowe ataki nie zmieniają przebiegu pojedynku.',
     'Premie Z i progi PŻ są propozycją balansu, bez synchronizacji Supabase/PvP.']};
  }
  return Object.freeze({simulate});
