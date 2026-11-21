@@ -19,8 +19,10 @@ function auditSave(save,quality){
    if(!Number.isInteger(item.socketCapacity)||item.socketCapacity<0||item.socketCapacity>3)error('INVALID_SOCKET','Nieprawidłowa liczba gniazd.');
    sockets+=item.socketCapacity;
   }
+  if(owned(item,'upgrade')&&(!Number.isInteger(item.upgrade)||item.upgrade<0||item.upgrade>20))error('INVALID_UPGRADE','Nieprawidłowy poziom ulepszenia.');
+  for(const key of ['prefix','suffix'])if(owned(item,key)&&item[key]!=null&&(typeof item[key]!=='string'||item[key].length>100))error('INVALID_AFFIX','Nieprawidłowy identyfikator prefiksu lub sufiksu.');
   if(owned(item,'socketedArtifacts')){
-   if(!Array.isArray(item.socketedArtifacts)||!Number.isInteger(item.socketCapacity)||item.socketedArtifacts.length>item.socketCapacity)error('INVALID_SOCKET','Artefakty nie mieszczą się w gniazdach.');
+   if(!Array.isArray(item.socketedArtifacts)||!Number.isInteger(item.socketCapacity)||item.socketedArtifacts.length>item.socketCapacity||item.socketedArtifacts.some(x=>typeof x!=='string'||!x||x.length>100))error('INVALID_SOCKET','Nieprawidłowa obsada artefaktów.');
   }
  }
  const equipped=new Set();let equippedModern=0;
@@ -43,7 +45,9 @@ function equipmentManifest(save,quality){
   const uid=save.equip[slot];if(!uid)continue;
   const item=byUid.get(uid),q=quality.describe(item);
   entries.push({slot,uid,id:item.id,qualitySchema:q.schema,rarity:q.index,
-   socketCapacity:item.socketCapacity??0});
+   prefix:item.prefix??null,suffix:item.suffix??null,upgrade:item.upgrade??0,
+   socketCapacity:item.socketCapacity??0,
+   socketedArtifacts:Array.isArray(item.socketedArtifacts)?[...item.socketedArtifacts]:[]});
  }
  return entries;
 }
