@@ -17,9 +17,19 @@
   const strike=stat.resolveStrike({min:Math.max(0,Number(w.min)||0),max:Math.max(0,Number(w.max)||0),attributeDamage:0,accuracy:Number(w.accuracy)||0,power:1},combatant(a),combatant(d),rolls,{critChance:config.critChance??5});
   return {outcome:strike.outcome,critical:strike.critical,hitChance:strike.hitChance,dodgeChance:strike.dodgeChance};
  }
+ // Jednolity tor krytyka: mnożnik działa przed redukcją przez pancerz.
+ // Używamy go tylko w rzeczywistych Starciach 0.6.0.
+ function impact(raw,armor,penetration=0,critical=false,critMultiplier=1.6){
+  if(!Number.isFinite(raw)||raw<0||!Number.isFinite(critMultiplier)||critMultiplier<1||critMultiplier>5)
+   throw Error('Nieprawidłowe obrażenia lub mnożnik krytyka');
+  const scaled=critical?raw*critMultiplier:raw;
+  const result=damage(scaled,armor,penetration);
+  return {damage:result.damage,normalDamage:critical?damage(raw,armor,penetration).damage:result.damage,
+   effectiveArmor:result.effectiveArmor,critical:!!critical};
+ }
  function damage(raw,armor,penetration=0){
   if(!stat||typeof stat.resolveDamage!=='function')throw Error('Brak kalkulatora obrażeń 0.6.0');
   return stat.resolveDamage(raw,armor,penetration);
  }
- return Object.freeze({outcome,damage});
+ return Object.freeze({outcome,damage,impact});
 });

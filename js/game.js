@@ -1216,12 +1216,14 @@ function fight(enemy,options={}){
      if(zActive('armor_light')&&mastery.roundHits>=1&&mastery.lightRound<2){raw=Math.max(1,Math.floor(raw*1.04));mastery.lightRound++;zLog(r,'Lekki: seria trafień')}
      if(zActive('accessory_observant')&&mastery.roundHits>=1&&mastery.observantRound!==r){raw=Math.max(1,Math.floor(raw*1.08));mastery.observantRound=r;zLog(r,'Spostrzegawczy: oznaczenie celu')}
    }
-   if(critical&&!labWeapon)raw=Math.floor(raw*1.6);
+   // Stary wzór pozostaje wyłącznie poza Starciami 0.6.0.
+   if(!modern&&critical&&!labWeapon)raw=Math.floor(raw*1.6);
    // Etap 30: w aktywnych Starciach PvE pancerz obniża obrażenia z malejącą skutecznością.
    // Wszystkie pozostałe tryby (PvP, Wyprawy, Laboratorium) zachowują dotychczasowy wzór.
-   let dmg=modern?window.Ashen060PveBridge.damage(raw,effectiveArmor).damage:
-     Math.max(1,Math.floor(raw*(1-clamp(effectiveArmor/100,0,.6))));
-   if(critical&&labWeapon)dmg=Math.max(1,Math.floor(dmg*(labWeapon.labCritMultiplier||1.6)));
+   const impact=modern?window.Ashen060PveBridge.impact(
+     raw,effectiveArmor,0,critical,labWeapon?.labCritMultiplier||1.6):null;
+   let dmg=modern?impact.damage:Math.max(1,Math.floor(raw*(1-clamp(effectiveArmor/100,0,.6))));
+   if(!modern&&critical&&labWeapon)dmg=Math.max(1,Math.floor(dmg*(labWeapon.labCritMultiplier||1.6)));
    if(isHero&&critical){
      dmg=Math.max(1,Math.floor(dmg*(1+(se.critDamagePct||0)/100)));
      if(zActive('armor_tracker')&&mastery.marked&&zCooldown('armor_tracker',r,3)){dmg=Math.max(1,Math.floor(dmg*1.10));mastery.marked=false;zLog(r,'Tropicielski: słaby punkt')}
@@ -1230,7 +1232,7 @@ function fight(enemy,options={}){
    if(!isHero){
      if(critical){
        dmg=Math.max(1,Math.floor(dmg*(1-(se.critResist||0)/100)));
-       if(zActive('armor_resistant')&&zOnce('armor_resistant')){const noCrit=Math.max(1,Math.floor(raw/1.6*(1-clamp(effectiveArmor/100,0,.6))));dmg=Math.max(1,dmg-Math.floor(Math.max(0,dmg-noCrit)*.40));zLog(r,'Odporny: stłumienie krytyka')}
+       if(zActive('armor_resistant')&&zOnce('armor_resistant')){const noCrit=modern?impact.normalDamage:Math.max(1,Math.floor(raw/1.6*(1-clamp(effectiveArmor/100,0,.6))));dmg=Math.max(1,dmg-Math.floor(Math.max(0,dmg-noCrit)*.40));zLog(r,'Odporny: stłumienie krytyka')}
      }
      const reduc=(se.damageResist||0)+(se.physicalResist||0)+(r>=5?(se.lateResist||0):0)+(xy.critProtectedRound===r?(se.afterCritResist||0):0);
      dmg=Math.max(1,Math.floor(dmg*(1-Math.min(40,reduc)/100))-(se.flatReduction||0));
