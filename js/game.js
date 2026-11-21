@@ -643,6 +643,48 @@ function toggleModernLootOffline(){
  save();render();
 }
 
+// Etap 36: podgląd nowych łupów na bieżącym profilu online, BEZ zmian
+// w zapisie postaci, migawce PvP i strukturze danych wysyłanej do Supabase.
+// To lokalna kolekcja diagnostyczna tego urządzenia, nie ekwipunek do zakładania.
+function modernPreviewStorageKey(){
+ const cloud=window.ASHEN_CLOUD;
+ const slot=cloud?.currentSlot?.()||devActiveId();
+ const user=cloud?.getSession?.()?.user?.id||'local';
+ return 'ashen-060-loot-preview-v1:'+user+':'+slot;
+}
+function modernPreviewRead(){
+ try{const d=JSON.parse(localStorage.getItem(modernPreviewStorageKey())||'null');
+  return {enabled:d?.enabled===true,items:Array.isArray(d?.items)?d.items.slice(-100):[]};
+ }catch{return {enabled:false,items:[]}}
+}
+function modernPreviewWrite(data){try{localStorage.setItem(modernPreviewStorageKey(),JSON.stringify(data));return true}catch{return false}}
+function toggleModernPreview(){
+ const d=modernPreviewRead();
+ d.enabled=!d.enabled;
+ if(!modernPreviewWrite(d)){message='Nie można zapisać ustawień lokalnego podglądu.';render();return}
+ message=d.enabled?'Włączono podgląd łupów 0.6 podczas Wypraw. Normalne nagrody i synchronizacja pozostają bez zmian.':'Wyłączono podgląd nowych łupów.';
+ render();
+}
+function modernPreviewCapture(id,expedition,luck){
+ const data=modernPreviewRead();if(!data.enabled||!modernExpeditionPool(expedition))return;
+ const inst=modernRollItem(id,expedition,luck);if(!inst)return;
+ const base=item(id);if(!base||base.slot==='material'||base.artifact)return;
+ const q=window.Ashen060Quality?.describe?.(inst);
+ const entry={id:inst.id,quality:q?.label||'Nieznana',rarity:inst.rarity,
+  sockets:inst.socketCapacity||0,name:base.name||id,createdAt:Date.now()};
+ data.items.push(entry);data.items=data.items.slice(-100);
+ modernPreviewWrite(data);
+}
+function modernPreviewPanel(){
+ const data=modernPreviewRead();
+ const items=data.items.slice(-12).reverse();
+ return `<div class="panel section" style="margin-bottom:12px"><span class="tag">ŁUPY 0.6 · PODGLĄD BEZ WYLOGOWANIA</span>
+ <h3>Nowe jakości podczas Wypraw</h3>
+ <p class="small muted">Możesz pozostać na swojej obecnej postaci online. Każda zdobyta nagroda nadal trafia do zwykłego ekwipunku i synchronizuje się normalnie. Równolegle gra pokazuje próbkę nowego przedmiotu 0.6 w osobnej kolekcji na tym urządzeniu. Próbki nie dają statystyk, nie można ich założyć i NIE zapisują się do chmury. To jeszcze nie nowy ekwipunek online.</p>
+ <div class="actions"><button type="button" data-action="modern-preview-toggle">${data.enabled?'Wyłącz podgląd 0.6':'Włącz podgląd 0.6'}</button><span class="small muted">Zapisane próbki: ${data.items.length}/100</span></div>
+ ${items.length?`<details style="margin-top:10px"><summary>Ostatnie próbki łupów (${items.length})</summary><div class="small">${items.map(x=>`<p>${escape(x.name)} · ${escape(x.quality)} · gniazda: ${Number(x.sockets)||0}</p>`).join('')}</div></details>`:'<p class="small muted">Brak próbek. Włącz podgląd i wykonaj Wyprawę.</p>'}
+ </div>`;
+}
 function modernExpeditionPool(loc){
  const id=typeof loc==='string'?loc:loc?.id;
  return ['ruins','hospital','outpost'].includes(id)?id:null;
@@ -676,7 +718,9 @@ function rollItem(id,expedition=null,luck=0){
  const rar=rollRarity(weights);
  const prefix=d?.artifact?pickModifier(artifactPrefixDefs,d,rar):d?.slot!=='material'&&Math.random()<prefixChance[rar]?pickModifier(prefixDefs,d,rar):null;
  const suffix=d?.artifact?(Math.random()<(rar>=4?.9:rar>=3?.75:.5)?pickModifier(artifactSuffixDefs,d,rar):null):d?.slot!=='material'&&Math.random()<suffixChance[rar]?pickModifier(suffixDefs,d,rar):null;
- return prepare060Award({uid:'loot-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),id,rarity:rar,prefix,suffix,artifactAffixesInitialized:!!d?.artifact,locked:rar>=3});
+ const award=prepare060Award({uid:'loot-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),id,rarity:rar,prefix,suffix,artifactAffixesInitialized:!!d?.artifact,locked:rar>=3});
+ modernPreviewCapture(id,expedition,luck);
+ return award;
 }
 function bonusText(b){return Object.entries(b||{}).filter(([,v])=>v!==0).map(([k,v])=>`${attrNames[k]} ${v>0?'+':''}${v}`).join(' · ')}
 function modifierText(m){return [m.luck?`Szczęście +${m.luck}`:null,bonusText(m.bonus),m.damagePct?`Obrażenia ${m.damagePct>0?'+':''}${m.damagePct}%`:null,m.armorPct?`Pancerz ${m.armorPct>0?'+':''}${m.armorPct}%`:null,m.critPp?`Szansa trafienia krytycznego +${m.critPp} p.p.`:null,m.accuracy?`Celność ${m.accuracy>0?'+':''}${m.accuracy} pkt`:null,m.armorPen?`Przebicie pancerza +${m.armorPen} pkt`:null,m.extraAttacks?`Dodatkowy osłabiony atak (około +12% sekwencji)`:null].filter(Boolean).join(' · ')}
@@ -3470,12 +3514,7 @@ function inventory(){
  <div class="actions"><button class="primary" data-action="bulk-sell" ${selectedForBulk.length?'':'disabled'}>Sprzedaj zaznaczone (${selectedForBulk.length})</button><button data-action="bulk-salvage" ${selectedForBulk.length?'':'disabled'}>Rozłóż zaznaczone (${selectedForBulk.length})</button></div>
  <div class="bulk-hint">Założone i zabezpieczone przedmioty nie mogą zostać zaznaczone. Potwierdzenie pokaże łączną nagrodę. Zaznaczenie nie jest zapisywane między uruchomieniami gry.</div></div>`;
  return section('Ekwipunek',`${zLabPanel()}
- <div class="panel section" style="margin-bottom:12px"><span class="tag">ŁUPY 0.6 · TEST LOKALNY</span>
- <h3>Nowe jakości na Wyprawach</h3>
- <p class="small muted">${modernLootOfflineEligible()?'Na niezwiązanej z chmurą postaci możesz włączyć losowanie nowych jakości przedmiotów podczas zwykłych Wypraw (Ruiny, Szpital, Posterunek). Nowe przedmioty są zapisywane w lokalnym ekwipunku.':'Niedostępne na profilu połączonym z kontem online. Stare łupy pozostają aktywne, dopóki serwer PvP nie obsłuży jakości 0.6.'} Przedmioty 0.6 nie mogą obecnie zostać opublikowane w PvP online.</p>
- <p class="small">Nowe przedmioty na tej postaci: <strong>${state.inventory.filter(x=>x.qualitySchema==='ashen-v06').length}</strong>. Tryb: <strong>${modernLootOfflineActive()?'WŁĄCZONY':'WYŁĄCZONY'}</strong>.</p>
- <div class="actions"><button type="button" data-action="modern-loot-offline-toggle" ${modernLootOfflineEligible()?'':'disabled'}>${modernLootOfflineActive()?'Wyłącz nowe łupy':'Włącz nowe łupy (tylko offline)'}</button></div>
- </div>
+ ${modernPreviewPanel()}
  <div class="inventory-premium-intro">
    <div class="inventory-premium-copyblock">
       <span class="tag">SEKTOR OPERACYJNY</span>
@@ -3911,6 +3950,7 @@ function act(e){if(e.target?.matches?.('.ashen-item-overlay')){openItemDetail=nu
  if(page==='messages'||page==='pvp')void window.ASHEN_ONLINE?.refresh?.();
  if(page==='players')void window.ASHEN_PLAYERS?.refresh?.();
  return}if(b.dataset.action==='create'){let n=$('hero-name')?.value.trim();if(!n||n.length<2||n.length>24){message='Podaj imię od 2 do 24 znaków.';render();return}state.name=n;state.gender=normalizeGender(state.gender);state.origin=normalizeOrigin(state.origin);state.created=true;let bonus=origins[state.origin]?.bonus||{};for(const [k,v] of Object.entries(bonus))state.attrs[k]+=v;message='Witaj na Pustkowiach, '+n+'!';setPage('character');save();render();return}if(b.dataset.workshopSelect){workshopUid=b.dataset.workshopSelect;render();return}if(b.dataset.workshopUpgrade){applyUpgrade(b.dataset.workshopUpgrade);return}if(b.dataset.action==='workshop-test'){grantWorkshopTest();return}if(b.dataset.action==='faction-test-pack'){grantFactionTestPack();return}if(b.dataset.dominant){if(['left','right'].includes(b.dataset.dominant)){state.dominantHand=b.dataset.dominant;message='Zmieniono rękę dominującą.';save();render()}return}if(b.dataset.attr){if(state.points>0){state.attrs[b.dataset.attr]++;state.points--;save();render()}return}if(b.dataset.mission){let l=locations.find(x=>x.id===b.dataset.mission);if(!l||state.mission)return;/* Testy: energia nie jest zużywana */state.missionOutcomePending=false;state.mission={id:l.id,started:Date.now(),durationMs:travelSeconds(l)*1000,ends:Date.now()+travelSeconds(l)*1000,exploration:explorationStats()};message='';save();render();return}if(b.dataset.lock){const inst=instance(b.dataset.lock);if(inst){inst.locked=!inst.locked;message=inst.locked?'Przedmiot zabezpieczony.':'Zdjęto zabezpieczenie.';save();render()}return}
+if(b.dataset.action==='modern-preview-toggle'){toggleModernPreview();return}
 if(b.dataset.action==='modern-loot-offline-toggle'){toggleModernLootOffline();return}
 if(b.dataset.action==='bulk-visible'){const arr=bulkEligibleVisible(invFilter);if(arr.length&&arr.every(x=>bulkSelected.has(x.uid)))arr.forEach(x=>bulkSelected.delete(x.uid));else arr.forEach(x=>bulkSelected.add(x.uid));render();return}
 if(b.dataset.action==='bulk-all'){state.inventory.filter(eligibleForBulk).forEach(x=>bulkSelected.add(x.uid));render();return}
