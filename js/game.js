@@ -1193,8 +1193,8 @@ function fight(enemy,options={}){
    const accuracy=isHero&&weapon?weaponAccuracy(a,weapon.weapon)+(se.accuracy||0)+(xy.missed?(se.afterMissAccuracy||0):0)+(xy.dodged?(se.afterDodgeAccuracy||0):0)+(r<=2?(se.earlyAccuracy||0):0)+zEarly:attacker.acc;
    const chance=clamp(70+2*(accuracy-defender.dodge)+(isHero?(weapon?.weapon.accuracy||0):0),15,95);
    const handName=weapon?' ('+(weapon.hand==='right'?'prawa':'lewa')+' ręka, '+Math.round(weapon.power*100)+'%)':'';
-   // Pierwsza rzeczywista integracja 0.6.0: tylko Starcia PvE.
-   // Nie modyfikuje wypraw, ekspedycji, PvP ani trybu Laboratorium.
+   // Wspólny resolver 0.6.0: Starcia i samotne Wyprawy.
+   // Nie modyfikuje ekspedycji klanowych, PvP online ani Laboratorium.
    const modern=options.combat060===true;
    const criticalChance=isHero?clamp(5+a.per*.5+(weapon?.weapon.critPp||0)+(se.critChance||0),0,35):6;
    const verdict=modern?window.Ashen060PveBridge.outcome({
@@ -1227,7 +1227,7 @@ function fight(enemy,options={}){
    }
    // Stary wzór pozostaje wyłącznie poza Starciami 0.6.0.
    if(!modern&&critical&&!labWeapon)raw=Math.floor(raw*1.6);
-   // Etap 30: w aktywnych Starciach PvE pancerz obniża obrażenia z malejącą skutecznością.
+   // ASHEN 0.6: w lokalnych walkach PvE pancerz obniża obrażenia z malejącą skutecznością.
    // Wszystkie pozostałe tryby (PvP, Wyprawy, Laboratorium) zachowują dotychczasowy wzór.
    const impact=modern?window.Ashen060PveBridge.impact(
      raw,effectiveArmor,0,critical,labWeapon?.labCritMultiplier||1.6):null;
@@ -1263,7 +1263,7 @@ function fight(enemy,options={}){
    }
    lines.push(`Runda ${r}: ${isHero?'Zadajesz':'Otrzymujesz'} ${actualDamage} obrażeń${handName}${critical?' (KRYTYCZNE)':''}.`);
  };
- const maxRounds=options.testSnapshot&&[10,15,20].includes(options.testMaxRounds)?options.testMaxRounds:10;
+ const maxRounds=[10,15,20].includes(options.testMaxRounds)&&options.testSnapshot?options.testMaxRounds:([10,15,20].includes(options.maxRounds)?options.maxRounds:10);
  for(let r=1;r<=maxRounds&&hero.hp>0&&foe.hp>0;r++){
    const startLine=lines.length,heroDamageStart=damageSummary.hero.damage,foeDamageStart=damageSummary.foe.damage;
    damageSummary.rounds=r;
@@ -1385,16 +1385,16 @@ function arenaOutcomeClass(entry){return ({win:'good',draw:'arena-draw-text',los
 function arenaOutcomeSymbol(entry){return ({win:'✓',draw:'=',loss:'✕'})[arenaOutcome(entry)]}
 function arenaOutcomeReason(entry){
  const outcome=arenaOutcome(entry);
- if(outcome==='draw')return 'Upłynął limit 10 rund, a obaj walczący nadal mają PŻ. Remis nie odblokowuje kolejnego etapu ani nie daje nagród — potrzebujesz skuteczniejszego uzbrojenia lub lepszych statystyk.';
+ if(outcome==='draw')return 'Upłynął limit 15 rund, a obaj walczący nadal mają PŻ. Remis nie odblokowuje kolejnego etapu ani nie daje nagród — potrzebujesz skuteczniejszego uzbrojenia lub lepszych statystyk.';
  if(outcome==='win')return 'Przeciwnik stracił wszystkie PŻ. Starcie zakończyło się zwycięstwem.';
  return 'Twoja postać straciła wszystkie PŻ, zanim zdołała pokonać przeciwnika.';
 }
 function startArenaFight(number){
  const stage=ARENA_STAGES.find(s=>s.level===number),progress=arenaData();
  if(!stage||!state.created||(!arenaTestMode&&number>Math.min(ARENA_STAGES.length,progress.highest+1)))return;
- if(!confirm(`${arenaTestMode?'TEST · bez nagród i zapisu postępu\n\n':''}Starcie ${number}/${ARENA_STAGES.length}: ${stage.name}${stage.boss?' (BOSS)':''}\n\nWalka trwa maksymalnie 10 rund. Zwyciężysz, jeśli pokonasz przeciwnika. Jeśli po 10 rundach obie strony nadal żyją, nastąpi REMIS: bez nagród i odblokowania kolejnego etapu.\n\nRozpocząć starcie?`))return;
- const result=fight(arenaEnemy(stage),{recordRounds:true,combat060:true});
- result.combatEngine='060-pve-attack-sequence';
+ if(!confirm(`${arenaTestMode?'TEST · bez nagród i zapisu postępu\n\n':''}Starcie ${number}/${ARENA_STAGES.length}: ${stage.name}${stage.boss?' (BOSS)':''}\n\nWalka trwa maksymalnie 15 rund. Zwyciężysz, jeśli pokonasz przeciwnika. Jeśli po 15 rundach obie strony nadal żyją, nastąpi REMIS: bez nagród i odblokowania kolejnego etapu.\n\nRozpocząć starcie?`))return;
+ const result=fight(arenaEnemy(stage),{recordRounds:true,combat060:true,maxRounds:15});
+ result.combatEngine='060-pve-unified';
  // Profil taktyczny jest pochodną bazowych statystyk wroga; nie zmienia walki.
  result.battleProfile.enemy.attributes=arenaEnemyAttributes(stage);
  if(arenaTestMode){
@@ -1588,7 +1588,7 @@ function combatLabHtml(){
  ${rows.map(([label,x,y])=>`<tr><th>${escape(String(label))}</th><td>${escape(String(x))}</td><td>${escape(String(y))}</td></tr>`).join('')}
  </tbody></table></div><p class="small muted"><strong>Aktualna broń:</strong> ${escape(lab.currentWeapons)} · <strong>Wariant testowy:</strong> ${escape(lab.referenceWeapon)}.</p>
  <p class="small muted">Wartości pozostałych PŻ to średnie ze wszystkich symulacji. „Remis przez limit rund” oznacza, że obie strony przeżyły do końca wybranego limitu. Obrażenia na rundę to suma obrażeń podzielona przez łączną liczbę rozegranych rund.</p>`:'<p class="small muted">Wybierz przeciwnika, liczbę prób i limit rund, a następnie uruchom symulację.</p>'}
- <p class="small muted">Prawdziwe Starcia nadal trwają maksymalnie 10 rund. Laboratorium nie przyznaje XP, surowców, przedmiotów ani postępu; nie zużywa energii. Wyniki są tylko w pamięci strony. Ekspedycje frakcyjne korzystają z osobnego silnika serwerowego.</p></div></details>`;
+ <p class="small muted">Prawdziwe Starcia trwają maksymalnie 15 rund. Laboratorium nie przyznaje XP, surowców, przedmiotów ani postępu; nie zużywa energii. Wyniki są tylko w pamięci strony. Ekspedycje frakcyjne korzystają z osobnego silnika serwerowego.</p></div></details>`;
 }
 
 // ASHEN v0.4.6.1 — eksperymentalne uzbrojenie, wyłącznie w Laboratorium.
@@ -2218,7 +2218,7 @@ function arena(){
  <div class="arena-test-controls ${arenaTestMode?'is-active':''}"><div><strong>Tryb testowania Starć</strong><p>Możesz sprawdzić dowolny poziom bez wcześniejszego zwycięstwa. Test nie przyznaje nagród, nie odblokowuje etapów i nie zmienia zapisanych statystyk.</p></div><button type="button" data-arena-test-toggle="1" aria-pressed="${arenaTestMode}" class="${arenaTestMode?'primary':''}">${arenaTestMode?'✓ Tryb testowy włączony':'Włącz tryb testowy'}</button></div>
  <div class="arena-chapter-tabs" aria-label="Rozdziały Starć">${chapters.map(c=>`<button type="button" data-arena-chapter="${c.id}" class="arena-chapter-tab ${arenaChapter===c.id?'selected':''}"><span>${c.tag}</span><strong>${c.title}</strong><small>Poziomy ${c.start}–${c.end} ${a.highest>=c.end?'· ✓ ukończony':arenaTestMode?'· TEST':a.highest>=c.start-1?'· dostępny':'· zablokowany'}</small></button>`).join('')}</div><div class="arena-level-grid" aria-label="Wybór poziomu Starć">${shownStages.map(s=>{const done=s.level<=a.highest,isLocked=!arenaTestMode&&s.level>max;return `<button type="button" data-arena-select="${s.level}" class="arena-level-btn ${s.boss?'boss':''} ${done?'completed':''} ${isLocked?'locked':''} ${arenaSelected===s.level?'selected':''}" aria-pressed="${arenaSelected===s.level}" title="${escape(s.name)}">${s.boss?'♛ ':''}${s.level}${done?' ✓':isLocked?' 🔒':''}</button>`}).join('')}</div>
  <div class="arena-layout"><article class="arena-enemy-card ${stage.boss?'boss':''}"><div class="arena-portrait-wrap"><img src="${arenaArt(stage.level)}" alt="${escape(stage.name)}" loading="eager"><div class="arena-portrait-number">ETAP ${stage.level} / ${ARENA_STAGES.length} ${stage.boss?'· BOSS':''}</div></div><div class="arena-enemy-details"><span class="tag">${stage.boss?'⚔ WALKA Z BOSSEM':'PRZECIWNIK'}</span><h3>${escape(stage.name)}</h3><p class="arena-epithet">${escape(stage.epithet)}</p><p>${escape(stage.description)}</p><p class="arena-story">${escape(stage.story)}</p><div class="arena-stat-grid">${[['PŻ',stage.hp],['Atak',stage.atk.join('–')],['Celność',stage.acc],['Unik',stage.dodge],['Pancerz',stage.armor],['Próby',Number(a.attempts[stage.level])||0]].map(([name,value])=>`<div><span>${name}</span><strong>${value}</strong></div>`).join('')}</div><div class="arena-reward-preview"><strong>Nagroda za pierwsze zwycięstwo</strong><span>+${stage.reward.xp} PD · +${stage.reward.scrap} złomu · +${stage.reward.credits} kredytów${stage.boss?' · epicki przedmiot':''}</span><small>Powtórki: 25% podstawowych zasobów, bez kolejnego przedmiotu bossa.</small></div><div class="arena-enemy-actions"><button class="primary" data-arena-fight="${stage.level}" ${locked?'disabled':''}>${locked?'🔒 Pokonaj poprzedniego przeciwnika':arenaTestMode?'🧪 Testuj starcie':stage.boss?'⚔ Zmierz się z bossem':'⚔ Rozpocznij starcie'}</button>${arenaTestMode?'<span class="tag">Bez nagród i postępu</span>':stage.level<=a.highest?'<span class="tag">✓ Pokonany · można powtórzyć</span>':''}</div></div></article>
- <aside class="arena-sidebar"><div class="arena-note"><span class="tag">ZASADY STARCIA</span><h3>Przygotowanie decyduje</h3><p>Poziom Starcia jest niezależny od poziomu postaci. <strong>Każda walka trwa maksymalnie 10 rund.</strong> Zwyciężasz, gdy pokonasz przeciwnika; przegrywasz, gdy Twoje PŻ spadną do zera. <strong class="arena-draw-text">REMIS (pomarańczowy)</strong> oznacza, że po 10 rundach obie strony nadal żyją. Nie odblokowuje kolejnego etapu i nie daje nagród — warto wtedy ulepszyć broń lub zmienić wyposażenie. Porażka i remis nie niszczą wyposażenia ani nie kosztują zasobów.</p><p>Możesz wracać do ukończonych starć, aby sprawdzać inne bronie i zestawy. Raport zapisuje całkowite obrażenia, liczbę trafień, rundy i dokładny przebieg.</p><button data-page="inventory">Przygotuj wyposażenie</button></div><div class="arena-note"><span class="tag">TWOJE POSTĘPY</span><div class="arena-progress-stats"><div><span>Ukończone</span><strong>${a.highest}/${ARENA_STAGES.length}</strong></div><div><span>Wszystkie próby</span><strong>${Object.values(a.attempts).reduce((n,k)=>n+(Number(k)||0),0)}</strong></div><div><span class="good">Zwycięstwa</span><strong class="good">${Object.values(a.victories).reduce((n,k)=>n+(Number(k)||0),0)}</strong></div><div><span class="bad">Porażki</span><strong class="bad">${Object.values(a.losses).reduce((n,k)=>n+(Number(k)||0),0)}</strong></div><div><span class="arena-draw-text">Remisy</span><strong class="arena-draw-text">${Object.values(a.draws).reduce((n,k)=>n+(Number(k)||0),0)}</strong></div></div></div></aside></div>
+ <aside class="arena-sidebar"><div class="arena-note"><span class="tag">ZASADY STARCIA</span><h3>Przygotowanie decyduje</h3><p>Poziom Starcia jest niezależny od poziomu postaci. <strong>Każda walka trwa maksymalnie 15 rund.</strong> Zwyciężasz, gdy pokonasz przeciwnika; przegrywasz, gdy Twoje PŻ spadną do zera. <strong class="arena-draw-text">REMIS (pomarańczowy)</strong> oznacza, że po 15 rundach obie strony nadal żyją. Nie odblokowuje kolejnego etapu i nie daje nagród — warto wtedy ulepszyć broń lub zmienić wyposażenie. Porażka i remis nie niszczą wyposażenia ani nie kosztują zasobów.</p><p>Możesz wracać do ukończonych starć, aby sprawdzać inne bronie i zestawy. Raport zapisuje całkowite obrażenia, liczbę trafień, rundy i dokładny przebieg.</p><button data-page="inventory">Przygotuj wyposażenie</button></div><div class="arena-note"><span class="tag">TWOJE POSTĘPY</span><div class="arena-progress-stats"><div><span>Ukończone</span><strong>${a.highest}/${ARENA_STAGES.length}</strong></div><div><span>Wszystkie próby</span><strong>${Object.values(a.attempts).reduce((n,k)=>n+(Number(k)||0),0)}</strong></div><div><span class="good">Zwycięstwa</span><strong class="good">${Object.values(a.victories).reduce((n,k)=>n+(Number(k)||0),0)}</strong></div><div><span class="bad">Porażki</span><strong class="bad">${Object.values(a.losses).reduce((n,k)=>n+(Number(k)||0),0)}</strong></div><div><span class="arena-draw-text">Remisy</span><strong class="arena-draw-text">${Object.values(a.draws).reduce((n,k)=>n+(Number(k)||0),0)}</strong></div></div></div></aside></div>
  ${last?`<section class="arena-reports-area"><div class="arena-reports-heading"><div><span class="tag">DZIENNIK STARCIA</span><h3>Ostatnie walki</h3></div><small>Zapisane: ${a.history.length} / 40</small></div><div class="arena-report-list">${a.history.slice(0,12).map((entry,i)=>`<button class="arena-history-button" data-arena-report="${i}" title="Otwórz raport"><span class="${arenaOutcomeClass(entry)}">${arenaOutcomeSymbol(entry)} ${arenaOutcomeLabel(entry)} · Poziom ${entry.stage} · ${escape(entry.name)}</span><span>${escape(entry.at)}</span></button>`).join('')}</div></section>`:''}
  <p class="arena-future-note">Rozdziały I–V (poziomy 1–50) są już dostępne. Postęp z poprzednich wersji pozostaje zachowany, a balans nowych walk można dalej dopracowywać po testach.</p></div>${arenaReportOpen!==null?`<div class="arena-report-overlay" data-arena-overlay="1"><div class="arena-report-dialog" role="dialog" aria-modal="true" aria-label="Raport Starcia ${(arenaReportOpen===-1?arenaTestReport:a.history[arenaReportOpen]).stage}"><div class="arena-report-dialog-toolbar"><span>⚔ RAPORT STARCIA</span><button type="button" data-arena-report-close="1">✕ Wróć do Starć</button></div><div class="arena-report-dialog-scroll">${arenaBattleReport(arenaReportOpen===-1?arenaTestReport:a.history[arenaReportOpen],arenaReportOpen)}</div></div></div>`:''}`);
 }
@@ -2461,7 +2461,7 @@ function reportLocId(r){return r.location?.includes('szpital')?'hospital':r.loca
 function reportStory(r){return r.story||'Wśród ruin doszło do nieoczekiwanego spotkania. Szczegółowy zapis tej wyprawy pochodzi ze starszej wersji gry.'}
 function finish(){
  let m=state.mission;if(!m||Date.now()<m.ends)return;
- let loc=locations.find(x=>x.id===m.id),enemy=loc.enemies[rand(0,loc.enemies.length-1)],result=fight(enemy,{expedition:true}),xp=result.won?rand(...loc.xp):Math.ceil(loc.xp[0]*.3),scrap=result.won?rand(...loc.scrap):0;
+ let loc=locations.find(x=>x.id===m.id),enemy=loc.enemies[rand(0,loc.enemies.length-1)],result=fight(enemy,{expedition:true,combat060:true}),xp=result.won?rand(...loc.xp):Math.ceil(loc.xp[0]*.3),scrap=result.won?rand(...loc.scrap):0;
  xp=Math.ceil(xp*(1+0.03*(roomLevel('bedroom')-1))*(companionId()==='raven'?1+petPower('raven')/100:1));scrap=Math.ceil(scrap*(companionId()==='cat'?1+petPower('cat')/100:1)*(1+activeVehicleModule('cargo')*.05));state.xp+=xp;state.scrap+=scrap;state.battles++;if(result.won)state.wins++;
   // Porażka: zero przedmiotów, w tym łupów z eksploracji, anomalii i zwierzęcia.
   const snapshot=m.exploration||explorationStats();

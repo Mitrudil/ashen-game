@@ -1,6 +1,6 @@
-/* ASHEN 0.6.0 / etap 29 — pierwszy most do prawdziwych Starć PvE.
- * Trafienie, unik i krytyk z nowego resolvera; obrażenia i efekty Z
- * pozostają w istniejącym silniku do kolejnego etapu migracji.
+/* ASHEN 0.6.0 / wspólny resolver lokalnego PvE (Starcia + Wyprawy).
+ * Trafienia, uniki, krytyki i obrażenia używają modułów 0.6.0;
+ * zdolności Z nadal są naliczane przez lokalny silnik walki.
  */
 (function(root,factory){
  const api=factory(typeof module==='object'&&module.exports?require('./ashen-060-stat-battle.js'):root.Ashen060StatBattle);
