@@ -86,7 +86,23 @@
    return {outcome:strike.outcome,damage:strike.damage,details:detailsForStrike};
   }
   const battle=deps.battle.simulate({...resolved,rounds:config.rounds}, {...deps,resolveAction});
-  return {status:'diagnostic_only',readyForLive:false,balanceStatus:'proposal_not_approved',
+  // Statystyki diagnostyczne pochodzą wyłącznie z rozstrzygniętych ataków;
+  // nie są wykorzystywane przez aktywny silnik gry.
+  const outcomeCounts={hit:0,critical_hit:0,dodge:0,miss:0};
+  let totalDamage=0;
+  for(const strike of details){outcomeCounts[strike.outcome]++;totalDamage+=strike.damage;}
+  const unsupported=[];
+  for(const id of ['a','b']){
+   for(const sig of battle.unresolved[id]||[])unsupported.push({actor:id,source:sig.key,reason:'no_rule'});
+   for(const [key,rule] of Object.entries(config[id].rules)){
+    if(rule.effect?.type==='extra_attacks'||rule.effect?.type==='initiative_flat'||rule.effect?.type==='status_marker')
+     unsupported.push({actor:id,source:key,reason:'no_combat_integration',effect:rule.effect.type});
+   }
+  }
+  const audit={strikes:details.length,damage:totalDamage,outcomes:outcomeCounts,
+   rounds:battle.roundsPlayed,winner:battle.winner,draw:battle.draw,
+   incompleteMechanics:unsupported,readyForProduction:false};
+  return {status:'diagnostic_only',readyForLive:false,balanceStatus:'proposal_not_approved',audit,
    battle,strikes:details,
    limitations:['Progi trafienia/uniku/krytyka i redukcja pancerza nadal są propozycją balansu.',
     'Rzuty są jawnie przekazane, bez losowania i synchronizacji Supabase.',
