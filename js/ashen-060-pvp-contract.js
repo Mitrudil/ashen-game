@@ -32,6 +32,21 @@ function auditSave(save,quality){
  }
  return Object.freeze({modernCount,legacyCount,equippedModern,equippedCount:equipped.size,socketCapacity:sockets});
 }
+// Canonical equipped-item manifest: read only, deterministic and bounded.
+// A server must compare this against its own cloud-save row; it is not proof of stat parity.
+const EQUIPMENT_SLOTS=Object.freeze(['right','left','head','shirt','outer','hands','pants','boots','extra','extra2','extra3']);
+function equipmentManifest(save,quality){
+ auditSave(save,quality);
+ const byUid=new Map(save.inventory.map(x=>[x.uid,x]));
+ const entries=[];
+ for(const slot of EQUIPMENT_SLOTS){
+  const uid=save.equip[slot];if(!uid)continue;
+  const item=byUid.get(uid),q=quality.describe(item);
+  entries.push({slot,uid,id:item.id,qualitySchema:q.schema,rarity:q.index,
+   socketCapacity:item.socketCapacity??0});
+ }
+ return entries;
+}
 function assertSnapshot(snapshot){
  if(!snapshot||typeof snapshot!=='object'||!Array.isArray(snapshot.attacks)||snapshot.attacks.length<1||snapshot.attacks.length>8)error('INVALID_SNAPSHOT','Migawka PvP ma nieprawidłową liczbę ataków.');
  for(const k of ['hp','armor','acc','dodge']){
@@ -55,5 +70,5 @@ function assertReady(save,snapshot,quality,build){
  if(build?.modernDropsEnabled===true)error('UNSAFE_BUILD','Nowy generator jakości włączono bez potwierdzonej zgodności serwera PvP.');
  return audit;
 }
-return Object.freeze({auditSave,assertSnapshot,assertReady});
+return Object.freeze({auditSave,equipmentManifest,assertSnapshot,assertReady,EQUIPMENT_SLOTS});
 });

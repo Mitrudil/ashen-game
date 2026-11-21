@@ -3824,7 +3824,8 @@ function pvpSnapshot(profileSave){
    qualityPoints:x.qualityPoints,level:x.level}));
   return {name:profileSave.name,origin:normalizeOrigin(profileSave.origin),gender:normalizeGender(profileSave.gender),level:profileSave.level,attrs:{...a},attacks,
    hp:d.hp,armor:d.armor,dodge:d.dodge,acc:d.acc,
-   setEngineVersion:SET_ENGINE_VERSION,setEffects,activeSets};
+   setEngineVersion:SET_ENGINE_VERSION,setEffects,activeSets,
+   equipmentManifest:window.Ashen060PvpContract.equipmentManifest(profileSave,window.Ashen060Quality)};
  }finally{state=previous}
 }
 // ASHEN 0.3.5: indywidualne nagrody klanowe. Idempotencja w zapisie postaci,
