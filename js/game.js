@@ -622,94 +622,9 @@ function prepare060Award(inst){
  if(!d||d.slot==='material'||d.artifact)return inst;
  return window.Ashen060Loot.prepareNewLoot(inst,window.Ashen060Bonuses);
 }
-// Dopiero zgodna wersja silnika Supabase pozwoli zmienic ta flage na true.
-// Nigdy nie aktywujemy nowych jakosci na podstawie URL lub localStorage.
-const ASHEN_060_MODERN_DROPS_ENABLED=window.ASHEN_BUILD?.modernDropsEnabled===true;
-// Etap 35: nowy drop dostępny w prawdziwych Wyprawach WYŁĄCZNIE na świadomie
-// wybranym, niezwiązanym z chmurą profilu testowym. Serwer PvP pozostaje nietknięty.
-function modernLootOfflineEligible(){
- const cloud=window.ASHEN_CLOUD;
- return !cloud?.getSession?.()?.user?.id && !cloud?.getBoundSlot?.();
-}
-function modernLootOfflineActive(){return state.modernLootOffline===true && modernLootOfflineEligible();}
-// Etap 38: nowe jakości jako PRAWDZIWE łupy na zapisanej postaci online.
-// Dopóki serwer nie zna ich statystyk, przedmiot 0.6 może być przechowywany,
-// ale nie może zostać założony ani opublikowany jako część migawki PvP.
-function modernLootOnlineEligible(){
- const cloud=window.ASHEN_CLOUD;
- return !!(cloud?.getSession?.()?.user?.id && cloud.getBoundSlot?.()===cloud.currentSlot?.());
-}
-function modernLootOnlineActive(){return state.modernLootOnline===true&&modernLootOnlineEligible();}
-function toggleModernLootOnline(){
- if(!modernLootOnlineEligible()){
-  message='Nowe łupy online można włączyć tylko na aktywnej postaci przypisanej do zalogowanego konta.';render();return;
- }
- if(!state.modernLootOnline){
-  if(!confirm('Włączyć nowe jakości 0.6 na tej postaci online? Nowe łupy trafią do normalnego ekwipunku i można je zakładać do Starć oraz Wypraw. Do czasu aktualizacji serwera profil PvP nie będzie aktualizowany po założeniu nowego przedmiotu. Kontynuować?'))return;
-  // Lokalny punkt przywracania sprzed pierwszego uruchomienia tej funkcji.
-  try{const key='ashen-060-before-online-loot:'+window.ASHEN_CLOUD.getSession().user.id+':'+window.ASHEN_CLOUD.currentSlot();if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(state));}
-  catch{message='Nie udało się utworzyć lokalnej kopii bezpieczeństwa — tryb nie został włączony.';render();return;}
- }
- state.modernLootOnline=!state.modernLootOnline;
- message=state.modernLootOnline?'Włączono nowe łupy 0.6 w zwykłym ekwipunku. Statystyki PvP nie będą publikowane z założonym nowym przedmiotem.':'Wyłączono generowanie nowych łupów 0.6. Zdobyte przedmioty pozostają w ekwipunku.';
- save();render();
-}
-function toggleModernLootOffline(){
- if(!modernLootOfflineEligible()){
-  message='Nowa jakość łupów jest na razie dostępna wyłącznie bez zalogowanego konta i powiązania z chmurą. Wyłączono tryb testowy.';
-  state.modernLootOffline=false;save();render();return;
- }
- if(!state.modernLootOffline && !confirm('Włączyć nowe jakości łupów 0.6 na tej lokalnej postaci? Przedmioty 0.6 nie są obsługiwane przez serwerowe PvP ani synchronizację online. Przed łączeniem tego profilu z kontem wykonaj eksport zapisu.'))return;
- state.modernLootOffline=!state.modernLootOffline;
- message=state.modernLootOffline?'Włączono nowe łupy 0.6 na lokalnych Wyprawach.':'Przywrócono standardowe łupy na kolejnych Wyprawach.';
- save();render();
-}
-
-// Etap 36: podgląd nowych łupów na bieżącym profilu online, BEZ zmian
-// w zapisie postaci, migawce PvP i strukturze danych wysyłanej do Supabase.
-// To lokalna kolekcja diagnostyczna tego urządzenia, nie ekwipunek do zakładania.
-function modernPreviewStorageKey(){
- const cloud=window.ASHEN_CLOUD;
- const slot=cloud?.currentSlot?.()||devActiveId();
- const user=cloud?.getSession?.()?.user?.id||'local';
- return 'ashen-060-loot-preview-v1:'+user+':'+slot;
-}
-function modernPreviewRead(){
- try{const d=JSON.parse(localStorage.getItem(modernPreviewStorageKey())||'null');
-  return {enabled:d?.enabled===true,items:Array.isArray(d?.items)?d.items.slice(-100):[]};
- }catch{return {enabled:false,items:[]}}
-}
-function modernPreviewWrite(data){try{localStorage.setItem(modernPreviewStorageKey(),JSON.stringify(data));return true}catch{return false}}
-function toggleModernPreview(){
- const d=modernPreviewRead();
- d.enabled=!d.enabled;
- if(!modernPreviewWrite(d)){message='Nie można zapisać ustawień lokalnego podglądu.';render();return}
- message=d.enabled?'Włączono podgląd łupów 0.6 podczas Wypraw. Normalne nagrody i synchronizacja pozostają bez zmian.':'Wyłączono podgląd nowych łupów.';
- render();
-}
-function modernPreviewCapture(id,expedition,luck){
- const data=modernPreviewRead();if(!data.enabled||!modernExpeditionPool(expedition))return;
- const inst=modernRollItem(id,expedition,luck);if(!inst)return;
- const base=item(id);if(!base||base.slot==='material'||base.artifact)return;
- const q=window.Ashen060Quality?.describe?.(inst);
- const entry={id:inst.id,quality:q?.label||'Nieznana',rarity:inst.rarity,
-  sockets:inst.socketCapacity||0,name:base.name||id,createdAt:Date.now()};
- data.items.push(entry);data.items=data.items.slice(-100);
- modernPreviewWrite(data);
-}
-function modernPreviewPanel(){
- const data=modernPreviewRead();
- const online=modernLootOnlineEligible();
- const realCount=state.inventory.filter(x=>x.qualitySchema==='ashen-v06').length;
- const onlinePanel=`<div class="panel section" style="margin-bottom:12px"><span class="tag">ŁUPY 0.6 · EKWIPUNEK ONLINE</span><h3>Nowe jakości na obecnej postaci</h3><p class="small muted">${online?'Postać jest połączona z chmurą.':'Aby uruchomić tę funkcję, przypisz aktywną postać do konta online.'} Nowe łupy z Wypraw zapisują się jako rzeczywiste przedmioty w ekwipunku i chmurze. Można ich używać w osobnym zestawie PvE 0.6, natomiast serwerowe PvP nadal wymaga starego wyposażenia. Dotychczasowe przedmioty działają bez zmian. Zebrane przedmioty 0.6: <strong>${realCount}</strong>.</p><div class="actions"><button type="button" data-action="modern-loot-online-toggle" ${online?'':'disabled'}>${state.modernLootOnline?'Wyłącz nowe łupy online':'Włącz nowe łupy online'}</button></div></div>`;
- const items=data.items.slice(-12).reverse();
- return onlinePanel+`<details class="panel section" style="margin-bottom:12px"><summary>Starszy podgląd łupów 0.6 (bez zapisu w ekwipunku)</summary><div><span class="tag">ŁUPY 0.6 · PODGLĄD</span>
- <h3>Nowe jakości podczas Wypraw</h3>
- <p class="small muted">Możesz pozostać na swojej obecnej postaci online. Każda zdobyta nagroda nadal trafia do zwykłego ekwipunku i synchronizuje się normalnie. Równolegle gra pokazuje próbkę nowego przedmiotu 0.6 w osobnej kolekcji na tym urządzeniu. Zwykłe nagrody nadal mogą mieć jakość „Ulepszony”, ponieważ korzystają ze starego schematu. Próbki 0.6 używają nowej skali z jakością „Mityczny”. Próbki nie dają statystyk, nie można ich założyć i NIE zapisują się do chmury. To jeszcze nie nowy ekwipunek online.</p>
- <div class="actions"><button type="button" data-action="modern-preview-toggle">${data.enabled?'Wyłącz podgląd 0.6':'Włącz podgląd 0.6'}</button><span class="small muted">Zapisane próbki: ${data.items.length}/100</span></div>
- ${items.length?`<details style="margin-top:10px"><summary>Ostatnie próbki łupów (${items.length})</summary><div class="small">${items.map(x=>`<p>${escape(x.name)} · ${escape(x.quality)} · gniazda: ${Number(x.sockets)||0}</p>`).join('')}</div></details>`:'<p class="small muted">Brak próbek. Włącz podgląd i wykonaj Wyprawę.</p>'}
- </div></details>`;
-}
+// Wydanie 0.6: jedna pula wyposażenia. Nie wymagamy trybu offline,
+// osobnej kolekcji próbek ani dodatkowego przełącznika dla zalogowanej postaci.
+// Synchronizacja PvP pozostaje odrębną, serwerowo weryfikowaną operacją.
 function modernExpeditionPool(loc){
  const id=typeof loc==='string'?loc:loc?.id;
  return ['ruins','hospital','outpost'].includes(id)?id:null;
@@ -734,7 +649,8 @@ function modernRollItem(id,expedition=null,luck=0){
  return window.Ashen060Loot.prepareModernLoot(base,pool,window.Ashen060Quality,window.Ashen060Bonuses,rngQuality);
 }
 function rollItem(id,expedition=null,luck=0){
- if(ASHEN_060_MODERN_DROPS_ENABLED||modernLootOfflineActive()||modernLootOnlineActive()){const modern=modernRollItem(id,expedition,luck);if(modern)return modern;}
+ const modern=modernRollItem(id,expedition,luck);
+ if(modern)return modern;
 
  const d=item(id);
  let weights=explorationRarityWeights(expedition,luck);
@@ -744,7 +660,6 @@ function rollItem(id,expedition=null,luck=0){
  const prefix=d?.artifact?pickModifier(artifactPrefixDefs,d,rar):d?.slot!=='material'&&Math.random()<prefixChance[rar]?pickModifier(prefixDefs,d,rar):null;
  const suffix=d?.artifact?(Math.random()<(rar>=4?.9:rar>=3?.75:.5)?pickModifier(artifactSuffixDefs,d,rar):null):d?.slot!=='material'&&Math.random()<suffixChance[rar]?pickModifier(suffixDefs,d,rar):null;
  const award=prepare060Award({uid:'loot-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),id,rarity:rar,prefix,suffix,artifactAffixesInitialized:!!d?.artifact,locked:rar>=3});
- modernPreviewCapture(id,expedition,luck);
  return award;
 }
 function bonusText(b){return Object.entries(b||{}).filter(([,v])=>v!==0).map(([k,v])=>`${attrNames[k]} ${v>0?'+':''}${v}`).join(' · ')}
@@ -3540,7 +3455,7 @@ function inventory(){
  <div class="actions"><button class="primary" data-action="bulk-sell" ${selectedForBulk.length?'':'disabled'}>Sprzedaj zaznaczone (${selectedForBulk.length})</button><button data-action="bulk-salvage" ${selectedForBulk.length?'':'disabled'}>Rozłóż zaznaczone (${selectedForBulk.length})</button></div>
  <div class="bulk-hint">Założone i zabezpieczone przedmioty nie mogą zostać zaznaczone. Potwierdzenie pokaże łączną nagrodę. Zaznaczenie nie jest zapisywane między uruchomieniami gry.</div></div>`;
  return section('Ekwipunek',`${zLabPanel()}
- <div class="small muted" style="margin:8px 0 14px">Nowe przedmioty 0.6 zakładasz zwykłym przyciskiem „Załóż” i wykorzystujesz w Starciach oraz Wyprawach. ${modernLootOnlineEligible()?`<button type="button" data-action="modern-loot-online-toggle">${state.modernLootOnline?'Wyłącz nowe łupy':'Włącz nowe łupy'}</button>`:''} ${Object.values(state.equip).some(uid=>instance(uid)?.qualitySchema==='ashen-v06')?'Nowe wyposażenie w PvP online oczekuje na zgodność serwera; postać może być zapisywana w chmurze.':''}</div>
+ <div class="small muted" style="margin:8px 0 14px">Przedmioty z nowych Wypraw trafiają od razu do ekwipunku. Zakładasz je standardowym przyciskiem „Załóż”. ${Object.values(state.equip).some(uid=>instance(uid)?.qualitySchema==='ashen-v06')?'Serwerowe PvP wymaga jeszcze aktualizacji obsługi nowych statystyk; zapis postaci w chmurze pozostaje dostępny.':''}</div>
  <div class="inventory-premium-intro">
    <div class="inventory-premium-copyblock">
       <span class="tag">SEKTOR OPERACYJNY</span>
@@ -3976,9 +3891,9 @@ function act(e){if(e.target?.matches?.('.ashen-item-overlay')){openItemDetail=nu
  if(page==='messages'||page==='pvp')void window.ASHEN_ONLINE?.refresh?.();
  if(page==='players')void window.ASHEN_PLAYERS?.refresh?.();
  return}if(b.dataset.action==='create'){let n=$('hero-name')?.value.trim();if(!n||n.length<2||n.length>24){message='Podaj imię od 2 do 24 znaków.';render();return}state.name=n;state.gender=normalizeGender(state.gender);state.origin=normalizeOrigin(state.origin);state.created=true;let bonus=origins[state.origin]?.bonus||{};for(const [k,v] of Object.entries(bonus))state.attrs[k]+=v;message='Witaj na Pustkowiach, '+n+'!';setPage('character');save();render();return}if(b.dataset.workshopSelect){workshopUid=b.dataset.workshopSelect;render();return}if(b.dataset.workshopUpgrade){applyUpgrade(b.dataset.workshopUpgrade);return}if(b.dataset.action==='workshop-test'){grantWorkshopTest();return}if(b.dataset.action==='faction-test-pack'){grantFactionTestPack();return}if(b.dataset.dominant){if(['left','right'].includes(b.dataset.dominant)){state.dominantHand=b.dataset.dominant;message='Zmieniono rękę dominującą.';save();render()}return}if(b.dataset.attr){if(state.points>0){state.attrs[b.dataset.attr]++;state.points--;save();render()}return}if(b.dataset.mission){let l=locations.find(x=>x.id===b.dataset.mission);if(!l||state.mission)return;/* Testy: energia nie jest zużywana */state.missionOutcomePending=false;state.mission={id:l.id,started:Date.now(),durationMs:travelSeconds(l)*1000,ends:Date.now()+travelSeconds(l)*1000,exploration:explorationStats()};message='';save();render();return}if(b.dataset.lock){const inst=instance(b.dataset.lock);if(inst){inst.locked=!inst.locked;message=inst.locked?'Przedmiot zabezpieczony.':'Zdjęto zabezpieczenie.';save();render()}return}
-if(b.dataset.action==='modern-loot-online-toggle'){toggleModernLootOnline();return}
-if(b.dataset.action==='modern-preview-toggle'){toggleModernPreview();return}
-if(b.dataset.action==='modern-loot-offline-toggle'){toggleModernLootOffline();return}
+
+
+
 if(b.dataset.action==='bulk-visible'){const arr=bulkEligibleVisible(invFilter);if(arr.length&&arr.every(x=>bulkSelected.has(x.uid)))arr.forEach(x=>bulkSelected.delete(x.uid));else arr.forEach(x=>bulkSelected.add(x.uid));render();return}
 if(b.dataset.action==='bulk-all'){state.inventory.filter(eligibleForBulk).forEach(x=>bulkSelected.add(x.uid));render();return}
 if(b.dataset.action==='bulk-clear'){bulkSelected.clear();render();return}
