@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ASHEN 0.6 — audyt ekwipunku (etap 136)</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,Segoe UI,sans-serif;background:#111923;color:#e8eef5}
+*{box-sizing:border-box}body{margin:0 auto;max-width:1050px;padding:25px 16px 60px}h1{font-size:1.65rem;margin-bottom:.4em}h2{font-size:1.12rem}p,small{color:#aebdcd;line-height:1.5}
+.panel{background:#1c2936;border:1px solid #344758;border-radius:12px;padding:18px;margin:18px 0}.buttons{display:flex;gap:12px;flex-wrap:wrap}button,.filelabel{background:#315b72;border:1px solid #5e8497;color:#fff;border-radius:8px;padding:10px 14px;cursor:pointer;font:inherit}button:hover,.filelabel:hover{background:#3f7590}button:disabled{opacity:.4;cursor:not-allowed}input[type=file]{max-width:100%}.muted{color:#aebdcd}.ok{color:#82d9ac}.bad{color:#ffa69a}.warn{color:#f5ca83}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:.93rem}th,td{padding:10px;border-bottom:1px solid #344758;text-align:left}th{color:#b4c8d7}code{word-break:break-word}#summary{font-weight:650}.notice{border-left:3px solid #f1c67c;padding-left:12px}
+</style></head><body>
+<h1>ASHEN 0.6 — kontrola ekwipunku</h1>
+<p>Etap 136 · podgląd diagnostyczny. Ta strona nie uruchamia gry, nie odczytuje jej automatycznych zapisów i nie zmienia danych w GitHub ani Supabase.</p>
+<section class="panel"><h2>1. Wybierz sposób kontroli</h2>
+<div class="buttons"><button id="demo" disabled>Uruchom przykład</button><label class="filelabel" for="snapshot">Wybierz lokalny plik JSON</label><input id="snapshot" type="file" accept=".json,application/json" disabled></div>
+<p class="notice"><strong>Uwaga:</strong> nie umieszczaj w pliku haseł, tokenów, kluczy ani danych osobowych. Plik jest odczytywany lokalnie w tej karcie, ale do podstawowej diagnostyki zalecamy przykładowe dane. Nie udostępniaj swojego pliku zapisu publicznie.</p>
+<small>Oczekiwany format JSON: <code>{"inventory":[{"uid":"item1","id":"..."}],"equip":{"right":"item1"}}</code>. Akceptowany jest tylko obiekt z tablicą inventory i obiektem equip. Maksymalnie 2 MB.</small></section>
+<section class="panel"><h2>2. Wynik diagnostyki</h2><p id="status" role="status">Ładowanie katalogu i modułów...</p><div id="result" hidden><p id="summary"></p><div class="tablewrap"><table><thead><tr><th>Slot</th><th>Status</th><th>Wyjaśnienie</th></tr></thead><tbody id="rows"></tbody></table></div><p id="inventoryTotals"></p><p id="unexpected"></p></div></section>
+<section class="panel"><h2>Zakres kontroli</h2><p>Sprawdzane są UID, kompatybilność slotów, powtórzenia oraz konflikt broni dwuręcznej. Przedmiot spoza katalogu otrzymuje status „wymaga sprawdzenia”, a nie „do usunięcia”. Nie są tu oceniane uprawnienia serwerowe, atrybuty postaci, wymagany poziom ani presety.</p></section>
+<script src="js/ashen-060-read-bridge-134.js"></script>
+<script src="js/ashen-060-equip-audit-135.js"></script>
+<script>
+'use strict';
+(function(){
+const $=id=>document.getElementById(id);
+const human={ok:'Zgodny',missingUid:'Brak UID',ambiguousUid:'Powtórzony UID',reusedEquippedUid:'UID w wielu slotach',wrongSlot:'Niezgodny slot',twoHandConflict:'Konflikt 2h',invalidUid:'Błędny UID',unknownBase:'Wymaga sprawdzenia'};
+const slots={right:'Prawa ręka',left:'Lewa ręka',head:'Głowa',shirt:'Koszulka',outer:'Kurtka/pancerz',hands:'Rękawice',pants:'Spodnie',boots:'Buty',extra:'Akcesorium 1',extra2:'Akcesorium 2',extra3:'Akcesorium 3'};
+let catalog=null;
+function setStatus(message,cls=''){const el=$('status');el.textContent=message;el.className=cls}
+function addCell(tr,value,cls){const td=document.createElement('td');td.textContent=value;if(cls)td.className=cls;tr.appendChild(td)}
+function show(snapshot,source){
+ $('result').hidden=true;
+ const audit=window.Ashen060EquipAudit135.inspectEquipment(snapshot,catalog);
+ const body=$('rows');body.replaceChildren();
+ for(const row of audit.rows){const tr=document.createElement('tr');addCell(tr,slots[row.slot]||row.slot);addCell(tr,human[row.status]||row.status,row.status==='ok'?'ok':row.status==='unknownBase'?'warn':'bad');addCell(tr,row.reason);body.appendChild(tr)}
+ const issue=audit.rows.filter(r=>r.status!=='ok'&&r.status!=='unknownBase').length;
+ const uncertain=audit.rows.filter(r=>r.status==='unknownBase').length;
+ $('summary').textContent=`${source}: ${audit.rows.length} zajętych slotów · ${issue} problemów · ${uncertain} do sprawdzenia`;
+ $('inventoryTotals').textContent='Wynik analizy plecaka: '+Object.entries(audit.inventoryTotals).map(([k,v])=>k+': '+v).join(' · ');
+ $('unexpected').textContent=audit.unexpectedSlots.length?'Nieznane klucze slotów: '+audit.unexpectedSlots.join(', '):'Nie wykryto dodatkowych kluczy slotów.';
+ $('result').hidden=false;setStatus('Audyt zakończony. Nie dokonano zmian w danych.','ok');
+}
+async function init(){
+ try{
+ if(!window.Ashen060ReadBridge134||!window.Ashen060EquipAudit135)throw Error('Brak modułu JS 134 lub 135. Sprawdź wgrane pliki.');
+ const response=await fetch('data/ashen-060-base-catalog-100.json',{cache:'no-store'});
+ if(!response.ok)throw Error('Nie można pobrać katalogu 100 baz (HTTP '+response.status+').');
+ catalog=await response.json();window.Ashen060ReadBridge134.indexCatalog(catalog);
+ $('demo').disabled=false;$('snapshot').disabled=false;setStatus('Gotowe. Katalog 100 baz załadowany; możesz uruchomić przykład.','ok');
+ }catch(e){setStatus('Nie można uruchomić audytu: '+e.message,'bad')}
+}
+$('demo').addEventListener('click',()=>{
+ try{const byName=n=>catalog.items.find(i=>i.name===n);const gun=byName('Karabin szabrownika');const pistol=byName('Pistolet M-9');const hat=byName('Wytarta czapka');if(!gun||!pistol||!hat)throw Error('Nie znaleziono baz demonstracyjnych');
+ show({inventory:[{uid:'demo-1',id:gun.modernId},{uid:'demo-2',id:pistol.modernId},{uid:'demo-3',id:hat.modernId}],equip:{right:'demo-1',left:'demo-2',head:'demo-3',boots:'brak-w-plecaku'}},'Przykładowy ekwipunek');
+ }catch(e){setStatus(e.message,'bad')}
+});
+$('snapshot').addEventListener('change',async()=>{
+ const file=$('snapshot').files?.[0];if(!file)return;
+ try{if(file.size>2*1024*1024)throw Error('Plik jest większy niż 2 MB');const data=JSON.parse(await file.text());if(!data||!Array.isArray(data.inventory)||!data.equip||typeof data.equip!=='object'||Array.isArray(data.equip))throw Error('Niewłaściwy format snapshotu. Wymagane inventory i equip.');show(data,'Plik lokalny');}
+ catch(e){$('result').hidden=true;setStatus('Błąd pliku: '+e.message,'bad')}
+ finally{$('snapshot').value=''}
+});
+init();
+})();
+</script></body></html>
