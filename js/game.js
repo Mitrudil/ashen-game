@@ -3151,6 +3151,11 @@ function inventorySummaryPanels(){
    </section>
  </aside>`;
 }
+function inventoryCatalogInfo146(inst){
+ // Only a read-only label. No migration, no state change, no hidden writes.
+ const match=window.Ashen060InventoryCatalog146?.preview(inst);
+ return match?`<div class="small muted" title="Podgląd planowanej bazy; aktywne statystyki przedmiotu pozostają bez zmian">Katalog 0.6 (podgląd): ${escape(match.name)} · ${escape(match.modernId)}</div>`:'';
+}
 function inventoryItemCard(inst,o){
  const worn=Object.values(state.equip).includes(inst.uid);
  const weapon=o.slot==='hand1';
@@ -3165,6 +3170,7 @@ function inventoryItemCard(inst,o){
          <div class="inventory-premium-badges"><span class="inventory-slot-chip">${escape(slotLabel)}</span><span class="inventory-rarity-chip" style="--rarity:${rarityMeta.color}">${escape(rarityMeta.name)}</span>${Number.isInteger(inst.socketCapacity)&&inst.socketCapacity>0?`<span class="inventory-slot-chip" title="Gniazda artefaktów">◇ ${Math.max(0,inst.socketCapacity-(inst.socketedArtifacts||[]).length)}/${inst.socketCapacity} wolnych</span>`:''}${worn?'<span class="inventory-action-tag equipped">Założony</span>':''}${inst.locked?'<span class="inventory-action-tag locked">Zabezpieczony</span>':''}</div>
          <button class="item-view-name inventory-premium-name" data-item-open="${escape(inst.uid)}" style="color:${rarityMeta.color}">${escape(o.name)}</button>
          ${itemAffixBadges(o,def(inst),inst)}
+         ${inventoryCatalogInfo146(inst)}
       </div>
    </div>
    <details class="inventory-item-expand"><summary>Rozwiń szczegóły i działania</summary><div class="inventory-item-expanded"><p class="small muted">${escape(statDetails(o))}</p>${setStatusText(inst)}${accessorySetItemPanel(inst)}<div class="inventory-premium-actions"><button data-item-open="${escape(inst.uid)}">Pełny opis</button><button data-workshop-select="${inst.uid}" data-page="workshop" title="Ulepsz w warsztacie">🔧 Warsztat</button>${buttons}<button data-lock="${inst.uid}" class="${inst.locked?'islocked':''}" title="${inst.locked?'Odblokuj':'Zabezpiecz'} przedmiot">${inst.locked?'🔒 Odblokuj':'🔓 Zabezpiecz'}</button>${o.slot==='material'?'':`<button data-sale="${inst.uid}" ${worn||inst.locked?'disabled':''}>Sprzedaj · ${saleValue(inst)} kr.</button><button data-salvage="${inst.uid}" ${worn||inst.locked?'disabled':''}>Rozłóż</button>`}</div></div></details>
